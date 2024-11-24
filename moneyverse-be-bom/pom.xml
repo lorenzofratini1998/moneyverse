@@ -9,6 +9,19 @@
   <name>moneyverse-bom</name>
   <description>Moneyverse</description>
   <packaging>pom</packaging>
+  <properties>
+    <!-- PRODUCT DEPENDENCIES VERSIONS -->
+    <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-account-management</artifactId>
+        <version>${moneyverse-account-management}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <modules>
     <module>moneyverse-be-lib</module>

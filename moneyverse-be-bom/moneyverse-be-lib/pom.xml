@@ -12,6 +12,10 @@
   <name>moneyverse-lib</name>
   <description>Moneyverse's global third parties dependencies</description>
 
+  <modules>
+    <module>moneyverse-account-management</module>
+  </modules>
+
   <properties>
     <!-- GENERAL SETTINGS -->
     <project.build.sourceEnconding>UTF-8</project.build.sourceEnconding>
@@ -24,8 +28,29 @@
     <maven-failsafe-plugin>3.5.2</maven-failsafe-plugin>
     <maven-javadoc-plugin>3.11.1</maven-javadoc-plugin>
     <jacoco-maven-plugin>0.8.12</jacoco-maven-plugin>
+    <!-- BILL-OF-MATERIALS DEPENDENCIES VERSIONS -->
+    <spring-boot.version>3.4.0</spring-boot.version>
+    <!-- OTHER DEPENDENCIES VERSIONS -->
+    <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
   </properties>
-
+  <dependencyManagement>
+    <dependencies>
+      <!-- BILL OF MATERIALS DEPENDENCIES -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- OTHER DEPENDENCIES -->
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <build>
     <pluginManagement>
       <plugins>

@@ -1,0 +1,12 @@
+server:
+  port:
+    8000
+
+# SWAGGER
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api/docs
+  swagger-ui:
+    path: /api/docs/swagger-ui.html
+    operations-sorter: alpha
