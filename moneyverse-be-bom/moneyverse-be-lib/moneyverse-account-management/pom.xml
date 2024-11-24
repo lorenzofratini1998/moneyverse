@@ -14,6 +14,12 @@
   <description>Moneyverse microservice for Accounts Management</description>
 
   <dependencies>
+    <!-- PRODUCT DEPENDENCIES -->
+    <dependency>
+      <groupId>it.moneyverse</groupId>
+      <artifactId>moneyverse-test</artifactId>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>

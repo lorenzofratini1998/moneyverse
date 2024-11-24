@@ -12,6 +12,7 @@
   <properties>
     <!-- PRODUCT DEPENDENCIES VERSIONS -->
     <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
+    <moneyverse-test.version>1.0.0-SNAPSHOT</moneyverse-test.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -19,6 +20,11 @@
         <groupId>it.moneyverse</groupId>
         <artifactId>moneyverse-account-management</artifactId>
         <version>${moneyverse-account-management}</version>
+      </dependency>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-test</artifactId>
+        <version>${moneyverse-test.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
