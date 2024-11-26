@@ -1,7 +1,7 @@
 package it.moneyverse.account.exceptions;
 
-import it.moneyverse.account.model.dto.ErrorDto;
-import it.moneyverse.account.utils.ErrorUtils;
+import it.moneyverse.model.dto.ErrorDto;
+import it.moneyverse.utils.ErrorUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

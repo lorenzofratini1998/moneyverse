@@ -1,4 +1,4 @@
-package it.moneyverse.account.model.entities;
+package it.moneyverse.model.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class Auditable {
+public class Auditable implements AuditableModel{
 
     @CreatedBy
     @Column(name = "CREATED_BY", nullable = false, updatable = false)
@@ -30,6 +30,7 @@ public class Auditable {
     @Column(name = "UPDATED_AT", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 
+    @Override
     public String getCreatedBy() {
         return createdBy;
     }
@@ -38,6 +39,7 @@ public class Auditable {
         this.createdBy = createdBy;
     }
 
+    @Override
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -46,6 +48,7 @@ public class Auditable {
         this.createdAt = createdAt;
     }
 
+    @Override
     public String getUpdatedBy() {
         return updatedBy;
     }
@@ -54,6 +57,7 @@ public class Auditable {
         this.updatedBy = updatedBy;
     }
 
+    @Override
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }

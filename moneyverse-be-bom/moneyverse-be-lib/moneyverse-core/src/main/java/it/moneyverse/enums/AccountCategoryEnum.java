@@ -1,4 +1,4 @@
-package it.moneyverse.account.enums;
+package it.moneyverse.enums;
 
 public enum AccountCategoryEnum {
   CASH,

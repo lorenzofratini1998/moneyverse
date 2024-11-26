@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import java.math.BigDecimal;
 import java.util.Optional;

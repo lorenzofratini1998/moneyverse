@@ -15,6 +15,7 @@
   <modules>
     <module>moneyverse-account-management</module>
     <module>moneyverse-test</module>
+    <module>moneyverse-core</module>
   </modules>
 
   <properties>
@@ -33,6 +34,8 @@
     <spring-boot.version>3.4.0</spring-boot.version>
     <!-- OTHER DEPENDENCIES VERSIONS -->
     <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
+    <postgres.version>42.7.4</postgres.version>
+    <flyware-core.version>10.15.0</flyware-core.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -49,6 +52,23 @@
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgres.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+        <version>${flyware-core.version}</version>
+        <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-database-postgresql</artifactId>
+        <version>${flyware-core.version}</version>
+        <optional>true</optional>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -1,8 +1,8 @@
-package it.moneyverse.account.utils;
+package it.moneyverse.utils;
 
-import it.moneyverse.account.enums.ErrorCategoryEnum;
-import it.moneyverse.account.model.dto.ErrorDto;
-import it.moneyverse.account.model.dto.ValidationErrorDto;
+import it.moneyverse.enums.ErrorCategoryEnum;
+import it.moneyverse.model.dto.ErrorDto;
+import it.moneyverse.model.dto.ValidationErrorDto;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;

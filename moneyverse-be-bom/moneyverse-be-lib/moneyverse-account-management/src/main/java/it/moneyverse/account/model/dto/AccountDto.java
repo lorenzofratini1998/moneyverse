@@ -2,7 +2,8 @@ package it.moneyverse.account.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.moneyverse.account.enums.AccountCategoryEnum;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.moneyverse.enums.AccountCategoryEnum;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -11,14 +12,16 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountDto implements Serializable {
 
-  private final UUID accountId;
-  private final UUID userId;
-  private final String accountName;
-  private final BigDecimal balance;
-  private final BigDecimal balanceTarget;
-  private final AccountCategoryEnum accountCategory;
-  private final String accountDescription;
-  private final Boolean isDefault;
+  private UUID accountId;
+  private UUID userId;
+  private String accountName;
+  private BigDecimal balance;
+  private BigDecimal balanceTarget;
+  private AccountCategoryEnum accountCategory;
+  private String accountDescription;
+  private Boolean isDefault;
+
+  public AccountDto() {}
 
   public AccountDto(Builder builder) {
     this.accountId = builder.accountId;

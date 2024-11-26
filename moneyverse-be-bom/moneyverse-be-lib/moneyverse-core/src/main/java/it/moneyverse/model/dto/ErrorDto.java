@@ -1,9 +1,9 @@
-package it.moneyverse.account.model.dto;
+package it.moneyverse.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.moneyverse.account.enums.ErrorCategoryEnum;
+import it.moneyverse.enums.ErrorCategoryEnum;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;

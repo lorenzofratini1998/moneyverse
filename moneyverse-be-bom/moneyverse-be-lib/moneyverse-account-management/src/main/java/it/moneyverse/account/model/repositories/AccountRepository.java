@@ -1,6 +1,6 @@
 package it.moneyverse.account.model.repositories;
 
-import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.model.entities.Account;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
