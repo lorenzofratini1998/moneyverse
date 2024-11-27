@@ -1,7 +1,9 @@
 package it.moneyverse.test.model;
 
-import it.moneyverse.model.entities.AccountModel;
-import it.moneyverse.model.entities.UserModel;
+import it.moneyverse.core.model.entities.AccountModel;
+import it.moneyverse.core.model.entities.UserModel;
+import it.moneyverse.test.model.entities.FakeAccount;
+import it.moneyverse.test.model.entities.FakeUser;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +21,7 @@ public class RandomTestContextCreator implements TestContextCreator {
     int numUsers = RandomUtils.randomInteger(MIN_USERS, MAX_USERS);
     return IntStream.range(0, numUsers)
         .mapToObj(FakeUser::new)
-        .map(user -> (UserModel) user)
+        .map(UserModel.class::cast)
         .toList();
   }
 
@@ -39,7 +41,7 @@ public class RandomTestContextCreator implements TestContextCreator {
         MAX_ACCOUNTS_PER_USER);
     return IntStream.range(0, numAccountsPerUser)
         .mapToObj(i -> new FakeAccount(userId, i))
-        .map(account -> (AccountModel) account)
+        .map(AccountModel.class::cast)
         .toList();
   }
 }

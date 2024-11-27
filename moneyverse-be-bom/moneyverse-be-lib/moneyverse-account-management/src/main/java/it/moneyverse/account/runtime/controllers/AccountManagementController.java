@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/accountsManagement/api/v1")
+@RequestMapping(value = "${moneyverse.account-management.base-path.v1}")
 @Validated
 public class AccountManagementController implements AccountOperations{
 

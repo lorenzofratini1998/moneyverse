@@ -2,7 +2,7 @@ package it.moneyverse.account.utils.mapper;
 
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.model.entities.Account;
+import it.moneyverse.account.model.entities.Account;
 
 public class AccountMapper {
 
@@ -26,14 +26,14 @@ public class AccountMapper {
       return null;
     }
     return AccountDto.builder()
-        .accountId(account.getAccountId())
-        .userId(account.getUserId())
-        .accountName(account.getAccountName())
-        .balance(account.getBalance())
-        .balanceTarget(account.getBalanceTarget())
-        .accountCategory(account.getAccountCategory())
-        .accountDescription(account.getAccountDescription())
-        .isDefault(account.isDefault())
+        .withAccountId(account.getAccountId())
+        .withUserId(account.getUserId())
+        .withAccountName(account.getAccountName())
+        .withBalance(account.getBalance())
+        .withBalanceTarget(account.getBalanceTarget())
+        .withAccountCategory(account.getAccountCategory())
+        .withAccountDescription(account.getAccountDescription())
+        .withDefault(account.isDefault())
         .build();
   }
 

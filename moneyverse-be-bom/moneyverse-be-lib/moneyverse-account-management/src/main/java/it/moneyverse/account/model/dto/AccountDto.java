@@ -3,25 +3,24 @@ package it.moneyverse.account.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import it.moneyverse.enums.AccountCategoryEnum;
+import it.moneyverse.core.enums.AccountCategoryEnum;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize(builder = AccountDto.Builder.class)
 public class AccountDto implements Serializable {
 
-  private UUID accountId;
-  private UUID userId;
-  private String accountName;
-  private BigDecimal balance;
-  private BigDecimal balanceTarget;
-  private AccountCategoryEnum accountCategory;
-  private String accountDescription;
-  private Boolean isDefault;
-
-  public AccountDto() {}
+  private final UUID accountId;
+  private final UUID userId;
+  private final String accountName;
+  private final BigDecimal balance;
+  private final BigDecimal balanceTarget;
+  private final AccountCategoryEnum accountCategory;
+  private final String accountDescription;
+  private final Boolean isDefault;
 
   public AccountDto(Builder builder) {
     this.accountId = builder.accountId;
@@ -77,42 +76,42 @@ public class AccountDto implements Serializable {
     private String accountDescription;
     private Boolean isDefault;
 
-    public Builder accountId(UUID accountId) {
+    public Builder withAccountId(UUID accountId) {
       this.accountId = accountId;
       return this;
     }
 
-    public Builder userId(UUID userId) {
+    public Builder withUserId(UUID userId) {
       this.userId = userId;
       return this;
     }
 
-    public Builder accountName(String accountName) {
+    public Builder withAccountName(String accountName) {
       this.accountName = accountName;
       return this;
     }
 
-    public Builder balance(BigDecimal balance) {
+    public Builder withBalance(BigDecimal balance) {
       this.balance = balance;
       return this;
     }
 
-    public Builder balanceTarget(BigDecimal balanceTarget) {
+    public Builder withBalanceTarget(BigDecimal balanceTarget) {
       this.balanceTarget = balanceTarget;
       return this;
     }
 
-    public Builder accountCategory(AccountCategoryEnum accountCategory) {
+    public Builder withAccountCategory(AccountCategoryEnum accountCategory) {
       this.accountCategory = accountCategory;
       return this;
     }
 
-    public Builder accountDescription(String accountDescription) {
+    public Builder withAccountDescription(String accountDescription) {
       this.accountDescription = accountDescription;
       return this;
     }
 
-    public Builder isDefault(Boolean isDefault) {
+    public Builder withDefault(Boolean isDefault) {
       this.isDefault = isDefault;
       return this;
     }

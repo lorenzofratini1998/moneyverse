@@ -2,7 +2,7 @@ package it.moneyverse.account.services;
 
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.model.entities.Account;
+import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
 import java.util.Optional;

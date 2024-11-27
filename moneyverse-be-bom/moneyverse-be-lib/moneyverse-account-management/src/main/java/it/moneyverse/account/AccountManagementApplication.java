@@ -1,9 +1,12 @@
 package it.moneyverse.account;
 
-import it.moneyverse.annotations.MoneyverseApplication;
+import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
 
-@MoneyverseApplication
+@SpringBootApplication
+@Import(DatasourceAutoConfiguration.class)
 public class AccountManagementApplication {
 
   public static void main(String[] args) {
