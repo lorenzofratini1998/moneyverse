@@ -36,6 +36,7 @@
     <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
     <postgres.version>42.7.4</postgres.version>
     <flyware-core.version>10.15.0</flyware-core.version>
+    <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -62,13 +63,16 @@
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-core</artifactId>
         <version>${flyware-core.version}</version>
-        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-database-postgresql</artifactId>
         <version>${flyware-core.version}</version>
-        <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>com.github.dasniko</groupId>
+        <artifactId>testcontainers-keycloak</artifactId>
+        <version>${testcontainers-keycloak.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

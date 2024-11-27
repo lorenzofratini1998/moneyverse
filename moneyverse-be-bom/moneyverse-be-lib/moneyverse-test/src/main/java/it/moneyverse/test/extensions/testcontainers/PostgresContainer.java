@@ -5,10 +5,14 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class PostgresContainer extends PostgreSQLContainer<PostgresContainer> {
 
   private static final String POSTGRES = "postgres";
-  private static final String IMAGE_NAME = "%s:16.3".formatted(POSTGRES);
+  private static final String VERSION = "16.3";
 
   public PostgresContainer() {
-    super(IMAGE_NAME);
+    super(POSTGRES + ":" + VERSION);
+  }
+
+  public PostgresContainer(String dockerImageName) {
+    super(dockerImageName);
     super.withDatabaseName(POSTGRES);
     super.withUsername(POSTGRES);
     super.withPassword(POSTGRES);
