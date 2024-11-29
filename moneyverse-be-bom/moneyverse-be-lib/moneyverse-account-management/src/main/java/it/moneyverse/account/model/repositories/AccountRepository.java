@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
   @Query("SELECT a FROM Account a WHERE a.userId = :userId AND a.isDefault = TRUE")
-  Optional<Account> findDefaultAccount(UUID userId);
+  Optional<Account> findDefaultAccountByUser(UUID userId);
 
+  Boolean existsByUserIdAndAccountName(UUID userId, String accountName);
 }

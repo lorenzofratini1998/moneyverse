@@ -1,11 +1,18 @@
 package it.moneyverse.test.utils.helper;
 
+import java.util.List;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class MapperTestHelper {
+
+    public static <T, U> List<T> map(List<U> source, Class<T> targetClass) {
+        return source.stream()
+            .map(entity -> MapperTestHelper.map(entity, targetClass))
+            .toList();
+    }
 
     public static <T, U> T map(U source, Class<T> targetClass) {
         try {

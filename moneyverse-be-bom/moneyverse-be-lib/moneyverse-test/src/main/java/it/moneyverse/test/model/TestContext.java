@@ -1,32 +1,72 @@
 package it.moneyverse.test.model;
 
-import it.moneyverse.core.model.entities.AccountModel;
-import it.moneyverse.core.model.entities.UserModel;
-import java.util.List;
-import java.util.UUID;
+import it.moneyverse.test.enums.TestModelStrategyEnum;
+import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
+import it.moneyverse.test.model.dto.ScriptMetadata;
+import it.moneyverse.test.operations.keycloak.KeycloakTestSetupManager;
+import it.moneyverse.test.operations.mapping.AccountProcessingStrategy;
+import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
+import it.moneyverse.test.services.SQLScriptService;
 
-public class TestContext implements TestContextModel {
+public class TestContext {
 
-  private final List<UserModel> users;
-  private final List<AccountModel> accounts;
+  private final TestContextModel model;
 
-  public TestContext(TestContextCreator creator) {
-    this.users = creator.createUsers();
-    this.accounts = creator.createAccounts(users);
+  public TestContextModel getModel() {
+    return model;
   }
 
-  @Override
-  public List<UserModel> getUsers() {
-    return users;
+  public TestContext(Builder builder) {
+    model = new TestModelBuilder(builder.strategy)
+        .buildTestModel(builder.withTestUsers, builder.withTestAccounts);
+    if (builder.keycloakContainer != null) {
+      new KeycloakTestSetupManager(builder.keycloakContainer).setup(model);
+    }
+    new EntityScriptGenerator(model, builder.metadata, new SQLScriptService())
+        .addStrategy(new AccountProcessingStrategy())
+        .execute();
   }
 
-  @Override
-  public List<AccountModel> getAccounts() {
-    return accounts;
+  public static class Builder {
+
+    private TestModelStrategyEnum strategy;
+    private boolean withTestUsers;
+    private boolean withTestAccounts;
+    private KeycloakContainer keycloakContainer;
+    private ScriptMetadata metadata;
+
+    public Builder withStrategy(TestModelStrategyEnum strategy) {
+      this.strategy = strategy;
+      return this;
+    }
+
+    public Builder withTestUsers() {
+      this.withTestUsers = true;
+      return this;
+    }
+
+    public Builder withTestAccount() {
+      this.withTestAccounts = true;
+      return this;
+    }
+
+    public Builder withKeycloak(KeycloakContainer keycloakContainer) {
+      this.keycloakContainer = keycloakContainer;
+      return this;
+    }
+
+    public Builder withScriptMetadata(ScriptMetadata metadata) {
+      this.metadata = metadata;
+      return this;
+    }
+
+    public TestContext build() {
+      return new TestContext(this);
+    }
   }
 
-  public List<AccountModel> getAccountsByUser(UUID userId) {
-    return accounts.stream().filter(account -> account.getUserId().equals(userId)).toList();
+  public static Builder builder() {
+    return new Builder();
   }
 
 }

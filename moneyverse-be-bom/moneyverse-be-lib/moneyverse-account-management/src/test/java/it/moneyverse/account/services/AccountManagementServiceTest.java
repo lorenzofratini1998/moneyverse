@@ -54,7 +54,7 @@ public class AccountManagementServiceTest {
 
     account.setBalance(BigDecimal.valueOf(500.0)); //new account
 
-    when(accountRepository.findDefaultAccount(request.userId())).thenReturn(
+    when(accountRepository.findDefaultAccountByUser(request.userId())).thenReturn(
         Optional.of(existingDefaultAccount));
     when(accountRepository.save(any(Account.class))).thenReturn(account);
 
