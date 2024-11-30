@@ -1,5 +1,6 @@
 package it.moneyverse.test.model;
 
+import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
@@ -21,6 +22,11 @@ public interface TestContextModel {
 
     default UserModel getRandomUser() {
         return getUsers().get(RandomUtils.randomInteger(0, getUsers().size() - 1));
+    }
+
+    default UserModel getAdminUser() {
+        return getUsers().stream().filter(user -> user.getRole().equals(UserRoleEnum.ADMIN)).findFirst()
+            .orElseThrow(() -> new IllegalStateException("No admin found"));
     }
 
     default AccountModel getRandomAccount(UUID userId)

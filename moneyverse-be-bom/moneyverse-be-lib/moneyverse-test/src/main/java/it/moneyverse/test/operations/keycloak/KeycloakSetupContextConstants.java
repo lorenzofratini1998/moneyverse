@@ -1,8 +1,9 @@
 package it.moneyverse.test.operations.keycloak;
 
-class KeycloakSetupContextConstants {
+public class KeycloakSetupContextConstants {
 
-  static final String TEST_REALM = "integration-test";
+  public static final String TEST_REALM = "integration-test";
+  public static final String TEST_FRONTEND_CLIENT = "frontend-app";
 
   private KeycloakSetupContextConstants() {}
 

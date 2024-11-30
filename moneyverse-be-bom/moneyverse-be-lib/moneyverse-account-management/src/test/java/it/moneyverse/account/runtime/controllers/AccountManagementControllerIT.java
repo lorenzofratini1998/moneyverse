@@ -1,5 +1,6 @@
 package it.moneyverse.account.runtime.controllers;
 
+import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_REALM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.moneyverse.account.model.dto.AccountDto;
@@ -7,6 +8,7 @@ import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountIntegrationTest;
+import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.enums.TestModelStrategyEnum;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
@@ -21,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -31,12 +33,6 @@ import org.testcontainers.junit.jupiter.Container;
 
 @IntegrationTest
 class AccountManagementControllerIT extends AccountIntegrationTest {
-
-  @Value("${moneyverse.account-management.base-path.v1}")
-  private String accountManagementBasePath;
-
-  @Autowired
-  protected TestRestTemplate restTemplate;
 
   @Autowired
   protected AccountRepository accountRepository;
@@ -60,18 +56,26 @@ class AccountManagementControllerIT extends AccountIntegrationTest {
 
   @DynamicPropertySource
   static void mappingProperties(DynamicPropertyRegistry registry) {
+    //Postgres
     registry.add(DatasourcePropertiesConstants.DRIVER_CLASS_NAME,
         postgresContainer::getDriverClassName);
     registry.add(DatasourcePropertiesConstants.URL, postgresContainer::getJdbcUrl);
     registry.add(DatasourcePropertiesConstants.USERNAME, postgresContainer::getUsername);
     registry.add(DatasourcePropertiesConstants.PASSWORD, postgresContainer::getPassword);
+    //Keycloak
+    registry.add("keycloak.host", keycloakContainer::getHost);
+    registry.add("keycloak.port", keycloakContainer::getHttpPort);
+    registry.add("keycloak.realm-name", () -> TEST_REALM);
   }
 
   @Test
   void testCreateAccount_Success() {
-    final AccountRequestDto request = createAccountForUser(testModel.getRandomUser().getUserId());
-    final String url = accountManagementBasePath + "/accounts";
-    ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, request,
+    final UserModel user = testModel.getRandomUser();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(user, TEST_REALM));
+    final AccountRequestDto request = createAccountForUser(user.getUserId());
+    final String url = basePath + "/accounts";
+    ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, new HttpEntity<>(request, headers),
         AccountDto.class);
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(testModel.getAccounts().size() + 1, accountRepository.findAll().size());
@@ -80,10 +84,13 @@ class AccountManagementControllerIT extends AccountIntegrationTest {
   @ParameterizedTest
   @MethodSource("invalidAccountRequestProvider")
   void testCreateAccount_BadRequestValidation(Function<UUID, AccountRequestDto> requestGenerator) {
+    final UserModel user = testModel.getRandomUser();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(user, TEST_REALM));
     final AccountRequestDto request = requestGenerator.apply(
         testModel.getRandomUser().getUserId());
-    final String url = accountManagementBasePath + "/accounts";
-    ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, request,
+    final String url = basePath + "/accounts";
+    ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, new HttpEntity<>(request, headers),
         AccountDto.class);
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals(testModel.getAccounts().size(), accountRepository.findAll().size());
@@ -91,10 +98,13 @@ class AccountManagementControllerIT extends AccountIntegrationTest {
 
   @Test
   void testCreateAccount_AccountAlreadyExists() {
+    final UserModel user = testModel.getRandomUser();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(user, TEST_REALM));
     final AccountRequestDto request = createAccountRequestForExistentAccount(
         testModel.getRandomUser().getUserId());
-    final String url = accountManagementBasePath + "/accounts";
-    ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, request,
+    final String url = basePath + "/accounts";
+    ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, new HttpEntity<>(request, headers),
         AccountDto.class);
     assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
     assertEquals(testModel.getAccounts().size(), accountRepository.findAll().size());
