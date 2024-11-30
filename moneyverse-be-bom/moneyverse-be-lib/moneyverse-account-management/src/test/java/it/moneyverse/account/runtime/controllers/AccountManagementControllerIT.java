@@ -8,7 +8,6 @@ import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountIntegrationTest;
-import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.enums.TestModelStrategyEnum;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
@@ -16,12 +15,12 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.utils.constants.DatasourcePropertiesConstants;
-import java.util.UUID;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -70,10 +69,10 @@ class AccountManagementControllerIT extends AccountIntegrationTest {
 
   @Test
   void testCreateAccount_Success() {
-    final UserModel user = testModel.getRandomUser();
+    final UserRepresentation user = keycloakContainer.getRandomUser(TEST_REALM);
     HttpHeaders headers = new HttpHeaders();
-    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(user, TEST_REALM));
-    final AccountRequestDto request = createAccountForUser(user.getUserId());
+    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(testModel.getUserCredential(user.getUsername()), TEST_REALM));
+    final AccountRequestDto request = createAccountForUser(user.getUsername());
     final String url = basePath + "/accounts";
     ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, new HttpEntity<>(request, headers),
         AccountDto.class);
@@ -83,12 +82,11 @@ class AccountManagementControllerIT extends AccountIntegrationTest {
 
   @ParameterizedTest
   @MethodSource("invalidAccountRequestProvider")
-  void testCreateAccount_BadRequestValidation(Function<UUID, AccountRequestDto> requestGenerator) {
-    final UserModel user = testModel.getRandomUser();
+  void testCreateAccount_BadRequestValidation(Function<String, AccountRequestDto> requestGenerator) {
+    final UserRepresentation user = keycloakContainer.getRandomUser(TEST_REALM);
     HttpHeaders headers = new HttpHeaders();
-    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(user, TEST_REALM));
-    final AccountRequestDto request = requestGenerator.apply(
-        testModel.getRandomUser().getUserId());
+    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(testModel.getUserCredential(user.getUsername()), TEST_REALM));
+    final AccountRequestDto request = requestGenerator.apply(user.getId());
     final String url = basePath + "/accounts";
     ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, new HttpEntity<>(request, headers),
         AccountDto.class);
@@ -98,11 +96,10 @@ class AccountManagementControllerIT extends AccountIntegrationTest {
 
   @Test
   void testCreateAccount_AccountAlreadyExists() {
-    final UserModel user = testModel.getRandomUser();
+    final UserRepresentation user = keycloakContainer.getRandomUser(TEST_REALM);
     HttpHeaders headers = new HttpHeaders();
-    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(user, TEST_REALM));
-    final AccountRequestDto request = createAccountRequestForExistentAccount(
-        testModel.getRandomUser().getUserId());
+    headers.setBearerAuth(keycloakContainer.getTestAuthenticationToken(testModel.getUserCredential(user.getUsername()), TEST_REALM));
+    final AccountRequestDto request = createExistentAccountForUser(user.getUsername());
     final String url = basePath + "/accounts";
     ResponseEntity<AccountDto> response = restTemplate.postForEntity(url, new HttpEntity<>(request, headers),
         AccountDto.class);

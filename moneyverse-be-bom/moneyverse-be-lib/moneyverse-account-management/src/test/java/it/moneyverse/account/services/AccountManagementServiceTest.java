@@ -32,8 +32,8 @@ public class AccountManagementServiceTest {
 
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(@Mock Account account) {
-    final UUID userId = UUID.randomUUID();
-    AccountRequestDto request = new AccountRequestDto(userId, null, null, null, null, null, null);
+    final String username = UUID.randomUUID().toString();
+    AccountRequestDto request = new AccountRequestDto(username, null, null, null, null, null, null);
     account.setBalance(BigDecimal.valueOf(0));
 
     when(accountRepository.save(any(Account.class))).thenReturn(account);
@@ -45,8 +45,8 @@ public class AccountManagementServiceTest {
 
   @Test
   void givenDefaultAccountExists_WhenCreateAccount_ThenReturnNewNonDefaultAccount(@Mock Account account) {
-    final UUID userId = UUID.randomUUID();
-    AccountRequestDto request = new AccountRequestDto(userId, null, BigDecimal.valueOf(500.0), null,
+    final String username = UUID.randomUUID().toString();
+    AccountRequestDto request = new AccountRequestDto(username, null, BigDecimal.valueOf(500.0), null,
         null, null, null);
 
     Account existingDefaultAccount = new Account();
@@ -54,7 +54,7 @@ public class AccountManagementServiceTest {
 
     account.setBalance(BigDecimal.valueOf(500.0)); //new account
 
-    when(accountRepository.findDefaultAccountByUser(request.userId())).thenReturn(
+    when(accountRepository.findDefaultAccountByUser(request.username())).thenReturn(
         Optional.of(existingDefaultAccount));
     when(accountRepository.save(any(Account.class))).thenReturn(account);
 

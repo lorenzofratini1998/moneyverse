@@ -7,7 +7,7 @@ public class AccountTestHelper {
 
     public static AccountRequestDto toAccountRequest(Account account) {
         return new AccountRequestDto(
-            account.getUserId(),
+            account.getUsername(),
             account.getAccountName(),
             account.getBalance(),
             account.getBalanceTarget(),

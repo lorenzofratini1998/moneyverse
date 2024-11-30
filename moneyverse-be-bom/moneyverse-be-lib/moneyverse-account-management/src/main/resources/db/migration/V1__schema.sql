@@ -1,6 +1,6 @@
 CREATE TABLE ACCOUNTS (
     ACCOUNT_ID UUID PRIMARY KEY,
-    USER_ID UUID NOT NULL,
+    USERNAME VARCHAR(64) NOT NULL,
     ACCOUNT_NAME VARCHAR(255) NOT NULL,
     BALANCE DECIMAL(18, 2) DEFAULT 0.0,
     BALANCE_TARGET DECIMAL(18, 2),
@@ -15,7 +15,7 @@ CREATE TABLE ACCOUNTS (
 
 COMMENT ON TABLE ACCOUNTS IS 'This table contains the information about the financial accounts held by users.';
 COMMENT ON COLUMN ACCOUNTS.ACCOUNT_ID IS 'Unique self-generated id for the account. [Primary Key]';
-COMMENT ON COLUMN ACCOUNTS.USER_ID IS 'Id of the user who owns the accounts.';
+COMMENT ON COLUMN ACCOUNTS.USERNAME IS 'User who owns the accounts.';
 COMMENT ON COLUMN ACCOUNTS.ACCOUNT_NAME IS 'Name of the account.';
 COMMENT ON COLUMN ACCOUNTS.BALANCE IS 'Current balance of the account.';
 COMMENT ON COLUMN ACCOUNTS.BALANCE_TARGET IS 'Target balance for the account.';

@@ -7,7 +7,7 @@ import java.util.UUID;
 public interface AccountModel extends AuditableModel {
 
   UUID getAccountId();
-  UUID getUserId();
+  String getUsername();
   String getAccountName();
   BigDecimal getBalance();
   BigDecimal getBalanceTarget();

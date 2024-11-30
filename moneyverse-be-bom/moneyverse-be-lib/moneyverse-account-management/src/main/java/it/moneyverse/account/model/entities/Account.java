@@ -28,8 +28,8 @@ public class Account extends Auditable implements Serializable, AccountModel {
     @Column(name = "ACCOUNT_ID", columnDefinition = "UUID")
     private UUID accountId;
 
-    @Column(name = "USER_ID", nullable = false, columnDefinition = "UUID")
-    private UUID userId;
+    @Column(name = "USERNAME", nullable = false, length = 64)
+    private String username;
 
     @Column(name = "ACCOUNT_NAME", nullable = false)
     private String accountName;
@@ -60,12 +60,12 @@ public class Account extends Auditable implements Serializable, AccountModel {
     }
 
     @Override
-    public UUID getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override

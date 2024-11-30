@@ -3,10 +3,13 @@ package it.moneyverse.test.extensions.testcontainers;
 import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_FRONTEND_CLIENT;
 
 import dasniko.testcontainers.keycloak.ExtendableKeycloakContainer;
-import it.moneyverse.core.model.entities.UserModel;
+import it.moneyverse.test.model.dto.UserCredential;
+import it.moneyverse.test.utils.RandomUtils;
+import java.util.List;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.representations.idm.UserRepresentation;
 
 public class KeycloakContainer extends ExtendableKeycloakContainer<KeycloakContainer> {
 
@@ -21,13 +24,13 @@ public class KeycloakContainer extends ExtendableKeycloakContainer<KeycloakConta
         super(dockerImageName);
     }
 
-    public String getTestAuthenticationToken(UserModel user, String realmName) {
+    public String getTestAuthenticationToken(UserCredential userCredential, String realmName) {
         try (Keycloak keycloakClient = KeycloakBuilder
             .builder()
             .serverUrl(super.getAuthServerUrl())
             .realm(realmName)
-            .username(user.getUsername())
-            .password(user.getPassword())
+            .username(userCredential.username())
+            .password(userCredential.password())
             .grantType(OAuth2Constants.PASSWORD)
             .clientId(TEST_FRONTEND_CLIENT)
             .clientSecret(TEST_FRONTEND_CLIENT)
@@ -39,4 +42,8 @@ public class KeycloakContainer extends ExtendableKeycloakContainer<KeycloakConta
         }
     }
 
+    public UserRepresentation getRandomUser(String realmName) {
+        List<UserRepresentation> users = getKeycloakAdminClient().realm(realmName).users().list();
+        return users.get(RandomUtils.randomInteger(0, users.size() - 1));
+    }
 }

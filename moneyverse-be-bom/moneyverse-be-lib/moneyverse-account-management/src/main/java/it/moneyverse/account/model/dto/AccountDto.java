@@ -14,7 +14,7 @@ import java.util.UUID;
 public class AccountDto implements Serializable {
 
   private final UUID accountId;
-  private final UUID userId;
+  private final String username;
   private final String accountName;
   private final BigDecimal balance;
   private final BigDecimal balanceTarget;
@@ -24,7 +24,7 @@ public class AccountDto implements Serializable {
 
   public AccountDto(Builder builder) {
     this.accountId = builder.accountId;
-    this.userId = builder.userId;
+    this.username = builder.username;
     this.accountName = builder.accountName;
     this.balance = builder.balance;
     this.balanceTarget = builder.balanceTarget;
@@ -37,8 +37,8 @@ public class AccountDto implements Serializable {
     return accountId;
   }
 
-  public UUID getUserId() {
-    return userId;
+  public String getUsername() {
+    return username;
   }
 
   public String getAccountName() {
@@ -68,7 +68,7 @@ public class AccountDto implements Serializable {
   public static class Builder {
 
     private UUID accountId;
-    private UUID userId;
+    private String username;
     private String accountName;
     private BigDecimal balance;
     private BigDecimal balanceTarget;
@@ -81,8 +81,8 @@ public class AccountDto implements Serializable {
       return this;
     }
 
-    public Builder withUserId(UUID userId) {
-      this.userId = userId;
+    public Builder withUsername(String username) {
+      this.username = username;
       return this;
     }
 

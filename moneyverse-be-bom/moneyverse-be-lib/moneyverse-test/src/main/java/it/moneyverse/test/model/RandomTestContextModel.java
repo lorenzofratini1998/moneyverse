@@ -7,7 +7,6 @@ import it.moneyverse.test.model.entities.FakeUser;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,19 +64,19 @@ public class RandomTestContextModel implements TestContextModel {
   public static List<AccountModel> createAccounts(List<UserModel> users) {
     List<AccountModel> accounts = new ArrayList<>();
     for (UserModel user : users) {
-      List<AccountModel> accountsByUser = randomAccounts(user.getUserId());
+      List<AccountModel> accountsByUser = randomAccounts(user.getUsername());
       accounts.addAll(accountsByUser);
     }
     LOGGER.info("Created {} random accounts for testing", accounts.size());
     return accounts;
   }
 
-  private static List<AccountModel> randomAccounts(UUID userId) {
+  private static List<AccountModel> randomAccounts(String username) {
     int numAccountsPerUser = RandomUtils.randomInteger(MIN_ACCOUNTS_PER_USER,
         MAX_ACCOUNTS_PER_USER);
     List<AccountModel> accounts = new ArrayList<>();
     for (int i = 0; i < numAccountsPerUser; i++) {
-      accounts.add(new FakeAccount(userId, i));
+      accounts.add(new FakeAccount(username, i));
     }
     return accounts;
   }

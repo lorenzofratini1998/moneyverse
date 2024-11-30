@@ -11,7 +11,7 @@ public class AccountMapper {
       return null;
     }
     Account account = new Account();
-    account.setUserId(request.userId());
+    account.setUsername(request.username());
     account.setAccountName(request.accountName());
     account.setBalance(request.balance());
     account.setBalanceTarget(request.balanceTarget());
@@ -27,7 +27,7 @@ public class AccountMapper {
     }
     return AccountDto.builder()
         .withAccountId(account.getAccountId())
-        .withUserId(account.getUserId())
+        .withUsername(account.getUsername())
         .withAccountName(account.getAccountName())
         .withBalance(account.getBalance())
         .withBalanceTarget(account.getBalanceTarget())

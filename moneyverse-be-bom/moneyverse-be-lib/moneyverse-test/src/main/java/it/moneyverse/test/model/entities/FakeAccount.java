@@ -10,7 +10,7 @@ import java.util.UUID;
 public class FakeAccount extends FakeAuditable implements AccountModel {
 
   private final UUID accountId;
-  private final UUID userId;
+  private final String username;
   private final String accountName;
   private final BigDecimal balance;
   private final BigDecimal balanceTarget;
@@ -18,9 +18,9 @@ public class FakeAccount extends FakeAuditable implements AccountModel {
   private final String accountDescription;
   private final Boolean isDefault;
 
-  public FakeAccount(UUID userId, Integer counter) {
+  public FakeAccount(String username, Integer counter) {
     counter = counter + 1;
-    this.userId = userId;
+    this.username = username;
     this.accountId = RandomUtils.randomUUID();
     this.accountName = "Account %s".formatted(counter);
     this.balance = RandomUtils.randomDecimal(0.0, Math.random() * 1000).setScale(2, RoundingMode.HALF_EVEN);
@@ -36,8 +36,8 @@ public class FakeAccount extends FakeAuditable implements AccountModel {
   }
 
   @Override
-  public UUID getUserId() {
-    return userId;
+  public String getUsername() {
+    return username;
   }
 
   @Override
