@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
-public abstract class IntegrationTest {
+public abstract class AbstractIntegrationTest {
 
   protected static TestContextModel testModel;
 
@@ -19,10 +19,7 @@ public abstract class IntegrationTest {
   @DataSourceScriptDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
   protected static Path tempDir;
 
-  @Autowired
-  protected TestRestTemplate restTemplate;
+  @Autowired protected TestRestTemplate restTemplate;
 
-  protected IntegrationTest() {
-  }
-
+  protected AbstractIntegrationTest() {}
 }

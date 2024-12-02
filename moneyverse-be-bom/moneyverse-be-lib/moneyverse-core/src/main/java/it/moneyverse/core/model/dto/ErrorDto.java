@@ -3,6 +3,7 @@ package it.moneyverse.core.model.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.moneyverse.core.enums.ErrorCategoryEnum;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,10 +11,12 @@ import org.springframework.http.HttpStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize(builder = ErrorDto.Builder.class)
 public class ErrorDto {
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd 'T' HH:mm:ss")
   private final LocalDateTime timestamp;
+
   private final HttpStatus status;
   private final Integer code;
   private final String method;
@@ -76,42 +79,42 @@ public class ErrorDto {
     private ErrorCategoryEnum category;
     private List<ValidationErrorDto> validationErrors;
 
-    public Builder timestamp(LocalDateTime timestamp) {
+    public Builder withTimestamp(LocalDateTime timestamp) {
       this.timestamp = timestamp;
       return this;
     }
 
-    public Builder status(HttpStatus status) {
+    public Builder withStatus(HttpStatus status) {
       this.status = status;
       return this;
     }
 
-    public Builder code(Integer code) {
+    public Builder withCode(Integer code) {
       this.code = code;
       return this;
     }
 
-    public Builder method(String method) {
+    public Builder withMethod(String method) {
       this.method = method;
       return this;
     }
 
-    public Builder path(String path) {
+    public Builder withPath(String path) {
       this.path = path;
       return this;
     }
 
-    public Builder message(String message) {
+    public Builder withMessage(String message) {
       this.message = message;
       return this;
     }
 
-    public Builder category(ErrorCategoryEnum category) {
+    public Builder withCategory(ErrorCategoryEnum category) {
       this.category = category;
       return this;
     }
 
-    public Builder validationErrors(List<ValidationErrorDto> validationErrors) {
+    public Builder withValidationErrors(List<ValidationErrorDto> validationErrors) {
       this.validationErrors = validationErrors;
       return this;
     }

@@ -1,5 +1,6 @@
 package it.moneyverse.core.boot;
 
+import it.moneyverse.core.utils.constants.DatasourcePropertiesConstants;
 import jakarta.annotation.PostConstruct;
 import java.util.Objects;
 import javax.sql.DataSource;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "datasource.config")
+@ConfigurationProperties(prefix = DatasourcePropertiesConstants.PREFIX)
 public class DatasourceAutoConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceAutoConfiguration.class);
@@ -27,10 +28,11 @@ public class DatasourceAutoConfiguration {
 
   @PostConstruct
   public void init() {
-    Objects.requireNonNull(driverClassName, "driverClassName is required");
-    Objects.requireNonNull(url, "url is required");
-    Objects.requireNonNull(username, "username is required");
-    Objects.requireNonNull(password, "password is required");
+    Objects.requireNonNull(
+        driverClassName, DatasourcePropertiesConstants.DRIVER_CLASS_NAME + " is required.");
+    Objects.requireNonNull(url, DatasourcePropertiesConstants.URL + " is required");
+    Objects.requireNonNull(username, DatasourcePropertiesConstants.USERNAME + " is required");
+    Objects.requireNonNull(password, DatasourcePropertiesConstants.PASSWORD + " is required");
   }
 
   @Bean

@@ -13,23 +13,30 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 public class ErrorUtils {
 
-  public static ErrorDto toErrorDto(HttpServletRequest request,
-      MethodArgumentNotValidException ex) {
+  public static ErrorDto toErrorDto(
+      HttpServletRequest request, MethodArgumentNotValidException ex) {
     List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
     List<ValidationErrorDto> validationErrorResponse = buildValidationErrors(validationErrors);
-    return ErrorDto.builder().timestamp(LocalDateTime.now()).status(HttpStatus.BAD_REQUEST)
-        .method(request.getMethod()).path(request.getRequestURI())
-        .category(ErrorCategoryEnum.CLIENT).validationErrors(validationErrorResponse).build();
+    return ErrorDto.builder()
+        .withTimestamp(LocalDateTime.now())
+        .withStatus(HttpStatus.BAD_REQUEST)
+        .withMethod(request.getMethod())
+        .withPath(request.getRequestURI())
+        .withCategory(ErrorCategoryEnum.CLIENT)
+        .withValidationErrors(validationErrorResponse)
+        .build();
   }
 
   private static List<ValidationErrorDto> buildValidationErrors(
       List<ObjectError> validationErrors) {
-    return validationErrors.stream().map(FieldError.class::cast).map(
-        error -> new ValidationErrorDto(error.getField(), error.getRejectedValue(),
-            error.getDefaultMessage())).toList();
+    return validationErrors.stream()
+        .map(FieldError.class::cast)
+        .map(
+            error ->
+                new ValidationErrorDto(
+                    error.getField(), error.getRejectedValue(), error.getDefaultMessage()))
+        .toList();
   }
 
-  private ErrorUtils() {
-  }
-
+  private ErrorUtils() {}
 }

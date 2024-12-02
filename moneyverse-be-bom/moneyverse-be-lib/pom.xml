@@ -16,6 +16,7 @@
     <module>moneyverse-account-management</module>
     <module>moneyverse-test</module>
     <module>moneyverse-core</module>
+    <module>moneyverse-proto</module>
   </modules>
 
   <properties>
@@ -32,11 +33,15 @@
     <jacoco-maven-plugin>0.8.12</jacoco-maven-plugin>
     <!-- BILL-OF-MATERIALS DEPENDENCIES VERSIONS -->
     <spring-boot.version>3.4.0</spring-boot.version>
+    <grpc-starter.version>3.4.0</grpc-starter.version>
+    <grpc.version>1.68.2</grpc.version>
     <!-- OTHER DEPENDENCIES VERSIONS -->
     <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
     <postgres.version>42.7.4</postgres.version>
     <flyware-core.version>10.15.0</flyware-core.version>
     <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
+    <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
+    <grpcmock.version>0.15.0</grpcmock.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -45,6 +50,20 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.github.danielliu1123</groupId>
+        <artifactId>grpc-starter-dependencies</artifactId>
+        <version>${grpc-starter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-bom</artifactId>
+        <version>${grpc.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -73,6 +92,21 @@
         <groupId>com.github.dasniko</groupId>
         <artifactId>testcontainers-keycloak</artifactId>
         <version>${testcontainers-keycloak.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>annotations-api</artifactId>
+        <version>${org.apache.tomcat.annotations-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.grpcmock</groupId>
+        <artifactId>grpcmock-spring-boot</artifactId>
+        <version>${grpcmock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.grpcmock</groupId>
+        <artifactId>grpcmock-junit5</artifactId>
+        <version>${grpcmock.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

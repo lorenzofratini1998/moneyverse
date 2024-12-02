@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Target({ElementType.TYPE})
@@ -16,6 +17,5 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @CleanDatabaseAfterEachTest
-public @interface IntegrationTest {
-
-}
+@TestPropertySource(properties = {"logging.level.org.grpcmock.GrpcMock=WARN"})
+public @interface IntegrationTest {}

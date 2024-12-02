@@ -21,15 +21,15 @@ class AccountMapperTest {
 
   @Test
   void testToEntity_ValidDto() {
-    AccountRequestDto dto = new AccountRequestDto(
-        "569f67de-36e6-4552-ac54-e52085109818",
-        "Savings",
-        BigDecimal.valueOf(1000.0),
-        BigDecimal.valueOf(2000.0),
-        AccountCategoryEnum.SAVINGS,
-        "Personal Savings Account",
-        Boolean.TRUE
-    );
+    AccountRequestDto dto =
+        new AccountRequestDto(
+            "569f67de-36e6-4552-ac54-e52085109818",
+            "Savings",
+            BigDecimal.valueOf(1000.0),
+            BigDecimal.valueOf(2000.0),
+            AccountCategoryEnum.SAVINGS,
+            "Personal Savings Account",
+            Boolean.TRUE);
     Account account = AccountMapper.toAccount(dto);
 
     assertEquals("569f67de-36e6-4552-ac54-e52085109818", account.getUsername());
@@ -60,7 +60,8 @@ class AccountMapperTest {
 
     AccountDto accountDto = AccountMapper.toAccountDto(account);
 
-    assertEquals(UUID.fromString("f740cf0c-cc87-4de8-bcc9-040a6d26dff6"), accountDto.getAccountId());
+    assertEquals(
+        UUID.fromString("f740cf0c-cc87-4de8-bcc9-040a6d26dff6"), accountDto.getAccountId());
     assertEquals("569f67de-36e6-4552-ac54-e52085109818", accountDto.getUsername());
     assertEquals("Savings", accountDto.getAccountName());
     assertEquals(BigDecimal.valueOf(1000.0), accountDto.getBalance());
@@ -69,5 +70,4 @@ class AccountMapperTest {
     assertEquals("Personal Savings Account", accountDto.getAccountDescription());
     assertTrue(accountDto.isDefault());
   }
-
 }

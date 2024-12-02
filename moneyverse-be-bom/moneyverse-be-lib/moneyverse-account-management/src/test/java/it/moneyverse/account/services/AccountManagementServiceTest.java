@@ -11,6 +11,7 @@ import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
+import it.moneyverse.core.services.UserServiceClient;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,12 +24,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class AccountManagementServiceTest {
 
-  @InjectMocks
-  private AccountManagementService accountManagementService;
+  @InjectMocks private AccountManagementService accountManagementService;
 
-  @Mock
-  private AccountRepository accountRepository;
-
+  @Mock private AccountRepository accountRepository;
+  @Mock private UserServiceGrpcClient userServiceClient;
 
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(@Mock Account account) {
@@ -37,6 +36,7 @@ public class AccountManagementServiceTest {
     account.setBalance(BigDecimal.valueOf(0));
 
     when(accountRepository.save(any(Account.class))).thenReturn(account);
+    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
 
     AccountDto result = accountManagementService.createAccount(request);
     assertNotNull(result);
@@ -44,19 +44,21 @@ public class AccountManagementServiceTest {
   }
 
   @Test
-  void givenDefaultAccountExists_WhenCreateAccount_ThenReturnNewNonDefaultAccount(@Mock Account account) {
+  void givenDefaultAccountExists_WhenCreateAccount_ThenReturnNewNonDefaultAccount(
+      @Mock Account account) {
     final String username = UUID.randomUUID().toString();
-    AccountRequestDto request = new AccountRequestDto(username, null, BigDecimal.valueOf(500.0), null,
-        null, null, null);
+    AccountRequestDto request =
+        new AccountRequestDto(username, null, BigDecimal.valueOf(500.0), null, null, null, null);
 
     Account existingDefaultAccount = new Account();
     existingDefaultAccount.setDefault(true);
 
-    account.setBalance(BigDecimal.valueOf(500.0)); //new account
+    account.setBalance(BigDecimal.valueOf(500.0)); // new account
 
-    when(accountRepository.findDefaultAccountByUser(request.username())).thenReturn(
-        Optional.of(existingDefaultAccount));
+    when(accountRepository.findDefaultAccountByUser(request.username()))
+        .thenReturn(Optional.of(existingDefaultAccount));
     when(accountRepository.save(any(Account.class))).thenReturn(account);
+    when(userServiceClient.checkIfUserExists(request.username())).thenReturn(true);
 
     AccountDto result = accountManagementService.createAccount(request);
 

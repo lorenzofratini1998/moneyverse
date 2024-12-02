@@ -22,6 +22,11 @@
     </dependency>
     <dependency>
       <groupId>it.moneyverse</groupId>
+      <artifactId>moneyverse-proto</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>it.moneyverse</groupId>
       <artifactId>moneyverse-test</artifactId>
       <optional>true</optional>
       <scope>test</scope>
@@ -29,7 +34,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -114,11 +118,27 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
+      <scope>test</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.github.dasniko</groupId>
       <artifactId>testcontainers-keycloak</artifactId>
+      <scope>test</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.grpcmock</groupId>
+      <artifactId>grpcmock-spring-boot</artifactId>
+      <version>${grpcmock.version}</version>
+      <scope>test</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.grpcmock</groupId>
+      <artifactId>grpcmock-junit5</artifactId>
+      <version>${grpcmock.version}</version>
+      <scope>test</scope>
       <optional>true</optional>
     </dependency>
   </dependencies>
