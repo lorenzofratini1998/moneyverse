@@ -27,6 +27,19 @@ public class ErrorUtils {
         .build();
   }
 
+  public static ErrorDto toErrorDto(
+      HttpServletRequest request, HttpStatus httpStatus, String message) {
+    return ErrorDto.builder()
+        .withTimestamp(LocalDateTime.now())
+        .withStatus(httpStatus)
+        .withMethod(request.getMethod())
+        .withPath(request.getRequestURI())
+        .withCategory(
+            httpStatus.is4xxClientError() ? ErrorCategoryEnum.CLIENT : ErrorCategoryEnum.SERVER)
+        .withMessage(message)
+        .build();
+  }
+
   private static List<ValidationErrorDto> buildValidationErrors(
       List<ObjectError> validationErrors) {
     return validationErrors.stream()

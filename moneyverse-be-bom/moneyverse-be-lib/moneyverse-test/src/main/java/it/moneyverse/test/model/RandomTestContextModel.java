@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 
 public class RandomTestContextModel implements TestContextModel {
 
-  private static final Integer MIN_USERS = 5;
-  private static final Integer MAX_USERS = 20;
-  private static final Integer MIN_ACCOUNTS_PER_USER = 1;
-  private static final Integer MAX_ACCOUNTS_PER_USER = 5;
+  private static final Integer MIN_USERS = 50;
+  private static final Integer MAX_USERS = 200;
+  private static final Integer MIN_ACCOUNTS_PER_USER = 5;
+  private static final Integer MAX_ACCOUNTS_PER_USER = 20;
   private static final Logger LOGGER = LoggerFactory.getLogger(RandomTestContextModel.class);
 
   private final List<UserModel> users;

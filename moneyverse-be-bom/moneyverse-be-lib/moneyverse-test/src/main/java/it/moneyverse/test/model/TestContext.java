@@ -12,15 +12,21 @@ public class TestContext {
 
   private final TestContextModel model;
 
+  private final KeycloakTestSetupManager keycloakTestManager;
+
   public TestContextModel getModel() {
     return model;
   }
 
   public TestContext(Builder builder) {
-    model = new TestModelBuilder(builder.strategy)
-        .buildTestModel(builder.withTestUsers, builder.withTestAccounts);
+    model =
+        new TestModelBuilder(builder.strategy)
+            .buildTestModel(builder.withTestUsers, builder.withTestAccounts);
     if (builder.keycloakContainer != null) {
-      new KeycloakTestSetupManager(builder.keycloakContainer).setup(model);
+      keycloakTestManager = new KeycloakTestSetupManager(builder.keycloakContainer, model);
+      keycloakTestManager.setup();
+    } else {
+      keycloakTestManager = null;
     }
     new EntityScriptGenerator(model, builder.metadata, new SQLScriptService())
         .addStrategy(new AccountProcessingStrategy())
@@ -67,6 +73,18 @@ public class TestContext {
 
   public static Builder builder() {
     return new Builder();
+  }
+
+  public String getRandomUserOrAdminUsername() {
+    return keycloakTestManager.getRandomUser().getUsername();
+  }
+
+  public String getAdminUsername() {
+    return keycloakTestManager.getAdminUser().getUsername();
+  }
+
+  public String getAuthenticationToken(String username) {
+    return keycloakTestManager.getTestAuthenticationToken(model.getUserCredential(username));
   }
 
 }

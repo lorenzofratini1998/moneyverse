@@ -3,6 +3,7 @@ package it.moneyverse.account.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.moneyverse.core.enums.AccountCategoryEnum;
+import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -26,4 +27,8 @@ public record AccountRequestDto(
     Boolean isDefault
 ) implements Serializable {
 
+    @Override
+    public String toString() {
+        return JsonUtils.toJson(this);
+    }
 }

@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 @JsonDeserialize(builder = ErrorDto.Builder.class)
 public class ErrorDto {
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd 'T' HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private final LocalDateTime timestamp;
 
   private final HttpStatus status;

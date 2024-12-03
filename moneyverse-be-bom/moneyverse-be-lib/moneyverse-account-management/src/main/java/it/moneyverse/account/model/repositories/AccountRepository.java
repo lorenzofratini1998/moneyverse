@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AccountRepository extends JpaRepository<Account, Long> {
+public interface AccountRepository extends JpaRepository<Account, Long>, AccountCustomRepository {
 
   @Query("SELECT a FROM Account a WHERE a.username = :username AND a.isDefault = TRUE")
   Optional<Account> findDefaultAccountByUser(String username);

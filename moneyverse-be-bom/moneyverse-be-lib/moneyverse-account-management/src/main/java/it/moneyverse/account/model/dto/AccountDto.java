@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.moneyverse.core.enums.AccountCategoryEnum;
+import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -123,5 +124,10 @@ public class AccountDto implements Serializable {
 
   public static Builder builder() {
     return new Builder();
+  }
+
+  @Override
+  public String toString() {
+    return JsonUtils.toJson(this);
   }
 }

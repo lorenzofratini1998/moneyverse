@@ -12,58 +12,63 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class Auditable implements AuditableModel{
+public class Auditable implements AuditableModel {
 
-    @CreatedBy
-    @Column(name = "CREATED_BY", nullable = false, updatable = false)
-    private String createdBy = "TMP"; //TODO: temporary: replace with the authenticated user
+  @CreatedBy
+  @Column(name = "CREATED_BY", nullable = false, updatable = false)
+  private String createdBy = "TMP"; // TODO: temporary: replace with the authenticated user
 
-    @CreatedDate
-    @Column(name = "CREATED_AT", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
+  @CreatedDate
+  @Column(
+      name = "CREATED_AT",
+      nullable = false,
+      updatable = false,
+      columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+  private LocalDateTime createdAt;
 
-    @LastModifiedBy
-    @Column(name = "UPDATED_BY")
-    private String updatedBy = "TMP"; //TODO: temporary: replace with the authenticated user
+  @LastModifiedBy
+  @Column(name = "UPDATED_BY")
+  private String updatedBy = "TMP"; // TODO: temporary: replace with the authenticated user
 
-    @LastModifiedDate
-    @Column(name = "UPDATED_AT", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private LocalDateTime updatedAt;
+  @LastModifiedDate
+  @Column(
+      name = "UPDATED_AT",
+      columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+  private LocalDateTime updatedAt;
 
-    @Override
-    public String getCreatedBy() {
-        return createdBy;
-    }
+  @Override
+  public String getCreatedBy() {
+    return createdBy;
+  }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+  }
 
-    @Override
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+  @Override
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
 
-    @Override
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
+  @Override
+  public String getUpdatedBy() {
+    return updatedBy;
+  }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
+  public void setUpdatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
+  }
 
-    @Override
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+  @Override
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 }

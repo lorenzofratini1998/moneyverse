@@ -1,15 +1,23 @@
 package it.moneyverse.account.services;
 
+import it.moneyverse.account.AccountSortAttributeEnum;
+import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
+import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.PageCriteria;
+import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.UserServiceClient;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,5 +52,18 @@ public class AccountManagementService implements AccountService {
     AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
     LOGGER.info("Saved account {} for user {}", result.getAccountId(), request.username());
     return result;
+  }
+
+  @Override
+  public List<AccountDto> findAccounts(AccountCriteria criteria) {
+    if (criteria.getPage() == null) {
+      criteria.setPage(new PageCriteria());
+    }
+    if (criteria.getSort() == null) {
+      criteria.setSort(
+          new SortCriteria<>(
+              SortAttribute.getDefault(AccountSortAttributeEnum.class), Direction.ASC));
+    }
+    return AccountMapper.toAccountDto(accountRepository.findAccounts(criteria));
   }
 }

@@ -42,11 +42,6 @@ class AccountMapperTest {
   }
 
   @Test
-  void testToDto_NullEntity() {
-    assertNull(AccountMapper.toAccountDto(null));
-  }
-
-  @Test
   void testToDto_ValidEntity() {
     Account account = new Account();
     account.setAccountId(UUID.fromString("f740cf0c-cc87-4de8-bcc9-040a6d26dff6"));

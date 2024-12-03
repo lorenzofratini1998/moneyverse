@@ -3,6 +3,9 @@ package it.moneyverse.account.utils.mapper;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AccountMapper {
 
@@ -37,7 +40,12 @@ public class AccountMapper {
         .build();
   }
 
-  private AccountMapper() {
+  public static List<AccountDto> toAccountDto(List<Account> entities) {
+    if (entities == null) {
+      return Collections.emptyList();
+    }
+    return entities.stream().map(AccountMapper::toAccountDto).collect(Collectors.toList());
   }
 
+  private AccountMapper() {}
 }
