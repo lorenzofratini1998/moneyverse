@@ -23,7 +23,9 @@ public class CreateTestUsersStrategy implements KeycloakConfigurationStrategy {
   public void configure(Keycloak client, TestContextModel testContext) {
     this.keycloak = client;
     createUsers(testContext);
+    LOGGER.info("KEYCLOAK: Created {} users ", testContext.getUsers().size());
     addRoleToUsers(testContext);
+    LOGGER.info("KEYCLOAK: Added roles to {} users ", testContext.getUsers().size());
   }
 
   private void createUsers(TestContextModel testContext) {
@@ -53,7 +55,6 @@ public class CreateTestUsersStrategy implements KeycloakConfigurationStrategy {
       response.close();
       throw new IllegalStateException("Failed to create user: " + user.getUsername());
     }
-    LOGGER.info("KEYCLOAK: Created user: {}", user.getUsername());
   }
 
   private void addRoleToUsers(TestContextModel testContext) {
@@ -62,7 +63,6 @@ public class CreateTestUsersStrategy implements KeycloakConfigurationStrategy {
       RoleRepresentation realmRole = realm.roles().get(user.getRole().name()).toRepresentation();
       String userId = realm.users().searchByUsername(user.getUsername(), true).getFirst().getId();
       realm.users().get(userId).roles().realmLevel().add(Collections.singletonList(realmRole));
-      LOGGER.info("KEYCLOAK: Added role: {} to {}", user.getRole().name(), user.getUsername());
     });
   }
 }

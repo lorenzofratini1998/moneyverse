@@ -1,53 +1,48 @@
-package it.moneyverse.account.utils.helper;
+package it.moneyverse.account.utils;
 
-import it.moneyverse.account.AccountSortAttributeEnum;
+import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.model.entities.AccountModel;
-import it.moneyverse.test.model.TestContextModel;
+import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.utils.RandomUtils;
+import org.springframework.data.domain.Sort;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
-public class AccountCriteriaRandomGenerator {
+class AccountCriteriaRandomGenerator {
 
-  private final TestContextModel model;
+  private final TestContext testContext;
 
-  public AccountCriteriaRandomGenerator(TestContextModel model) {
-    this.model = model;
+  public AccountCriteriaRandomGenerator(TestContext testContext) {
+    this.testContext = testContext;
   }
 
   public AccountCriteria generate() {
     AccountCriteria criteria = new AccountCriteria();
-    criteria.setUsername(Math.random() < 0.5 ? model.getRandomUser().getUsername() : null);
+    criteria.setUsername(Math.random() < 0.5 ? testContext.getRandomUser().getUsername() : null);
     criteria.setBalance(
         Math.random() < 0.5
             ? randomCriteriaBound(
-                model.getAccounts().stream().map(AccountModel::getBalance).toList())
+                testContext.getModel().getAccounts().stream().map(AccountModel::getBalance).toList())
             : null);
     criteria.setBalanceTarget(
         Math.random() < 0.5
             ? randomCriteriaBound(
-                model.getAccounts().stream().map(AccountModel::getBalanceTarget).toList())
+                testContext.getModel().getAccounts().stream().map(AccountModel::getBalanceTarget).toList())
             : null);
     criteria.setAccountCategory(
         Math.random() < 0.5 ? RandomUtils.randomEnum(AccountCategoryEnum.class) : null);
     criteria.setDefault(Math.random() < 0.5 ? Math.random() < 0.5 : null);
     criteria.setPage(new PageCriteria());
-    /*criteria.setSort(
-        Math.random() < 0.5
-            ? new SortCriteria<>(
-                RandomUtils.randomEnum(AccountSortAttributeEnum.class), Direction.ASC)
-            : null);*/
-    criteria.setSort(new SortCriteria<>(RandomUtils.randomEnum(AccountSortAttributeEnum.class), Direction.ASC));
+    criteria.setSort(new SortCriteria<>(AccountSortAttributeEnum.ACCOUNT_NAME, Sort.Direction.ASC));
     return criteria;
   }
 

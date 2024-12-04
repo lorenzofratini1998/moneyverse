@@ -80,6 +80,12 @@
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-commons</artifactId>
+      <optional>true</optional>
+      <scope>true</scope>
+    </dependency>
     <!-- JAKARTA IMPLEMENTATIONS DEPENDENCIES -->
     <dependency>
       <groupId>org.eclipse</groupId>

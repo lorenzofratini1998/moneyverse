@@ -40,11 +40,8 @@ public class AccountManagementController implements AccountOperations{
   @Override
   @GetMapping("/accounts")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize("hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or #criteria.username == authentication.name")
+  @PreAuthorize("hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (#criteria.username.isPresent() and #criteria.username.get().equals(authentication.name))")
   public List<AccountDto> getAccounts(AccountCriteria criteria) {
-    if (!SecurityContextUtils.isCurrentUserAdmin()) {
-      criteria.setUsername(SecurityContextUtils.getAuthenticatedUser().getUsername());
-    }
     return accountService.findAccounts(criteria);
   }
 }

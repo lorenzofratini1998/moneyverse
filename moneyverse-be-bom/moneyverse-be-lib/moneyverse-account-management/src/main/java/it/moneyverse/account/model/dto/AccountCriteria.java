@@ -1,11 +1,11 @@
 package it.moneyverse.account.model.dto;
 
-import it.moneyverse.account.AccountSortAttributeEnum;
+import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
-import jakarta.validation.Valid;
+
 import java.util.Optional;
 
 public class AccountCriteria {

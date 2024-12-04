@@ -3,7 +3,7 @@ package it.moneyverse.account.model.repositories;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import it.moneyverse.account.AccountSortAttributeEnum;
+import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.QAccount;
@@ -11,7 +11,6 @@ import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.model.dto.SortCriteria;
 import java.util.List;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
@@ -33,7 +32,7 @@ public class AccountCustomRepositoryImpl extends QuerydslRepositorySupport
         .ifPresent(
             balance -> {
               balance.getLower().ifPresent(lower -> predicate.and(account.balance.gt(lower)));
-              balance.getUpper().ifPresent(upper -> predicate.and(account.balance.gt(upper)));
+              balance.getUpper().ifPresent(upper -> predicate.and(account.balance.lt(upper)));
             });
     param
         .getBalanceTarget()
@@ -44,11 +43,12 @@ public class AccountCustomRepositoryImpl extends QuerydslRepositorySupport
                   .ifPresent(lower -> predicate.and(account.balanceTarget.gt(lower)));
               balanceTarget
                   .getUpper()
-                  .ifPresent(upper -> predicate.and(account.balanceTarget.gt(upper)));
+                  .ifPresent(upper -> predicate.and(account.balanceTarget.lt(upper)));
             });
     param
         .getAccountCategory()
         .ifPresent(accountCategory -> predicate.and(account.accountCategory.eq(accountCategory)));
+    param.getDefault().ifPresent(isDefault -> predicate.and(account.isDefault.eq(isDefault)));
     return from(account)
         .where(predicate)
         .offset(param.getPage().getOffset())

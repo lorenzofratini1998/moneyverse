@@ -1,6 +1,6 @@
 package it.moneyverse.account.services;
 
-import it.moneyverse.account.AccountSortAttributeEnum;
+import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
@@ -16,7 +16,6 @@ import it.moneyverse.core.services.UserServiceClient;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
