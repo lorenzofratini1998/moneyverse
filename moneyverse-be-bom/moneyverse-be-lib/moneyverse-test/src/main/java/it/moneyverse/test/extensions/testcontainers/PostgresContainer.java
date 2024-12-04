@@ -18,5 +18,4 @@ public class PostgresContainer extends PostgreSQLContainer<PostgresContainer> {
     super.withPassword(POSTGRES);
     super.withCommand("postgres", "-c", "max_connections=200");
   }
-
 }

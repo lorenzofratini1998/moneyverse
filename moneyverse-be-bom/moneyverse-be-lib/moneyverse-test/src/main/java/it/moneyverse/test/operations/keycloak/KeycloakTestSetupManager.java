@@ -54,5 +54,4 @@ public class KeycloakTestSetupManager {
       throw new IllegalStateException("Can't get access token", e);
     }
   }
-
 }

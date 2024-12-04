@@ -23,8 +23,13 @@ public class FakeAccount extends FakeAuditable implements AccountModel {
     this.username = username;
     this.accountId = RandomUtils.randomUUID();
     this.accountName = "Account %s".formatted(counter);
-    this.balance = RandomUtils.randomDecimal(0.0, Math.random() * 1000).setScale(2, RoundingMode.HALF_EVEN);
-    this.balanceTarget = (int) (Math.random() * 100) % 2 == 0 ? RandomUtils.randomDecimal(0.0, Math.random() * 2000).setScale(2, RoundingMode.HALF_EVEN) : null;
+    this.balance =
+        RandomUtils.randomDecimal(0.0, Math.random() * 1000).setScale(2, RoundingMode.HALF_EVEN);
+    this.balanceTarget =
+        (int) (Math.random() * 100) % 2 == 0
+            ? RandomUtils.randomDecimal(0.0, Math.random() * 2000)
+                .setScale(2, RoundingMode.HALF_EVEN)
+            : null;
     this.accountCategory = RandomUtils.randomEnum(AccountCategoryEnum.class);
     this.accountDescription = "Account Description %s".formatted(counter);
     this.isDefault = counter == 1;

@@ -59,10 +59,20 @@ public class CreateTestUsersStrategy implements KeycloakConfigurationStrategy {
 
   private void addRoleToUsers(TestContextModel testContext) {
     RealmResource realm = keycloak.realm(TEST_REALM);
-    testContext.getUsers().forEach(user -> {
-      RoleRepresentation realmRole = realm.roles().get(user.getRole().name()).toRepresentation();
-      String userId = realm.users().searchByUsername(user.getUsername(), true).getFirst().getId();
-      realm.users().get(userId).roles().realmLevel().add(Collections.singletonList(realmRole));
-    });
+    testContext
+        .getUsers()
+        .forEach(
+            user -> {
+              RoleRepresentation realmRole =
+                  realm.roles().get(user.getRole().name()).toRepresentation();
+              String userId =
+                  realm.users().searchByUsername(user.getUsername(), true).getFirst().getId();
+              realm
+                  .users()
+                  .get(userId)
+                  .roles()
+                  .realmLevel()
+                  .add(Collections.singletonList(realmRole));
+            });
   }
 }

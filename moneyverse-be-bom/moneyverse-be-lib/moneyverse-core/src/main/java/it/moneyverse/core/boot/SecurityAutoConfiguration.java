@@ -21,37 +21,39 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityAutoConfiguration {
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
-      @Value("${spring.security.base-path}") String basePath) throws Exception {
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity httpSecurity, @Value("${spring.security.base-path}") String basePath)
+      throws Exception {
 
-    DelegatingJwtGrantedAuthoritiesConverter authoritiesConverter = new DelegatingJwtGrantedAuthoritiesConverter(
-        new JwtGrantedAuthoritiesConverter(),
-        new KeycloakJwtRolesConverter()
-    );
+    DelegatingJwtGrantedAuthoritiesConverter authoritiesConverter =
+        new DelegatingJwtGrantedAuthoritiesConverter(
+            new JwtGrantedAuthoritiesConverter(), new KeycloakJwtRolesConverter());
 
-    KeycloakJwtAuthenticationConverter jwtAuthenticationConverter = new KeycloakJwtAuthenticationConverter(
-        authoritiesConverter);
+    KeycloakJwtAuthenticationConverter jwtAuthenticationConverter =
+        new KeycloakJwtAuthenticationConverter(authoritiesConverter);
 
     httpSecurity
         .httpBasic(HttpBasicConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .logout(AbstractHttpConfigurer::disable)
-        .sessionManagement(session -> session.sessionCreationPolicy(
-            SessionCreationPolicy.STATELESS
-        ));
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-    httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
-        .jwt(
-            jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+    httpSecurity.oauth2ResourceServer(
+        oauth2 ->
+            oauth2.jwt(
+                jwtConfigurer ->
+                    jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
 
-    httpSecurity
-        .authorizeHttpRequests(authz -> authz
-            .requestMatchers(basePath + "/public/**").permitAll()
-            .anyRequest().authenticated()
-        );
+    httpSecurity.authorizeHttpRequests(
+        authz ->
+            authz
+                .requestMatchers(basePath + "/public/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated());
 
     return httpSecurity.build();
   }
-
 }

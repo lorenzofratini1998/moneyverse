@@ -13,6 +13,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 public class ErrorUtils {
 
+  private ErrorUtils() {}
+
   public static ErrorDto toErrorDto(
       HttpServletRequest request, MethodArgumentNotValidException ex) {
     List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
@@ -50,6 +52,4 @@ public class ErrorUtils {
                     error.getField(), error.getRejectedValue(), error.getDefaultMessage()))
         .toList();
   }
-
-  private ErrorUtils() {}
 }

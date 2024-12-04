@@ -6,5 +6,4 @@ import org.keycloak.admin.client.Keycloak;
 public interface KeycloakConfigurationStrategy {
 
   void configure(Keycloak client, TestContextModel testContext);
-
 }

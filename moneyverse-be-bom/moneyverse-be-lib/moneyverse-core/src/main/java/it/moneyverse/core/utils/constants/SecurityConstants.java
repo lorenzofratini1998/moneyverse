@@ -13,5 +13,4 @@ public class SecurityConstants {
   public static final String PREFIX_ROLE = "ROLE_";
 
   private SecurityConstants() {}
-
 }

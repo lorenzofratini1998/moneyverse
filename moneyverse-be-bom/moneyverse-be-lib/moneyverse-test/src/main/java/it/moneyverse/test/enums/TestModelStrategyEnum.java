@@ -11,8 +11,7 @@ public enum TestModelStrategyEnum {
   RANDOM(
       RandomTestContextModel::builder,
       RandomTestContextModel::createUsers,
-      RandomTestContextModel::createAccounts
-  );
+      RandomTestContextModel::createAccounts);
 
   private final Supplier<Builder> builderSupplier;
   private final UserCreationStrategy userCreator;
@@ -21,8 +20,7 @@ public enum TestModelStrategyEnum {
   TestModelStrategyEnum(
       Supplier<Builder> builderSupplier,
       UserCreationStrategy userCreator,
-      AccountCreationStrategy accountCreator
-  ) {
+      AccountCreationStrategy accountCreator) {
     this.builderSupplier = builderSupplier;
     this.userCreator = userCreator;
     this.accountCreator = accountCreator;

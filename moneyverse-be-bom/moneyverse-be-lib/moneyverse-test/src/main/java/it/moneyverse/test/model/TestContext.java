@@ -16,15 +16,14 @@ import it.moneyverse.test.operations.mapping.AccountProcessingStrategy;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
 import it.moneyverse.test.utils.RandomUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 public abstract class TestContext {
 
@@ -34,10 +33,6 @@ public abstract class TestContext {
 
   protected final TestContextModel model;
   private final KeycloakTestSetupManager keycloakTestManager;
-
-  public TestContextModel getModel() {
-      return model;
-  }
 
   protected TestContext(Builder<?> builder) {
     Instant now = Instant.now();
@@ -59,10 +54,6 @@ public abstract class TestContext {
     LOGGER.info("Test Context set up in {} ms", System.currentTimeMillis() - now.toEpochMilli());
   }
 
-  private static void setCurrentInstance(TestContext instance) {
-    currentInstance = instance;
-  }
-
   protected static TestContext getCurrentInstance() {
     if (currentInstance == null) {
       throw new IllegalStateException("TestContext instance is not set.");
@@ -70,42 +61,12 @@ public abstract class TestContext {
     return currentInstance;
   }
 
-  public abstract static class Builder<T extends Builder<T>> {
+  private static void setCurrentInstance(TestContext instance) {
+    currentInstance = instance;
+  }
 
-    private TestModelStrategyEnum strategy;
-    private boolean withTestUsers;
-    private boolean withTestAccounts;
-    private KeycloakContainer keycloakContainer;
-    private ScriptMetadata metadata;
-
-    public T withStrategy(TestModelStrategyEnum strategy) {
-      this.strategy = strategy;
-      return self();
-    }
-
-    public T withTestUsers() {
-      this.withTestUsers = true;
-      return self();
-    }
-
-    public T withTestAccount() {
-      this.withTestAccounts = true;
-      return self();
-    }
-
-    public T withKeycloak(KeycloakContainer keycloakContainer) {
-      this.keycloakContainer = keycloakContainer;
-      return self();
-    }
-
-    public T withScriptMetadata(ScriptMetadata metadata) {
-      this.metadata = metadata;
-      return self();
-    }
-
-    protected abstract T self();
-
-    public abstract TestContext build();
+  public TestContextModel getModel() {
+      return model;
   }
 
   public UserModel getRandomUser() {
@@ -172,5 +133,43 @@ public abstract class TestContext {
       }
     }
     return uri.build().toUriString();
+  }
+
+  public abstract static class Builder<T extends Builder<T>> {
+
+    private TestModelStrategyEnum strategy;
+    private boolean withTestUsers;
+    private boolean withTestAccounts;
+    private KeycloakContainer keycloakContainer;
+    private ScriptMetadata metadata;
+
+    public T withStrategy(TestModelStrategyEnum strategy) {
+      this.strategy = strategy;
+      return self();
+    }
+
+    public T withTestUsers() {
+      this.withTestUsers = true;
+      return self();
+    }
+
+    public T withTestAccount() {
+      this.withTestAccounts = true;
+      return self();
+    }
+
+    public T withKeycloak(KeycloakContainer keycloakContainer) {
+      this.keycloakContainer = keycloakContainer;
+      return self();
+    }
+
+    public T withScriptMetadata(ScriptMetadata metadata) {
+      this.metadata = metadata;
+      return self();
+    }
+
+    protected abstract T self();
+
+    public abstract TestContext build();
   }
 }

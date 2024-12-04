@@ -20,10 +20,8 @@ public class KeycloakJwtRolesConverter implements Converter<Jwt, Collection<Gran
 
   @Override
   public Collection<GrantedAuthority> convert(@Nonnull Jwt jwt) {
-    return Stream.concat(
-        extractRealmRoles(jwt).stream(),
-        extractResourceRoles(jwt).stream()
-    ).toList();
+    return Stream.concat(extractRealmRoles(jwt).stream(), extractResourceRoles(jwt).stream())
+        .toList();
   }
 
   private Collection<GrantedAuthority> extractRealmRoles(Jwt jwt) {
@@ -40,11 +38,13 @@ public class KeycloakJwtRolesConverter implements Converter<Jwt, Collection<Gran
             jwt.<Map<String, Map<String, Collection<String>>>>getClaim(CLAIM_RESOURCE_ACCESS))
         .stream()
         .flatMap(resourceAccess -> resourceAccess.entrySet().stream())
-        .flatMap(entry -> Optional.ofNullable(entry.getValue().get(CLAIM_ROLES))
-            .stream()
-            .flatMap(Collection::stream)
-            .map(role -> new SimpleGrantedAuthority(PREFIX_ROLE + entry.getKey() + "_" + role)))
+        .flatMap(
+            entry ->
+                Optional.ofNullable(entry.getValue().get(CLAIM_ROLES)).stream()
+                    .flatMap(Collection::stream)
+                    .map(
+                        role ->
+                            new SimpleGrantedAuthority(PREFIX_ROLE + entry.getKey() + "_" + role)))
         .collect(Collectors.toList());
   }
-
 }

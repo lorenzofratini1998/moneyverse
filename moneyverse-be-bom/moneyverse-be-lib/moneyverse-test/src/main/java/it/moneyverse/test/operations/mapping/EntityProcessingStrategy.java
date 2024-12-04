@@ -6,6 +6,6 @@ import it.moneyverse.test.services.ScriptService;
 public interface EntityProcessingStrategy {
 
   boolean supports(Class<?> clazz);
-  String process(TestContextModel testContext, ScriptService scriptService, Class<?> clazz);
 
+  String process(TestContextModel testContext, ScriptService scriptService, Class<?> clazz);
 }

@@ -6,10 +6,5 @@ import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record ValidationErrorDto(
-    String field,
-    Object rejectedValue,
-    String message
-) implements Serializable {
-
-}
+public record ValidationErrorDto(String field, Object rejectedValue, String message)
+    implements Serializable {}

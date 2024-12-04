@@ -6,5 +6,4 @@ public class KeycloakSetupContextConstants {
   public static final String TEST_FRONTEND_CLIENT = "frontend-app";
 
   private KeycloakSetupContextConstants() {}
-
 }

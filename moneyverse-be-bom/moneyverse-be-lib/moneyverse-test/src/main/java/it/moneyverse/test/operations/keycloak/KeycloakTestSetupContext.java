@@ -17,5 +17,4 @@ public class KeycloakTestSetupContext {
   public void execute(Keycloak client, TestContextModel context) {
     strategies.forEach(strategy -> strategy.configure(client, context));
   }
-
 }

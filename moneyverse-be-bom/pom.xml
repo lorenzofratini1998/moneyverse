@@ -1,48 +1,48 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <groupId>it.moneyverse</groupId>
   <artifactId>moneyverse-bom</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <name>moneyverse-bom</name>
-  <description>Moneyverse</description>
-  <packaging>pom</packaging>
-  <properties>
-    <!-- PRODUCT DEPENDENCIES VERSIONS -->
-    <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
-    <moneyverse-test.version>1.0.0-SNAPSHOT</moneyverse-test.version>
-    <moneyverse-core.version>1.0.0-SNAPSHOT</moneyverse-core.version>
-    <moneyverse-proto.version>1.0.0-SNAPSHOT</moneyverse-proto.version>
-  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>it.moneyverse</groupId>
         <artifactId>moneyverse-account-management</artifactId>
+        <groupId>it.moneyverse</groupId>
         <version>${moneyverse-account-management}</version>
       </dependency>
       <dependency>
-        <groupId>it.moneyverse</groupId>
         <artifactId>moneyverse-test</artifactId>
+        <groupId>it.moneyverse</groupId>
         <version>${moneyverse-test.version}</version>
       </dependency>
       <dependency>
-        <groupId>it.moneyverse</groupId>
         <artifactId>moneyverse-core</artifactId>
+        <groupId>it.moneyverse</groupId>
         <version>${moneyverse-core.version}</version>
       </dependency>
       <dependency>
-        <groupId>it.moneyverse</groupId>
         <artifactId>moneyverse-proto</artifactId>
+        <groupId>it.moneyverse</groupId>
         <version>${moneyverse-proto.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
+  <description>Moneyverse</description>
+  <groupId>it.moneyverse</groupId>
+  <modelVersion>4.0.0</modelVersion>
   <modules>
     <module>moneyverse-be-lib</module>
   </modules>
+  <name>moneyverse-bom</name>
+  <packaging>pom</packaging>
+  <properties>
+    <!-- PRODUCT DEPENDENCIES VERSIONS -->
+    <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
+    <moneyverse-core.version>1.0.0-SNAPSHOT</moneyverse-core.version>
+    <moneyverse-proto.version>1.0.0-SNAPSHOT</moneyverse-proto.version>
+    <moneyverse-test.version>1.0.0-SNAPSHOT</moneyverse-test.version>
+  </properties>
+
+  <version>1.0.0-SNAPSHOT</version>
 
 </project>

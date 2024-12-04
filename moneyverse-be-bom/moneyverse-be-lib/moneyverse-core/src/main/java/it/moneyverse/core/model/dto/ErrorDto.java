@@ -36,6 +36,10 @@ public class ErrorDto {
     this.validationErrors = builder.validationErrors;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
   public LocalDateTime getTimestamp() {
     return timestamp;
   }
@@ -122,9 +126,5 @@ public class ErrorDto {
     public ErrorDto build() {
       return new ErrorDto(this);
     }
-  }
-
-  public static Builder builder() {
-    return new Builder();
   }
 }

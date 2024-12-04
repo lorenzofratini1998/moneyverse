@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 public class PageCriteria {
 
-  @NotNull
-  private Integer offset;
-  @NotNull
-  private Integer limit;
+  @NotNull private Integer offset;
+  @NotNull private Integer limit;
 
   public PageCriteria() {
     this.offset = CommonConstants.DEFAULT_OFFSET;

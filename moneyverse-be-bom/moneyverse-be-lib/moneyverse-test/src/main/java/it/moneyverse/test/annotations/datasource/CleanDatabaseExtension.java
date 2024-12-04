@@ -26,8 +26,8 @@ public class CleanDatabaseExtension implements BeforeEachCallback {
   }
 
   private void populateDatabase(ExtensionContext context) {
-    JdbcTemplate jdbcTemplate = SpringExtension.getApplicationContext(context)
-        .getBean(JdbcTemplate.class);
+    JdbcTemplate jdbcTemplate =
+        SpringExtension.getApplicationContext(context).getBean(JdbcTemplate.class);
     Path filePath = getDataSourceScriptDirValue(context);
     try {
       String[] sqlStatements = Files.readString(filePath).split(";");
@@ -49,7 +49,6 @@ public class CleanDatabaseExtension implements BeforeEachCallback {
           } catch (IllegalAccessException e) {
             throw new IllegalStateException("Unable to access field", e);
           }
-        }
-    );
+        });
   }
 }

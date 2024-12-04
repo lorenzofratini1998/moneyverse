@@ -8,7 +8,10 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RandomUtils {
 
   private static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
-  private static final String ALPHANUMERIC = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  private static final String ALPHANUMERIC =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  private RandomUtils() {}
 
   public static UUID randomUUID() {
     return UUID.randomUUID();
@@ -43,8 +46,4 @@ public class RandomUtils {
     int year = randomInteger(startYear, endYear);
     return LocalDate.ofYearDay(year, dayOfYear);
   }
-
-  private RandomUtils() {
-  }
-
 }

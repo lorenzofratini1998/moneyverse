@@ -6,17 +6,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityContextUtils {
 
+  private SecurityContextUtils() {}
+
   public static AuthenticatedUser getAuthenticatedUser() {
-    return (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    return (AuthenticatedUser)
+        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
   }
 
   public static Boolean isCurrentUserAdmin() {
     return getAuthenticatedUser().getAuthorities().stream()
         .anyMatch(role -> role.getAuthority().equals("ROLE_" + UserRoleEnum.ADMIN.name()));
   }
-
-  private SecurityContextUtils() {
-  }
-
 }

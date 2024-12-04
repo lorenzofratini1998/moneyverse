@@ -1,80 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>it.moneyverse</groupId>
-    <artifactId>moneyverse-lib</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
-
   <artifactId>moneyverse-core</artifactId>
-  <name>moneyverse-core</name>
-  <description>Core components of Moneyverse application</description>
-
   <dependencies>
     <dependency>
-      <groupId>it.moneyverse</groupId>
       <artifactId>moneyverse-proto</artifactId>
+      <groupId>it.moneyverse</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
+      <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+      <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
     <!-- JAKARTA IMPLEMENTATIONS DEPENDENCIES -->
     <dependency>
-      <groupId>org.eclipse</groupId>
       <artifactId>yasson</artifactId>
+      <groupId>org.eclipse</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>jakarta.json</groupId>
       <artifactId>jakarta.json-api</artifactId>
+      <groupId>jakarta.json</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>jakarta.json.bind</groupId>
       <artifactId>jakarta.json.bind-api</artifactId>
+      <groupId>jakarta.json.bind</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
+      <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
-      <version>${querydsl.version}</version>
       <classifier>jakarta</classifier>
+      <groupId>com.querydsl</groupId>
       <optional>true</optional>
+      <version>${querydsl.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-apt</artifactId>
-      <version>${querydsl.version}</version>
       <classifier>jakarta</classifier>
-      <scope>provided</scope>
+      <groupId>com.querydsl</groupId>
       <optional>true</optional>
+      <scope>provided</scope>
+      <version>${querydsl.version}</version>
     </dependency>
   </dependencies>
+
+  <description>Core components of Moneyverse application</description>
+  <modelVersion>4.0.0</modelVersion>
+  <name>moneyverse-core</name>
+
+  <parent>
+    <artifactId>moneyverse-lib</artifactId>
+    <groupId>it.moneyverse</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
 
 </project>

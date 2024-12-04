@@ -19,13 +19,15 @@ public class CreateTestUserRolesStrategy implements KeycloakConfigurationStrateg
 
   @Override
   public void configure(Keycloak client, TestContextModel testContext) {
-    Arrays.stream(UserRoleEnum.values()).forEach(role -> {
-      RoleRepresentation keycloakRole = new RoleRepresentation();
-      keycloakRole.setName(role.name());
-      keycloakRole.setDescription("Role %s for testing purposes".formatted(role.name()));
-      client.realm(TEST_REALM).roles().create(keycloakRole);
-      LOGGER.info("KEYCLOAK: Created realm role {}", keycloakRole);
-    });
+    Arrays.stream(UserRoleEnum.values())
+        .forEach(
+            role -> {
+              RoleRepresentation keycloakRole = new RoleRepresentation();
+              keycloakRole.setName(role.name());
+              keycloakRole.setDescription("Role %s for testing purposes".formatted(role.name()));
+              client.realm(TEST_REALM).roles().create(keycloakRole);
+              LOGGER.info("KEYCLOAK: Created realm role {}", keycloakRole);
+            });
     enhanceAdminRole(client);
   }
 

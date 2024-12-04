@@ -1,145 +1,23 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>it.moneyverse</groupId>
-    <artifactId>moneyverse-bom</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
   <artifactId>moneyverse-lib</artifactId>
-  <packaging>pom</packaging>
-  <name>moneyverse-lib</name>
-  <description>Moneyverse's global third parties dependencies</description>
-
-  <modules>
-    <module>moneyverse-account-management</module>
-    <module>moneyverse-test</module>
-    <module>moneyverse-core</module>
-    <module>moneyverse-proto</module>
-  </modules>
-
-  <properties>
-    <!-- GENERAL SETTINGS -->
-    <project.build.sourceEnconding>UTF-8</project.build.sourceEnconding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>21</java.version>
-    <!-- DEVOPS DEPENDENCIES VERSION -->
-    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-    <maven-failsafe-plugin>3.5.2</maven-failsafe-plugin>
-    <maven-javadoc-plugin>3.11.1</maven-javadoc-plugin>
-    <jacoco-maven-plugin>0.8.12</jacoco-maven-plugin>
-    <!-- BILL-OF-MATERIALS DEPENDENCIES VERSIONS -->
-    <spring-boot.version>3.4.0</spring-boot.version>
-    <grpc-starter.version>3.4.0</grpc-starter.version>
-    <grpc.version>1.68.2</grpc.version>
-    <!-- OTHER DEPENDENCIES VERSIONS -->
-    <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
-    <postgres.version>42.7.4</postgres.version>
-    <flyware-core.version>10.15.0</flyware-core.version>
-    <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
-    <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
-    <grpcmock.version>0.15.0</grpcmock.version>
-    <!--<hibernate-jpamodelgen.version>6.6.3.Final</hibernate-jpamodelgen.version>-->
-    <querydsl.version>5.1.0</querydsl.version>
-  </properties>
-  <dependencyManagement>
-    <dependencies>
-      <!-- BILL OF MATERIALS DEPENDENCIES -->
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring-boot.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.github.danielliu1123</groupId>
-        <artifactId>grpc-starter-dependencies</artifactId>
-        <version>${grpc-starter.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-bom</artifactId>
-        <version>${grpc.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <!-- OTHER DEPENDENCIES -->
-      <dependency>
-        <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>${postgres.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-core</artifactId>
-        <version>${flyware-core.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-database-postgresql</artifactId>
-        <version>${flyware-core.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.dasniko</groupId>
-        <artifactId>testcontainers-keycloak</artifactId>
-        <version>${testcontainers-keycloak.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>annotations-api</artifactId>
-        <version>${org.apache.tomcat.annotations-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.grpcmock</groupId>
-        <artifactId>grpcmock-spring-boot</artifactId>
-        <version>${grpcmock.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.grpcmock</groupId>
-        <artifactId>grpcmock-junit5</artifactId>
-        <version>${grpcmock.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.querydsl</groupId>
-        <artifactId>querydsl-apt</artifactId>
-        <version>${querydsl.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.querydsl</groupId>
-        <artifactId>querydsl-jpa</artifactId>
-        <version>${querydsl.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
           <configuration>
+            <parameters>true</parameters>
+            <release>${java.version}</release>
             <source>${java.version}</source>
             <target>${java.version}</target>
-            <release>${java.version}</release>
-            <parameters>true</parameters>
           </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
+          <version>${maven-compiler-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>${maven-jar-plugin.version}</version>
           <configuration>
             <archive>
               <manifest>
@@ -148,53 +26,176 @@
               </manifest>
             </archive>
           </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
+          <version>${maven-jar-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
+          </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
           <version>${maven-surefire-plugin.version}</version>
-          <configuration>
-            <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
-          </configuration>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>${maven-failsafe-plugin.version}</version>
           <configuration>
             <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
           </configuration>
-        </plugin>
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>${maven-javadoc-plugin.version}</version>
-          <configuration>
-            <source>${java.version}</source>
-            <encoding>${project.reporting.outputEncoding}</encoding>
-          </configuration>
+          <version>${maven-failsafe-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.jacoco</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <encoding>${project.reporting.outputEncoding}</encoding>
+            <source>${java.version}</source>
+          </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
+          <version>${maven-javadoc-plugin.version}</version>
+        </plugin>
+        <plugin>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${jacoco-maven-plugin.version}</version>
           <executions>
             <execution>
-              <id>agent</id>
               <goals>
                 <goal>prepare-agent</goal>
               </goals>
+              <id>agent</id>
             </execution>
             <execution>
-              <id>report</id>
-              <phase>test</phase>
               <goals>
                 <goal>report</goal>
               </goals>
+              <id>report</id>
+              <phase>test</phase>
             </execution>
           </executions>
+          <groupId>org.jacoco</groupId>
+          <version>${jacoco-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
+  <dependencyManagement>
+    <dependencies>
+      <!-- BILL OF MATERIALS DEPENDENCIES -->
+      <dependency>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <scope>import</scope>
+        <type>pom</type>
+        <version>${spring-boot.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpc-starter-dependencies</artifactId>
+        <groupId>io.github.danielliu1123</groupId>
+        <scope>import</scope>
+        <type>pom</type>
+        <version>${grpc-starter.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpc-bom</artifactId>
+        <groupId>io.grpc</groupId>
+        <scope>import</scope>
+        <type>pom</type>
+        <version>${grpc.version}</version>
+      </dependency>
+      <!-- OTHER DEPENDENCIES -->
+      <dependency>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <groupId>org.springdoc</groupId>
+        <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>postgresql</artifactId>
+        <groupId>org.postgresql</groupId>
+        <version>${postgres.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>flyway-core</artifactId>
+        <groupId>org.flywaydb</groupId>
+        <version>${flyware-core.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>flyway-database-postgresql</artifactId>
+        <groupId>org.flywaydb</groupId>
+        <version>${flyware-core.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>testcontainers-keycloak</artifactId>
+        <groupId>com.github.dasniko</groupId>
+        <version>${testcontainers-keycloak.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>annotations-api</artifactId>
+        <groupId>org.apache.tomcat</groupId>
+        <version>${org.apache.tomcat.annotations-api.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpcmock-spring-boot</artifactId>
+        <groupId>org.grpcmock</groupId>
+        <version>${grpcmock.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpcmock-junit5</artifactId>
+        <groupId>org.grpcmock</groupId>
+        <version>${grpcmock.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>querydsl-apt</artifactId>
+        <groupId>com.querydsl</groupId>
+        <version>${querydsl.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>querydsl-jpa</artifactId>
+        <groupId>com.querydsl</groupId>
+        <version>${querydsl.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <description>Moneyverse's global third parties dependencies</description>
+  <modelVersion>4.0.0</modelVersion>
+  <modules>
+    <module>moneyverse-account-management</module>
+    <module>moneyverse-test</module>
+    <module>moneyverse-core</module>
+    <module>moneyverse-proto</module>
+  </modules>
+
+  <name>moneyverse-lib</name>
+
+  <packaging>pom</packaging>
+  <parent>
+    <artifactId>moneyverse-bom</artifactId>
+    <groupId>it.moneyverse</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <properties>
+    <!-- GENERAL SETTINGS -->
+    <flyware-core.version>10.15.0</flyware-core.version>
+    <grpc-starter.version>3.4.0</grpc-starter.version>
+    <grpc.version>1.68.2</grpc.version>
+    <!-- DEVOPS DEPENDENCIES VERSION -->
+    <grpcmock.version>0.15.0</grpcmock.version>
+    <jacoco-maven-plugin>0.8.12</jacoco-maven-plugin>
+    <java.version>21</java.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-failsafe-plugin>3.5.2</maven-failsafe-plugin>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-javadoc-plugin>3.11.1</maven-javadoc-plugin>
+    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+    <!-- BILL-OF-MATERIALS DEPENDENCIES VERSIONS -->
+    <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
+    <postgres.version>42.7.4</postgres.version>
+    <project.build.sourceEnconding>UTF-8</project.build.sourceEnconding>
+    <!-- OTHER DEPENDENCIES VERSIONS -->
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <querydsl.version>5.1.0</querydsl.version>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.organization>lorenzofratini1998</sonar.organization>
+    <spring-boot.version>3.4.0</spring-boot.version>
+    <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
+    <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
+  </properties>
 </project>

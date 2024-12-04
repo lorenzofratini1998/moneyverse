@@ -22,6 +22,39 @@ public class AuthenticatedUser implements Principal {
     this.authorities = builder.authorities;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getFullName() {
+    return fullName;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public Boolean getEmailVerified() {
+    return isEmailVerified;
+  }
+
+  public Collection<GrantedAuthority> getAuthorities() {
+    return authorities;
+  }
+
+  @Override
+  public String getName() {
+    return username;
+  }
+
   public static class Builder {
 
     private String id;
@@ -70,38 +103,5 @@ public class AuthenticatedUser implements Principal {
     public AuthenticatedUser build() {
       return new AuthenticatedUser(this);
     }
-  }
-
-  public static Builder builder() {
-    return new Builder();
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public String getFullName() {
-    return fullName;
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public Boolean getEmailVerified() {
-    return isEmailVerified;
-  }
-
-  public Collection<GrantedAuthority> getAuthorities() {
-    return authorities;
-  }
-
-  @Override
-  public String getName() {
-    return username;
   }
 }

@@ -13,6 +13,4 @@ import org.springframework.test.context.TestPropertySource;
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(CleanDatabaseExtension.class)
 @TestPropertySource(properties = "spring.flyway.clean-disabled=false")
-public @interface CleanDatabaseAfterEachTest {
-
-}
+public @interface CleanDatabaseAfterEachTest {}

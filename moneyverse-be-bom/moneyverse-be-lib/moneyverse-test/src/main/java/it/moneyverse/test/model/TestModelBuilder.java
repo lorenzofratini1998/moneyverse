@@ -24,5 +24,4 @@ public class TestModelBuilder {
     }
     return modelBuilder.build();
   }
-
 }

@@ -26,27 +26,6 @@ public class RandomTestContextModel implements TestContextModel {
     this.accounts = builder.accounts;
   }
 
-  public static class Builder implements TestContextModel.Builder {
-
-    private List<UserModel> users;
-    private List<AccountModel> accounts;
-
-    public Builder withUsers(List<UserModel> users) {
-      this.users = users;
-      return this;
-    }
-
-    public Builder withAccounts(List<AccountModel> accounts) {
-      this.accounts = accounts;
-      return this;
-    }
-
-    public RandomTestContextModel build() {
-      return new RandomTestContextModel(this);
-    }
-
-  }
-
   public static Builder builder() {
     return new Builder();
   }
@@ -89,6 +68,27 @@ public class RandomTestContextModel implements TestContextModel {
   @Override
   public List<AccountModel> getAccounts() {
     return accounts;
+  }
+
+  public static class Builder implements TestContextModel.Builder {
+
+    private List<UserModel> users;
+    private List<AccountModel> accounts;
+
+    public Builder withUsers(List<UserModel> users) {
+      this.users = users;
+      return this;
+    }
+
+    public Builder withAccounts(List<AccountModel> accounts) {
+      this.accounts = accounts;
+      return this;
+    }
+
+    public RandomTestContextModel build() {
+      return new RandomTestContextModel(this);
+    }
+
   }
 
 

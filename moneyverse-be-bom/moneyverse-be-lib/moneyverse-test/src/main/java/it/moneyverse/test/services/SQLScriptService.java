@@ -19,7 +19,7 @@ public class SQLScriptService implements ScriptService {
     return entities.stream().map(this::createInsertRow).collect(Collectors.joining("\n"));
   }
 
-  private  <T> String createInsertRow(T entity) {
+  private <T> String createInsertRow(T entity) {
     Class<?> clazz = entity.getClass();
     if (!clazz.isAnnotationPresent(Entity.class) || !clazz.isAnnotationPresent(Table.class)) {
       throw new IllegalArgumentException(
@@ -37,7 +37,8 @@ public class SQLScriptService implements ScriptService {
     return INSERT_INTO_ROW_TEMPLATE.formatted(tableName, columns, values);
   }
 
-  private <T> void processFieldsForEntity(Class<?> currentClass, T entity, StringBuilder columns, StringBuilder values) {
+  private <T> void processFieldsForEntity(
+      Class<?> currentClass, T entity, StringBuilder columns, StringBuilder values) {
     for (Field field : currentClass.getDeclaredFields()) {
       ReflectionUtils.makeAccessible(field);
       if (field.isAnnotationPresent(Column.class)) {
@@ -47,7 +48,8 @@ public class SQLScriptService implements ScriptService {
     }
   }
 
-  private <T> void appendColumnAndValue(Field field, T entity, StringBuilder columns, StringBuilder values) {
+  private <T> void appendColumnAndValue(
+      Field field, T entity, StringBuilder columns, StringBuilder values) {
     if (!columns.isEmpty()) {
       columns.append(", ");
       values.append(", ");

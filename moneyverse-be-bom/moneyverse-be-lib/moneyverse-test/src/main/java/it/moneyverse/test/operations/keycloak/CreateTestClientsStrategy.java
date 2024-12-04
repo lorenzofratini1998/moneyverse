@@ -27,8 +27,11 @@ public class CreateTestClientsStrategy implements KeycloakConfigurationStrategy 
       ClientRepresentation clientRepresentation = new ClientRepresentation();
       clientRepresentation.setClientId(keycloakClient);
       clientRepresentation.setSecret(keycloakClient);
-      clientRepresentation.setName(Arrays.stream(keycloakClient.split("-")).map(String::toUpperCase)
-          .collect(Collectors.joining(" ")) + " CLIENT");
+      clientRepresentation.setName(
+          Arrays.stream(keycloakClient.split("-"))
+                  .map(String::toUpperCase)
+                  .collect(Collectors.joining(" "))
+              + " CLIENT");
       clientRepresentation.setEnabled(true);
       clientRepresentation.setStandardFlowEnabled(true);
       clientRepresentation.setDirectAccessGrantsEnabled(true);
@@ -36,13 +39,12 @@ public class CreateTestClientsStrategy implements KeycloakConfigurationStrategy 
     }
   }
 
-    private void saveTestClient(Keycloak keycloak, ClientRepresentation client) {
-      Response response = keycloak.realm(TEST_REALM).clients().create(client);
-      if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-        response.close();
-        throw new IllegalStateException("Failed to create client: " + client.getName());
-      }
-      LOGGER.info("KEYCLOAK: Created client: {}", client.getName());
+  private void saveTestClient(Keycloak keycloak, ClientRepresentation client) {
+    Response response = keycloak.realm(TEST_REALM).clients().create(client);
+    if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
+      response.close();
+      throw new IllegalStateException("Failed to create client: " + client.getName());
     }
-
+    LOGGER.info("KEYCLOAK: Created client: {}", client.getName());
+  }
 }

@@ -1,12 +1,13 @@
 package it.moneyverse.test.utils.helper;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Field;
-import java.util.Objects;
-
 public class MapperTestHelper {
+
+    private MapperTestHelper() {}
 
     public static <T, U> List<T> map(List<U> source, Class<T> targetClass) {
         return source.stream()
@@ -43,6 +44,4 @@ public class MapperTestHelper {
             }
         }
     }
-
-    private MapperTestHelper() {}
 }

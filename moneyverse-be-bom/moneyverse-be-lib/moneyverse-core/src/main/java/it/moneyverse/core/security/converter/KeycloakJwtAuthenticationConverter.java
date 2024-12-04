@@ -16,8 +16,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-public class KeycloakJwtAuthenticationConverter implements
-    Converter<Jwt, AbstractAuthenticationToken> {
+public class KeycloakJwtAuthenticationConverter
+    implements Converter<Jwt, AbstractAuthenticationToken> {
 
   private final Converter<Jwt, Collection<GrantedAuthority>> authoritiesConverter;
 
@@ -29,15 +29,16 @@ public class KeycloakJwtAuthenticationConverter implements
   @Override
   public AbstractAuthenticationToken convert(@Nonnull Jwt jwt) {
     Collection<GrantedAuthority> authorities = authoritiesConverter.convert(jwt);
-    Principal principal = AuthenticatedUser.builder()
-        .withId(jwt.getSubject())
-        .withName(jwt.getClaimAsString(CLAIM_GIVEN_NAME))
-        .withSurname(jwt.getClaimAsString(CLAIM_FAMILY_NAME))
-        .withUsername(jwt.getClaimAsString(CLAIM_PREFERRED_USERNAME))
-        .withEmail(jwt.getClaimAsString(CLAIM_EMAIL))
-        .withIsEmailVerified(jwt.getClaimAsBoolean(CLAIM_EMAIL_VERIFIED))
-        .withAuthorities(authorities)
-        .build();
+    Principal principal =
+        AuthenticatedUser.builder()
+            .withId(jwt.getSubject())
+            .withName(jwt.getClaimAsString(CLAIM_GIVEN_NAME))
+            .withSurname(jwt.getClaimAsString(CLAIM_FAMILY_NAME))
+            .withUsername(jwt.getClaimAsString(CLAIM_PREFERRED_USERNAME))
+            .withEmail(jwt.getClaimAsString(CLAIM_EMAIL))
+            .withIsEmailVerified(jwt.getClaimAsBoolean(CLAIM_EMAIL_VERIFIED))
+            .withAuthorities(authorities)
+            .build();
     return new UsernamePasswordAuthenticationToken(principal, null, authorities);
   }
 }

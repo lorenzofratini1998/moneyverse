@@ -7,6 +7,10 @@ import java.util.List;
 
 public interface TestContextModel {
 
+  List<UserModel> getUsers();
+
+  List<AccountModel> getAccounts();
+
   interface Builder {
 
     Builder withUsers(List<UserModel> users);
@@ -15,9 +19,4 @@ public interface TestContextModel {
 
     TestContextModel build();
   }
-
-  List<UserModel> getUsers();
-
-  List<AccountModel> getAccounts();
-
 }

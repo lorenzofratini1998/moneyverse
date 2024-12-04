@@ -14,6 +14,5 @@ import org.junit.jupiter.api.io.TempDir;
 @TempDir(cleanup = CleanupMode.ALWAYS)
 public @interface DataSourceScriptDir {
 
-    String fileName();
-
+  String fileName();
 }

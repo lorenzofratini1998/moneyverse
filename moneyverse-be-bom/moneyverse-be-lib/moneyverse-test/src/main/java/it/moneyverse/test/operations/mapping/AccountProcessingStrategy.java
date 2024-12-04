@@ -15,8 +15,8 @@ public class AccountProcessingStrategy implements EntityProcessingStrategy {
 
   @Override
   public String process(TestContextModel model, ScriptService scriptService, Class<?> clazz) {
-    List<?> accounts = model.getAccounts()
-        .stream().map(fake -> MapperTestHelper.map(fake, clazz)).toList();
+    List<?> accounts =
+        model.getAccounts().stream().map(fake -> MapperTestHelper.map(fake, clazz)).toList();
     return scriptService.createInsertScript(accounts);
   }
 }

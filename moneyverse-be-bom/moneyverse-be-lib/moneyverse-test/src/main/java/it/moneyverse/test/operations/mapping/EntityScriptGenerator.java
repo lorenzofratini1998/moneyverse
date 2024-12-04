@@ -23,7 +23,8 @@ public class EntityScriptGenerator {
 
   private String script;
 
-  public EntityScriptGenerator(TestContextModel model, ScriptMetadata metadata, ScriptService scriptService) {
+  public EntityScriptGenerator(
+      TestContextModel model, ScriptMetadata metadata, ScriptService scriptService) {
     this.model = model;
     this.metadata = metadata;
     this.scriptService = scriptService;
@@ -60,5 +61,4 @@ public class EntityScriptGenerator {
       throw new IllegalStateException("Failed to write script file", e);
     }
   }
-
 }
