@@ -34,6 +34,10 @@ public class AccountDto implements Serializable {
     this.isDefault = builder.isDefault;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
   public UUID getAccountId() {
     return accountId;
   }
@@ -64,6 +68,11 @@ public class AccountDto implements Serializable {
 
   public Boolean isDefault() {
     return isDefault;
+  }
+
+  @Override
+  public String toString() {
+    return JsonUtils.toJson(this);
   }
 
   public static class Builder {
@@ -120,14 +129,5 @@ public class AccountDto implements Serializable {
     public AccountDto build() {
       return new AccountDto(this);
     }
-  }
-
-  public static Builder builder() {
-    return new Builder();
-  }
-
-  @Override
-  public String toString() {
-    return JsonUtils.toJson(this);
   }
 }

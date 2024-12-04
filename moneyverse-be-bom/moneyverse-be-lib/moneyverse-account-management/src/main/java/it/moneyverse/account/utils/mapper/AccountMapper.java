@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 public class AccountMapper {
 
+  private AccountMapper() {}
+
   public static Account toAccount(AccountRequestDto request) {
     if (request == null) {
       return null;
@@ -46,6 +48,4 @@ public class AccountMapper {
     }
     return entities.stream().map(AccountMapper::toAccountDto).collect(Collectors.toList());
   }
-
-  private AccountMapper() {}
 }

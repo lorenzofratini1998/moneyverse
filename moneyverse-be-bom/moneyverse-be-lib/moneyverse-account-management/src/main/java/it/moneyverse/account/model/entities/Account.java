@@ -20,104 +20,104 @@ import java.util.UUID;
 @Table(name = "ACCOUNTS")
 public class Account extends Auditable implements Serializable, AccountModel {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+  @Serial private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ACCOUNT_ID", columnDefinition = "UUID")
-    private UUID accountId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "ACCOUNT_ID", columnDefinition = "UUID")
+  private UUID accountId;
 
-    @Column(name = "USERNAME", nullable = false, length = 64)
-    private String username;
+  @Column(name = "USERNAME", nullable = false, length = 64)
+  private String username;
 
-    @Column(name = "ACCOUNT_NAME", nullable = false)
-    private String accountName;
+  @Column(name = "ACCOUNT_NAME", nullable = false)
+  private String accountName;
 
-    @Column(name = "BALANCE", columnDefinition = "DEFAULT 0.0")
-    private BigDecimal balance;
+  @Column(name = "BALANCE", columnDefinition = "DEFAULT 0.0")
+  private BigDecimal balance;
 
-    @Column(name = "BALANCE_TARGET")
-    private BigDecimal balanceTarget;
+  @Column(name = "BALANCE_TARGET")
+  private BigDecimal balanceTarget;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ACCOUNT_CATEGORY", nullable = false)
-    private AccountCategoryEnum accountCategory;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "ACCOUNT_CATEGORY", nullable = false)
+  private AccountCategoryEnum accountCategory;
 
-    @Column(name = "ACCOUNT_DESCRIPTION")
-    private String accountDescription;
+  @Column(name = "ACCOUNT_DESCRIPTION")
+  private String accountDescription;
 
-    @Column(name = "IS_DEFAULT", columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean isDefault;
+  @Column(name = "IS_DEFAULT", columnDefinition = "BOOLEAN DEFAULT FALSE")
+  private Boolean isDefault;
 
-    @Override
-    public UUID getAccountId() {
-        return accountId;
-    }
+  @Override
+  public UUID getAccountId() {
+    return accountId;
+  }
 
-    public void setAccountId(UUID accountId) {
-        this.accountId = accountId;
-    }
+  public void setAccountId(UUID accountId) {
+    this.accountId = accountId;
+  }
 
-    @Override
-    public String getUsername() {
-        return username;
-    }
+  @Override
+  public String getUsername() {
+    return username;
+  }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+  public void setUsername(String username) {
+    this.username = username;
+  }
 
-    @Override
-    public String getAccountName() {
-        return accountName;
-    }
+  @Override
+  public String getAccountName() {
+    return accountName;
+  }
 
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
+  public void setAccountName(String accountName) {
+    this.accountName = accountName;
+  }
 
-    @Override
-    public BigDecimal getBalance() {
-        return balance;
-    }
+  @Override
+  public BigDecimal getBalance() {
+    return balance;
+  }
 
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
+  public void setBalance(BigDecimal balance) {
+    this.balance = balance;
+  }
 
-    @Override
-    public BigDecimal getBalanceTarget() {
-        return balanceTarget;
-    }
+  @Override
+  public BigDecimal getBalanceTarget() {
+    return balanceTarget;
+  }
 
-    public void setBalanceTarget(BigDecimal balanceTarget) {
-        this.balanceTarget = balanceTarget;
-    }
+  public void setBalanceTarget(BigDecimal balanceTarget) {
+    this.balanceTarget = balanceTarget;
+  }
 
-    @Override
-    public AccountCategoryEnum getAccountCategory() {
-        return accountCategory;
-    }
+  @Override
+  public AccountCategoryEnum getAccountCategory() {
+    return accountCategory;
+  }
 
-    public void setAccountCategory(AccountCategoryEnum accountCategory) {
-        this.accountCategory = accountCategory;
-    }
+  public void setAccountCategory(AccountCategoryEnum accountCategory) {
+    this.accountCategory = accountCategory;
+  }
 
-    @Override
-    public String getAccountDescription() {
-        return accountDescription;
-    }
+  @Override
+  public String getAccountDescription() {
+    return accountDescription;
+  }
 
-    public void setAccountDescription(String accountDescription) {
-        this.accountDescription = accountDescription;
-    }
-    @Override
-    public Boolean isDefault() {
-        return isDefault;
-    }
+  public void setAccountDescription(String accountDescription) {
+    this.accountDescription = accountDescription;
+  }
 
-    public void setDefault(Boolean isDefault) {
-        this.isDefault = isDefault;
-    }
+  @Override
+  public Boolean isDefault() {
+    return isDefault;
+  }
+
+  public void setDefault(Boolean isDefault) {
+    this.isDefault = isDefault;
+  }
 }

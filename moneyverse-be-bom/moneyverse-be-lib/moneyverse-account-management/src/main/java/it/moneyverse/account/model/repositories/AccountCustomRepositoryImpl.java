@@ -48,7 +48,7 @@ public class AccountCustomRepositoryImpl extends QuerydslRepositorySupport
     param
         .getAccountCategory()
         .ifPresent(accountCategory -> predicate.and(account.accountCategory.eq(accountCategory)));
-    param.getDefault().ifPresent(isDefault -> predicate.and(account.isDefault.eq(isDefault)));
+    param.getIsDefault().ifPresent(isDefault -> predicate.and(account.isDefault.eq(isDefault)));
     return from(account)
         .where(predicate)
         .offset(param.getPage().getOffset())

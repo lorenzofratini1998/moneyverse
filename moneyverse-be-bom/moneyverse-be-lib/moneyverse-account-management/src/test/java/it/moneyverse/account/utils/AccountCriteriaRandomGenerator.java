@@ -9,13 +9,12 @@ import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.utils.RandomUtils;
-import org.springframework.data.domain.Sort;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.data.domain.Sort;
 
 class AccountCriteriaRandomGenerator {
 
@@ -31,16 +30,20 @@ class AccountCriteriaRandomGenerator {
     criteria.setBalance(
         Math.random() < 0.5
             ? randomCriteriaBound(
-                testContext.getModel().getAccounts().stream().map(AccountModel::getBalance).toList())
+                testContext.getModel().getAccounts().stream()
+                    .map(AccountModel::getBalance)
+                    .toList())
             : null);
     criteria.setBalanceTarget(
         Math.random() < 0.5
             ? randomCriteriaBound(
-                testContext.getModel().getAccounts().stream().map(AccountModel::getBalanceTarget).toList())
+                testContext.getModel().getAccounts().stream()
+                    .map(AccountModel::getBalanceTarget)
+                    .toList())
             : null);
     criteria.setAccountCategory(
         Math.random() < 0.5 ? RandomUtils.randomEnum(AccountCategoryEnum.class) : null);
-    criteria.setDefault(Math.random() < 0.5 ? Math.random() < 0.5 : null);
+    criteria.setIsDefault(Math.random() < 0.5 ? Math.random() < 0.5 : null);
     criteria.setPage(new PageCriteria());
     criteria.setSort(new SortCriteria<>(AccountSortAttributeEnum.ACCOUNT_NAME, Sort.Direction.ASC));
     return criteria;

@@ -19,12 +19,10 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.properties.TestPropertiesHelper;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,13 +43,12 @@ import org.testcontainers.junit.jupiter.Container;
 @IntegrationTest
 class AccountManagementControllerIT extends AbstractIntegrationTest {
 
+  protected static AccountTestContext testContext;
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
   @Autowired protected AccountRepository accountRepository;
-
   private HttpHeaders headers;
-  protected static AccountTestContext testContext;
 
   @DynamicPropertySource
   static void mappingProperties(DynamicPropertyRegistry registry) {
@@ -90,8 +87,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             basePath + "/accounts", new HttpEntity<>(request, headers), AccountDto.class);
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    assertEquals(
-        testContext.getAccountsCount() + 1, accountRepository.findAll().size());
+    assertEquals(testContext.getAccountsCount() + 1, accountRepository.findAll().size());
     compareActualWithExpectedAccount(response.getBody(), expected);
   }
 
@@ -177,13 +173,14 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
-  private ResponseEntity<List<AccountDto>> testGetAccounts(String username, AccountCriteria criteria) {
+  private ResponseEntity<List<AccountDto>> testGetAccounts(
+      String username, AccountCriteria criteria) {
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     return restTemplate.exchange(
-            testContext.createUri(basePath + "/accounts", criteria),
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
-            new ParameterizedTypeReference<>() {});
+        testContext.createUri(basePath + "/accounts", criteria),
+        HttpMethod.GET,
+        new HttpEntity<>(headers),
+        new ParameterizedTypeReference<>() {});
   }
 
   private void compareActualWithExpectedAccount(AccountDto actual, AccountDto expected) {

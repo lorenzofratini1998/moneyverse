@@ -5,7 +5,6 @@ import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
-
 import java.util.Optional;
 
 public class AccountCriteria {
@@ -50,11 +49,11 @@ public class AccountCriteria {
     this.accountCategory = accountCategory;
   }
 
-  public Optional<Boolean> getDefault() {
+  public Optional<Boolean> getIsDefault() {
     return Optional.ofNullable(isDefault);
   }
 
-  public void setDefault(Boolean aDefault) {
+  public void setIsDefault(Boolean aDefault) {
     isDefault = aDefault;
   }
 

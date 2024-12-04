@@ -4,10 +4,7 @@ import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.services.AccountService;
-import it.moneyverse.core.utils.SecurityContextUtils;
-import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
 @Validated
-public class AccountManagementController implements AccountOperations{
+public class AccountManagementController implements AccountOperations {
 
   private final AccountService accountService;
 
@@ -32,7 +29,8 @@ public class AccountManagementController implements AccountOperations{
   @Override
   @PostMapping("/accounts")
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or #request.username == authentication.name")
+  @PreAuthorize(
+      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or #request.username == authentication.name")
   public AccountDto createAccount(@RequestBody AccountRequestDto request) {
     return accountService.createAccount(request);
   }
@@ -40,7 +38,8 @@ public class AccountManagementController implements AccountOperations{
   @Override
   @GetMapping("/accounts")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize("hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (#criteria.username.isPresent() and #criteria.username.get().equals(authentication.name))")
+  @PreAuthorize(
+      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (#criteria.username.isPresent() and #criteria.username.get().equals(authentication.name))")
   public List<AccountDto> getAccounts(AccountCriteria criteria) {
     return accountService.findAccounts(criteria);
   }

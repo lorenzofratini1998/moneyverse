@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SortAttributeConverter implements Converter<String, SortAttribute> {
 
-    @Override
-    public SortAttribute convert(String source) {
-        try {
-            return AccountSortAttributeEnum.valueOf(source.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid sort attribute: " + source, e);
-        }
+  @Override
+  public SortAttribute convert(String source) {
+    try {
+      return AccountSortAttributeEnum.valueOf(source.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Invalid sort attribute: " + source, e);
     }
+  }
 }
