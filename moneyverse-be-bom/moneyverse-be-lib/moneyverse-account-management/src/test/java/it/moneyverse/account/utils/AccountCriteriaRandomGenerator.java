@@ -16,37 +16,49 @@ import java.util.List;
 import java.util.Objects;
 import org.springframework.data.domain.Sort;
 
-class AccountCriteriaRandomGenerator {
+public class AccountCriteriaRandomGenerator {
 
   private final TestContext testContext;
+  private final AccountCriteria criteria;
 
   public AccountCriteriaRandomGenerator(TestContext testContext) {
     this.testContext = testContext;
+    this.criteria = new AccountCriteria();
   }
 
   public AccountCriteria generate() {
-    AccountCriteria criteria = new AccountCriteria();
+    withRandomUsername();
+    withRandomBalance();
+    withRandomBalanceTarget();
+    withRandomAccountCategory();
+    withRandomIsDefault();
+    withPage();
+    withSort();
+    return criteria;
+  }
+
+  private void withRandomUsername() {
     criteria.setUsername(Math.random() < 0.5 ? testContext.getRandomUser().getUsername() : null);
+  }
+
+  private void withRandomBalance() {
     criteria.setBalance(
         Math.random() < 0.5
             ? randomCriteriaBound(
-                testContext.getModel().getAccounts().stream()
-                    .map(AccountModel::getBalance)
-                    .toList())
+            testContext.getModel().getAccounts().stream()
+                .map(AccountModel::getBalance)
+                .toList())
             : null);
+  }
+
+  private void withRandomBalanceTarget() {
     criteria.setBalanceTarget(
         Math.random() < 0.5
             ? randomCriteriaBound(
-                testContext.getModel().getAccounts().stream()
-                    .map(AccountModel::getBalanceTarget)
-                    .toList())
+            testContext.getModel().getAccounts().stream()
+                .map(AccountModel::getBalanceTarget)
+                .toList())
             : null);
-    criteria.setAccountCategory(
-        Math.random() < 0.5 ? RandomUtils.randomEnum(AccountCategoryEnum.class) : null);
-    criteria.setIsDefault(Math.random() < 0.5 ? Math.random() < 0.5 : null);
-    criteria.setPage(new PageCriteria());
-    criteria.setSort(new SortCriteria<>(AccountSortAttributeEnum.ACCOUNT_NAME, Sort.Direction.ASC));
-    return criteria;
   }
 
   private BoundCriteria randomCriteriaBound(List<BigDecimal> values) {
@@ -73,4 +85,22 @@ class AccountCriteriaRandomGenerator {
   private BigDecimal findMax(List<BigDecimal> values) {
     return values.stream().filter(Objects::nonNull).max(Comparator.naturalOrder()).get();
   }
+
+  private void withRandomAccountCategory() {
+    criteria.setAccountCategory(
+        Math.random() < 0.5 ? RandomUtils.randomEnum(AccountCategoryEnum.class) : null);
+  }
+
+  private void withRandomIsDefault() {
+    criteria.setIsDefault(Math.random() < 0.5 ? Math.random() < 0.5 : null);
+  }
+
+  private void withPage() {
+    criteria.setPage(new PageCriteria());
+  }
+
+  private void withSort() {
+    criteria.setSort(new SortCriteria<>(AccountSortAttributeEnum.ACCOUNT_NAME, Sort.Direction.ASC));
+  }
+
 }

@@ -50,21 +50,6 @@
       <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <artifactId>querydsl-jpa</artifactId>
-      <classifier>jakarta</classifier>
-      <groupId>com.querydsl</groupId>
-      <optional>true</optional>
-      <version>${querydsl.version}</version>
-    </dependency>
-    <dependency>
-      <artifactId>querydsl-apt</artifactId>
-      <classifier>jakarta</classifier>
-      <groupId>com.querydsl</groupId>
-      <optional>true</optional>
-      <scope>provided</scope>
-      <version>${querydsl.version}</version>
-    </dependency>
   </dependencies>
 
   <description>Core components of Moneyverse application</description>

@@ -31,50 +31,6 @@ public class AccountTestContext extends TestContext {
     return new Builder();
   }
 
-  public static Stream<Function<String, AccountRequestDto>> invalidAccountRequestProvider() {
-    return Stream.of(
-        AccountTestContext::createAccountWithNullUsername,
-        AccountTestContext::createAccountWithNullAccountName,
-        AccountTestContext::createAccountWithNullAccountCategory,
-        AccountTestContext::createAccountWithExceedUsername);
-  }
-
-  public static AccountRequestDto createAccountWithNullUsername(String username) {
-    Account account =
-        MapperTestHelper.map(
-            new FakeAccount(username, getCurrentInstance().getModel().getAccounts().size()),
-            Account.class);
-    account.setUsername(null);
-    return toAccountRequest(account);
-  }
-
-  public static AccountRequestDto createAccountWithNullAccountName(String username) {
-    Account account =
-        MapperTestHelper.map(
-            new FakeAccount(username, getCurrentInstance().getModel().getAccounts().size()),
-            Account.class);
-    account.setAccountName(null);
-    return toAccountRequest(account);
-  }
-
-  public static AccountRequestDto createAccountWithNullAccountCategory(String username) {
-    Account account =
-        MapperTestHelper.map(
-            new FakeAccount(username, getCurrentInstance().getModel().getAccounts().size()),
-            Account.class);
-    account.setAccountCategory(null);
-    return toAccountRequest(account);
-  }
-
-  public static AccountRequestDto createAccountWithExceedUsername(String username) {
-    Account account =
-        MapperTestHelper.map(
-            new FakeAccount(username, getCurrentInstance().getModel().getAccounts().size()),
-            Account.class);
-    account.setUsername(RandomUtils.randomString(100));
-    return toAccountRequest(account);
-  }
-
   private static AccountRequestDto toAccountRequest(Account account) {
     return new AccountRequestDto(
         account.getUsername(),

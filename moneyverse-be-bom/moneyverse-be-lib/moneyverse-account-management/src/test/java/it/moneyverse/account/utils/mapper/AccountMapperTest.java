@@ -2,67 +2,109 @@ package it.moneyverse.account.utils.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.core.enums.AccountCategoryEnum;
-import java.math.BigDecimal;
-import java.util.UUID;
+import it.moneyverse.test.utils.RandomUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
+/** Unit test for {@link AccountMapper} */
 class AccountMapperTest {
 
   @Test
-  void testToEntity_NullDto() {
+  void testToAccountEntity_NullAccountRequest() {
     assertNull(AccountMapper.toAccount(null));
   }
 
   @Test
-  void testToEntity_ValidDto() {
-    AccountRequestDto dto =
+  void testToAccountEntity_ValidAccountRequest() {
+    AccountRequestDto request =
         new AccountRequestDto(
-            "569f67de-36e6-4552-ac54-e52085109818",
-            "Savings",
-            BigDecimal.valueOf(1000.0),
-            BigDecimal.valueOf(2000.0),
-            AccountCategoryEnum.SAVINGS,
-            "Personal Savings Account",
-            Boolean.TRUE);
-    Account account = AccountMapper.toAccount(dto);
+            RandomUtils.randomString(25),
+            RandomUtils.randomString(25),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(25),
+            RandomUtils.randomBoolean());
 
-    assertEquals("569f67de-36e6-4552-ac54-e52085109818", account.getUsername());
-    assertEquals("Savings", account.getAccountName());
-    assertEquals(BigDecimal.valueOf(1000.0), account.getBalance());
-    assertEquals(BigDecimal.valueOf(2000.0), account.getBalanceTarget());
-    assertEquals(AccountCategoryEnum.SAVINGS, account.getAccountCategory());
-    assertEquals("Personal Savings Account", account.getAccountDescription());
-    assertTrue(account.isDefault());
+    Account account = AccountMapper.toAccount(request);
+
+    assertEquals(request.username(), account.getUsername());
+    assertEquals(request.accountName(), account.getAccountName());
+    assertEquals(request.balance(), account.getBalance());
+    assertEquals(request.balanceTarget(), account.getBalanceTarget());
+    assertEquals(request.accountCategory(), account.getAccountCategory());
+    assertEquals(request.accountDescription(), account.getAccountDescription());
+    assertEquals(request.isDefault(), account.isDefault());
   }
 
   @Test
-  void testToDto_ValidEntity() {
-    Account account = new Account();
-    account.setAccountId(UUID.fromString("f740cf0c-cc87-4de8-bcc9-040a6d26dff6"));
-    account.setUsername("569f67de-36e6-4552-ac54-e52085109818");
-    account.setAccountName("Savings");
-    account.setBalance(BigDecimal.valueOf(1000.0));
-    account.setBalanceTarget(BigDecimal.valueOf(2000.0));
-    account.setAccountCategory(AccountCategoryEnum.SAVINGS);
-    account.setAccountDescription("Personal Savings Account");
-    account.setDefault(true);
+  void testToAccountDto_NullAccountEntity() {
+    assertNull(AccountMapper.toAccountDto((Account) null));
+  }
+
+  @Test
+  void testToAccountDto_ValidAccountEntity() {
+    Account account = createAccount();
 
     AccountDto accountDto = AccountMapper.toAccountDto(account);
 
-    assertEquals(
-        UUID.fromString("f740cf0c-cc87-4de8-bcc9-040a6d26dff6"), accountDto.getAccountId());
-    assertEquals("569f67de-36e6-4552-ac54-e52085109818", accountDto.getUsername());
-    assertEquals("Savings", accountDto.getAccountName());
-    assertEquals(BigDecimal.valueOf(1000.0), accountDto.getBalance());
-    assertEquals(BigDecimal.valueOf(2000.0), accountDto.getBalanceTarget());
-    assertEquals(AccountCategoryEnum.SAVINGS, accountDto.getAccountCategory());
-    assertEquals("Personal Savings Account", accountDto.getAccountDescription());
-    assertTrue(accountDto.isDefault());
+    assertEquals(account.getAccountId(), accountDto.getAccountId());
+    assertEquals(account.getUsername(), accountDto.getUsername());
+    assertEquals(account.getAccountName(), accountDto.getAccountName());
+    assertEquals(account.getBalance(), accountDto.getBalance());
+    assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
+    assertEquals(account.getAccountCategory(), accountDto.getAccountCategory());
+    assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
+    assertEquals(account.isDefault(), accountDto.isDefault());
+  }
+
+  @Test
+  void testToAccountDtoList_EmptyEntityList() {
+    assertEquals(Collections.emptyList(), AccountMapper.toAccountDto(new ArrayList<>()));
+  }
+
+  @Test
+  void testToAccountDtoList_NonEmptyEntityList() {
+    int entitiesCount = RandomUtils.randomInteger(0, 10);
+    List<Account> accounts = new ArrayList<>(entitiesCount);
+    for (int i = 0; i < entitiesCount; i++) {
+      accounts.add(createAccount());
+    }
+
+    List<AccountDto> accountDtos = AccountMapper.toAccountDto(accounts);
+
+    for (int i = 0; i < entitiesCount; i++) {
+      Account account = accounts.get(i);
+      AccountDto accountDto = accountDtos.get(i);
+
+      assertEquals(account.getAccountId(), accountDto.getAccountId());
+      assertEquals(account.getUsername(), accountDto.getUsername());
+      assertEquals(account.getAccountName(), accountDto.getAccountName());
+      assertEquals(account.getBalance(), accountDto.getBalance());
+      assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
+      assertEquals(account.getAccountCategory(), accountDto.getAccountCategory());
+      assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
+      assertEquals(account.isDefault(), accountDto.isDefault());
+    }
+  }
+
+  private Account createAccount() {
+    Account account = new Account();
+    account.setAccountId(RandomUtils.randomUUID());
+    account.setUsername(RandomUtils.randomString(25));
+    account.setAccountName(RandomUtils.randomString(25));
+    account.setBalance(RandomUtils.randomBigDecimal());
+    account.setBalanceTarget(RandomUtils.randomBigDecimal());
+    account.setAccountCategory(RandomUtils.randomEnum(AccountCategoryEnum.class));
+    account.setAccountDescription(RandomUtils.randomString(25));
+    account.setDefault(RandomUtils.randomBoolean());
+    return account;
   }
 }

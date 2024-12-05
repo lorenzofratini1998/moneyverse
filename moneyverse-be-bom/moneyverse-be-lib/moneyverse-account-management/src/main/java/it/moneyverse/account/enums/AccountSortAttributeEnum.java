@@ -1,14 +1,13 @@
 package it.moneyverse.account.enums;
 
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import it.moneyverse.account.model.entities.QAccount;
+import it.moneyverse.account.model.entities.Account_;
 import it.moneyverse.core.enums.SortAttribute;
 
 public enum AccountSortAttributeEnum implements SortAttribute {
   ACCOUNT_NAME {
     @Override
-    public ComparableExpressionBase<?> getField() {
-      return QAccount.account.accountName;
+    public String getField() {
+      return Account_.ACCOUNT_NAME;
     }
 
     @Override
@@ -18,8 +17,8 @@ public enum AccountSortAttributeEnum implements SortAttribute {
   },
   ACCOUNT_CATEGORY {
     @Override
-    public ComparableExpressionBase<?> getField() {
-      return QAccount.account.accountCategory;
+    public String getField() {
+      return Account_.ACCOUNT_CATEGORY;
     }
 
     @Override
@@ -29,8 +28,8 @@ public enum AccountSortAttributeEnum implements SortAttribute {
   },
   BALANCE {
     @Override
-    public ComparableExpressionBase<?> getField() {
-      return QAccount.account.balance;
+    public String getField() {
+      return Account_.BALANCE;
     }
 
     @Override
@@ -40,8 +39,8 @@ public enum AccountSortAttributeEnum implements SortAttribute {
   },
   BALANCE_TARGET {
     @Override
-    public ComparableExpressionBase<?> getField() {
-      return QAccount.account.balanceTarget;
+    public String getField() {
+      return Account_.BALANCE_TARGET;
     }
 
     @Override
@@ -51,8 +50,8 @@ public enum AccountSortAttributeEnum implements SortAttribute {
   },
   USERNAME {
     @Override
-    public ComparableExpressionBase<?> getField() {
-      return QAccount.account.username;
+    public String getField() {
+      return Account_.USERNAME;
     }
 
     @Override

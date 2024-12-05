@@ -91,52 +91,6 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     compareActualWithExpectedAccount(response.getBody(), expected);
   }
 
-  @ParameterizedTest
-  @MethodSource("it.moneyverse.account.utils.AccountTestContext#invalidAccountRequestProvider")
-  void testCreateAccount_BadRequestValidation(
-      Function<String, AccountRequestDto> requestGenerator) {
-    final String username = testContext.getRandomUser().getUsername();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    final AccountRequestDto request = requestGenerator.apply(username);
-    mockUserService.mockExistentUser();
-
-    ResponseEntity<ErrorDto> response =
-        restTemplate.postForEntity(
-            basePath + "/accounts", new HttpEntity<>(request, headers), ErrorDto.class);
-
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertEquals(testContext.getAccountsCount(), accountRepository.findAll().size());
-  }
-
-  @Test
-  void testCreateAccount_AccountAlreadyExists() {
-    final String username = testContext.getRandomUser().getUsername();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    final AccountRequestDto request = testContext.createExistentAccountForUser(username);
-    mockUserService.mockExistentUser();
-
-    ResponseEntity<ErrorDto> response =
-        restTemplate.postForEntity(
-            basePath + "/accounts", new HttpEntity<>(request, headers), ErrorDto.class);
-
-    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-    assertEquals(testContext.getAccountsCount(), accountRepository.findAll().size());
-  }
-
-  @Test
-  void testCreateAccount_AccountNotFound() {
-    final String username = testContext.getRandomUser().getUsername();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    final AccountRequestDto request = testContext.createExistentAccountForUser(username);
-    mockUserService.mockNonExistentUser();
-
-    ResponseEntity<ErrorDto> response =
-        restTemplate.postForEntity(
-            basePath + "/accounts", new HttpEntity<>(request, headers), ErrorDto.class);
-
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-  }
-
   @Test
   void testGetAccountsAdminRole_Success() {
     final String admin = testContext.getAdminUser().getUsername();

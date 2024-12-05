@@ -36,9 +36,9 @@ public abstract class TestContext {
 
   protected TestContext(Builder<?> builder) {
     Instant now = Instant.now();
-      model =
-            new TestModelBuilder(builder.strategy)
-                    .buildTestModel(builder.withTestUsers, builder.withTestAccounts);
+    model =
+        new TestModelBuilder(builder.strategy)
+            .buildTestModel(builder.withTestUsers, builder.withTestAccounts);
 
     if (builder.keycloakContainer != null) {
       this.keycloakTestManager = new KeycloakTestSetupManager(builder.keycloakContainer, model);
@@ -47,9 +47,11 @@ public abstract class TestContext {
       this.keycloakTestManager = null;
     }
 
-    new EntityScriptGenerator(model, builder.metadata, new SQLScriptService())
-            .addStrategy(new AccountProcessingStrategy())
-            .execute();
+    if (builder.metadata != null) {
+      new EntityScriptGenerator(model, builder.metadata, new SQLScriptService())
+          .addStrategy(new AccountProcessingStrategy())
+          .execute();
+    }
     setCurrentInstance(this);
     LOGGER.info("Test Context set up in {} ms", System.currentTimeMillis() - now.toEpochMilli());
   }
@@ -66,7 +68,7 @@ public abstract class TestContext {
   }
 
   public TestContextModel getModel() {
-      return model;
+    return model;
   }
 
   public UserModel getRandomUser() {
@@ -75,9 +77,9 @@ public abstract class TestContext {
 
   public UserModel getAdminUser() {
     return model.getUsers().stream()
-            .filter(user -> user.getRole().equals(UserRoleEnum.ADMIN))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No admin found"));
+        .filter(user -> user.getRole().equals(UserRoleEnum.ADMIN))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No admin found"));
   }
 
   public String getAuthenticationToken(String username) {
@@ -86,22 +88,22 @@ public abstract class TestContext {
 
   private UserCredential getUserCredential(String username) {
     return Optional.of(getUser(username))
-            .map(user -> new UserCredential(user.getUsername(), user.getPassword()))
-            .orElseThrow(() -> new IllegalArgumentException("No user found with username " + username));
+        .map(user -> new UserCredential(user.getUsername(), user.getPassword()))
+        .orElseThrow(() -> new IllegalArgumentException("No user found with username " + username));
   }
 
   private UserModel getUser(String username) {
     return model.getUsers().stream()
-            .filter(user -> user.getUsername().equals(username))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("No user found with username " + username));
+        .filter(user -> user.getUsername().equals(username))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("No user found with username " + username));
   }
 
   public AccountModel getRandomAccount(String username) {
     List<AccountModel> userAccounts =
-            model.getAccounts().stream()
-                    .filter(account -> account.getUsername().equals(username))
-                    .toList();
+        model.getAccounts().stream()
+            .filter(account -> account.getUsername().equals(username))
+            .toList();
     return userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
   }
 
@@ -115,10 +117,12 @@ public abstract class TestContext {
       if (fieldValue != null) {
         switch (fieldValue) {
           case BoundCriteria boundCriteria -> {
-            boundCriteria.getLower()
-                    .ifPresent(lower -> uri.queryParam(fieldName + ".lower", lower));
-            boundCriteria.getUpper()
-                    .ifPresent(upper -> uri.queryParam(fieldName + ".upper", upper));
+            boundCriteria
+                .getLower()
+                .ifPresent(lower -> uri.queryParam(fieldName + ".lower", lower));
+            boundCriteria
+                .getUpper()
+                .ifPresent(upper -> uri.queryParam(fieldName + ".upper", upper));
           }
           case PageCriteria page -> {
             uri.queryParam(fieldName + ".offset", page.getOffset());

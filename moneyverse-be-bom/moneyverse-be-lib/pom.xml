@@ -12,6 +12,13 @@
             <release>${java.version}</release>
             <source>${java.version}</source>
             <target>${java.version}</target>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-jpamodelgen</artifactId>
+                <version>${hibernate-jpamodelgen.version}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
           <groupId>org.apache.maven.plugins</groupId>
           <version>${maven-compiler-plugin.version}</version>
@@ -31,17 +38,11 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
-          </configuration>
           <groupId>org.apache.maven.plugins</groupId>
           <version>${maven-surefire-plugin.version}</version>
         </plugin>
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <configuration>
-            <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
-          </configuration>
           <groupId>org.apache.maven.plugins</groupId>
           <version>${maven-failsafe-plugin.version}</version>
         </plugin>
@@ -55,24 +56,17 @@
           <version>${maven-javadoc-plugin.version}</version>
         </plugin>
         <plugin>
+          <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <executions>
             <execution>
+              <id>report-aggregate</id>
+              <phase>verify</phase>
               <goals>
-                <goal>prepare-agent</goal>
+                <goal>report-aggregate</goal>
               </goals>
-              <id>agent</id>
-            </execution>
-            <execution>
-              <goals>
-                <goal>report</goal>
-              </goals>
-              <id>report</id>
-              <phase>test</phase>
             </execution>
           </executions>
-          <groupId>org.jacoco</groupId>
-          <version>${jacoco-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -86,13 +80,6 @@
         <scope>import</scope>
         <type>pom</type>
         <version>${spring-boot.version}</version>
-      </dependency>
-      <dependency>
-        <artifactId>grpc-starter-dependencies</artifactId>
-        <groupId>io.github.danielliu1123</groupId>
-        <scope>import</scope>
-        <type>pom</type>
-        <version>${grpc-starter.version}</version>
       </dependency>
       <dependency>
         <artifactId>grpc-bom</artifactId>
@@ -143,14 +130,9 @@
         <version>${grpcmock.version}</version>
       </dependency>
       <dependency>
-        <artifactId>querydsl-apt</artifactId>
-        <groupId>com.querydsl</groupId>
-        <version>${querydsl.version}</version>
-      </dependency>
-      <dependency>
-        <artifactId>querydsl-jpa</artifactId>
-        <groupId>com.querydsl</groupId>
-        <version>${querydsl.version}</version>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-jpamodelgen</artifactId>
+        <version>${hibernate-jpamodelgen.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -188,10 +170,10 @@
     <!-- BILL-OF-MATERIALS DEPENDENCIES VERSIONS -->
     <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
     <postgres.version>42.7.4</postgres.version>
-    <project.build.sourceEnconding>UTF-8</project.build.sourceEnconding>
     <!-- OTHER DEPENDENCIES VERSIONS -->
+    <project.build.sourceEnconding>UTF-8</project.build.sourceEnconding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <querydsl.version>5.1.0</querydsl.version>
+    <hibernate-jpamodelgen.version>6.6.3.Final</hibernate-jpamodelgen.version>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.organization>lorenzofratini1998</sonar.organization>
     <spring-boot.version>3.4.0</spring-boot.version>

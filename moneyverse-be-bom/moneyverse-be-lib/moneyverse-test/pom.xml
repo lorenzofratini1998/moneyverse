@@ -1,89 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>it.moneyverse</groupId>
+    <artifactId>moneyverse-lib</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
   <artifactId>moneyverse-test</artifactId>
+  <name>moneyverse-test</name>
+  <description>Moneyverse's facilities for integration tests</description>
+
   <dependencies>
     <dependency>
+      <groupId>it.moneyverse</groupId>
       <artifactId>moneyverse-core</artifactId>
-      <groupId>it.moneyverse</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>it.moneyverse</groupId>
       <artifactId>moneyverse-proto</artifactId>
-      <groupId>it.moneyverse</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <groupId>org.springframework.boot</groupId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <groupId>org.springframework.boot</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <artifactId>junit-jupiter</artifactId>
       <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
       <optional>true</optional>
       <!--
       WARNING!! Testcontainers still depends on JUNIt 4. I cannot remove this dependency using the exclusion tag due to a bug. See https://github.com/testcontainers/testcontainers-java/issues/970 for further details
       -->
     </dependency>
     <dependency>
-      <artifactId>postgresql</artifactId>
       <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <artifactId>postgresql</artifactId>
       <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
       <optional>true</optional>
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>org.flywaydb</groupId>
       <artifactId>flyway-database-postgresql</artifactId>
-      <groupId>org.flywaydb</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
-      <groupId>org.flywaydb</groupId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <artifactId>testcontainers-keycloak</artifactId>
       <groupId>com.github.dasniko</groupId>
+      <artifactId>testcontainers-keycloak</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.grpcmock</groupId>
       <artifactId>grpcmock-spring-boot</artifactId>
-      <groupId>org.grpcmock</groupId>
-      <optional>true</optional>
       <version>${grpcmock.version}</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
-      <artifactId>grpcmock-junit5</artifactId>
       <groupId>org.grpcmock</groupId>
-      <optional>true</optional>
+      <artifactId>grpcmock-junit5</artifactId>
       <version>${grpcmock.version}</version>
+      <optional>true</optional>
     </dependency>
   </dependencies>
-
-  <description>Moneyverse's facilities for integration tests</description>
-  <modelVersion>4.0.0</modelVersion>
-  <name>moneyverse-test</name>
-
-  <parent>
-    <artifactId>moneyverse-lib</artifactId>
-    <groupId>it.moneyverse</groupId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
 
 </project>

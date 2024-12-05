@@ -43,7 +43,7 @@ public class AccountMapper {
   }
 
   public static List<AccountDto> toAccountDto(List<Account> entities) {
-    if (entities == null) {
+    if (entities.isEmpty()) {
       return Collections.emptyList();
     }
     return entities.stream().map(AccountMapper::toAccountDto).collect(Collectors.toList());

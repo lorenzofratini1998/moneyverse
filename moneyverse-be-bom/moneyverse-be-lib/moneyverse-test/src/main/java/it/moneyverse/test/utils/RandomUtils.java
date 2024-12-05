@@ -46,4 +46,12 @@ public class RandomUtils {
     int year = randomInteger(startYear, endYear);
     return LocalDate.ofYearDay(year, dayOfYear);
   }
+
+  public static Boolean randomBoolean() {
+    return RANDOM.nextBoolean();
+  }
+
+  public static BigDecimal randomBigDecimal() {
+    return BigDecimal.valueOf(RANDOM.nextDouble());
+  }
 }

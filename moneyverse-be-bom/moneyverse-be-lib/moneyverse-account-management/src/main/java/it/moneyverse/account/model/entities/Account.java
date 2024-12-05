@@ -15,6 +15,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "ACCOUNTS")
@@ -24,7 +25,7 @@ public class Account extends Auditable implements Serializable, AccountModel {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "ACCOUNT_ID", columnDefinition = "UUID")
+  @Column(name = "ACCOUNT_ID")
   private UUID accountId;
 
   @Column(name = "USERNAME", nullable = false, length = 64)
@@ -33,7 +34,8 @@ public class Account extends Auditable implements Serializable, AccountModel {
   @Column(name = "ACCOUNT_NAME", nullable = false)
   private String accountName;
 
-  @Column(name = "BALANCE", columnDefinition = "DEFAULT 0.0")
+  @Column(name = "BALANCE")
+  @ColumnDefault(value = "0.0")
   private BigDecimal balance;
 
   @Column(name = "BALANCE_TARGET")
@@ -46,7 +48,8 @@ public class Account extends Auditable implements Serializable, AccountModel {
   @Column(name = "ACCOUNT_DESCRIPTION")
   private String accountDescription;
 
-  @Column(name = "IS_DEFAULT", columnDefinition = "BOOLEAN DEFAULT FALSE")
+  @Column(name = "IS_DEFAULT")
+  @ColumnDefault(value = "FALSE")
   private Boolean isDefault;
 
   @Override

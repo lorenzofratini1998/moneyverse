@@ -1,66 +1,52 @@
 package it.moneyverse.account.model.repositories;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.entities.Account;
-import it.moneyverse.account.model.entities.QAccount;
-import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.model.dto.SortCriteria;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.List;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AccountCustomRepositoryImpl extends QuerydslRepositorySupport
-    implements AccountCustomRepository {
+public class AccountCustomRepositoryImpl implements AccountCustomRepository {
 
-  public AccountCustomRepositoryImpl() {
-    super(Account.class);
+  private final EntityManager em;
+  private final CriteriaBuilder cb;
+
+  public AccountCustomRepositoryImpl(EntityManager em) {
+    this.em = em;
+    this.cb = em.getCriteriaBuilder();
   }
 
   @Override
   public List<Account> findAccounts(AccountCriteria param) {
-    QAccount account = QAccount.account;
-    BooleanBuilder predicate = new BooleanBuilder();
-    param.getUsername().ifPresent(username -> predicate.and(account.username.eq(username)));
-    param
-        .getBalance()
-        .ifPresent(
-            balance -> {
-              balance.getLower().ifPresent(lower -> predicate.and(account.balance.gt(lower)));
-              balance.getUpper().ifPresent(upper -> predicate.and(account.balance.lt(upper)));
-            });
-    param
-        .getBalanceTarget()
-        .ifPresent(
-            balanceTarget -> {
-              balanceTarget
-                  .getLower()
-                  .ifPresent(lower -> predicate.and(account.balanceTarget.gt(lower)));
-              balanceTarget
-                  .getUpper()
-                  .ifPresent(upper -> predicate.and(account.balanceTarget.lt(upper)));
-            });
-    param
-        .getAccountCategory()
-        .ifPresent(accountCategory -> predicate.and(account.accountCategory.eq(accountCategory)));
-    param.getIsDefault().ifPresent(isDefault -> predicate.and(account.isDefault.eq(isDefault)));
-    return from(account)
-        .where(predicate)
-        .offset(param.getPage().getOffset())
-        .limit(param.getPage().getLimit())
-        .orderBy(getOrderSpecifier(param.getSort()))
-        .fetch();
+    CriteriaQuery<Account> cq = cb.createQuery(Account.class);
+    Root<Account> root = cq.from(Account.class);
+    Predicate predicate = new AccountPredicateBuilder(cb, root).build(param);
+    cq.where(predicate);
+    if (param.getSort() != null) {
+      cq.orderBy(getOrder(param.getSort(), root));
+    }
+    TypedQuery<Account> query = em.createQuery(cq);
+    if (param.getPage() != null) {
+      query.setFirstResult(param.getPage().getOffset());
+      query.setMaxResults(param.getPage().getLimit());
+    }
+    return query.getResultList();
   }
 
-  private OrderSpecifier<?> getOrderSpecifier(SortCriteria<AccountSortAttributeEnum> sortCriteria) {
-    SortAttribute attribute = sortCriteria.getAttribute();
-    ComparableExpressionBase<?> field = attribute.getField();
-
-    return sortCriteria.getDirection() == Sort.Direction.ASC ? field.asc() : field.desc();
+  private Order getOrder(
+      SortCriteria<AccountSortAttributeEnum> sortCriteria, Root<Account> account) {
+    return sortCriteria.getDirection() == Direction.ASC
+        ? cb.asc(account.get(sortCriteria.getAttribute().getField()))
+        : cb.desc(account.get(sortCriteria.getAttribute().getField()));
   }
 }

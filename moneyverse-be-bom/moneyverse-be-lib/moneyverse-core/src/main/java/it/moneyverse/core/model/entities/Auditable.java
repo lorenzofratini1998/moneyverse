@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -12,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class Auditable implements AuditableModel {
+public abstract class Auditable implements AuditableModel {
 
   @CreatedBy
   @Column(name = "CREATED_BY", nullable = false, updatable = false)
@@ -22,8 +24,9 @@ public class Auditable implements AuditableModel {
   @Column(
       name = "CREATED_AT",
       nullable = false,
-      updatable = false,
-      columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+      updatable = false
+  )
+  @CreationTimestamp
   private LocalDateTime createdAt;
 
   @LastModifiedBy
@@ -31,9 +34,8 @@ public class Auditable implements AuditableModel {
   private String updatedBy = "TMP"; // TODO: temporary: replace with the authenticated user
 
   @LastModifiedDate
-  @Column(
-      name = "UPDATED_AT",
-      columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+  @Column(name = "UPDATED_AT")
+  @UpdateTimestamp
   private LocalDateTime updatedAt;
 
   @Override

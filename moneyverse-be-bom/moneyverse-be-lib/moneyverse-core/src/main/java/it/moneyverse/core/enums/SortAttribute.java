@@ -1,6 +1,5 @@
 package it.moneyverse.core.enums;
 
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import java.util.Arrays;
 
 public interface SortAttribute {
@@ -11,7 +10,7 @@ public interface SortAttribute {
         .orElseThrow(() -> new IllegalArgumentException("No default sorting attribute found"));
   }
 
-  ComparableExpressionBase<?> getField();
+  String getField();
 
   Boolean isDefault();
 }

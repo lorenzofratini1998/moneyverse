@@ -8,6 +8,8 @@ public class SortCriteria<T extends SortAttribute> {
   private T attribute;
   private Sort.Direction direction;
 
+  public SortCriteria() {}
+
   public SortCriteria(T attribute, Sort.Direction direction) {
     this.attribute = attribute;
     this.direction = direction;

@@ -41,19 +41,9 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <artifactId>querydsl-apt</artifactId>
-      <classifier>jakarta</classifier>
-      <groupId>com.querydsl</groupId>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-jpamodelgen</artifactId>
       <optional>true</optional>
-      <scope>provided</scope>
-      <version>${querydsl.version}</version>
-    </dependency>
-    <dependency>
-      <artifactId>querydsl-jpa</artifactId>
-      <classifier>jakarta</classifier>
-      <groupId>com.querydsl</groupId>
-      <optional>true</optional>
-      <version>${querydsl.version}</version>
     </dependency>
     <dependency>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -139,6 +129,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <artifactId>grpcmock-spring-boot</artifactId>
       <groupId>org.grpcmock</groupId>
       <optional>true</optional>
@@ -151,6 +146,12 @@
       <optional>true</optional>
       <scope>test</scope>
       <version>${grpcmock.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 
