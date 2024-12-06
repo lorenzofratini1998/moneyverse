@@ -18,7 +18,7 @@ public abstract class Auditable implements AuditableModel {
 
   @CreatedBy
   @Column(name = "CREATED_BY", nullable = false, updatable = false)
-  private String createdBy = "TMP"; // TODO: temporary: replace with the authenticated user
+  private String createdBy;
 
   @CreatedDate
   @Column(
@@ -31,7 +31,7 @@ public abstract class Auditable implements AuditableModel {
 
   @LastModifiedBy
   @Column(name = "UPDATED_BY")
-  private String updatedBy = "TMP"; // TODO: temporary: replace with the authenticated user
+  private String updatedBy;
 
   @LastModifiedDate
   @Column(name = "UPDATED_AT")

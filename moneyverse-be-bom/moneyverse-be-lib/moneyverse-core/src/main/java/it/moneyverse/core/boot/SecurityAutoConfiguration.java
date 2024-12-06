@@ -2,22 +2,30 @@ package it.moneyverse.core.boot;
 
 import it.moneyverse.core.security.converter.KeycloakJwtAuthenticationConverter;
 import it.moneyverse.core.security.converter.KeycloakJwtRolesConverter;
+import it.moneyverse.core.utils.SecurityContextUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.DelegatingJwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Optional;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableJpaAuditing
 public class SecurityAutoConfiguration {
 
   @Bean
@@ -56,4 +64,13 @@ public class SecurityAutoConfiguration {
 
     return httpSecurity.build();
   }
+
+  @Bean
+  public AuditorAware<String> auditorAware() { return () -> {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return Optional.empty();
+    }
+    return Optional.of((SecurityContextUtils.getAuthenticatedUser().getUsername()));
+  }; }
 }

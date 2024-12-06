@@ -13,12 +13,10 @@ import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.entities.FakeAccount;
-import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.helper.MapperTestHelper;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
+
 import org.springframework.data.domain.Sort;
 
 public class AccountTestContext extends TestContext {
@@ -57,14 +55,6 @@ public class AccountTestContext extends TestContext {
         .withBalanceTarget(request.balanceTarget())
         .withDefault(request.isDefault())
         .build();
-  }
-
-  public AccountRequestDto createExistentAccountForUser(String username) {
-    AccountModel randomExistingAccount = getRandomAccount(username);
-    Account account =
-        MapperTestHelper.map(new FakeAccount(username, model.getAccounts().size()), Account.class);
-    account.setAccountName(randomExistingAccount.getAccountName());
-    return toAccountRequest(account);
   }
 
   public AccountCriteria createAccountFilters() {
