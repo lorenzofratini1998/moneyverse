@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
+import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
@@ -171,6 +172,54 @@ class AccountManagementServiceTest {
 
     assertThrows(ResourceNotFoundException.class, () -> accountManagementService.findAccountByAccountId(accountId));
     verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
+  }
+
+  @Test
+  void givenAccountId_WhenUpdateAccount_ThenReturnAccountDto(@Mock Account account, @Mock AccountDto result) {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+            new AccountUpdateRequestDto(
+                    RandomUtils.randomString(15),
+                    RandomUtils.randomBigDecimal(),
+                    RandomUtils.randomBigDecimal(),
+                    RandomUtils.randomEnum(AccountCategoryEnum.class),
+                    RandomUtils.randomString(15),
+                    null);
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    mapper.when(() -> AccountMapper.partialUpdate(account, request)).thenReturn(account);
+    when(accountRepository.save(account)).thenReturn(account);
+    mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
+
+    result = accountManagementService.updateAccount(accountId, request);
+
+    assertNotNull(result);
+    verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.partialUpdate(account, request), times(1));
+    verify(accountRepository, times(1)).save(account);
+    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+  }
+
+  @Test
+  void givenAccountId_WhenUpdateAccount_ThenReturnResourceNotFound() {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+            new AccountUpdateRequestDto(
+                    RandomUtils.randomString(15),
+                    RandomUtils.randomBigDecimal(),
+                    RandomUtils.randomBigDecimal(),
+                    RandomUtils.randomEnum(AccountCategoryEnum.class),
+                    RandomUtils.randomString(15),
+                    null);
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+    assertThrows(ResourceNotFoundException.class, () -> accountManagementService.updateAccount(accountId, request));
+
+    verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.partialUpdate(any(Account.class), any(AccountUpdateRequestDto.class)), never());
+    verify(accountRepository, never()).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
   }
 }

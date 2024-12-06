@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
+import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.test.utils.RandomUtils;
@@ -93,6 +94,28 @@ class AccountMapperTest {
       assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
       assertEquals(account.isDefault(), accountDto.isDefault());
     }
+  }
+
+  @Test
+  void testToAccount_PartialUpdate() {
+    Account account = createAccount();
+    AccountUpdateRequestDto request = new AccountUpdateRequestDto(
+        RandomUtils.randomString(25),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomEnum(AccountCategoryEnum.class),
+        RandomUtils.randomString(25),
+        RandomUtils.randomBoolean()
+    );
+
+    Account result = AccountMapper.partialUpdate(account, request);
+
+    assertEquals(request.accountName(), result.getAccountName());
+    assertEquals(request.balance(), result.getBalance());
+    assertEquals(request.balanceTarget(), result.getBalanceTarget());
+    assertEquals(request.accountCategory(), result.getAccountCategory());
+    assertEquals(request.accountDescription(), result.getAccountDescription());
+    assertEquals(request.isDefault(), result.isDefault());
   }
 
   private Account createAccount() {

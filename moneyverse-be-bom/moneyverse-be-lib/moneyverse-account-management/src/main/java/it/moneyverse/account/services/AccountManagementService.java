@@ -4,6 +4,7 @@ import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
+import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AccountManagementService implements AccountService {
@@ -35,15 +37,10 @@ public class AccountManagementService implements AccountService {
   }
 
   @Override
+  @Transactional
   public AccountDto createAccount(AccountRequestDto request) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(request.username()))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(request.username()));
-    }
-    if (Boolean.TRUE.equals(accountRepository.existsByUsernameAndAccountName(
-        request.username(), request.accountName()))) {
-      throw new ResourceAlreadyExistsException(
-          "Account with name %s already exists".formatted(request.accountName()));
-    }
+    checkIfUserExists(request.username());
+    checkIfAccountAlreadyExists(request.username(), request.accountName());
     LOGGER.info("Creating account {} for user {}", request.accountName(), request.username());
     Account account = AccountMapper.toAccount(request);
     if (accountRepository.findDefaultAccountByUser(request.username()).isEmpty()) {
@@ -55,7 +52,23 @@ public class AccountManagementService implements AccountService {
     return result;
   }
 
+  private void checkIfUserExists(String username) {
+    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
+      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+    }
+  }
+
+  private void checkIfAccountAlreadyExists(String username, String accountName) {
+    if (Boolean.TRUE.equals(accountRepository.existsByUsernameAndAccountName(
+            username, accountName))) {
+      throw new ResourceAlreadyExistsException(
+              "Account with name %s already exists".formatted(accountName));
+    }
+  }
+
+
   @Override
+  @Transactional(readOnly = true)
   public List<AccountDto> findAccounts(AccountCriteria criteria) {
     if (criteria.getPage() == null) {
       criteria.setPage(new PageCriteria());
@@ -70,8 +83,23 @@ public class AccountManagementService implements AccountService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public AccountDto findAccountByAccountId(UUID accountId) {
-    Account account = accountRepository.findById(accountId).orElseThrow(() -> new ResourceNotFoundException("Account %s not found".formatted(accountId)));
+    Account account = findAccountById(accountId);
     return AccountMapper.toAccountDto(account);
+  }
+
+  @Override
+  @Transactional
+  public AccountDto updateAccount(UUID accountId, AccountUpdateRequestDto request) {
+    Account account = findAccountById(accountId);
+    account = AccountMapper.partialUpdate(account, request);
+    AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
+    LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUsername());
+    return result;
+  }
+
+  private Account findAccountById(UUID accountId) {
+    return accountRepository.findById(accountId).orElseThrow(() -> new ResourceNotFoundException("Account %s not found".formatted(accountId)));
   }
 }

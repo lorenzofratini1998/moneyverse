@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
+import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
@@ -18,6 +19,7 @@ import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertiesHelper;
 import java.util.List;
 import java.util.Objects;
@@ -166,6 +168,46 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             HttpMethod.GET,
             new HttpEntity<>(headers),
                 AccountDto.class);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+  }
+
+  @Test
+  void testUpdateAccount_Success() {
+    final String admin = testContext.getAdminUser().getUsername();
+    final UUID accountId = testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+    AccountUpdateRequestDto request = new AccountUpdateRequestDto(
+            null, RandomUtils.randomBigDecimal(), null, null, RandomUtils.randomString(25), RandomUtils.randomBoolean());
+
+    headers.setBearerAuth(testContext.getAuthenticationToken(admin));
+    ResponseEntity<AccountDto> response =
+        restTemplate.exchange(
+            basePath + "/accounts/" + accountId,
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            AccountDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(request.balance(), response.getBody().getBalance());
+    assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
+    assertEquals(request.isDefault(), response.getBody().isDefault());
+  }
+
+  @Test
+  void testUpdateAccount_Unauthorized() {
+    final String username = testContext.getRandomUser().getUsername();
+    final UUID accountId = testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+    AccountUpdateRequestDto request = new AccountUpdateRequestDto(
+            null, RandomUtils.randomBigDecimal(), null, null, RandomUtils.randomString(25), RandomUtils.randomBoolean());
+
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+    ResponseEntity<AccountDto> response =
+        restTemplate.exchange(
+            basePath + "/accounts/" + accountId,
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            AccountDto.class);
 
     assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }

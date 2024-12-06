@@ -2,6 +2,7 @@ package it.moneyverse.account.utils.mapper;
 
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
+import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,31 @@ public class AccountMapper {
     if (entities.isEmpty()) {
       return Collections.emptyList();
     }
-    return entities.stream().map(AccountMapper::toAccountDto).collect(Collectors.toList());
+    return entities.stream().map(AccountMapper::toAccountDto).toList();
+  }
+
+  public static Account partialUpdate(Account account, AccountUpdateRequestDto request) {
+    if (request == null) {
+      return null;
+    }
+    if (request.accountName() != null) {
+      account.setAccountName(request.accountName());
+    }
+    if (request.balance() != null) {
+      account.setBalance(request.balance());
+    }
+    if (request.balanceTarget() != null) {
+      account.setBalanceTarget(request.balanceTarget());
+    }
+    if (request.accountCategory() != null) {
+      account.setAccountCategory(request.accountCategory());
+    }
+    if (request.accountDescription() != null) {
+      account.setAccountDescription(request.accountDescription());
+    }
+    if (request.isDefault() != null) {
+      account.setDefault(request.isDefault());
+    }
+    return account;
   }
 }

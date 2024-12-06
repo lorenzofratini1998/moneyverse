@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
+import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.services.AccountManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.SecurityAutoConfiguration;
@@ -159,6 +160,50 @@ class AccountManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/accounts/" + accountId)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testUpdateAccount_Success(@Mock AccountDto response) throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
+            null);
+
+    when(accountService.updateAccount(accountId, request)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/accounts/" + accountId)
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testUpdateAccount_NotFound() throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
+            null);
+
+    when(accountService.updateAccount(accountId, request)).thenThrow(ResourceNotFoundException.class);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/accounts/" + accountId)
+                .content(request.toString())
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
