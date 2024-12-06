@@ -2,7 +2,7 @@ package it.moneyverse.test.utils.properties;
 
 import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_REALM;
 
-import it.moneyverse.core.utils.constants.DatasourcePropertiesConstants;
+import it.moneyverse.core.utils.properties.DatasourceProperties;
 import it.moneyverse.core.utils.constants.KeycloakPropertiesConstants;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
@@ -12,10 +12,10 @@ public class TestPropertiesHelper {
 
   public static void setupPostgresProperties(
       DynamicPropertyRegistry registry, PostgresContainer container) {
-    registry.add(DatasourcePropertiesConstants.DRIVER_CLASS_NAME, container::getDriverClassName);
-    registry.add(DatasourcePropertiesConstants.URL, container::getJdbcUrl);
-    registry.add(DatasourcePropertiesConstants.USERNAME, container::getUsername);
-    registry.add(DatasourcePropertiesConstants.PASSWORD, container::getPassword);
+    registry.add(DatasourceProperties.DRIVER_CLASS_NAME, container::getDriverClassName);
+    registry.add(DatasourceProperties.URL, container::getJdbcUrl);
+    registry.add(DatasourceProperties.USERNAME, container::getUsername);
+    registry.add(DatasourceProperties.PASSWORD, container::getPassword);
   }
 
   public static void setupKeycloakProperties(

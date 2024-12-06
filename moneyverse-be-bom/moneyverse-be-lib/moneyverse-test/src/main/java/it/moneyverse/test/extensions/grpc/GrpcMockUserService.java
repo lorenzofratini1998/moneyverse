@@ -3,7 +3,7 @@ package it.moneyverse.test.extensions.grpc;
 import static org.grpcmock.GrpcMock.stubFor;
 import static org.grpcmock.GrpcMock.unaryMethod;
 
-import it.moneyverse.core.utils.constants.GrpcClientPropertiesConstants;
+import it.moneyverse.core.utils.constants.UserServiceGrpcClientProperties;
 import it.moneyverse.grpc.lib.UserResponse;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
 import org.grpcmock.junit5.GrpcMockExtension;
@@ -28,8 +28,8 @@ public class GrpcMockUserService extends GrpcMockExtension {
   }
 
   public void setupProperties(DynamicPropertyRegistry registry) {
-    registry.add(GrpcClientPropertiesConstants.USER_SERVICE_CLIENT_HOST, () -> host);
-    registry.add(GrpcClientPropertiesConstants.USER_SERVICE_CLIENT_PORT, () -> port);
+    registry.add(UserServiceGrpcClientProperties.USER_SERVICE_CLIENT_HOST, () -> host);
+    registry.add(UserServiceGrpcClientProperties.USER_SERVICE_CLIENT_PORT, () -> port);
   }
 
   public void mockExistentUser() {

@@ -1,79 +1,34 @@
 package it.moneyverse.core.boot;
 
-import it.moneyverse.core.utils.constants.DatasourcePropertiesConstants;
-import jakarta.annotation.PostConstruct;
-import java.util.Objects;
+import it.moneyverse.core.utils.properties.DatasourceProperties;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = DatasourcePropertiesConstants.PREFIX)
+@EnableConfigurationProperties(DatasourceProperties.class)
 public class DatasourceAutoConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceAutoConfiguration.class);
 
-  private String driverClassName;
-  private String url;
-  private String username;
-  private String password;
+  private final DatasourceProperties properties;
 
-  public DatasourceAutoConfiguration() {
+  public DatasourceAutoConfiguration(DatasourceProperties properties) {
+    this.properties = properties;
     LOGGER.info("Starting to load beans from {}", DatasourceAutoConfiguration.class.getName());
-  }
-
-  @PostConstruct
-  public void init() {
-    Objects.requireNonNull(
-        driverClassName, DatasourcePropertiesConstants.DRIVER_CLASS_NAME + " is required.");
-    Objects.requireNonNull(url, DatasourcePropertiesConstants.URL + " is required");
-    Objects.requireNonNull(username, DatasourcePropertiesConstants.USERNAME + " is required");
-    Objects.requireNonNull(password, DatasourcePropertiesConstants.PASSWORD + " is required");
   }
 
   @Bean
   public DataSource dataSource() {
     return DataSourceBuilder.create()
-        .driverClassName(driverClassName)
-        .url(url)
-        .username(username)
-        .password(password)
+        .driverClassName(properties.getDriverClassName())
+        .url(properties.getUrl())
+        .username(properties.getUsername())
+        .password(properties.getPassword())
         .build();
-  }
-
-  public String getDriverClassName() {
-    return driverClassName;
-  }
-
-  public void setDriverClassName(String driverClassName) {
-    this.driverClassName = driverClassName;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
   }
 }

@@ -3,6 +3,9 @@ package it.moneyverse.core.boot;
 import it.moneyverse.core.security.converter.KeycloakJwtAuthenticationConverter;
 import it.moneyverse.core.security.converter.KeycloakJwtRolesConverter;
 import it.moneyverse.core.utils.SecurityContextUtils;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,13 +23,17 @@ import org.springframework.security.oauth2.server.resource.authentication.Delega
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import java.util.Optional;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @EnableJpaAuditing
 public class SecurityAutoConfiguration {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAutoConfiguration.class);
+
+  public SecurityAutoConfiguration() {
+    LOGGER.info("Starting to load beans from {}", SecurityAutoConfiguration.class);
+  }
 
   @Bean
   public SecurityFilterChain securityFilterChain(
