@@ -2,6 +2,7 @@ package it.moneyverse.account.runtime.controllers;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
@@ -132,6 +133,41 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
         HttpMethod.GET,
         new HttpEntity<>(headers),
         new ParameterizedTypeReference<>() {});
+  }
+
+  @Test
+  void testGetAccount_Success() {
+    final String username = testContext.getAdminUser().getUsername();
+    final UUID accountId = testContext.getRandomAccount(testContext.getRandomUser().getUsername()).getAccountId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<AccountDto> response =
+        restTemplate.exchange(
+            basePath + "/accounts/" + accountId,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            AccountDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(accountId, response.getBody().getAccountId());
+
+  }
+
+  @Test
+  void testGetAccount_Unauthorized() {
+    final String username = testContext.getRandomUser().getUsername();
+    final UUID accountId = testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<AccountDto> response =
+        restTemplate.exchange(
+            basePath + "/accounts/" + accountId,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+                AccountDto.class);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
 
   private void compareActualWithExpectedAccount(AccountDto actual, AccountDto expected) {

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.services.AccountManagementService;
@@ -15,6 +16,9 @@ import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
+
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -42,7 +46,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
     })
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class AccountManagementControllerTest {
+class AccountManagementControllerTest {
 
   @Value("${spring.security.base-path}")
   protected String basePath;
@@ -66,7 +70,6 @@ public class AccountManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post(basePath + "/accounts")
-                .header("Authentication", "Bearer token")
                 .content(request.toString())
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated());
@@ -121,6 +124,41 @@ public class AccountManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/accounts")
                 .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testGetAccounts_Success(@Mock AccountCriteria criteria,  @Mock List<AccountDto> response) throws Exception {
+    when(accountService.findAccounts(criteria)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/accounts")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetAccount_Success(@Mock AccountDto response) throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountService.findAccountByAccountId(accountId)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/accounts/" + accountId)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetAccount_NotFound() throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountService.findAccountByAccountId(accountId)).thenThrow(ResourceNotFoundException.class);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/accounts/" + accountId)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }

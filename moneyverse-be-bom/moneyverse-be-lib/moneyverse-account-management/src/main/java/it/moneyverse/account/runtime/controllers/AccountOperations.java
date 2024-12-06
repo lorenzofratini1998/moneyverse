@@ -5,10 +5,13 @@ import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 public interface AccountOperations {
 
   AccountDto createAccount(@Valid AccountRequestDto request);
 
   List<AccountDto> getAccounts(AccountCriteria criteria);
+
+  AccountDto findAccountById(UUID accountId);
 }

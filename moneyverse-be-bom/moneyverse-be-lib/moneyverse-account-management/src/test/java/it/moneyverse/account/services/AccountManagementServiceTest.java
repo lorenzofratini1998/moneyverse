@@ -3,16 +3,14 @@ package it.moneyverse.account.services;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
+import it.moneyverse.account.utils.mapper.AccountMapper;
 import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
@@ -21,26 +19,41 @@ import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
 
 /**
  * Unit test for {@link AccountManagementService}
  */
 @ExtendWith(MockitoExtension.class)
-public class AccountManagementServiceTest {
+class AccountManagementServiceTest {
 
   @InjectMocks private AccountManagementService accountManagementService;
 
   @Mock private AccountRepository accountRepository;
   @Mock private UserServiceGrpcClient userServiceClient;
+  private MockedStatic<AccountMapper> mapper;
+
+  @BeforeEach
+  public void setup() {
+    mapper = mockStatic(AccountMapper.class);
+  }
+
+  @AfterEach
+  public void tearDown() {
+    mapper.close();
+  }
 
   @Test
-  void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(@Mock Account account) {
+  void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(@Mock Account account, @Mock AccountDto accountDto) {
     final String username = RandomUtils.randomString(15);
     AccountRequestDto request =
         new AccountRequestDto(
@@ -52,19 +65,24 @@ public class AccountManagementServiceTest {
             RandomUtils.randomString(15),
             null);
 
+    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
+            .thenReturn(false);
+    mapper.when(() -> AccountMapper.toAccount(request)).thenReturn(account);
     when(accountRepository.findDefaultAccountByUser(request.username()))
         .thenReturn(Optional.empty());
     when(accountRepository.save(any(Account.class))).thenReturn(account);
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(accountDto);
 
-    AccountDto result = accountManagementService.createAccount(request);
+    accountDto = accountManagementService.createAccount(request);
 
-    assertNotNull(result);
+    assertNotNull(accountDto);
+    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(accountRepository, times(1)).existsByUsernameAndAccountName(username, request.accountName());
+    mapper.verify(() -> AccountMapper.toAccount(request), times(1));
     verify(accountRepository, times(1)).findDefaultAccountByUser(request.username());
     verify(accountRepository, times(1)).save(any(Account.class));
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
-    verify(accountRepository, times(1))
-        .existsByUsernameAndAccountName(username, request.accountName());
+    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
   }
 
   @Test
@@ -131,5 +149,28 @@ public class AccountManagementServiceTest {
     verify(criteria, times(1)).setPage(any(PageCriteria.class));
     verify(criteria, times(1)).setSort(any(SortCriteria.class));
     verify(accountRepository, times(1)).findAccounts(criteria);
+  }
+
+  @Test
+  void givenAccountId_WhenGetAccount_ThenReturnAccountDto(
+      @Mock Account account, @Mock AccountDto result) {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(AccountMapper.toAccountDto(account)).thenReturn(result);
+
+    result = accountManagementService.findAccountByAccountId(accountId);
+    assertNotNull(result);
+    verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+  }
+
+  @Test
+  void givenAccountId_WhenGetAccount_ThenResourceNotFoundException() {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+    assertThrows(ResourceNotFoundException.class, () -> accountManagementService.findAccountByAccountId(accountId));
+    verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
   }
 }

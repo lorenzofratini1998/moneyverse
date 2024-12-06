@@ -5,6 +5,8 @@ import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.utils.JsonUtils;
+
 import java.util.Optional;
 
 public class AccountCriteria {
@@ -71,5 +73,10 @@ public class AccountCriteria {
 
   public void setSort(SortCriteria<AccountSortAttributeEnum> sort) {
     this.sort = sort;
+  }
+
+  @Override
+  public String toString() {
+    return JsonUtils.toJson(this);
   }
 }
