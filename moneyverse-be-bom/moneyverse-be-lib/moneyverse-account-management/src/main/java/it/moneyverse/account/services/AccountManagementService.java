@@ -1,6 +1,8 @@
 package it.moneyverse.account.services;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
+import it.moneyverse.account.model.Event.AccountDeletionEvent;
+import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
@@ -29,11 +31,18 @@ public class AccountManagementService implements AccountService {
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountManagementService.class);
   private final AccountRepository accountRepository;
   private final UserServiceClient userServiceClient;
+  private final AccountProducer accountProducer;
+  private final AccountDeletionTopic accountDeletionTopic;
 
   public AccountManagementService(
-      AccountRepository accountRepository, UserServiceGrpcClient userServiceClient) {
+      AccountRepository accountRepository,
+      UserServiceGrpcClient userServiceClient,
+      AccountProducer accountProducer,
+      AccountDeletionTopic accountDeletionTopic) {
     this.accountRepository = accountRepository;
     this.userServiceClient = userServiceClient;
+    this.accountProducer = accountProducer;
+    this.accountDeletionTopic = accountDeletionTopic;
   }
 
   @Override
@@ -97,6 +106,16 @@ public class AccountManagementService implements AccountService {
     AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
     LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUsername());
     return result;
+  }
+
+  @Override
+  @Transactional
+  public void deleteAccount(UUID accountId) {
+    Account account = findAccountById(accountId);
+    accountRepository.delete(account);
+    accountProducer.send(
+        new AccountDeletionEvent(accountId, account.getUsername()), accountDeletionTopic.name());
+    LOGGER.info("Deleted account {} for user {}", account.getUsername(), account.getUsername());
   }
 
   private Account findAccountById(UUID accountId) {

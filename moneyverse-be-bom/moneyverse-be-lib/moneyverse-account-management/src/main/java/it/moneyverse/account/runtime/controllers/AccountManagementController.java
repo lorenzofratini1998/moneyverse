@@ -59,4 +59,13 @@ public class AccountManagementController implements AccountOperations {
   public AccountDto updateAccount(@PathVariable UUID accountId, @RequestBody AccountUpdateRequestDto request) {
     return accountService.updateAccount(accountId, request);
   }
+
+  @Override
+  @DeleteMapping("/accounts/{accountId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@accountRepository.existsByUsernameAndAccountId(authentication.name, #accountId))")
+  public void deleteAccount(@PathVariable UUID accountId) {
+    accountService.deleteAccount(accountId);
+  }
 }

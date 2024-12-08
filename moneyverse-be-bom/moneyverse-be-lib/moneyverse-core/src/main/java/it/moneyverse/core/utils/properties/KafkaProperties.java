@@ -9,11 +9,9 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
 public class KafkaProperties {
   public static final String PREFIX = "spring.kafka";
   public static final String BOOTSTRAP_SERVERS = PREFIX + ".bootstrap-servers";
-  public static final String TOPIC = PREFIX + ".topic";
   public static final String GROUP_ID = PREFIX + ".group-id";
 
   private final String bootstrapServers;
-  private final String topic;
   private final String groupId;
   private final Integer retry;
   private final Integer retryBackoffMs;
@@ -28,7 +26,6 @@ public class KafkaProperties {
       Integer retryBackoffMs,
       String acks) {
     this.bootstrapServers = bootstrapServers;
-    this.topic = topic;
     this.groupId = groupId;
     this.retry = retry != null ? retry : 5;
     this.retryBackoffMs = retryBackoffMs != null ? retryBackoffMs : 1000;
@@ -38,16 +35,11 @@ public class KafkaProperties {
   @PostConstruct
   public void init() {
     Objects.requireNonNull(bootstrapServers, BOOTSTRAP_SERVERS + " cannot be null");
-    Objects.requireNonNull(topic, TOPIC + " cannot be null");
     Objects.requireNonNull(groupId, GROUP_ID + " cannot be null");
   }
 
   public String getBootstrapServers() {
     return bootstrapServers;
-  }
-
-  public String getTopic() {
-    return topic;
   }
 
   public String getGroupId() {

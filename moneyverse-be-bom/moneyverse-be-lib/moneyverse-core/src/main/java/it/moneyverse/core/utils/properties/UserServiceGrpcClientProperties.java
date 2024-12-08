@@ -1,4 +1,4 @@
-package it.moneyverse.core.utils.constants;
+package it.moneyverse.core.utils.properties;
 
 import jakarta.annotation.PostConstruct;
 import java.util.Objects;

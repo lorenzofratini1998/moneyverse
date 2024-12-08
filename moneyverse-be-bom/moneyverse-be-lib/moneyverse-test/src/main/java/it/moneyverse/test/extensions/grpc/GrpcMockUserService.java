@@ -3,7 +3,7 @@ package it.moneyverse.test.extensions.grpc;
 import static org.grpcmock.GrpcMock.stubFor;
 import static org.grpcmock.GrpcMock.unaryMethod;
 
-import it.moneyverse.core.utils.constants.UserServiceGrpcClientProperties;
+import it.moneyverse.core.utils.properties.UserServiceGrpcClientProperties;
 import it.moneyverse.grpc.lib.UserResponse;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
 import org.grpcmock.junit5.GrpcMockExtension;

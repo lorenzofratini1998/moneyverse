@@ -2,7 +2,7 @@ package it.moneyverse.core.boot;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import it.moneyverse.core.utils.constants.UserServiceGrpcClientProperties;
+import it.moneyverse.core.utils.properties.UserServiceGrpcClientProperties;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
 import it.moneyverse.grpc.lib.UserServiceGrpc.UserServiceBlockingStub;
 import org.slf4j.Logger;

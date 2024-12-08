@@ -17,4 +17,6 @@ public interface AccountOperations {
   AccountDto findAccountById(UUID accountId);
 
   AccountDto updateAccount(UUID accountId, AccountUpdateRequestDto request);
+
+  void deleteAccount(UUID accountId);
 }

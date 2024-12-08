@@ -11,13 +11,13 @@ import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.services.AccountManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
+import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.SecurityAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
     excludeAutoConfiguration = {
       DatasourceAutoConfiguration.class,
       SecurityAutoConfiguration.class,
-      UserServiceGrpcClientAutoConfiguration.class
+      UserServiceGrpcClientAutoConfiguration.class,
+      KafkaAutoConfiguration.class
     })
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -106,7 +108,6 @@ class AccountManagementControllerTest {
                 .content(request.toString())
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isConflict());
-
   }
 
   @Test
@@ -130,7 +131,8 @@ class AccountManagementControllerTest {
   }
 
   @Test
-  void testGetAccounts_Success(@Mock AccountCriteria criteria,  @Mock List<AccountDto> response) throws Exception {
+  void testGetAccounts_Success(@Mock AccountCriteria criteria, @Mock List<AccountDto> response)
+      throws Exception {
     when(accountService.findAccounts(criteria)).thenReturn(response);
 
     mockMvc
@@ -155,7 +157,8 @@ class AccountManagementControllerTest {
   @Test
   void testGetAccount_NotFound() throws Exception {
     UUID accountId = RandomUtils.randomUUID();
-    when(accountService.findAccountByAccountId(accountId)).thenThrow(ResourceNotFoundException.class);
+    when(accountService.findAccountByAccountId(accountId))
+        .thenThrow(ResourceNotFoundException.class);
 
     mockMvc
         .perform(
@@ -198,12 +201,39 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             null);
 
-    when(accountService.updateAccount(accountId, request)).thenThrow(ResourceNotFoundException.class);
+    when(accountService.updateAccount(accountId, request))
+        .thenThrow(ResourceNotFoundException.class);
 
     mockMvc
         .perform(
             MockMvcRequestBuilders.put(basePath + "/accounts/" + accountId)
                 .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testDeleteAccount_Success() throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+
+    Mockito.doNothing().when(accountService).deleteAccount(accountId);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/accounts/" + accountId)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void testDeleteAccount_NotFound() throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+
+    Mockito.doThrow(ResourceNotFoundException.class).when(accountService).deleteAccount(accountId);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/accounts/" + accountId)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }

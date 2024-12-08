@@ -7,6 +7,7 @@ import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.utils.AccountCriteriaRandomGenerator;
 import it.moneyverse.account.utils.AccountTestContext;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
+import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.SecurityAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.test.enums.TestModelStrategyEnum;
@@ -35,7 +36,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
       FlywayAutoConfiguration.class,
       SecurityAutoConfiguration.class,
       UserServiceGrpcClientAutoConfiguration.class,
-      DatasourceAutoConfiguration.class
+      DatasourceAutoConfiguration.class,
+      KafkaAutoConfiguration.class
     })
 public class AccountCustomRepositoryImplTest {
 
@@ -54,10 +56,7 @@ public class AccountCustomRepositoryImplTest {
             .withTestAccount()
             .build();
     accounts =
-        MapperTestHelper.map(
-                testContext.getModel().getAccounts(), Account.class)
-            .stream()
-            .toList();
+        MapperTestHelper.map(testContext.getModel().getAccounts(), Account.class).stream().toList();
     accounts.forEach(account -> account.setAccountId(null));
   }
 
