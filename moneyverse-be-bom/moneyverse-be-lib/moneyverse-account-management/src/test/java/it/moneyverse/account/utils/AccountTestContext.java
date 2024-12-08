@@ -16,7 +16,6 @@ import it.moneyverse.test.model.entities.FakeAccount;
 import it.moneyverse.test.utils.helper.MapperTestHelper;
 import java.math.BigDecimal;
 import java.util.List;
-
 import org.springframework.data.domain.Sort;
 
 public class AccountTestContext extends TestContext {
@@ -134,6 +133,12 @@ public class AccountTestContext extends TestContext {
 
   public int getAccountsCount() {
     return model.getAccounts().size();
+  }
+
+  public List<AccountModel> getUserAccounts(String username) {
+    return model.getAccounts().stream()
+        .filter(account -> username.equals(account.getUsername()))
+        .toList();
   }
 
   public static class Builder extends TestContext.Builder<Builder> {

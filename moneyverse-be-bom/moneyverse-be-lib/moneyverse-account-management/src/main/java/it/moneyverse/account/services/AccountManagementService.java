@@ -1,24 +1,23 @@
 package it.moneyverse.account.services;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
-import it.moneyverse.account.model.Event.AccountDeletionEvent;
-import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.UserServiceClient;
 import java.util.List;
 import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
@@ -68,13 +67,12 @@ public class AccountManagementService implements AccountService {
   }
 
   private void checkIfAccountAlreadyExists(String username, String accountName) {
-    if (Boolean.TRUE.equals(accountRepository.existsByUsernameAndAccountName(
-            username, accountName))) {
+    if (Boolean.TRUE.equals(
+        accountRepository.existsByUsernameAndAccountName(username, accountName))) {
       throw new ResourceAlreadyExistsException(
-              "Account with name %s already exists".formatted(accountName));
+          "Account with name %s already exists".formatted(accountName));
     }
   }
-
 
   @Override
   @Transactional(readOnly = true)
@@ -118,7 +116,17 @@ public class AccountManagementService implements AccountService {
     LOGGER.info("Deleted account {} for user {}", account.getUsername(), account.getUsername());
   }
 
+  @Transactional
+  @Override
+  public void deleteAccountsByUsername(String username) {
+    LOGGER.info("Deleting accounts by username {}", username);
+    accountRepository.deleteAll(accountRepository.findAccountByUsername(username));
+  }
+
   private Account findAccountById(UUID accountId) {
-    return accountRepository.findById(accountId).orElseThrow(() -> new ResourceNotFoundException("Account %s not found".formatted(accountId)));
+    return accountRepository
+        .findById(accountId)
+        .orElseThrow(
+            () -> new ResourceNotFoundException("Account %s not found".formatted(accountId)));
   }
 }

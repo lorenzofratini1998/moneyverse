@@ -1,0 +1,4 @@
+it.moneyverse.core.boot.DatasourceAutoConfiguration
+it.moneyverse.core.boot.KafkaAutoConfiguration
+it.moneyverse.core.boot.SecurityAutoConfiguration
+it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration

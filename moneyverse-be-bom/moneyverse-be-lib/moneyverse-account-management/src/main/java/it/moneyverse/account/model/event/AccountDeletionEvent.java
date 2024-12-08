@@ -1,4 +1,4 @@
-package it.moneyverse.account.model.Event;
+package it.moneyverse.account.model.event;
 
 import it.moneyverse.core.utils.JsonUtils;
 import java.util.UUID;

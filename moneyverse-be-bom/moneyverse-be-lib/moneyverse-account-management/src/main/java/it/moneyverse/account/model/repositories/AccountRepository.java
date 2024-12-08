@@ -1,6 +1,7 @@
 package it.moneyverse.account.model.repositories;
 
 import it.moneyverse.account.model.entities.Account;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID>, Account
 
   Boolean existsByUsernameAndAccountName(String username, String accountName);
 
-  Optional<Object> findByAccountId(UUID accountId);
-
   boolean existsByUsernameAndAccountId(String username, UUID accountId);
+
+  List<Account> findAccountByUsername(String username);
 }

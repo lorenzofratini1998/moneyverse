@@ -19,4 +19,6 @@ public interface AccountService {
   AccountDto updateAccount(UUID accountId, AccountUpdateRequestDto request);
 
   void deleteAccount(UUID accountId);
+
+  void deleteAccountsByUsername(String username);
 }

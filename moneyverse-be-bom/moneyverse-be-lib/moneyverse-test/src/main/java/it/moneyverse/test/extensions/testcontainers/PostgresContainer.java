@@ -8,7 +8,7 @@ public class PostgresContainer extends PostgreSQLContainer<PostgresContainer> {
   private static final String VERSION = "16.3";
 
   public PostgresContainer() {
-    super(POSTGRES + ":" + VERSION);
+    this(POSTGRES + ":" + VERSION);
   }
 
   public PostgresContainer(String dockerImageName) {

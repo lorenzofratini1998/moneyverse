@@ -1,6 +1,6 @@
 package it.moneyverse.account.services;
 
-import it.moneyverse.account.model.Event.AccountDeletionEvent;
+import it.moneyverse.account.model.event.AccountDeletionEvent;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;

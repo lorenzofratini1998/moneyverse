@@ -11,4 +11,12 @@ public class JsonUtils {
       throw new IllegalArgumentException(e);
     }
   }
+
+  public static <T> T fromJson(String json, Class<T> clazz) {
+    try (var jsonb = JsonbBuilder.create()) {
+      return jsonb.fromJson(json, clazz);
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
 }

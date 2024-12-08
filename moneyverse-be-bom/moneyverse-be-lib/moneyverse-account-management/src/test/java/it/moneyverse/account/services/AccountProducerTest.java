@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import it.moneyverse.account.model.Event.AccountDeletionEvent;
+import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.HashMap;
 import java.util.Map;
