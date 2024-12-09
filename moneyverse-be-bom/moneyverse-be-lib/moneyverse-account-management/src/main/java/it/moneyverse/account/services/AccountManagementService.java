@@ -31,17 +31,15 @@ public class AccountManagementService implements AccountService {
   private final AccountRepository accountRepository;
   private final UserServiceClient userServiceClient;
   private final AccountProducer accountProducer;
-  private final AccountDeletionTopic accountDeletionTopic;
 
   public AccountManagementService(
       AccountRepository accountRepository,
       UserServiceGrpcClient userServiceClient,
-      AccountProducer accountProducer,
-      AccountDeletionTopic accountDeletionTopic) {
+      AccountProducer accountProducer
+  ) {
     this.accountRepository = accountRepository;
     this.userServiceClient = userServiceClient;
     this.accountProducer = accountProducer;
-    this.accountDeletionTopic = accountDeletionTopic;
   }
 
   @Override
@@ -112,7 +110,7 @@ public class AccountManagementService implements AccountService {
     Account account = findAccountById(accountId);
     accountRepository.delete(account);
     accountProducer.send(
-        new AccountDeletionEvent(accountId, account.getUsername()), accountDeletionTopic.name());
+        new AccountDeletionEvent(accountId, account.getUsername()), AccountDeletionTopic.TOPIC);
     LOGGER.info("Deleted account {} for user {}", account.getUsername(), account.getUsername());
   }
 

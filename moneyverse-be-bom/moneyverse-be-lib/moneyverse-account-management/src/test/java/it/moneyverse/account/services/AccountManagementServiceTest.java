@@ -239,17 +239,14 @@ class AccountManagementServiceTest {
   void givenAccountId_WhenDeleteAccount_ThenDeleteAccount(
       @Mock Account account, @Mock CompletableFuture<SendResult<UUID, String>> future) {
     UUID accountId = RandomUtils.randomUUID();
-    String accountDeletionTopicName = RandomUtils.randomString(15);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(accountDeletionTopic.name()).thenReturn(accountDeletionTopicName);
     when(accountProducer.send(any(AccountDeletionEvent.class), any(String.class)))
         .thenReturn(future);
 
     accountManagementService.deleteAccount(accountId);
 
     verify(accountRepository, times(1)).findById(accountId);
-    verify(accountDeletionTopic, times(1)).name();
     verify(accountProducer, times(1)).send(any(AccountDeletionEvent.class), any(String.class));
   }
 

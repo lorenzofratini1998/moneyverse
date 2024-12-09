@@ -4,9 +4,4 @@ server:
 
 spring:
   security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://${keycloak.host}:${keycloak.port}/realms/${keycloak.realm-name}
-          jwk-set-uri: http://${keycloak.host}:${keycloak.port}/realms/${keycloak.realm-name}/protocol/openid-connect/certs
     base-path: /accountsManagement/api/v1

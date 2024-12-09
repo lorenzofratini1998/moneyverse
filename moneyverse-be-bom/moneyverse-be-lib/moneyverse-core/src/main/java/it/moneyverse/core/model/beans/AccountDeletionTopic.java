@@ -4,9 +4,9 @@ import org.apache.kafka.clients.admin.NewTopic;
 
 public class AccountDeletionTopic extends NewTopic {
 
-  private static final String name = "account-deletion-topic";
+  public static final String TOPIC = "account-deletion-topic";
 
   public AccountDeletionTopic() {
-    super(name, 1, (short) 1);
+    super(TOPIC, 1, (short) 1);
   }
 }

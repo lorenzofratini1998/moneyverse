@@ -72,7 +72,8 @@ public abstract class TestContext {
   }
 
   public UserModel getRandomUser() {
-    return model.getUsers().get(RandomUtils.randomInteger(0, model.getUsers().size() - 1));
+    List<UserModel> users = model.getUsers().stream().filter(user -> !user.getRole().equals(UserRoleEnum.ADMIN)).toList();
+    return users.get(RandomUtils.randomInteger(0, users.size() - 1));
   }
 
   public UserModel getAdminUser() {

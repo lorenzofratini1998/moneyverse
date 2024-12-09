@@ -200,11 +200,12 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testUpdateAccount_Unauthorized() {
     final String username = testContext.getRandomUser().getUsername();
-    final UUID accountId = testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+    final UUID accountId =
+            testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
     AccountUpdateRequestDto request = new AccountUpdateRequestDto(
             null, RandomUtils.randomBigDecimal(), null, null, RandomUtils.randomString(25), RandomUtils.randomBoolean());
 
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(
             basePath + "/accounts/" + accountId,

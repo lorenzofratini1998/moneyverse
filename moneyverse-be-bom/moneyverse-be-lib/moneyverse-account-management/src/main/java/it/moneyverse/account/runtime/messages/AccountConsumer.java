@@ -4,14 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.moneyverse.account.model.event.UserDeletionEvent;
 import it.moneyverse.account.services.AccountService;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.core.utils.JsonUtils;
-import it.moneyverse.core.utils.properties.KafkaProperties;
+
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -21,34 +21,34 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 @Component
-@EnableConfigurationProperties({KafkaProperties.class})
 public class AccountConsumer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountConsumer.class);
   private final AccountService accountService;
   private final UserServiceClient userServiceClient;
-  private final KafkaProperties kafkaProperties;
 
   public AccountConsumer(
-      AccountService accountService,
-      UserServiceClient userServiceClient,
-      KafkaProperties kafkaProperties) {
+          AccountService accountService,
+          UserServiceClient userServiceClient
+  ) {
     this.accountService = accountService;
     this.userServiceClient = userServiceClient;
-    this.kafkaProperties = kafkaProperties;
   }
 
   @RetryableTopic(
-      attempts = "${spring.kafka.consumer.retry.attempts}",
+      attempts = "#{@kafkaProperties.getConsumer().getRetry().getAttempts()}",
       backoff =
           @Backoff(
-              delayExpression = "${spring.kafka.consumer.retry.delay}",
-              multiplierExpression = "${spring.kafka.consumer.retry.multiplier}",
-              maxDelayExpression = "${spring.kafka.consumer.retry.max-delay}"),
+              delayExpression = "#{@kafkaProperties.getConsumer().getRetry().getDelay()}",
+              multiplierExpression = "#{@kafkaProperties.getConsumer().getRetry().getMultiplier()}",
+              maxDelayExpression = "#{@kafkaProperties.getConsumer().getRetry().getMaxRetryBackoffMs()}"),
       autoStartDltHandler = "true",
       exclude = {JsonProcessingException.class, ResourceNotFoundException.class})
-  @KafkaListener(topics = "user-deletion-topic", autoStartup = "${kafka.auto-startup.budget:true}")
-  // groupId = "${spring.kafka.consumer.group-id}")
+  @KafkaListener(
+          topics = {UserDeletionTopic.TOPIC},
+          autoStartup = "#{@kafkaProperties.getConsumer().getAutoStartup()}",
+          groupId = "$#{@kafkaProperties.getConsumer().getGroupId()}"
+  )
   public void onMessage(
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     LOGGER.info("Received event: {} from topic: {}", record.value(), topic);

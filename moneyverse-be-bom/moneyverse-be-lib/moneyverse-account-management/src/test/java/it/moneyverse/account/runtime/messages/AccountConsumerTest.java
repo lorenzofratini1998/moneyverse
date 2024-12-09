@@ -8,10 +8,10 @@ import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.event.UserDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
+import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.utils.JsonUtils;
-import it.moneyverse.grpc.lib.UserServiceGrpc.UserServiceBlockingStub;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
 import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
 import it.moneyverse.test.enums.TestModelStrategyEnum;
@@ -44,27 +44,19 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration",
-      "keycloak.host=test",
-      "keycloak.port=0",
-      "keycloak.realm-name=test",
       "logging.level.org.grpcmock.GrpcMock=WARN"
     })
 @Testcontainers
 @CleanDatabaseAfterEachTest
-public class AccountConsumerTest {
-
-  private static final String TOPIC = "user-deletion-topic";
+class AccountConsumerTest {
 
   protected static AccountTestContext testContext;
 
@@ -104,7 +96,7 @@ public class AccountConsumerTest {
   @BeforeEach
   void setup() {
     consumerRecords = new LinkedBlockingQueue<>();
-    ContainerProperties containerProperties = new ContainerProperties(TOPIC + "-dlt");
+    ContainerProperties containerProperties = new ContainerProperties(UserDeletionTopic.TOPIC + "-dlt");
     container = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
     container.setupMessageListener(
         (MessageListener<UUID, String>) record -> consumerRecords.add(record));
@@ -125,7 +117,7 @@ public class AccountConsumerTest {
     final long initialSize = accountRepository.count();
     String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUsername()));
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(TOPIC, RandomUtils.randomUUID(), event);
+        new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
     mockUserService.mockExistentUser();
     kafkaTemplate.send(producerRecord);
@@ -143,19 +135,19 @@ public class AccountConsumerTest {
     String event = JsonUtils.toJson(new UserDeletionEvent(nonExistentUsername));
 
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(TOPIC, RandomUtils.randomUUID(), event);
+        new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
     mockUserService.mockNonExistentUser();
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(10))
+        .pollInterval(Duration.ofSeconds(2))
         .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
-              ConsumerRecord<UUID, String> dltRecord = consumerRecords.poll(1, TimeUnit.SECONDS);
-              assertNotNull(dltRecord);
-              assertEquals(event, dltRecord.value());
+              ConsumerRecord<UUID, String> dltRecord = consumerRecords.poll(5, TimeUnit.SECONDS);
+              assertNotNull(dltRecord, "Expected a message in the Dead Letter Topic, but none was found.");
+              assertEquals(event, dltRecord.value(), "The message value in DLT does not match the original event.");
             });
   }
 }

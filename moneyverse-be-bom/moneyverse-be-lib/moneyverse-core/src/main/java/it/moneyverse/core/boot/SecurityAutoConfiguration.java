@@ -4,9 +4,12 @@ import it.moneyverse.core.security.converter.KeycloakJwtAuthenticationConverter;
 import it.moneyverse.core.security.converter.KeycloakJwtRolesConverter;
 import it.moneyverse.core.utils.SecurityContextUtils;
 import java.util.Optional;
+
+import it.moneyverse.core.utils.properties.KeycloakProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -19,20 +22,25 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.DelegatingJwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableConfigurationProperties(KeycloakProperties.class)
 @EnableWebSecurity
 @EnableMethodSecurity
 @EnableJpaAuditing
 public class SecurityAutoConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAutoConfiguration.class);
+  private final KeycloakProperties keycloakProperties;
 
-  public SecurityAutoConfiguration() {
-    LOGGER.info("Starting to load beans from {}", SecurityAutoConfiguration.class);
+  public SecurityAutoConfiguration(KeycloakProperties keycloakProperties) {
+      this.keycloakProperties = keycloakProperties;
+      LOGGER.info("Starting to load beans from {}", SecurityAutoConfiguration.class);
   }
 
   @Bean
@@ -58,8 +66,10 @@ public class SecurityAutoConfiguration {
     httpSecurity.oauth2ResourceServer(
         oauth2 ->
             oauth2.jwt(
-                jwtConfigurer ->
-                    jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+                jwtConfigurer -> {
+                    jwtConfigurer.jwkSetUri(keycloakProperties.getJwkSetUri());
+                    jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter);
+  }));
 
     httpSecurity.authorizeHttpRequests(
         authz ->
@@ -80,4 +90,9 @@ public class SecurityAutoConfiguration {
     }
     return Optional.of((SecurityContextUtils.getAuthenticatedUser().getUsername()));
   }; }
+
+  @Bean
+  public JwtDecoder jwtDecoder() {
+    return JwtDecoders.fromIssuerLocation(keycloakProperties.getIssuerUri());
+  }
 }
