@@ -66,8 +66,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomEnum(AccountCategoryEnum.class),
-            RandomUtils.randomString(15),
-            null);
+            RandomUtils.randomString(15));
     when(accountService.createAccount(request)).thenReturn(response);
 
     mockMvc
@@ -99,8 +98,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomEnum(AccountCategoryEnum.class),
-            RandomUtils.randomString(15),
-            null);
+            RandomUtils.randomString(15));
     when(accountService.createAccount(request)).thenThrow(ResourceAlreadyExistsException.class);
     mockMvc
         .perform(
@@ -119,8 +117,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomEnum(AccountCategoryEnum.class),
-            RandomUtils.randomString(15),
-            null);
+            RandomUtils.randomString(15));
     when(accountService.createAccount(request)).thenThrow(ResourceNotFoundException.class);
     mockMvc
         .perform(
@@ -253,8 +250,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomEnum(AccountCategoryEnum.class),
-        RandomUtils.randomString(15),
-        null);
+        RandomUtils.randomString(15));
   }
 
   private static AccountRequestDto createRequestWithNullAccountName() {
@@ -264,8 +260,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomEnum(AccountCategoryEnum.class),
-        RandomUtils.randomString(15),
-        null);
+        RandomUtils.randomString(15));
   }
 
   private static AccountRequestDto createRequestWithNullAccountCategory() {
@@ -275,8 +270,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         null,
-        RandomUtils.randomString(15),
-        null);
+        RandomUtils.randomString(15));
   }
 
   private static AccountRequestDto createRequestWithExceedUsername() {
@@ -287,7 +281,6 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomEnum(AccountCategoryEnum.class),
-        RandomUtils.randomString(15),
-        null);
+        RandomUtils.randomString(15));
   }
 }

@@ -83,7 +83,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     final AccountRequestDto request = testContext.createAccountForUser(username);
     mockUserService.mockExistentUser();
-    final AccountDto expected = testContext.toAccountDto(request);
+    AccountDto expected = testContext.getExpectedAccountDto(request);
 
     ResponseEntity<AccountDto> response =
         restTemplate.postForEntity(

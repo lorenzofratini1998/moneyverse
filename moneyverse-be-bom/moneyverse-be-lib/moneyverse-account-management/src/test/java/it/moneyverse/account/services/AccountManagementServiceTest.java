@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
 import it.moneyverse.core.enums.AccountCategoryEnum;
@@ -67,8 +67,7 @@ class AccountManagementServiceTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomEnum(AccountCategoryEnum.class),
-            RandomUtils.randomString(15),
-            null);
+            RandomUtils.randomString(15));
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
@@ -101,8 +100,7 @@ class AccountManagementServiceTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomEnum(AccountCategoryEnum.class),
-            RandomUtils.randomString(15),
-            null);
+            RandomUtils.randomString(15));
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(false);
 
@@ -126,8 +124,7 @@ class AccountManagementServiceTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomEnum(AccountCategoryEnum.class),
-            RandomUtils.randomString(15),
-            null);
+            RandomUtils.randomString(15));
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
@@ -205,6 +202,39 @@ class AccountManagementServiceTest {
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
     mapper.verify(() -> AccountMapper.partialUpdate(account, request), times(1));
+    verify(accountRepository, times(1)).save(account);
+    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+  }
+
+  @Test
+  void givenAccountId_WhenUpdateAccountAlreadyExistentDefaultAccount_ThenReturnAccountDto(
+      @Mock Account account, @Mock Account defaultAccount, @Mock AccountDto result) {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
+            Boolean.TRUE);
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    mapper.when(() -> AccountMapper.partialUpdate(account, request)).thenReturn(account);
+    when(account.isDefault()).thenReturn(true);
+    when(accountRepository.findDefaultAccountByUser(any())).thenReturn(Optional.of(defaultAccount));
+    when(defaultAccount.getAccountId()).thenReturn(RandomUtils.randomUUID());
+    when(accountRepository.save(defaultAccount)).thenReturn(defaultAccount);
+    when(accountRepository.save(account)).thenReturn(account);
+    mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
+
+    result = accountManagementService.updateAccount(accountId, request);
+
+    assertNotNull(result);
+    verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.partialUpdate(account, request), times(1));
+    verify(accountRepository, times(1)).findDefaultAccountByUser(any());
+    verify(accountRepository, times(1)).save(defaultAccount);
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
   }

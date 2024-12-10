@@ -31,8 +31,7 @@ class AccountMapperTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomEnum(AccountCategoryEnum.class),
-            RandomUtils.randomString(25),
-            RandomUtils.randomBoolean());
+            RandomUtils.randomString(25));
 
     Account account = AccountMapper.toAccount(request);
 
@@ -42,7 +41,6 @@ class AccountMapperTest {
     assertEquals(request.balanceTarget(), account.getBalanceTarget());
     assertEquals(request.accountCategory(), account.getAccountCategory());
     assertEquals(request.accountDescription(), account.getAccountDescription());
-    assertEquals(request.isDefault(), account.isDefault());
   }
 
   @Test

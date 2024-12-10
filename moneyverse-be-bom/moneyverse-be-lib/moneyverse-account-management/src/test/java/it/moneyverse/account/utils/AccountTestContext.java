@@ -35,8 +35,7 @@ public class AccountTestContext extends TestContext {
         account.getBalance(),
         account.getBalanceTarget(),
         account.getAccountCategory(),
-        account.getAccountDescription(),
-        account.isDefault());
+        account.getAccountDescription());
   }
 
   public AccountRequestDto createAccountForUser(String username) {
@@ -44,7 +43,14 @@ public class AccountTestContext extends TestContext {
         MapperTestHelper.map(new FakeAccount(username, model.getAccounts().size()), Account.class));
   }
 
-  public AccountDto toAccountDto(AccountRequestDto request) {
+  public AccountDto getExpectedAccountDto(AccountRequestDto request) {
+    if (getUserAccounts(request.username()).stream().anyMatch(AccountModel::isDefault)) {
+      return toAccountDto(request, Boolean.FALSE);
+    }
+    return toAccountDto(request, Boolean.TRUE);
+  }
+
+  private AccountDto toAccountDto(AccountRequestDto request, Boolean isDefault) {
     return AccountDto.builder()
         .withUsername(request.username())
         .withAccountName(request.accountName())
@@ -52,7 +58,7 @@ public class AccountTestContext extends TestContext {
         .withAccountDescription(request.accountDescription())
         .withBalance(request.balance())
         .withBalanceTarget(request.balanceTarget())
-        .withDefault(request.isDefault())
+        .withDefault(isDefault)
         .build();
   }
 

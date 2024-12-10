@@ -23,7 +23,6 @@ public class AccountMapper {
     account.setBalanceTarget(request.balanceTarget());
     account.setAccountCategory(request.accountCategory());
     account.setAccountDescription(request.accountDescription());
-    account.setDefault(request.isDefault());
     return account;
   }
 

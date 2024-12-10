@@ -20,8 +20,7 @@ public record AccountRequestDto(
     BigDecimal balance,
     BigDecimal balanceTarget,
     @NotNull(message = "'Account Category' must not be null") AccountCategoryEnum accountCategory,
-    String accountDescription,
-    Boolean isDefault)
+    String accountDescription)
     implements Serializable {
 
   @Override
