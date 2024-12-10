@@ -65,6 +65,18 @@
       <artifactId>spring-kafka</artifactId>
       <version>3.1.4</version>
     </dependency>
+    <dependency>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <optional>true</optional>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <optional>true</optional>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <description>Core components of Moneyverse application</description>
