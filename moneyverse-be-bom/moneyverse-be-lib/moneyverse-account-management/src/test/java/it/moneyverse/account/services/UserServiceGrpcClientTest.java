@@ -1,9 +1,7 @@
 package it.moneyverse.account.services;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import it.moneyverse.grpc.lib.UserRequest;
 import it.moneyverse.grpc.lib.UserResponse;
@@ -19,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * Unit tests for {@link UserServiceGrpcClient}
  */
 @ExtendWith(MockitoExtension.class)
-public class UserServiceGrpcClientTest {
+class UserServiceGrpcClientTest {
 
   @InjectMocks private UserServiceGrpcClient userServiceClient;
 

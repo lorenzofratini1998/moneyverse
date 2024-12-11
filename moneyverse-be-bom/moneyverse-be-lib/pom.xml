@@ -97,6 +97,13 @@
         <type>pom</type>
         <version>${grpc.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <!-- OTHER DEPENDENCIES -->
       <dependency>
         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -192,6 +199,7 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.organization>lorenzofratini1998</sonar.organization>
     <spring-boot.version>3.4.0</spring-boot.version>
+    <spring-cloud.version>2024.0.0</spring-cloud.version>
     <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
     <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
     <testcontainers-kafka.version>1.20.4</testcontainers-kafka.version>

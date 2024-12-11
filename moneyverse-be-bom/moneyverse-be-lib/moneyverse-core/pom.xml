@@ -34,6 +34,11 @@
       <artifactId>spring-boot-autoconfigure</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+      <optional>true</optional>
+    </dependency>
     <!-- JAKARTA IMPLEMENTATIONS DEPENDENCIES -->
     <dependency>
       <artifactId>yasson</artifactId>
