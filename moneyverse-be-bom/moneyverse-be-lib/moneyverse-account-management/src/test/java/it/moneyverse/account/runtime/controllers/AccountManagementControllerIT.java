@@ -195,6 +195,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.balance(), response.getBody().getBalance());
     assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
     assertEquals(request.isDefault(), response.getBody().isDefault());
+    assertEquals(1, accountRepository.findDefaultAccountsByUser(admin).size());
   }
 
   @Test

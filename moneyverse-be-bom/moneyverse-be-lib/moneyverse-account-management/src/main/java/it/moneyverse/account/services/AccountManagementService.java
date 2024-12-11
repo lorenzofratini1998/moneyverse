@@ -49,7 +49,7 @@ public class AccountManagementService implements AccountService {
     checkIfAccountAlreadyExists(request.username(), request.accountName());
     LOGGER.info("Creating account {} for user {}", request.accountName(), request.username());
     Account account = AccountMapper.toAccount(request);
-    if (accountRepository.findDefaultAccountByUser(request.username()).isEmpty()) {
+    if (accountRepository.findDefaultAccountsByUser(request.username()).isEmpty()) {
       LOGGER.info("Setting default account for user {}", request.username());
       account.setDefault(Boolean.TRUE);
     } else {
@@ -101,11 +101,12 @@ public class AccountManagementService implements AccountService {
   public AccountDto updateAccount(UUID accountId, AccountUpdateRequestDto request) {
     Account account = findAccountById(accountId);
     account = AccountMapper.partialUpdate(account, request);
-    if (account.isDefault()) {
+    if (Boolean.TRUE.equals(request.isDefault())) {
       accountRepository
-          .findDefaultAccountByUser(account.getUsername())
+          .findDefaultAccountsByUser(account.getUsername())
+          .stream()
           .filter(defaultAcc -> !defaultAcc.getAccountId().equals(accountId))
-          .ifPresent(
+          .forEach(
               defaultAcc -> {
                 defaultAcc.setDefault(false);
                 accountRepository.save(defaultAcc);

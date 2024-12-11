@@ -20,6 +20,8 @@ import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.utils.RandomUtils;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -73,8 +75,8 @@ class AccountManagementServiceTest {
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
         .thenReturn(false);
     mapper.when(() -> AccountMapper.toAccount(request)).thenReturn(account);
-    when(accountRepository.findDefaultAccountByUser(request.username()))
-        .thenReturn(Optional.empty());
+    when(accountRepository.findDefaultAccountsByUser(request.username()))
+        .thenReturn(Collections.emptyList());
     when(accountRepository.save(any(Account.class))).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(accountDto);
 
@@ -85,7 +87,7 @@ class AccountManagementServiceTest {
     verify(accountRepository, times(1))
         .existsByUsernameAndAccountName(username, request.accountName());
     mapper.verify(() -> AccountMapper.toAccount(request), times(1));
-    verify(accountRepository, times(1)).findDefaultAccountByUser(request.username());
+    verify(accountRepository, times(1)).findDefaultAccountsByUser(request.username());
     verify(accountRepository, times(1)).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
   }
@@ -107,7 +109,7 @@ class AccountManagementServiceTest {
     assertThrows(
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
-    verify(accountRepository, never()).findDefaultAccountByUser(request.username());
+    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, never())
         .existsByUsernameAndAccountName(username, request.accountName());
@@ -134,7 +136,7 @@ class AccountManagementServiceTest {
         ResourceAlreadyExistsException.class,
         () -> accountManagementService.createAccount(request));
 
-    verify(accountRepository, never()).findDefaultAccountByUser(request.username());
+    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
     verify(accountRepository, never()).save(any(Account.class));
     verify(userServiceClient, times(1)).checkIfUserExists(username);
     verify(accountRepository, times(1))
@@ -221,8 +223,7 @@ class AccountManagementServiceTest {
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     mapper.when(() -> AccountMapper.partialUpdate(account, request)).thenReturn(account);
-    when(account.isDefault()).thenReturn(true);
-    when(accountRepository.findDefaultAccountByUser(any())).thenReturn(Optional.of(defaultAccount));
+    when(accountRepository.findDefaultAccountsByUser(any())).thenReturn(List.of(defaultAccount));
     when(defaultAccount.getAccountId()).thenReturn(RandomUtils.randomUUID());
     when(accountRepository.save(defaultAccount)).thenReturn(defaultAccount);
     when(accountRepository.save(account)).thenReturn(account);
@@ -233,7 +234,7 @@ class AccountManagementServiceTest {
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
     mapper.verify(() -> AccountMapper.partialUpdate(account, request), times(1));
-    verify(accountRepository, times(1)).findDefaultAccountByUser(any());
+    verify(accountRepository, times(1)).findDefaultAccountsByUser(any());
     verify(accountRepository, times(1)).save(defaultAccount);
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
