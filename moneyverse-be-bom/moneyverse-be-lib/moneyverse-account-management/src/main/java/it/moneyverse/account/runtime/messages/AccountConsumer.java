@@ -8,12 +8,10 @@ import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.core.utils.JsonUtils;
 
-import it.moneyverse.core.utils.properties.KafkaProperties;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -30,9 +28,9 @@ public class AccountConsumer {
   private final UserServiceClient userServiceClient;
 
   public AccountConsumer(
-      AccountService accountService,
-      UserServiceClient userServiceClient,
-      KafkaProperties kafkaProperties) {
+          AccountService accountService,
+          UserServiceClient userServiceClient
+  ) {
     this.accountService = accountService;
     this.userServiceClient = userServiceClient;
   }
