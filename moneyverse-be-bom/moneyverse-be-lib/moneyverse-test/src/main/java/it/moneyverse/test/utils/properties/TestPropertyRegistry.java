@@ -39,7 +39,7 @@ public class TestPropertyRegistry {
 
   public TestPropertyRegistry withKafkaContainer(KafkaContainer container) {
     registry.add(KafkaProperties.KafkaAdminProperties.BOOTSTRAP_SERVERS, container::getBootstrapServers);
-    registry.add(KafkaProperties.KafkaConsumerProperties.GROUP_ID, () -> "test-group-listener");
+    registry.add(KafkaProperties.KafkaConsumerProperties.GROUP_ID, () -> "test-group");
     return this;
   }
 }

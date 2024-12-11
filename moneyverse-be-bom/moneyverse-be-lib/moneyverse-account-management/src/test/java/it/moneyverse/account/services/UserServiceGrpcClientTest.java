@@ -1,36 +1,85 @@
 package it.moneyverse.account.services;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import it.moneyverse.grpc.lib.UserRequest;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import it.moneyverse.account.runtime.messages.AccountConsumer;
+import it.moneyverse.core.utils.properties.UserServiceGrpcCircuitBreakerProperties;
 import it.moneyverse.grpc.lib.UserResponse;
-import it.moneyverse.grpc.lib.UserServiceGrpc.UserServiceBlockingStub;
+import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-/**
- * Unit tests for {@link UserServiceGrpcClient}
- */
+/** Unit tests for {@link UserServiceGrpcClient} */
+@SpringBootTest(
+    properties = {
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.DatasourceAutoConfiguration, it.moneyverse.core.boot.KafkaAutoConfiguration",
+      "logging.level.org.grpcmock.GrpcMock=WARN"
+    })
+@EmbeddedKafka
 @ExtendWith(MockitoExtension.class)
 class UserServiceGrpcClientTest {
 
-  @InjectMocks private UserServiceGrpcClient userServiceClient;
+  @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
 
-  @Mock private UserServiceBlockingStub stub;
+  @Autowired private UserServiceGrpcClient userServiceClient;
+  @Autowired private CircuitBreakerRegistry registry;
 
-  @Test
-  void givenUsername_WhenCheckIfUserExists_ThenReturnTrue(@Mock UserResponse response) {
-    String username = RandomUtils.randomUUID().toString();
-    when(stub.checkIfUserExists(any(UserRequest.class))).thenReturn(response);
+  private CircuitBreaker circuitBreaker;
 
-    userServiceClient.checkIfUserExists(username);
+  @MockitoBean private AccountConsumer accountConsumer;
+  @MockitoBean private AccountProducer accountProducer;
 
-    verify(response, times(1)).getExists();
+  @DynamicPropertySource
+  static void mappingProperties(DynamicPropertyRegistry registry) {
+    new TestPropertyRegistry(registry)
+        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort());
   }
 
+  @BeforeEach
+  void setUp() {
+    circuitBreaker =
+        registry.circuitBreaker(UserServiceGrpcCircuitBreakerProperties.USER_SERVICE_GRPC);
+    circuitBreaker.transitionToClosedState();
+  }
+
+  @AfterEach
+  void tearDown() {
+    circuitBreaker.reset();
+  }
+
+  @Test
+  void givenUsername_WhenCheckIfUserExists_ThenReturnTrue() {
+    String username = RandomUtils.randomUUID().toString();
+    mockUserService.mockExistentUser();
+
+    Boolean exists = userServiceClient.checkIfUserExists(username);
+
+    assertTrue(exists);
+  }
+
+  @Test
+  void givenCircuitBreakerOpen_WhenCheckIfUserExists_ThenFallbackMethodIsTriggered() {
+    String username = RandomUtils.randomUUID().toString();
+    circuitBreaker.transitionToOpenState();
+
+    Boolean exists = userServiceClient.checkIfUserExists(username);
+    assertFalse(exists);
+  }
 }

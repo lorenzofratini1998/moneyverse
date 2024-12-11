@@ -83,7 +83,6 @@ public class KafkaProperties {
     public static final String GROUP_ID = CONSUMER_PREFIX + ".group-id";
 
     private String groupId;
-    private Boolean autoStartup = true;
     private final KafkaConsumerRetryProperties retry = new KafkaConsumerRetryProperties();
 
     @PostConstruct
@@ -97,14 +96,6 @@ public class KafkaProperties {
 
     public void setGroupId(String groupId) {
       this.groupId = groupId;
-    }
-
-    public Boolean getAutoStartup() {
-      return autoStartup;
-    }
-
-    public void setAutoStartup(Boolean autoStartup) {
-      this.autoStartup = autoStartup;
     }
 
     public KafkaConsumerRetryProperties getRetry() {
