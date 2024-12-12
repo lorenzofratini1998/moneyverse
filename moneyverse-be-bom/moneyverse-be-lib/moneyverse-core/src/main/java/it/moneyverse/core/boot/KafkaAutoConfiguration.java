@@ -1,6 +1,5 @@
 package it.moneyverse.core.boot;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.utils.properties.KafkaProperties;
@@ -8,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import jakarta.json.stream.JsonParsingException;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
@@ -107,7 +108,7 @@ public class KafkaAutoConfiguration {
             kafkaProperties.getConsumer().getRetry().getMultiplier(),
             kafkaProperties.getConsumer().getRetry().getMaxRetryBackoffMs())
         .autoStartDltHandler(Boolean.TRUE)
-        .notRetryOn(List.of(JsonProcessingException.class, ResourceNotFoundException.class))
+        .notRetryOn(List.of(JsonParsingException.class, ResourceNotFoundException.class))
         .create(template);
   }
 }

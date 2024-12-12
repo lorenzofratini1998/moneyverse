@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>it.moneyverse</groupId>
     <artifactId>moneyverse-lib</artifactId>
@@ -10,10 +10,12 @@
   </parent>
 
   <artifactId>moneyverse-test</artifactId>
+
   <name>moneyverse-test</name>
   <description>Moneyverse's facilities for integration tests</description>
 
   <dependencies>
+    <!-- Product dependencies -->
     <dependency>
       <groupId>it.moneyverse</groupId>
       <artifactId>moneyverse-core</artifactId>
@@ -24,31 +26,40 @@
       <artifactId>moneyverse-proto</artifactId>
       <optional>true</optional>
     </dependency>
+    <!-- External dependencies -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>com.github.dasniko</groupId>
+      <artifactId>testcontainers-keycloak</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
       <optional>true</optional>
-      <!--
-      WARNING!! Testcontainers still depends on JUNIt 4. I cannot remove this dependency using the exclusion tag due to a bug. See https://github.com/testcontainers/testcontainers-java/issues/970 for further details
-      -->
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>postgresql</artifactId>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.grpcmock</groupId>
+      <artifactId>grpcmock-junit5</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.grpcmock</groupId>
+      <artifactId>grpcmock-spring-boot</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -58,35 +69,41 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-database-postgresql</artifactId>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.github.dasniko</groupId>
-      <artifactId>testcontainers-keycloak</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.grpcmock</groupId>
-      <artifactId>grpcmock-spring-boot</artifactId>
-      <version>${grpcmock.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.grpcmock</groupId>
-      <artifactId>grpcmock-junit5</artifactId>
-      <version>${grpcmock.version}</version>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-commons</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <optional>true</optional>
+      <!--
+      WARNING!! Testcontainers still depends on JUnit 4. I cannot remove this dependency using the exclusion tag due to a bug. See https://github.com/testcontainers/testcontainers-java/issues/970 for further details
+      -->
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
       <artifactId>kafka</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
       <optional>true</optional>
     </dependency>
   </dependencies>

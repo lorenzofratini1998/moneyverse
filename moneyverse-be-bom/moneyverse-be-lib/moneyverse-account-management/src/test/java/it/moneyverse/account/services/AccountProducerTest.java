@@ -1,8 +1,6 @@
 package it.moneyverse.account.services;
 
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import it.moneyverse.account.model.event.AccountDeletionEvent;
@@ -49,7 +47,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @EmbeddedKafka(
     partitions = 1,
     topics = {"test-topic"})
-public class AccountProducerTest {
+class AccountProducerTest {
 
   private static final String TOPIC = "test-topic";
 
