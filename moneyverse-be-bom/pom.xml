@@ -17,6 +17,7 @@
 
   <properties>
     <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
+    <moneyverse-budget-management.version>1.0.0-SNAPSHOT</moneyverse-budget-management.version>
     <moneyverse-core.version>1.0.0-SNAPSHOT</moneyverse-core.version>
     <moneyverse-proto.version>1.0.0-SNAPSHOT</moneyverse-proto.version>
     <moneyverse-test.version>1.0.0-SNAPSHOT</moneyverse-test.version>
@@ -25,24 +26,29 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <artifactId>moneyverse-account-management</artifactId>
         <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-account-management</artifactId>
         <version>${moneyverse-account-management.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-budget-management</artifactId>
+        <version>${moneyverse-budget-management.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-core</artifactId>
+        <version>${moneyverse-core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-proto</artifactId>
+        <version>${moneyverse-proto.version}</version>
       </dependency>
       <dependency>
         <artifactId>moneyverse-test</artifactId>
         <groupId>it.moneyverse</groupId>
         <version>${moneyverse-test.version}</version>
-      </dependency>
-      <dependency>
-        <artifactId>moneyverse-core</artifactId>
-        <groupId>it.moneyverse</groupId>
-        <version>${moneyverse-core.version}</version>
-      </dependency>
-      <dependency>
-        <artifactId>moneyverse-proto</artifactId>
-        <groupId>it.moneyverse</groupId>
-        <version>${moneyverse-proto.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

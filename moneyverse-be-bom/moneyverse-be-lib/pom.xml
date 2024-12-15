@@ -17,9 +17,10 @@
 
   <modules>
     <module>moneyverse-account-management</module>
-    <module>moneyverse-test</module>
+    <module>moneyverse-budget-management</module>
     <module>moneyverse-core</module>
     <module>moneyverse-proto</module>
+    <module>moneyverse-test</module>
   </modules>
 
   <properties>
