@@ -1,8 +1,10 @@
 package it.moneyverse.test.model;
 
 import it.moneyverse.core.model.entities.AccountModel;
+import it.moneyverse.core.model.entities.BudgetModel;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.model.entities.FakeAccount;
+import it.moneyverse.test.model.entities.FakeBudget;
 import it.moneyverse.test.model.entities.FakeUser;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
@@ -16,14 +18,18 @@ public class RandomTestContextModel implements TestContextModel {
   private static final Integer MAX_USERS = 200;
   private static final Integer MIN_ACCOUNTS_PER_USER = 5;
   private static final Integer MAX_ACCOUNTS_PER_USER = 20;
+  private static final Integer MIN_BUDGETS_PER_USER = 3;
+  private static final Integer MAX_BUDGETS_PER_USER = 15;
   private static final Logger LOGGER = LoggerFactory.getLogger(RandomTestContextModel.class);
 
   private final List<UserModel> users;
   private final List<AccountModel> accounts;
+  private final List<BudgetModel> budgets;
 
   public RandomTestContextModel(Builder builder) {
     this.users = builder.users;
     this.accounts = builder.accounts;
+    this.budgets = builder.budgets;
   }
 
   public static Builder builder() {
@@ -51,13 +57,32 @@ public class RandomTestContextModel implements TestContextModel {
   }
 
   private static List<AccountModel> randomAccounts(String username) {
-    int numAccountsPerUser = RandomUtils.randomInteger(MIN_ACCOUNTS_PER_USER,
-        MAX_ACCOUNTS_PER_USER);
+    int numAccountsPerUser =
+        RandomUtils.randomInteger(MIN_ACCOUNTS_PER_USER, MAX_ACCOUNTS_PER_USER);
     List<AccountModel> accounts = new ArrayList<>();
     for (int i = 0; i < numAccountsPerUser; i++) {
       accounts.add(new FakeAccount(username, i));
     }
     return accounts;
+  }
+
+  public static List<BudgetModel> createBudgets(List<UserModel> users) {
+    List<BudgetModel> budgets = new ArrayList<>();
+    for (UserModel user : users) {
+      List<BudgetModel> budgetsByUser = randomBudgets(user.getUsername());
+      budgets.addAll(budgetsByUser);
+    }
+    LOGGER.info("Created {} random budgets for testing", budgets.size());
+    return budgets;
+  }
+
+  private static List<BudgetModel> randomBudgets(String username) {
+    int numBudgetsPerUser = RandomUtils.randomInteger(MIN_BUDGETS_PER_USER, MAX_BUDGETS_PER_USER);
+    List<BudgetModel> budgets = new ArrayList<>();
+    for (int i = 0; i < numBudgetsPerUser; i++) {
+      budgets.add(new FakeBudget(username, i));
+    }
+    return budgets;
   }
 
   @Override
@@ -70,10 +95,16 @@ public class RandomTestContextModel implements TestContextModel {
     return accounts;
   }
 
+  @Override
+  public List<BudgetModel> getBudgets() {
+    return budgets;
+  }
+
   public static class Builder implements TestContextModel.Builder {
 
     private List<UserModel> users;
     private List<AccountModel> accounts;
+    private List<BudgetModel> budgets;
 
     public Builder withUsers(List<UserModel> users) {
       this.users = users;
@@ -85,11 +116,14 @@ public class RandomTestContextModel implements TestContextModel {
       return this;
     }
 
+    @Override
+    public TestContextModel.Builder withBudgets(List<BudgetModel> budgets) {
+      this.budgets = budgets;
+      return this;
+    }
+
     public RandomTestContextModel build() {
       return new RandomTestContextModel(this);
     }
-
   }
-
-
 }

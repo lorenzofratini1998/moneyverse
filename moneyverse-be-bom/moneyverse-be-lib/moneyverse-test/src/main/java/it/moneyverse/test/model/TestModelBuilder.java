@@ -13,13 +13,17 @@ public class TestModelBuilder {
     this.strategy = Objects.requireNonNull(strategy, "strategy must not be null");
   }
 
-  public TestContextModel buildTestModel(boolean withTestUsers, boolean withTestAccounts) {
+  public TestContextModel buildTestModel(
+      boolean withTestUsers, boolean withTestAccounts, boolean withTestBudgets) {
     TestContextModel.Builder modelBuilder = strategy.getBuilder();
     if (withTestUsers) {
       List<UserModel> users = strategy.createUsers();
       modelBuilder = modelBuilder.withUsers(users);
       if (withTestAccounts) {
         modelBuilder = modelBuilder.withAccounts(strategy.createAccounts(users));
+      }
+      if (withTestBudgets) {
+        modelBuilder = modelBuilder.withBudgets(strategy.createBudgets(users));
       }
     }
     return modelBuilder.build();

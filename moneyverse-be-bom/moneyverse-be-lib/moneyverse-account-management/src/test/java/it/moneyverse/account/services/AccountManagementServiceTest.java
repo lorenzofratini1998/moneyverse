@@ -19,6 +19,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.UserServiceGrpcClient;
 import it.moneyverse.test.utils.RandomUtils;
 
 import java.util.Collections;

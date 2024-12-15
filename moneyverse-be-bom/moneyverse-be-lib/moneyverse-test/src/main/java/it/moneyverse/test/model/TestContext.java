@@ -13,6 +13,7 @@ import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.model.dto.UserCredential;
 import it.moneyverse.test.operations.keycloak.KeycloakTestSetupManager;
 import it.moneyverse.test.operations.mapping.AccountProcessingStrategy;
+import it.moneyverse.test.operations.mapping.BudgetProcessingStrategy;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
 import it.moneyverse.test.utils.RandomUtils;
@@ -38,7 +39,8 @@ public abstract class TestContext {
     Instant now = Instant.now();
     model =
         new TestModelBuilder(builder.strategy)
-            .buildTestModel(builder.withTestUsers, builder.withTestAccounts);
+            .buildTestModel(
+                builder.withTestUsers, builder.withTestAccounts, builder.withTestBudgets);
 
     if (builder.keycloakContainer != null) {
       this.keycloakTestManager = new KeycloakTestSetupManager(builder.keycloakContainer, model);
@@ -50,6 +52,7 @@ public abstract class TestContext {
     if (builder.metadata != null) {
       new EntityScriptGenerator(model, builder.metadata, new SQLScriptService())
           .addStrategy(new AccountProcessingStrategy())
+          .addStrategy(new BudgetProcessingStrategy())
           .execute();
     }
     setCurrentInstance(this);
@@ -72,7 +75,10 @@ public abstract class TestContext {
   }
 
   public UserModel getRandomUser() {
-    List<UserModel> users = model.getUsers().stream().filter(user -> !user.getRole().equals(UserRoleEnum.ADMIN)).toList();
+    List<UserModel> users =
+        model.getUsers().stream()
+            .filter(user -> !user.getRole().equals(UserRoleEnum.ADMIN))
+            .toList();
     return users.get(RandomUtils.randomInteger(0, users.size() - 1));
   }
 
@@ -145,6 +151,7 @@ public abstract class TestContext {
     private TestModelStrategyEnum strategy;
     private boolean withTestUsers;
     private boolean withTestAccounts;
+    private boolean withTestBudgets;
     private KeycloakContainer keycloakContainer;
     private ScriptMetadata metadata;
 
@@ -160,6 +167,11 @@ public abstract class TestContext {
 
     public T withTestAccount() {
       this.withTestAccounts = true;
+      return self();
+    }
+
+    public T withTestBudgets() {
+      this.withTestBudgets = true;
       return self();
     }
 

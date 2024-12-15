@@ -18,6 +18,8 @@ import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.UserServiceClient;
 import java.util.List;
 import java.util.UUID;
+
+import it.moneyverse.core.services.UserServiceGrpcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;

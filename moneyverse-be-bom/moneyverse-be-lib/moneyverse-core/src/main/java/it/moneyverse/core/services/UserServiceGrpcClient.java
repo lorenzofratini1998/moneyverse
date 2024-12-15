@@ -1,7 +1,6 @@
-package it.moneyverse.account.services;
+package it.moneyverse.core.services;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.core.utils.properties.UserServiceGrpcCircuitBreakerProperties;
 import it.moneyverse.grpc.lib.UserRequest;
 import it.moneyverse.grpc.lib.UserResponse;
@@ -29,7 +28,7 @@ public class UserServiceGrpcClient implements UserServiceClient {
     return response.getExists();
   }
 
-  private Boolean fallbackCheckIfUserExists(String username, Throwable throwable) {
+  protected Boolean fallbackCheckIfUserExists(String username, Throwable throwable) {
     LOGGER.error("Impossible to contact the UserService to check whether the user {} exists. Returning FALSE as fallback: {}", username, throwable.getMessage());
     return false;
   }

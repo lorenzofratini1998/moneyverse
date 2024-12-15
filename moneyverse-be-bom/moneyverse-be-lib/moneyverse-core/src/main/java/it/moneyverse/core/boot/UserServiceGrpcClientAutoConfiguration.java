@@ -5,6 +5,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import it.moneyverse.core.services.UserServiceGrpcClient;
 import it.moneyverse.core.utils.properties.UserServiceGrpcCircuitBreakerProperties;
 import it.moneyverse.core.utils.properties.UserServiceGrpcClientProperties;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
@@ -18,7 +19,8 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
 
 @Configuration
-@EnableConfigurationProperties(value = {UserServiceGrpcClientProperties.class, UserServiceGrpcCircuitBreakerProperties.class})
+@EnableConfigurationProperties(
+    value = {UserServiceGrpcClientProperties.class, UserServiceGrpcCircuitBreakerProperties.class})
 public class UserServiceGrpcClientAutoConfiguration {
 
   private static final Logger LOGGER =
@@ -27,10 +29,12 @@ public class UserServiceGrpcClientAutoConfiguration {
   private final UserServiceGrpcClientProperties clientProperties;
   private final UserServiceGrpcCircuitBreakerProperties circuitBreakerProperties;
 
-  public UserServiceGrpcClientAutoConfiguration(UserServiceGrpcClientProperties clientProperties, UserServiceGrpcCircuitBreakerProperties circuitBreakerProperties) {
+  public UserServiceGrpcClientAutoConfiguration(
+      UserServiceGrpcClientProperties clientProperties,
+      UserServiceGrpcCircuitBreakerProperties circuitBreakerProperties) {
     this.clientProperties = clientProperties;
-      this.circuitBreakerProperties = circuitBreakerProperties;
-      LOGGER.info("Starting to load beans from {}", UserServiceGrpcClientAutoConfiguration.class);
+    this.circuitBreakerProperties = circuitBreakerProperties;
+    LOGGER.info("Starting to load beans from {}", UserServiceGrpcClientAutoConfiguration.class);
   }
 
   @Bean
@@ -47,11 +51,20 @@ public class UserServiceGrpcClientAutoConfiguration {
 
   @Bean
   public CircuitBreaker userServiceGrpcCircuitBreaker(CircuitBreakerRegistry registry) {
-    CircuitBreakerConfig userServiceConfig = CircuitBreakerConfig.custom()
+    CircuitBreakerConfig userServiceConfig =
+        CircuitBreakerConfig.custom()
             .failureRateThreshold(circuitBreakerProperties.getFailureRateThreshold())
-            .waitDurationInOpenState(Duration.ofSeconds(circuitBreakerProperties.getWaitDurationInOpenState()))
+            .waitDurationInOpenState(
+                Duration.ofSeconds(circuitBreakerProperties.getWaitDurationInOpenState()))
             .slidingWindowSize(circuitBreakerProperties.getSlidingWindowSize())
             .build();
-    return registry.circuitBreaker(UserServiceGrpcCircuitBreakerProperties.USER_SERVICE_GRPC, userServiceConfig);
+    return registry.circuitBreaker(
+        UserServiceGrpcCircuitBreakerProperties.USER_SERVICE_GRPC, userServiceConfig);
+  }
+
+  @Bean
+  public UserServiceGrpcClient userServiceGrpcClient(
+      UserServiceBlockingStub userServiceBlockingStub) {
+    return new UserServiceGrpcClient(userServiceBlockingStub);
   }
 }
