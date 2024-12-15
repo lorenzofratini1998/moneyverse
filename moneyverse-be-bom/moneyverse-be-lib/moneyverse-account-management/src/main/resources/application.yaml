@@ -1,7 +1,23 @@
 server:
   port:
-    8000
+    ${PORT:8080}
 
 spring:
   security:
     base-path: /accountsManagement/api/v1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
