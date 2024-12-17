@@ -24,6 +24,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+import java.util.UUID;
+
 /** Unit test for {@link BudgetManagementService} */
 @ExtendWith(MockitoExtension.class)
 public class BudgetManagementServiceTest {
@@ -116,5 +119,32 @@ public class BudgetManagementServiceTest {
     verify(userServiceClient, times(1)).checkIfUserExists(username);
     verify(budgetRepository, times(1))
         .existsByUsernameAndBudgetName(username, request.budgetName());
+  }
+
+  @Test
+  void givenBudgetId_WhenGetBudget_ThenReturnBudget(@Mock Budget budget, @Mock BudgetDto budgetDto) {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    when(budgetRepository.findById(budgetId)).thenReturn(Optional.ofNullable(budget));
+    mapper.when(() -> BudgetMapper.toBudgetDto(budget)).thenReturn(budgetDto);
+
+    budgetDto = budgetManagementService.getBudget(budgetId);
+
+    assertNotNull(budgetDto);
+    verify(budgetRepository, times(1)).findById(budgetId);
+    mapper.verify(() -> BudgetMapper.toBudgetDto(budget), times(1));
+  }
+
+  @Test
+  void givenBudgetId_WhenGetBudget_ThenBudgetNotFound() {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    when(budgetRepository.findById(budgetId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> budgetManagementService.getBudget(budgetId));
+
+    verify(budgetRepository, times(1)).findById(budgetId);
+    mapper.verify(() -> BudgetMapper.toBudgetDto(any(Budget.class)), never());
   }
 }

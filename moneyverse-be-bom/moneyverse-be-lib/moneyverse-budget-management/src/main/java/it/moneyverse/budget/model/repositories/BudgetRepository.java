@@ -8,5 +8,7 @@ import java.util.UUID;
 
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, UUID>, BudgetCustomRepository {
-  Object existsByUsernameAndBudgetName(String username, String budgetName);
+  Boolean existsByUsernameAndBudgetName(String username, String budgetName);
+
+  boolean existsByUsernameAndBudgetId(String username, UUID budgetId);
 }

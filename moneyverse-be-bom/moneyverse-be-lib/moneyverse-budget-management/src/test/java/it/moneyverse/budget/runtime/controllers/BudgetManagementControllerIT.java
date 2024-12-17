@@ -135,4 +135,38 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
             new ParameterizedTypeReference<>() {}
     );
   }
+
+  @Test
+  void testGetBudget_Success() {
+    final String username = testContext.getAdminUser().getUsername();
+    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<BudgetDto> response =
+        restTemplate.exchange(
+            basePath + "/budgets/" + budgetId,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            BudgetDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(budgetId, response.getBody().getBudgetId());
+  }
+
+  @Test
+  void testGetBudget_NotFound() {
+    final String username = testContext.getRandomUser().getUsername();
+    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<BudgetDto> response =
+        restTemplate.exchange(
+            basePath + "/budgets/" + budgetId,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            BudgetDto.class);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+  }
 }

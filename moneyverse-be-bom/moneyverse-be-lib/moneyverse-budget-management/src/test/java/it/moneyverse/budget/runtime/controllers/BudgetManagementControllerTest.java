@@ -16,6 +16,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,30 @@ class BudgetManagementControllerTest {
     verify(budgetService, never()).createBudget(requestSupplier.get());
   }
 
+  private static Stream<Supplier<BudgetRequestDto>> invalidBudgetRequestProvider() {
+    return Stream.of(
+            BudgetManagementControllerTest::createRequestWithNullUsername,
+            BudgetManagementControllerTest::createRequestWithNullBudgetName);
+  }
+
+  private static BudgetRequestDto createRequestWithNullUsername() {
+    return new BudgetRequestDto(
+            null,
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
+  }
+
+  private static BudgetRequestDto createRequestWithNullBudgetName() {
+    return new BudgetRequestDto(
+            RandomUtils.randomString(15),
+            null,
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
+  }
+
   @Test
   void testBudgetCreation_BudgetAlreadyExists() throws Exception {
     BudgetRequestDto request =
@@ -129,27 +154,28 @@ class BudgetManagementControllerTest {
         .andExpect(status().isOk());
   }
 
-  private static Stream<Supplier<BudgetRequestDto>> invalidBudgetRequestProvider() {
-    return Stream.of(
-        BudgetManagementControllerTest::createRequestWithNullUsername,
-        BudgetManagementControllerTest::createRequestWithNullBudgetName);
+  @Test
+  void testGetBudget_Success(@Mock BudgetDto response) throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+    when(budgetService.getBudget(budgetId)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/budgets/" + budgetId)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 
-  private static BudgetRequestDto createRequestWithNullUsername() {
-    return new BudgetRequestDto(
-        null,
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal());
-  }
+  @Test
+  void testGetBudget_NotFound() throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+    when(budgetService.getBudget(budgetId))
+        .thenThrow(ResourceNotFoundException.class);
 
-  private static BudgetRequestDto createRequestWithNullBudgetName() {
-    return new BudgetRequestDto(
-        RandomUtils.randomString(15),
-        null,
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal());
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/budgets/" + budgetId)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 }

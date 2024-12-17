@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BudgetManagementService implements BudgetService {
@@ -73,5 +74,17 @@ public class BudgetManagementService implements BudgetService {
     }
     LOGGER.info("Finding budgets with filters: {}", criteria);
     return BudgetMapper.toBudgetDto(budgetRepository.findBudgets(criteria));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BudgetDto getBudget(UUID budgetId) {
+    return BudgetMapper.toBudgetDto(findBudgetById(budgetId));
+  }
+
+  private Budget findBudgetById(UUID budgetId) {
+    return budgetRepository
+        .findById(budgetId)
+        .orElseThrow(() -> new ResourceNotFoundException("Budget with id %s not found".formatted(budgetId)));
   }
 }

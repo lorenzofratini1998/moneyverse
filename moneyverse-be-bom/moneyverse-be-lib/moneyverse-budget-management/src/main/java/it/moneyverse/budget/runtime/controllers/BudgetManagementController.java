@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
@@ -38,5 +39,14 @@ public class BudgetManagementController implements BudgetOperations {
       "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (#criteria.username.isPresent() and #criteria.username.get().equals(authentication.name))")
   public List<BudgetDto> getBudgets(BudgetCriteria criteria) {
     return budgetService.getBudgets(criteria);
+  }
+
+  @Override
+  @GetMapping("/budgets/{budgetId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+          "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@budgetRepository.existsByUsernameAndBudgetId(authentication.name, #budgetId))")
+  public BudgetDto getBudget(@PathVariable UUID budgetId) {
+    return budgetService.getBudget(budgetId);
   }
 }

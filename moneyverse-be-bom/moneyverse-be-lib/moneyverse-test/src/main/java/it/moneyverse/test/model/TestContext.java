@@ -6,6 +6,7 @@ import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.model.entities.AccountModel;
+import it.moneyverse.core.model.entities.BudgetModel;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.enums.TestModelStrategyEnum;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
@@ -113,6 +114,14 @@ public abstract class TestContext {
             .filter(account -> account.getUsername().equals(username))
             .toList();
     return userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
+  }
+
+  public BudgetModel getRandomBudget(String username) {
+    List<BudgetModel> userBudgets =
+            model.getBudgets().stream()
+                    .filter(budget -> budget.getUsername().equals(username))
+                    .toList();
+    return userBudgets.get(RandomUtils.randomInteger(0, userBudgets.size() - 1));
   }
 
   protected boolean filterByBound(BigDecimal value, BoundCriteria boundCriteria) {
