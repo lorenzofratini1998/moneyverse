@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
+import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.services.BudgetManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
@@ -13,6 +14,8 @@ import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
+
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -113,6 +116,17 @@ class BudgetManagementControllerTest {
                 .content(request.toString())
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testGetBudgets_Success(@Mock BudgetCriteria criteria, @Mock List<BudgetDto> response) throws Exception {
+    when(budgetService.getBudgets(criteria)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/budgets")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 
   private static Stream<Supplier<BudgetRequestDto>> invalidBudgetRequestProvider() {

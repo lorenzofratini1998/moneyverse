@@ -18,6 +18,7 @@ import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
 import it.moneyverse.test.utils.RandomUtils;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -112,6 +113,11 @@ public abstract class TestContext {
             .filter(account -> account.getUsername().equals(username))
             .toList();
     return userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
+  }
+
+  protected boolean filterByBound(BigDecimal value, BoundCriteria boundCriteria) {
+    return boundCriteria.getLower().map(lower -> value.compareTo(lower) >= 0).orElse(true)
+            && boundCriteria.getUpper().map(upper -> value.compareTo(upper) <= 0).orElse(true);
   }
 
   public <T> String createUri(String path, T criteria) {

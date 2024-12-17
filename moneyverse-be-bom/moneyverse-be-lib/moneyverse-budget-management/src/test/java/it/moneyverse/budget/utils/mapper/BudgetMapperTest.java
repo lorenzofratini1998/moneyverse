@@ -9,6 +9,10 @@ import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.test.utils.RandomUtils;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /** Unit test for {@link BudgetMapper} */
 class BudgetMapperTest {
 
@@ -38,7 +42,7 @@ class BudgetMapperTest {
 
   @Test
   void testToBudgetDto_NullBudgetEntity() {
-    assertNull(BudgetMapper.toBudgetDto(null));
+    assertNull(BudgetMapper.toBudgetDto((Budget) null));
   }
 
   @Test
@@ -53,6 +57,34 @@ class BudgetMapperTest {
     assertEquals(budget.getDescription(), dto.getDescription());
     assertEquals(budget.getBudgetLimit(), dto.getBudgetLimit());
     assertEquals(budget.getAmount(), dto.getAmount());
+  }
+
+  @Test
+  void testToBudgetDto_EmptyEntityList() {
+    assertEquals(Collections.emptyList(), BudgetMapper.toBudgetDto(new ArrayList<>()));
+  }
+
+  @Test
+  void testToBudgetDto_NonEmptyEntityList() {
+    int entitiesCount = RandomUtils.randomInteger(0, 10);
+    List<Budget> budgets = new ArrayList<>(entitiesCount);
+    for (int i = 0; i < entitiesCount; i++) {
+      budgets.add(createBudget());
+    }
+
+    List<BudgetDto> budgetDtos = BudgetMapper.toBudgetDto(budgets);
+
+    for (int i = 0; i < entitiesCount; i++) {
+      Budget budget = budgets.get(i);
+      BudgetDto budgetDto = budgetDtos.get(i);
+
+      assertEquals(budget.getBudgetId(), budgetDto.getBudgetId());
+      assertEquals(budget.getUsername(), budgetDto.getUsername());
+      assertEquals(budget.getBudgetName(), budgetDto.getBudgetName());
+      assertEquals(budget.getDescription(), budgetDto.getDescription());
+      assertEquals(budget.getBudgetLimit(), budgetDto.getBudgetLimit());
+      assertEquals(budget.getAmount(), budgetDto.getAmount());
+    }
   }
 
   private Budget createBudget() {

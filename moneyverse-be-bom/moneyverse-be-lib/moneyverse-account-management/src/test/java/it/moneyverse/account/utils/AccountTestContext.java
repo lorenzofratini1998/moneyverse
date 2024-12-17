@@ -8,13 +8,12 @@ import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.core.enums.SortAttribute;
-import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.entities.FakeAccount;
 import it.moneyverse.test.utils.helper.MapperTestHelper;
-import java.math.BigDecimal;
+
 import java.util.List;
 import org.springframework.data.domain.Sort;
 
@@ -108,11 +107,6 @@ public class AccountTestContext extends TestContext {
         .skip(criteria.getPage().getOffset())
         .limit(criteria.getPage().getLimit())
         .toList();
-  }
-
-  private boolean filterByBound(BigDecimal value, BoundCriteria boundCriteria) {
-    return boundCriteria.getLower().map(lower -> value.compareTo(lower) >= 0).orElse(true)
-        && boundCriteria.getUpper().map(upper -> value.compareTo(upper) <= 0).orElse(true);
   }
 
   private int sortByCriteria(

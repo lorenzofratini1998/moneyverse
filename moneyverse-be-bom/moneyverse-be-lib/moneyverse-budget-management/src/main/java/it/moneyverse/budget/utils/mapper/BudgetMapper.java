@@ -4,6 +4,9 @@ import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 
+import java.util.Collections;
+import java.util.List;
+
 public class BudgetMapper {
 
   public static Budget toBudget(BudgetRequestDto request) {
@@ -31,6 +34,13 @@ public class BudgetMapper {
         .withBudgetLimit(budget.getBudgetLimit())
         .withAmount(budget.getAmount())
         .build();
+  }
+
+  public static List<BudgetDto> toBudgetDto(List<Budget> entities) {
+    if (entities.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return entities.stream().map(BudgetMapper::toBudgetDto).toList();
   }
 
   private BudgetMapper() {}

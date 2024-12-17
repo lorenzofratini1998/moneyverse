@@ -3,29 +3,24 @@ package it.moneyverse.account.utils;
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.core.enums.AccountCategoryEnum;
-import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.model.entities.AccountModel;
+import it.moneyverse.test.CriteriaRandomGenerator;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.utils.RandomUtils;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 import org.springframework.data.domain.Sort;
 
-public class AccountCriteriaRandomGenerator {
+public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<AccountCriteria> {
 
-  private final TestContext testContext;
   private final AccountCriteria criteria;
 
   public AccountCriteriaRandomGenerator(TestContext testContext) {
-    this.testContext = testContext;
+    super(testContext);
     this.criteria = new AccountCriteria();
   }
 
+  @Override
   public AccountCriteria generate() {
     withRandomUsername();
     withRandomBalance();
@@ -59,31 +54,6 @@ public class AccountCriteriaRandomGenerator {
                 .map(AccountModel::getBalanceTarget)
                 .toList())
             : null);
-  }
-
-  private BoundCriteria randomCriteriaBound(List<BigDecimal> values) {
-    BigDecimal minBalance = findMin(values);
-    BigDecimal maxBalance = findMax(values);
-    BoundCriteria criteria = new BoundCriteria();
-    criteria.setLower(
-        RandomUtils.randomDecimal(
-                minBalance.doubleValue(),
-                maxBalance.divide(BigDecimal.TWO, RoundingMode.HALF_DOWN).doubleValue())
-            .setScale(2, RoundingMode.HALF_DOWN));
-    criteria.setUpper(
-        RandomUtils.randomDecimal(
-                maxBalance.divide(BigDecimal.TWO, RoundingMode.HALF_DOWN).doubleValue(),
-                maxBalance.doubleValue())
-            .setScale(2, RoundingMode.HALF_DOWN));
-    return criteria;
-  }
-
-  private BigDecimal findMin(List<BigDecimal> values) {
-    return values.stream().filter(Objects::nonNull).min(Comparator.naturalOrder()).get();
-  }
-
-  private BigDecimal findMax(List<BigDecimal> values) {
-    return values.stream().filter(Objects::nonNull).max(Comparator.naturalOrder()).get();
   }
 
   private void withRandomAccountCategory() {
