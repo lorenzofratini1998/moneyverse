@@ -4,9 +4,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import ch.qos.logback.core.testUtil.RandomUtil;
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
+import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.utils.BudgetTestContext;
@@ -18,6 +20,7 @@ import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 
 import java.util.List;
@@ -165,6 +168,54 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
             basePath + "/budgets/" + budgetId,
             HttpMethod.GET,
             new HttpEntity<>(headers),
+            BudgetDto.class);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+  }
+
+  @Test
+  void testUpdateBudget_Success() {
+    final String username = testContext.getAdminUser().getUsername();
+    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
+        null,
+            RandomUtils.randomString(25),
+            null,
+            RandomUtils.randomBigDecimal()
+    );
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<BudgetDto> response =
+        restTemplate.exchange(
+            basePath + "/budgets/" + budgetId,
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            BudgetDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(budgetId, response.getBody().getBudgetId());
+    assertEquals(request.description(), response.getBody().getDescription());
+    assertEquals(request.budgetLimit(), response.getBody().getBudgetLimit());
+  }
+
+  @Test
+  void testUpdateBudget_Unauthorized() {
+    final String username = testContext.getRandomUser().getUsername();
+    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
+        null,
+            RandomUtils.randomString(25),
+            null,
+            RandomUtils.randomBigDecimal()
+    );
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<BudgetDto> response =
+        restTemplate.exchange(
+            basePath + "/budgets/" + budgetId,
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
             BudgetDto.class);
 
     assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());

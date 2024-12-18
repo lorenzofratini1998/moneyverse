@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
+import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.services.BudgetManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
@@ -175,6 +176,45 @@ class BudgetManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/budgets/" + budgetId)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testUpdateBudgetSuccess(@Mock BudgetDto response) throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal()
+    );
+    when(budgetService.updateBudget(budgetId, request)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/budgets/" + budgetId)
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testUpdateBudget_NotFound() throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal()
+    );
+    when(budgetService.updateBudget(budgetId, request))
+        .thenThrow(ResourceNotFoundException.class);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/budgets/" + budgetId)
+                .content(request.toString())
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }

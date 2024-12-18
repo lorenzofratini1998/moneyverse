@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
+import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
@@ -29,7 +30,7 @@ import java.util.UUID;
 
 /** Unit test for {@link BudgetManagementService} */
 @ExtendWith(MockitoExtension.class)
-public class BudgetManagementServiceTest {
+class BudgetManagementServiceTest {
 
   @InjectMocks private BudgetManagementService budgetManagementService;
 
@@ -145,6 +146,51 @@ public class BudgetManagementServiceTest {
         ResourceNotFoundException.class, () -> budgetManagementService.getBudget(budgetId));
 
     verify(budgetRepository, times(1)).findById(budgetId);
+    mapper.verify(() -> BudgetMapper.toBudgetDto(any(Budget.class)), never());
+  }
+
+  @Test
+  void givenBudgetId_WhenUpdateBudget_ThenReturnBudgetDto(@Mock Budget budget, @Mock BudgetDto budgetDto) {
+    UUID budgetId = RandomUtils.randomUUID();
+    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal()
+    );
+
+    when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
+    mapper.when(() -> BudgetMapper.partialUpdate(budget, request)).thenReturn(budget);
+    when(budgetRepository.save(budget)).thenReturn(budget);
+    mapper.when(() -> BudgetMapper.toBudgetDto(budget)).thenReturn(budgetDto);
+
+    budgetDto = budgetManagementService.updateBudget(budgetId, request);
+
+    assertNotNull(budgetDto);
+    verify(budgetRepository, times(1)).findById(budgetId);
+    mapper.verify(() -> BudgetMapper.partialUpdate(budget, request), times(1));
+    verify(budgetRepository, times(1)).save(budget);
+    mapper.verify(() -> BudgetMapper.toBudgetDto(budget), times(1));
+  }
+
+  @Test
+  void givenBudgetId_WhenUpdateBudget_ThenReturnResourceNotFound() {
+    UUID budgetId = RandomUtils.randomUUID();
+    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal()
+    );
+
+    when(budgetRepository.findById(budgetId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> budgetManagementService.updateBudget(budgetId, request));
+
+    verify(budgetRepository, times(1)).findById(budgetId);
+    mapper.verify(() -> BudgetMapper.partialUpdate(any(Budget.class), any(BudgetUpdateRequestDto.class)), never());
+    verify(budgetRepository, never()).save(any(Budget.class));
     mapper.verify(() -> BudgetMapper.toBudgetDto(any(Budget.class)), never());
   }
 }

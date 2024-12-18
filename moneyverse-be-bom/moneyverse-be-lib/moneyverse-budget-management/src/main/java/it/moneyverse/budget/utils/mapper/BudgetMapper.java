@@ -2,6 +2,7 @@ package it.moneyverse.budget.utils.mapper;
 
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
+import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 
 import java.util.Collections;
@@ -41,6 +42,25 @@ public class BudgetMapper {
       return Collections.emptyList();
     }
     return entities.stream().map(BudgetMapper::toBudgetDto).toList();
+  }
+
+  public static Budget partialUpdate(Budget budget, BudgetUpdateRequestDto request) {
+    if (request == null) {
+      return null;
+    }
+    if (request.budgetName() != null) {
+      budget.setBudgetName(request.budgetName());
+    }
+    if (request.description() != null) {
+      budget.setDescription(request.description());
+    }
+    if (request.budgetLimit() != null) {
+      budget.setBudgetLimit(request.budgetLimit());
+    }
+    if (request.amount() != null) {
+      budget.setAmount(request.amount());
+    }
+    return budget;
   }
 
   private BudgetMapper() {}

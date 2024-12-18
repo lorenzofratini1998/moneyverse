@@ -4,6 +4,7 @@ import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
+import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
@@ -80,6 +81,16 @@ public class BudgetManagementService implements BudgetService {
   @Transactional(readOnly = true)
   public BudgetDto getBudget(UUID budgetId) {
     return BudgetMapper.toBudgetDto(findBudgetById(budgetId));
+  }
+
+  @Override
+  @Transactional
+  public BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto budgetDto) {
+    Budget budget = findBudgetById(budgetId);
+    budget = BudgetMapper.partialUpdate(budget, budgetDto);
+    BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
+    LOGGER.info("Updated budget {} for user {}", result, budget.getUsername());
+    return result;
   }
 
   private Budget findBudgetById(UUID budgetId) {
