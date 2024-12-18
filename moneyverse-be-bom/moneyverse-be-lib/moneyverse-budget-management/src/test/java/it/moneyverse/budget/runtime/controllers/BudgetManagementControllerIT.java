@@ -4,7 +4,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import ch.qos.logback.core.testUtil.RandomUtil;
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
@@ -16,6 +15,7 @@ import it.moneyverse.core.model.entities.BudgetModel;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.enums.TestModelStrategyEnum;
 import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
+import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.model.dto.ScriptMetadata;
@@ -42,6 +42,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   protected static BudgetTestContext testContext;
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
+  @Container static KafkaContainer kafkaContainer = new KafkaContainer();
   @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
   @Autowired private BudgetRepository budgetRepository;
   private HttpHeaders headers;
@@ -51,7 +52,8 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKeycloak(keycloakContainer)
-        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort());
+        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort())
+        .withKafkaContainer(kafkaContainer);
   }
 
   @BeforeAll
@@ -217,6 +219,39 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
             HttpMethod.PUT,
             new HttpEntity<>(request, headers),
             BudgetDto.class);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+  }
+
+  @Test
+  void testDeleteAccount_Success() {
+    final String admin = testContext.getAdminUser().getUsername();
+    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(admin));
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/budgets/" + budgetId,
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class);
+
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertEquals(testContext.getBudgetsCount() - 1, budgetRepository.count());
+  }
+
+  @Test
+  void testDeleteBudget_Unauthorized() {
+    final String username = testContext.getRandomUser().getUsername();
+    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/budgets/" + budgetId,
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class);
 
     assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }

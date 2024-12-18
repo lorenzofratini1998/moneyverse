@@ -2,6 +2,7 @@ package it.moneyverse.core.boot;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
+import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.utils.properties.KafkaProperties;
 import java.util.HashMap;
 import java.util.List;
@@ -110,5 +111,10 @@ public class KafkaAutoConfiguration {
         .autoStartDltHandler(Boolean.TRUE)
         .notRetryOn(List.of(JsonParsingException.class, ResourceNotFoundException.class))
         .create(template);
+  }
+
+  @Bean
+  public MessageProducer<UUID, String> messageProducer(KafkaTemplate<UUID, String> kafkaTemplate) {
+    return new MessageProducer<>(kafkaTemplate);
   }
 }

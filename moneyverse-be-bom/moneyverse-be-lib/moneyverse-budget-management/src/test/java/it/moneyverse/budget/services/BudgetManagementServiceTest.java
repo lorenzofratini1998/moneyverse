@@ -10,10 +10,12 @@ import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
+import it.moneyverse.budget.model.event.BudgetDeletionEvent;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -24,9 +26,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.support.SendResult;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /** Unit test for {@link BudgetManagementService} */
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +40,7 @@ class BudgetManagementServiceTest {
 
   @Mock private BudgetRepository budgetRepository;
   @Mock private UserServiceClient userServiceClient;
+  @Mock private MessageProducer<UUID, String> messageProducer;
   private MockedStatic<BudgetMapper> mapper;
 
   @BeforeEach
@@ -192,5 +197,31 @@ class BudgetManagementServiceTest {
     mapper.verify(() -> BudgetMapper.partialUpdate(any(Budget.class), any(BudgetUpdateRequestDto.class)), never());
     verify(budgetRepository, never()).save(any(Budget.class));
     mapper.verify(() -> BudgetMapper.toBudgetDto(any(Budget.class)), never());
+  }
+
+  @Test
+  void givenBudgetId_WhenDeleteBudget_ThenDeleteAccount(@Mock Budget budget, @Mock CompletableFuture<SendResult<UUID, String>> future) {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
+    when(messageProducer.send(any(BudgetDeletionEvent.class), any(String.class))).thenReturn(future);
+
+    budgetManagementService.deleteBudget(budgetId);
+
+    verify(budgetRepository, times(1)).findById(budgetId);
+    verify(messageProducer, times(1)).send(any(BudgetDeletionEvent.class), any(String.class));
+  }
+
+  @Test
+  void givenBudgetId_WhenDeleteBudget_ThenBudgetNotFound() {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    when(budgetRepository.findById(budgetId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> budgetManagementService.deleteBudget(budgetId));
+
+    verify(budgetRepository, times(1)).findById(budgetId);
+    verify(messageProducer, never()).send(any(BudgetDeletionEvent.class), any(String.class));
   }
 }

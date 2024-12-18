@@ -15,6 +15,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import java.util.List;
 import java.util.UUID;
@@ -32,16 +33,16 @@ public class AccountManagementService implements AccountService {
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountManagementService.class);
   private final AccountRepository accountRepository;
   private final UserServiceClient userServiceClient;
-  private final AccountProducer accountProducer;
+  private final MessageProducer<UUID, String> messageProducer;
 
   public AccountManagementService(
       AccountRepository accountRepository,
       UserServiceGrpcClient userServiceClient,
-      AccountProducer accountProducer
+      MessageProducer<UUID, String> messageProducer
   ) {
     this.accountRepository = accountRepository;
     this.userServiceClient = userServiceClient;
-    this.accountProducer = accountProducer;
+    this.messageProducer = messageProducer;
   }
 
   @Override
@@ -124,7 +125,7 @@ public class AccountManagementService implements AccountService {
   public void deleteAccount(UUID accountId) {
     Account account = findAccountById(accountId);
     accountRepository.delete(account);
-    accountProducer.send(
+    messageProducer.send(
         new AccountDeletionEvent(accountId, account.getUsername()), AccountDeletionTopic.TOPIC);
     LOGGER.info("Deleted account {} for user {}", account.getUsername(), account.getUsername());
   }

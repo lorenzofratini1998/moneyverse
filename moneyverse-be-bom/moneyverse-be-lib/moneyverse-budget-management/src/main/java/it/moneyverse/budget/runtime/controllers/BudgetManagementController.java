@@ -60,4 +60,13 @@ public class BudgetManagementController implements BudgetOperations {
   public BudgetDto updateBudget(@PathVariable UUID budgetId, @RequestBody BudgetUpdateRequestDto request) {
     return budgetService.updateBudget(budgetId, request);
   }
+
+  @Override
+  @DeleteMapping("/budgets/{budgetId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+          "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@budgetRepository.existsByUsernameAndBudgetId(authentication.name, #budgetId))")
+  public void deleteBudget(@PathVariable UUID budgetId) {
+    budgetService.deleteBudget(budgetId);
+  }
 }

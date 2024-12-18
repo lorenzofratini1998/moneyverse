@@ -14,4 +14,5 @@ public interface BudgetService {
   List<BudgetDto> getBudgets(BudgetCriteria criteria);
   BudgetDto getBudget(UUID budgetId);
   BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto budgetDto);
+  void deleteBudget(UUID budgetId);
 }

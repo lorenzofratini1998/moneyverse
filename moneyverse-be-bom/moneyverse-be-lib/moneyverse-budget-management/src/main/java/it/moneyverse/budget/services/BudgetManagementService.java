@@ -6,13 +6,16 @@ import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
+import it.moneyverse.budget.model.event.BudgetDeletionEvent;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.beans.BudgetDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +33,13 @@ public class BudgetManagementService implements BudgetService {
 
   private final BudgetRepository budgetRepository;
   private final UserServiceClient userServiceClient;
+  private final MessageProducer<UUID, String> messageProducer;
 
   public BudgetManagementService(
-      BudgetRepository budgetRepository, UserServiceClient userServiceClient) {
+          BudgetRepository budgetRepository, UserServiceClient userServiceClient, MessageProducer<UUID, String> messageProducer) {
     this.budgetRepository = budgetRepository;
     this.userServiceClient = userServiceClient;
+      this.messageProducer = messageProducer;
   }
 
   @Override
@@ -91,6 +96,16 @@ public class BudgetManagementService implements BudgetService {
     BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
     LOGGER.info("Updated budget {} for user {}", result, budget.getUsername());
     return result;
+  }
+
+  @Override
+  @Transactional
+  public void deleteBudget(UUID budgetId) {
+    Budget budget = findBudgetById(budgetId);
+    budgetRepository.delete(budget);
+    messageProducer.send(
+        new BudgetDeletionEvent(budgetId, budget.getUsername()), BudgetDeletionTopic.TOPIC);
+    LOGGER.info("Deleted budget {} for user {}", budget, budget.getUsername());
   }
 
   private Budget findBudgetById(UUID budgetId) {

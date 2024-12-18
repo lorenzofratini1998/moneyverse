@@ -19,6 +19,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceGrpcClient;
 import it.moneyverse.test.utils.RandomUtils;
 
@@ -45,7 +46,7 @@ class AccountManagementServiceTest {
 
   @Mock private AccountRepository accountRepository;
   @Mock private UserServiceGrpcClient userServiceClient;
-  @Mock private AccountProducer accountProducer;
+  @Mock private MessageProducer<UUID, String> messageProducer;
   @Mock private AccountDeletionTopic accountDeletionTopic;
   private MockedStatic<AccountMapper> mapper;
 
@@ -273,13 +274,13 @@ class AccountManagementServiceTest {
     UUID accountId = RandomUtils.randomUUID();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(accountProducer.send(any(AccountDeletionEvent.class), any(String.class)))
+    when(messageProducer.send(any(AccountDeletionEvent.class), any(String.class)))
         .thenReturn(future);
 
     accountManagementService.deleteAccount(accountId);
 
     verify(accountRepository, times(1)).findById(accountId);
-    verify(accountProducer, times(1)).send(any(AccountDeletionEvent.class), any(String.class));
+    verify(messageProducer, times(1)).send(any(AccountDeletionEvent.class), any(String.class));
   }
 
   @Test
@@ -293,6 +294,6 @@ class AccountManagementServiceTest {
 
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountDeletionTopic, never()).name();
-    verify(accountProducer, never()).send(any(AccountDeletionEvent.class), any(String.class));
+    verify(messageProducer, never()).send(any(AccountDeletionEvent.class), any(String.class));
   }
 }

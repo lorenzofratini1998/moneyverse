@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -215,6 +216,31 @@ class BudgetManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.put(basePath + "/budgets/" + budgetId)
                 .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testDeleteBudget_Success() throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    Mockito.doNothing().when(budgetService).deleteBudget(budgetId);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/budgets/" + budgetId)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void testDeleteBudget_NotFound() throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+    Mockito.doThrow(ResourceNotFoundException.class).when(budgetService).deleteBudget(budgetId);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/budgets/" + budgetId)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
