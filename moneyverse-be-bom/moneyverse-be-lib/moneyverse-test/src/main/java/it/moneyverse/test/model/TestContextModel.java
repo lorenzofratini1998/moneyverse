@@ -2,6 +2,7 @@ package it.moneyverse.test.model;
 
 import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.core.model.entities.BudgetModel;
+import it.moneyverse.core.model.entities.DefaultBudgetTemplateModel;
 import it.moneyverse.core.model.entities.UserModel;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public interface TestContextModel {
     Builder withAccounts(List<AccountModel> accounts);
 
     Builder withBudgets(List<BudgetModel> budgets);
+
+    Builder withDefaultBudgetTemplates(List<DefaultBudgetTemplateModel> defaultBudgetTemplates);
 
     TestContextModel build();
   }

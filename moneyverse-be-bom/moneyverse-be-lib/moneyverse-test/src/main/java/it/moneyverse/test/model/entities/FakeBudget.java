@@ -26,7 +26,6 @@ public class FakeBudget extends FakeAuditable implements BudgetModel {
             ? RandomUtils.randomDecimal(0.0, Math.random() * 2000)
                 .setScale(2, RoundingMode.HALF_EVEN)
             : null;
-    ;
     this.amount = RandomUtils.randomBigDecimal().setScale(2, RoundingMode.HALF_EVEN);
   }
 

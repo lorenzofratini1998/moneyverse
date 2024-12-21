@@ -2,6 +2,7 @@ package it.moneyverse.test.model;
 
 import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.core.model.entities.BudgetModel;
+import it.moneyverse.core.model.entities.DefaultBudgetTemplateModel;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.model.entities.FakeAccount;
 import it.moneyverse.test.model.entities.FakeBudget;
@@ -20,6 +21,7 @@ public class RandomTestContextModel implements TestContextModel {
   private static final Integer MAX_ACCOUNTS_PER_USER = 20;
   private static final Integer MIN_BUDGETS_PER_USER = 3;
   private static final Integer MAX_BUDGETS_PER_USER = 15;
+  private static final Integer DEFAULT_BUDGET_NUMBER = 3;
   private static final Logger LOGGER = LoggerFactory.getLogger(RandomTestContextModel.class);
 
   private final List<UserModel> users;
@@ -105,6 +107,7 @@ public class RandomTestContextModel implements TestContextModel {
     private List<UserModel> users;
     private List<AccountModel> accounts;
     private List<BudgetModel> budgets;
+    private List<DefaultBudgetTemplateModel> defaultBudgetTemplates;
 
     public Builder withUsers(List<UserModel> users) {
       this.users = users;
@@ -120,6 +123,12 @@ public class RandomTestContextModel implements TestContextModel {
     public TestContextModel.Builder withBudgets(List<BudgetModel> budgets) {
       this.budgets = budgets;
       return this;
+    }
+
+    @Override
+    public TestContextModel.Builder withDefaultBudgetTemplates(List<DefaultBudgetTemplateModel> defaultBudgetTemplates) {
+        this.defaultBudgetTemplates = defaultBudgetTemplates;
+        return this;
     }
 
     public RandomTestContextModel build() {

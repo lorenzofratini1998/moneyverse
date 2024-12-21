@@ -6,7 +6,6 @@ import it.moneyverse.test.services.ScriptService;
 import it.moneyverse.test.utils.helper.MapperTestHelper;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BudgetProcessingStrategy implements EntityProcessingStrategy {
   @Override

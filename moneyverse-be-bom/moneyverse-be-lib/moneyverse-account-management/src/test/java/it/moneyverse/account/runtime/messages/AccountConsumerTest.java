@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import it.moneyverse.account.model.entities.Account;
-import it.moneyverse.account.model.event.UserDeletionEvent;
+import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
 import it.moneyverse.core.model.beans.UserDeletionTopic;

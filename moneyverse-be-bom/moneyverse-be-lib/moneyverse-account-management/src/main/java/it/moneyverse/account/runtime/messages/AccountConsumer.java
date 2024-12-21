@@ -1,6 +1,6 @@
 package it.moneyverse.account.runtime.messages;
 
-import it.moneyverse.account.model.event.UserDeletionEvent;
+import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.account.services.AccountService;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.UserDeletionTopic;

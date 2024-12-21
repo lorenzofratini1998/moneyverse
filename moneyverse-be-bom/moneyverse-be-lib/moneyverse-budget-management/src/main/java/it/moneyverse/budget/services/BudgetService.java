@@ -11,8 +11,10 @@ import java.util.UUID;
 public interface BudgetService {
 
   BudgetDto createBudget(BudgetRequestDto budgetDto);
+  void createDefaultBudgets(String username);
   List<BudgetDto> getBudgets(BudgetCriteria criteria);
   BudgetDto getBudget(UUID budgetId);
   BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto budgetDto);
   void deleteBudget(UUID budgetId);
+  void deleteAllBudgets(String username);
 }

@@ -8,6 +8,7 @@ import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.event.BudgetDeletionEvent;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
+import it.moneyverse.budget.model.repositories.DefaultBudgetTemplateRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
@@ -32,13 +33,15 @@ public class BudgetManagementService implements BudgetService {
   private static final Logger LOGGER = LoggerFactory.getLogger(BudgetManagementService.class);
 
   private final BudgetRepository budgetRepository;
+  private final DefaultBudgetTemplateRepository defaultBudgetTemplateRepository;
   private final UserServiceClient userServiceClient;
   private final MessageProducer<UUID, String> messageProducer;
 
   public BudgetManagementService(
-          BudgetRepository budgetRepository, UserServiceClient userServiceClient, MessageProducer<UUID, String> messageProducer) {
+          BudgetRepository budgetRepository, DefaultBudgetTemplateRepository defaultBudgetTemplateRepository, UserServiceClient userServiceClient, MessageProducer<UUID, String> messageProducer) {
     this.budgetRepository = budgetRepository;
-    this.userServiceClient = userServiceClient;
+      this.defaultBudgetTemplateRepository = defaultBudgetTemplateRepository;
+      this.userServiceClient = userServiceClient;
       this.messageProducer = messageProducer;
   }
 
@@ -54,10 +57,22 @@ public class BudgetManagementService implements BudgetService {
     return result;
   }
 
-  private void checkIfUserExists(String username) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
-    }
+  @Override
+  @Transactional
+  public void createDefaultBudgets(String username) {
+    checkIfUserExists(username);
+    LOGGER.info("Creating default budgets for user {}", username);
+    List<Budget> defaultBudgets = defaultBudgetTemplateRepository.findAll()
+            .stream()
+            .map(defaultBudgetTemplate -> {
+              Budget budget = new Budget();
+              budget.setUsername(username);
+              budget.setBudgetName(defaultBudgetTemplate.getName());
+              budget.setDescription(defaultBudgetTemplate.getDescription());
+              return budget;
+            })
+            .toList();
+    budgetRepository.saveAll(defaultBudgets);
   }
 
   private void checkIfBudgetAlreadyExists(String username, String budgetName) {
@@ -106,6 +121,20 @@ public class BudgetManagementService implements BudgetService {
     messageProducer.send(
         new BudgetDeletionEvent(budgetId, budget.getUsername()), BudgetDeletionTopic.TOPIC);
     LOGGER.info("Deleted budget {} for user {}", budget, budget.getUsername());
+  }
+
+  @Override
+  @Transactional
+  public void deleteAllBudgets(String username) {
+    checkIfUserExists(username);
+  }
+
+  private void checkIfUserExists(String username) {
+    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
+      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+    }
+    LOGGER.info("Deleting accounts by username {}", username);
+    budgetRepository.deleteAll(budgetRepository.findBudgetByUsername(username));
   }
 
   private Budget findBudgetById(UUID budgetId) {
