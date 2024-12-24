@@ -7,24 +7,43 @@ import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountFactory;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.model.dto.SortCriteria;
-import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.test.model.TestContext;
-import it.moneyverse.test.model.entities.FakeAccount;
-import it.moneyverse.test.utils.helper.MapperTestHelper;
-
+import it.moneyverse.test.model.dto.ScriptMetadata;
+import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
+import it.moneyverse.test.services.SQLScriptService;
+import it.moneyverse.test.utils.RandomUtils;
+import java.nio.file.Path;
 import java.util.List;
 import org.springframework.data.domain.Sort;
 
-public class AccountTestContext extends TestContext {
+public class AccountTestContext extends TestContext<AccountTestContext> {
 
-  protected AccountTestContext(Builder builder) {
-    super(builder);
+  private static AccountTestContext currentInstance;
+
+  private final List<Account> accounts;
+
+  public AccountTestContext() {
+    super();
+    accounts = AccountFactory.createAccounts(getUsers());
+    setCurrentInstance(this);
   }
 
-  public static Builder builder() {
-    return new Builder();
+  private static void setCurrentInstance(AccountTestContext instance) {
+    currentInstance = instance;
+  }
+
+  protected static AccountTestContext getCurrentInstance() {
+    if (currentInstance == null) {
+      throw new IllegalStateException("TestContext instance is not set.");
+    }
+    return currentInstance;
+  }
+
+  public List<Account> getAccounts() {
+    return accounts;
   }
 
   private static AccountRequestDto toAccountRequest(Account account) {
@@ -37,13 +56,18 @@ public class AccountTestContext extends TestContext {
         account.getAccountDescription());
   }
 
+  public Account getRandomAccount(String username) {
+    List<Account> userAccounts =
+        accounts.stream().filter(account -> account.getUsername().equals(username)).toList();
+    return userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
+  }
+
   public AccountRequestDto createAccountForUser(String username) {
-    return toAccountRequest(
-        MapperTestHelper.map(new FakeAccount(username, model.getAccounts().size()), Account.class));
+    return toAccountRequest(AccountFactory.fakeAccount(username, accounts.size()));
   }
 
   public AccountDto getExpectedAccountDto(AccountRequestDto request) {
-    if (getUserAccounts(request.username()).stream().anyMatch(AccountModel::isDefault)) {
+    if (getUserAccounts(request.username()).stream().anyMatch(Account::isDefault)) {
       return toAccountDto(request, Boolean.FALSE);
     }
     return toAccountDto(request, Boolean.TRUE);
@@ -65,8 +89,8 @@ public class AccountTestContext extends TestContext {
     return new AccountCriteriaRandomGenerator(getCurrentInstance()).generate();
   }
 
-  public List<AccountModel> filterAccounts(AccountCriteria criteria) {
-    return model.getAccounts().stream()
+  public List<Account> filterAccounts(AccountCriteria criteria) {
+    return accounts.stream()
         .filter(
             account ->
                 criteria
@@ -110,7 +134,7 @@ public class AccountTestContext extends TestContext {
   }
 
   private int sortByCriteria(
-      AccountModel a, AccountModel b, SortCriteria<AccountSortAttributeEnum> sortCriteria) {
+      Account a, Account b, SortCriteria<AccountSortAttributeEnum> sortCriteria) {
     if (sortCriteria == null) {
       return 0;
     }
@@ -132,25 +156,21 @@ public class AccountTestContext extends TestContext {
   }
 
   public int getAccountsCount() {
-    return model.getAccounts().size();
+    return accounts.size();
   }
 
-  public List<AccountModel> getUserAccounts(String username) {
-    return model.getAccounts().stream()
-        .filter(account -> username.equals(account.getUsername()))
-        .toList();
+  public List<Account> getUserAccounts(String username) {
+    return accounts.stream().filter(account -> username.equals(account.getUsername())).toList();
   }
 
-  public static class Builder extends TestContext.Builder<Builder> {
+  @Override
+  public AccountTestContext self() {
+    return this;
+  }
 
-    @Override
-    protected Builder self() {
-      return this;
-    }
-
-    @Override
-    public AccountTestContext build() {
-      return new AccountTestContext(this);
-    }
+  @Override
+  public AccountTestContext generateScript(Path dir) {
+    new EntityScriptGenerator(new ScriptMetadata(dir, accounts), new SQLScriptService()).execute();
+    return self();
   }
 }

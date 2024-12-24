@@ -1,22 +1,21 @@
 package it.moneyverse.budget.model.entities;
 
-import it.moneyverse.core.model.entities.DefaultBudgetTemplateModel;
 import jakarta.persistence.*;
-
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
 @Table(name = "DEFAULT_BUDGET_TEMPLATES")
-public class DefaultBudgetTemplate implements Serializable, DefaultBudgetTemplateModel {
+public class DefaultBudgetTemplate implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DEFAULT_BUDGET_TEMPLATE_ID")
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "DEFAULT_BUDGET_TEMPLATE_ID")
+  private UUID id;
 
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
@@ -24,16 +23,14 @@ public class DefaultBudgetTemplate implements Serializable, DefaultBudgetTemplat
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @Override
-    public Long getId() {
+  public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+  public void setId(UUID id) {
         this.id = id;
     }
 
-    @Override
     public String getName() {
         return name;
     }
@@ -42,7 +39,6 @@ public class DefaultBudgetTemplate implements Serializable, DefaultBudgetTemplat
         this.name = name;
     }
 
-    @Override
     public String getDescription() {
         return description;
     }

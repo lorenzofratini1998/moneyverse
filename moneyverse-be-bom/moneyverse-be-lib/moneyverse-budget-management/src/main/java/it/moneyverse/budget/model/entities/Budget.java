@@ -1,20 +1,18 @@
 package it.moneyverse.budget.model.entities;
 
 import it.moneyverse.core.model.entities.Auditable;
-import it.moneyverse.core.model.entities.BudgetModel;
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(
     name = "BUDGETS",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"USERNAME", "BUDGET_NAME"})})
-public class Budget extends Auditable implements Serializable, BudgetModel {
+public class Budget extends Auditable implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 
@@ -39,7 +37,6 @@ public class Budget extends Auditable implements Serializable, BudgetModel {
   @ColumnDefault(value = "0.0")
   private BigDecimal amount;
 
-  @Override
   public UUID getBudgetId() {
     return budgetId;
   }
@@ -48,7 +45,6 @@ public class Budget extends Auditable implements Serializable, BudgetModel {
     this.budgetId = budgetId;
   }
 
-  @Override
   public String getUsername() {
     return username;
   }
@@ -57,7 +53,6 @@ public class Budget extends Auditable implements Serializable, BudgetModel {
     this.username = username;
   }
 
-  @Override
   public String getBudgetName() {
     return budgetName;
   }
@@ -66,7 +61,6 @@ public class Budget extends Auditable implements Serializable, BudgetModel {
     this.budgetName = budgetName;
   }
 
-  @Override
   public String getDescription() {
     return description;
   }
@@ -75,7 +69,6 @@ public class Budget extends Auditable implements Serializable, BudgetModel {
     this.description = description;
   }
 
-  @Override
   public BigDecimal getBudgetLimit() {
     return budgetLimit;
   }
@@ -84,7 +77,6 @@ public class Budget extends Auditable implements Serializable, BudgetModel {
     this.budgetLimit = budgetLimit;
   }
 
-  @Override
   public BigDecimal getAmount() {
     return amount;
   }

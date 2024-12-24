@@ -97,14 +97,14 @@ class AccountMapperTest {
   @Test
   void testToAccount_PartialUpdate() {
     Account account = createAccount();
-    AccountUpdateRequestDto request = new AccountUpdateRequestDto(
-        RandomUtils.randomString(25),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(AccountCategoryEnum.class),
-        RandomUtils.randomString(25),
-        RandomUtils.randomBoolean()
-    );
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            RandomUtils.randomString(25),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(25),
+            RandomUtils.randomBoolean());
 
     Account result = AccountMapper.partialUpdate(account, request);
 

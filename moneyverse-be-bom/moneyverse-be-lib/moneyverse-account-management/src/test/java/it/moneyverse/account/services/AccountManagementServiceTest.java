@@ -22,7 +22,6 @@ import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceGrpcClient;
 import it.moneyverse.test.utils.RandomUtils;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

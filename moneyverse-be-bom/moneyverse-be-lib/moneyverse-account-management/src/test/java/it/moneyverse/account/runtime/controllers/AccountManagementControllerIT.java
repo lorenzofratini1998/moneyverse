@@ -11,14 +11,11 @@ import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
-import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.test.annotations.IntegrationTest;
-import it.moneyverse.test.enums.TestModelStrategyEnum;
 import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
-import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
@@ -63,13 +60,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   @BeforeAll
   static void beforeAll() {
     testContext =
-        AccountTestContext.builder()
-            .withStrategy(TestModelStrategyEnum.RANDOM)
-            .withTestUsers()
-            .withTestAccount()
-            .withKeycloak(keycloakContainer)
-            .withScriptMetadata(new ScriptMetadata(tempDir, Account.class))
-            .build();
+        new AccountTestContext().generateScript(tempDir).insertUsersIntoKeycloak(keycloakContainer);
   }
 
   @BeforeEach
@@ -98,7 +89,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   void testGetAccountsAdminRole_Success() {
     final String admin = testContext.getAdminUser().getUsername();
     final AccountCriteria criteria = testContext.createAccountFilters();
-    final List<AccountModel> expected = testContext.filterAccounts(criteria);
+    final List<Account> expected = testContext.filterAccounts(criteria);
 
     ResponseEntity<List<AccountDto>> response = testGetAccounts(admin, criteria);
 
@@ -111,7 +102,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     final String username = testContext.getRandomUser().getUsername();
     final AccountCriteria criteria = testContext.createAccountFilters();
     criteria.setUsername(username);
-    final List<AccountModel> expected = testContext.filterAccounts(criteria);
+    final List<Account> expected = testContext.filterAccounts(criteria);
 
     ResponseEntity<List<AccountDto>> response = testGetAccounts(username, criteria);
 
@@ -143,7 +134,8 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetAccount_Success() {
     final String username = testContext.getAdminUser().getUsername();
-    final UUID accountId = testContext.getRandomAccount(testContext.getRandomUser().getUsername()).getAccountId();
+    final UUID accountId =
+        testContext.getRandomAccount(testContext.getRandomUser().getUsername()).getAccountId();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 
     ResponseEntity<AccountDto> response =
@@ -156,13 +148,13 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(accountId, response.getBody().getAccountId());
-
   }
 
   @Test
   void testGetAccount_Unauthorized() {
     final String username = testContext.getRandomUser().getUsername();
-    final UUID accountId = testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+    final UUID accountId =
+        testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 
     ResponseEntity<AccountDto> response =
@@ -170,7 +162,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             basePath + "/accounts/" + accountId,
             HttpMethod.GET,
             new HttpEntity<>(headers),
-                AccountDto.class);
+            AccountDto.class);
 
     assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
   }
@@ -178,9 +170,16 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testUpdateAccount_Success() {
     final String admin = testContext.getAdminUser().getUsername();
-    final UUID accountId = testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
-    AccountUpdateRequestDto request = new AccountUpdateRequestDto(
-            null, RandomUtils.randomBigDecimal(), null, null, RandomUtils.randomString(25), RandomUtils.randomBoolean());
+    final UUID accountId =
+        testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            null,
+            RandomUtils.randomBigDecimal(),
+            null,
+            null,
+            RandomUtils.randomString(25),
+            RandomUtils.randomBoolean());
 
     headers.setBearerAuth(testContext.getAuthenticationToken(admin));
     ResponseEntity<AccountDto> response =
@@ -202,10 +201,16 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   void testUpdateAccount_Unauthorized() {
     final String username = testContext.getRandomUser().getUsername();
     final UUID accountId =
-            testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+        testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    AccountUpdateRequestDto request = new AccountUpdateRequestDto(
-            null, RandomUtils.randomBigDecimal(), null, null, RandomUtils.randomString(25), RandomUtils.randomBoolean());
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            null,
+            RandomUtils.randomBigDecimal(),
+            null,
+            null,
+            RandomUtils.randomString(25),
+            RandomUtils.randomBoolean());
 
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(

@@ -3,9 +3,9 @@ package it.moneyverse.budget.runtime.controllers;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
-import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.services.BudgetManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
@@ -15,7 +15,6 @@ import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -87,26 +86,26 @@ class BudgetManagementControllerTest {
 
   private static Stream<Supplier<BudgetRequestDto>> invalidBudgetRequestProvider() {
     return Stream.of(
-            BudgetManagementControllerTest::createRequestWithNullUsername,
-            BudgetManagementControllerTest::createRequestWithNullBudgetName);
+        BudgetManagementControllerTest::createRequestWithNullUsername,
+        BudgetManagementControllerTest::createRequestWithNullBudgetName);
   }
 
   private static BudgetRequestDto createRequestWithNullUsername() {
     return new BudgetRequestDto(
-            null,
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+        null,
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal());
   }
 
   private static BudgetRequestDto createRequestWithNullBudgetName() {
     return new BudgetRequestDto(
-            RandomUtils.randomString(15),
-            null,
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+        RandomUtils.randomString(15),
+        null,
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal());
   }
 
   @Test
@@ -146,7 +145,8 @@ class BudgetManagementControllerTest {
   }
 
   @Test
-  void testGetBudgets_Success(@Mock BudgetCriteria criteria, @Mock List<BudgetDto> response) throws Exception {
+  void testGetBudgets_Success(@Mock BudgetCriteria criteria, @Mock List<BudgetDto> response)
+      throws Exception {
     when(budgetService.getBudgets(criteria)).thenReturn(response);
 
     mockMvc
@@ -171,8 +171,7 @@ class BudgetManagementControllerTest {
   @Test
   void testGetBudget_NotFound() throws Exception {
     UUID budgetId = RandomUtils.randomUUID();
-    when(budgetService.getBudget(budgetId))
-        .thenThrow(ResourceNotFoundException.class);
+    when(budgetService.getBudget(budgetId)).thenThrow(ResourceNotFoundException.class);
 
     mockMvc
         .perform(
@@ -184,12 +183,12 @@ class BudgetManagementControllerTest {
   @Test
   void testUpdateBudgetSuccess(@Mock BudgetDto response) throws Exception {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal()
-    );
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
     when(budgetService.updateBudget(budgetId, request)).thenReturn(response);
 
     mockMvc
@@ -203,14 +202,13 @@ class BudgetManagementControllerTest {
   @Test
   void testUpdateBudget_NotFound() throws Exception {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal()
-    );
-    when(budgetService.updateBudget(budgetId, request))
-        .thenThrow(ResourceNotFoundException.class);
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
+    when(budgetService.updateBudget(budgetId, request)).thenThrow(ResourceNotFoundException.class);
 
     mockMvc
         .perform(

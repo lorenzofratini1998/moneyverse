@@ -6,9 +6,9 @@ import java.util.List;
 
 public class ScriptMetadata {
   private final Path directory;
-  private final List<Class<?>> entities;
+  private final List<List<?>> entities;
 
-  public ScriptMetadata(Path directory, Class<?>... entities) {
+  public ScriptMetadata(Path directory, List<?>... entities) {
     this.directory = directory;
     this.entities = Arrays.asList(entities);
   }
@@ -17,7 +17,7 @@ public class ScriptMetadata {
     return directory;
   }
 
-  public List<Class<?>> getEntities() {
+  public List<List<?>> getEntities() {
     return entities;
   }
 }

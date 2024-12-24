@@ -8,11 +8,10 @@ import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.test.utils.RandomUtils;
-import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 /** Unit test for {@link BudgetMapper} */
 class BudgetMapperTest {
@@ -91,12 +90,12 @@ class BudgetMapperTest {
   @Test
   void testToBudget_PartialUpdate() {
     Budget budget = createBudget();
-    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal()
-    );
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
 
     Budget result = BudgetMapper.partialUpdate(budget, request);
 

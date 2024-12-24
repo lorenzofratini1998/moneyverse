@@ -18,6 +18,9 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,10 +30,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.SendResult;
-
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 /** Unit test for {@link BudgetManagementService} */
 @ExtendWith(MockitoExtension.class)
@@ -128,7 +127,8 @@ class BudgetManagementServiceTest {
   }
 
   @Test
-  void givenBudgetId_WhenGetBudget_ThenReturnBudget(@Mock Budget budget, @Mock BudgetDto budgetDto) {
+  void givenBudgetId_WhenGetBudget_ThenReturnBudget(
+      @Mock Budget budget, @Mock BudgetDto budgetDto) {
     UUID budgetId = RandomUtils.randomUUID();
 
     when(budgetRepository.findById(budgetId)).thenReturn(Optional.ofNullable(budget));
@@ -155,14 +155,15 @@ class BudgetManagementServiceTest {
   }
 
   @Test
-  void givenBudgetId_WhenUpdateBudget_ThenReturnBudgetDto(@Mock Budget budget, @Mock BudgetDto budgetDto) {
+  void givenBudgetId_WhenUpdateBudget_ThenReturnBudgetDto(
+      @Mock Budget budget, @Mock BudgetDto budgetDto) {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal()
-    );
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
 
     when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
     mapper.when(() -> BudgetMapper.partialUpdate(budget, request)).thenReturn(budget);
@@ -181,30 +182,35 @@ class BudgetManagementServiceTest {
   @Test
   void givenBudgetId_WhenUpdateBudget_ThenReturnResourceNotFound() {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal()
-    );
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
 
     when(budgetRepository.findById(budgetId)).thenReturn(Optional.empty());
 
     assertThrows(
-        ResourceNotFoundException.class, () -> budgetManagementService.updateBudget(budgetId, request));
+        ResourceNotFoundException.class,
+        () -> budgetManagementService.updateBudget(budgetId, request));
 
     verify(budgetRepository, times(1)).findById(budgetId);
-    mapper.verify(() -> BudgetMapper.partialUpdate(any(Budget.class), any(BudgetUpdateRequestDto.class)), never());
+    mapper.verify(
+        () -> BudgetMapper.partialUpdate(any(Budget.class), any(BudgetUpdateRequestDto.class)),
+        never());
     verify(budgetRepository, never()).save(any(Budget.class));
     mapper.verify(() -> BudgetMapper.toBudgetDto(any(Budget.class)), never());
   }
 
   @Test
-  void givenBudgetId_WhenDeleteBudget_ThenDeleteAccount(@Mock Budget budget, @Mock CompletableFuture<SendResult<UUID, String>> future) {
+  void givenBudgetId_WhenDeleteBudget_ThenDeleteAccount(
+      @Mock Budget budget, @Mock CompletableFuture<SendResult<UUID, String>> future) {
     UUID budgetId = RandomUtils.randomUUID();
 
     when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
-    when(messageProducer.send(any(BudgetDeletionEvent.class), any(String.class))).thenReturn(future);
+    when(messageProducer.send(any(BudgetDeletionEvent.class), any(String.class)))
+        .thenReturn(future);
 
     budgetManagementService.deleteBudget(budgetId);
 

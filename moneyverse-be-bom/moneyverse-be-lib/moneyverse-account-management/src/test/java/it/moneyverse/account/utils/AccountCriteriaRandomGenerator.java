@@ -2,22 +2,22 @@ package it.moneyverse.account.utils;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
+import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
-import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.test.CriteriaRandomGenerator;
-import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.utils.RandomUtils;
 import org.springframework.data.domain.Sort;
 
 public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<AccountCriteria> {
 
   private final AccountCriteria criteria;
+  private final AccountTestContext testContext;
 
-  public AccountCriteriaRandomGenerator(TestContext testContext) {
-    super(testContext);
+  public AccountCriteriaRandomGenerator(AccountTestContext testContext) {
     this.criteria = new AccountCriteria();
+    this.testContext = testContext;
   }
 
   @Override
@@ -40,9 +40,7 @@ public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<Acco
     criteria.setBalance(
         Math.random() < 0.5
             ? randomCriteriaBound(
-            testContext.getModel().getAccounts().stream()
-                .map(AccountModel::getBalance)
-                .toList())
+                testContext.getAccounts().stream().map(Account::getBalance).toList())
             : null);
   }
 
@@ -50,9 +48,7 @@ public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<Acco
     criteria.setBalanceTarget(
         Math.random() < 0.5
             ? randomCriteriaBound(
-            testContext.getModel().getAccounts().stream()
-                .map(AccountModel::getBalanceTarget)
-                .toList())
+                testContext.getAccounts().stream().map(Account::getBalanceTarget).toList())
             : null);
   }
 
@@ -72,5 +68,4 @@ public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<Acco
   private void withSort() {
     criteria.setSort(new SortCriteria<>(AccountSortAttributeEnum.ACCOUNT_NAME, Sort.Direction.ASC));
   }
-
 }

@@ -18,14 +18,13 @@ import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
+import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class BudgetManagementService implements BudgetService {
@@ -127,14 +126,14 @@ public class BudgetManagementService implements BudgetService {
   @Transactional
   public void deleteAllBudgets(String username) {
     checkIfUserExists(username);
+    LOGGER.info("Deleting accounts by username {}", username);
+    budgetRepository.deleteAll(budgetRepository.findBudgetByUsername(username));
   }
 
   private void checkIfUserExists(String username) {
     if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
       throw new ResourceNotFoundException("User %s does not exists".formatted(username));
     }
-    LOGGER.info("Deleting accounts by username {}", username);
-    budgetRepository.deleteAll(budgetRepository.findBudgetByUsername(username));
   }
 
   private Budget findBudgetById(UUID budgetId) {

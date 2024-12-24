@@ -3,7 +3,7 @@ package it.moneyverse.test.operations.keycloak;
 import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_REALM;
 
 import it.moneyverse.core.enums.UserRoleEnum;
-import it.moneyverse.test.model.TestContextModel;
+import it.moneyverse.core.model.entities.UserModel;
 import java.util.Arrays;
 import java.util.List;
 import org.keycloak.admin.client.Keycloak;
@@ -18,7 +18,7 @@ public class CreateTestUserRolesStrategy implements KeycloakConfigurationStrateg
   private static final Logger LOGGER = LoggerFactory.getLogger(CreateTestUserRolesStrategy.class);
 
   @Override
-  public void configure(Keycloak client, TestContextModel testContext) {
+  public void configure(Keycloak client, List<UserModel> users) {
     Arrays.stream(UserRoleEnum.values())
         .forEach(
             role -> {

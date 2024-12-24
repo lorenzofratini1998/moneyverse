@@ -2,7 +2,8 @@ package it.moneyverse.test.operations.keycloak;
 
 import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_REALM;
 
-import it.moneyverse.test.model.TestContextModel;
+import it.moneyverse.core.model.entities.UserModel;
+import java.util.List;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ public class CreateTestRealmStrategy implements KeycloakConfigurationStrategy {
   private static final Logger LOGGER = LoggerFactory.getLogger(CreateTestRealmStrategy.class);
 
   @Override
-  public void configure(Keycloak client, TestContextModel testContext) {
+  public void configure(Keycloak client, List<UserModel> users) {
     RealmRepresentation realm = new RealmRepresentation();
     realm.setRealm(TEST_REALM);
     realm.setEnabled(true);

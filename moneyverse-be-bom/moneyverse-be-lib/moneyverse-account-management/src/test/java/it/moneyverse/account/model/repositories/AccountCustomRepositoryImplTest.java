@@ -10,8 +10,6 @@ import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.SecurityAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
-import it.moneyverse.test.enums.TestModelStrategyEnum;
-import it.moneyverse.test.utils.helper.MapperTestHelper;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,24 +43,16 @@ public class AccountCustomRepositoryImplTest {
   @Autowired AccountCustomRepositoryImpl customRepository;
 
   static AccountTestContext testContext;
-  static List<Account> accounts;
 
   @BeforeAll
   public static void beforeAll() {
-    testContext =
-        AccountTestContext.builder()
-            .withStrategy(TestModelStrategyEnum.RANDOM)
-            .withTestUsers()
-            .withTestAccount()
-            .build();
-    accounts =
-        MapperTestHelper.map(testContext.getModel().getAccounts(), Account.class).stream().toList();
-    accounts.forEach(account -> account.setAccountId(null));
+    testContext = new AccountTestContext();
+    testContext.getAccounts().forEach(account -> account.setAccountId(null));
   }
 
   @BeforeEach
   public void setup() {
-    for (Account account : accounts) {
+    for (Account account : testContext.getAccounts()) {
       entityManager.persist(account);
     }
     entityManager.flush();
@@ -71,10 +61,7 @@ public class AccountCustomRepositoryImplTest {
   @Test
   void givenCriteria_thenReturnFilteredAccounts() {
     AccountCriteria criteria = new AccountCriteriaRandomGenerator(testContext).generate();
-    List<Account> expected =
-        testContext.filterAccounts(criteria).stream()
-            .map(account -> MapperTestHelper.map(account, Account.class))
-            .toList();
+    List<Account> expected = testContext.filterAccounts(criteria);
 
     List<Account> actual = customRepository.findAccounts(criteria);
 

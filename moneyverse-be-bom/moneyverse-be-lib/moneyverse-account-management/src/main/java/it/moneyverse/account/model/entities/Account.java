@@ -1,7 +1,6 @@
 package it.moneyverse.account.model.entities;
 
 import it.moneyverse.core.enums.AccountCategoryEnum;
-import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.core.model.entities.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +18,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "ACCOUNTS")
-public class Account extends Auditable implements Serializable, AccountModel {
+public class Account extends Auditable implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 
@@ -52,7 +51,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
   @ColumnDefault(value = "FALSE")
   private Boolean isDefault;
 
-  @Override
   public UUID getAccountId() {
     return accountId;
   }
@@ -61,7 +59,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.accountId = accountId;
   }
 
-  @Override
   public String getUsername() {
     return username;
   }
@@ -70,7 +67,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.username = username;
   }
 
-  @Override
   public String getAccountName() {
     return accountName;
   }
@@ -79,7 +75,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.accountName = accountName;
   }
 
-  @Override
   public BigDecimal getBalance() {
     return balance;
   }
@@ -88,7 +83,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.balance = balance;
   }
 
-  @Override
   public BigDecimal getBalanceTarget() {
     return balanceTarget;
   }
@@ -97,7 +91,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.balanceTarget = balanceTarget;
   }
 
-  @Override
   public AccountCategoryEnum getAccountCategory() {
     return accountCategory;
   }
@@ -106,7 +99,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.accountCategory = accountCategory;
   }
 
-  @Override
   public String getAccountDescription() {
     return accountDescription;
   }
@@ -115,7 +107,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.accountDescription = accountDescription;
   }
 
-  @Override
   public Boolean isDefault() {
     return isDefault;
   }

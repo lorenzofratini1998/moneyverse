@@ -34,4 +34,13 @@ ON COLUMN BUDGETS.CREATED_AT IS 'Timestamp when the budget was created. Defaults
 COMMENT
 ON COLUMN BUDGETS.UPDATED_BY IS 'The username that updates the budget.';
 COMMENT
-ON COLUMN BUDGETS.UPDATED_AT IS 'Timestamp when the budget was last updated. Defaults to the current timestamp.'
+ON COLUMN BUDGETS.UPDATED_AT IS 'Timestamp when the budget was last updated. Defaults to the current timestamp.';
+
+
+CREATE TABLE DEFAULT_BUDGET_TEMPLATES
+(
+    DEFAULT_BUDGET_TEMPLATE_ID UUID PRIMARY KEY,
+    NAME                       VARCHAR(255) NOT NULL,
+    DESCRIPTION                VARCHAR(255),
+    CONSTRAINT UNIQUE_BUDGET_TEMPLATE_NAME UNIQUE (NAME)
+);

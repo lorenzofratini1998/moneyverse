@@ -5,20 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import it.moneyverse.account.model.entities.Account;
-import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
-import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.core.model.entities.UserModel;
+import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
 import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
-import it.moneyverse.test.enums.TestModelStrategyEnum;
 import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
-import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
@@ -84,19 +81,14 @@ class AccountConsumerTest {
 
   @BeforeAll
   static void beforeAll() {
-    testContext =
-        AccountTestContext.builder()
-            .withStrategy(TestModelStrategyEnum.RANDOM)
-            .withTestUsers()
-            .withTestAccount()
-            .withScriptMetadata(new ScriptMetadata(tempDir, Account.class))
-            .build();
+    testContext = new AccountTestContext().generateScript(tempDir);
   }
 
   @BeforeEach
   void setup() {
     consumerRecords = new LinkedBlockingQueue<>();
-    ContainerProperties containerProperties = new ContainerProperties(UserDeletionTopic.TOPIC + "-dlt");
+    ContainerProperties containerProperties =
+        new ContainerProperties(UserDeletionTopic.TOPIC + "-dlt");
     container = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
     container.setupMessageListener(
         (MessageListener<UUID, String>) record -> consumerRecords.add(record));
@@ -113,7 +105,7 @@ class AccountConsumerTest {
   @Test
   void testOnMessage_Success() {
     final UserModel userModel = testContext.getRandomUser();
-    final List<AccountModel> userAccounts = testContext.getUserAccounts(userModel.getUsername());
+    final List<Account> userAccounts = testContext.getUserAccounts(userModel.getUsername());
     final long initialSize = accountRepository.count();
     String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUsername()));
     final ProducerRecord<UUID, String> producerRecord =
@@ -146,8 +138,12 @@ class AccountConsumerTest {
         .untilAsserted(
             () -> {
               ConsumerRecord<UUID, String> dltRecord = consumerRecords.poll(5, TimeUnit.SECONDS);
-              assertNotNull(dltRecord, "Expected a message in the Dead Letter Topic, but none was found.");
-              assertEquals(event, dltRecord.value(), "The message value in DLT does not match the original event.");
+              assertNotNull(
+                  dltRecord, "Expected a message in the Dead Letter Topic, but none was found.");
+              assertEquals(
+                  event,
+                  dltRecord.value(),
+                  "The message value in DLT does not match the original event.");
             });
   }
 }

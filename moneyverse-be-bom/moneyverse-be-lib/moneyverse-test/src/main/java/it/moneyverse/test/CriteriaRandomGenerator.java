@@ -1,9 +1,7 @@
 package it.moneyverse.test;
 
 import it.moneyverse.core.model.dto.BoundCriteria;
-import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.utils.RandomUtils;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
@@ -11,11 +9,6 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class CriteriaRandomGenerator<T> {
-    protected final TestContext testContext;
-
-    protected CriteriaRandomGenerator(TestContext testContext) {
-        this.testContext = testContext;
-    }
 
     public abstract T generate();
 

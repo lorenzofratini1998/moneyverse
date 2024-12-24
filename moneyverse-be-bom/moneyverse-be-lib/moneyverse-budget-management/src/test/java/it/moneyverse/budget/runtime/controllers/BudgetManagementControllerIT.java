@@ -4,25 +4,21 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
+import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.utils.BudgetTestContext;
-import it.moneyverse.core.model.entities.BudgetModel;
 import it.moneyverse.test.annotations.IntegrationTest;
-import it.moneyverse.test.enums.TestModelStrategyEnum;
 import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
-import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
-
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,13 +55,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @BeforeAll
   static void beforeAll() {
     testContext =
-        BudgetTestContext.builder()
-            .withStrategy(TestModelStrategyEnum.RANDOM)
-            .withTestUsers()
-            .withTestBudgets()
-            .withKeycloak(keycloakContainer)
-            .withScriptMetadata(new ScriptMetadata(tempDir, Budget.class))
-            .build();
+        new BudgetTestContext().generateScript(tempDir).insertUsersIntoKeycloak(keycloakContainer);
   }
 
   @BeforeEach
@@ -97,7 +87,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   void testGetBudgetsAdminRole_Success() {
     final String admin = testContext.getAdminUser().getUsername();
     final BudgetCriteria criteria = testContext.createBudgetCriteria();
-    final List<BudgetModel> expected = testContext.filterBudgets(criteria);
+    final List<Budget> expected = testContext.filterBudgets(criteria);
 
     ResponseEntity<List<BudgetDto>> response = testGetBudgets(admin, criteria);
 
@@ -111,7 +101,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final String user = testContext.getRandomUser().getUsername();
     final BudgetCriteria criteria = testContext.createBudgetCriteria();
     criteria.setUsername(user);
-    final List<BudgetModel> expected = testContext.filterBudgets(criteria);
+    final List<Budget> expected = testContext.filterBudgets(criteria);
 
     ResponseEntity<List<BudgetDto>> response = testGetBudgets(user, criteria);
 
@@ -134,17 +124,17 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   private ResponseEntity<List<BudgetDto>> testGetBudgets(String username, BudgetCriteria criteria) {
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     return restTemplate.exchange(
-            testContext.createUri(basePath + "/budgets", criteria),
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
-            new ParameterizedTypeReference<>() {}
-    );
+        testContext.createUri(basePath + "/budgets", criteria),
+        HttpMethod.GET,
+        new HttpEntity<>(headers),
+        new ParameterizedTypeReference<>() {});
   }
 
   @Test
   void testGetBudget_Success() {
     final String username = testContext.getAdminUser().getUsername();
-    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    final UUID budgetId =
+        testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 
     ResponseEntity<BudgetDto> response =
@@ -162,7 +152,8 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetBudget_NotFound() {
     final String username = testContext.getRandomUser().getUsername();
-    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    final UUID budgetId =
+        testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 
     ResponseEntity<BudgetDto> response =
@@ -178,13 +169,11 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testUpdateBudget_Success() {
     final String username = testContext.getAdminUser().getUsername();
-    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
-    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
-        null,
-            RandomUtils.randomString(25),
-            null,
-            RandomUtils.randomBigDecimal()
-    );
+    final UUID budgetId =
+        testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            null, RandomUtils.randomString(25), null, RandomUtils.randomBigDecimal());
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 
     ResponseEntity<BudgetDto> response =
@@ -204,13 +193,11 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testUpdateBudget_Unauthorized() {
     final String username = testContext.getRandomUser().getUsername();
-    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
-    BudgetUpdateRequestDto request = new BudgetUpdateRequestDto(
-        null,
-            RandomUtils.randomString(25),
-            null,
-            RandomUtils.randomBigDecimal()
-    );
+    final UUID budgetId =
+        testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            null, RandomUtils.randomString(25), null, RandomUtils.randomBigDecimal());
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 
     ResponseEntity<BudgetDto> response =
@@ -226,7 +213,8 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testDeleteAccount_Success() {
     final String admin = testContext.getAdminUser().getUsername();
-    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    final UUID budgetId =
+        testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
     headers.setBearerAuth(testContext.getAuthenticationToken(admin));
 
     ResponseEntity<Void> response =
@@ -243,7 +231,8 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testDeleteBudget_Unauthorized() {
     final String username = testContext.getRandomUser().getUsername();
-    final UUID budgetId = testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
+    final UUID budgetId =
+        testContext.getRandomBudget(testContext.getAdminUser().getUsername()).getBudgetId();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 
     ResponseEntity<Void> response =
