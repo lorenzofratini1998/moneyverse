@@ -11,6 +11,8 @@ import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
+import it.moneyverse.core.enums.UserRoleEnum;
+import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
@@ -69,7 +71,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void testCreateAccount_Success() {
+  void testCreateAccount() {
     final String username = testContext.getRandomUser().getUsername();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     final AccountRequestDto request = testContext.createAccountForUser(username);
@@ -86,57 +88,31 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void testGetAccountsAdminRole_Success() {
-    final String admin = testContext.getAdminUser().getUsername();
+  void testGetAccounts() {
+    final UserModel user = testContext.getRandomAdminOrUser();
     final AccountCriteria criteria = testContext.createAccountFilters();
+    if (user.getRole().equals(UserRoleEnum.USER)) {
+      criteria.setUsername(user.getUsername());
+    }
     final List<Account> expected = testContext.filterAccounts(criteria);
 
-    ResponseEntity<List<AccountDto>> response = testGetAccounts(admin, criteria);
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+    ResponseEntity<List<AccountDto>> response =
+        restTemplate.exchange(
+            testContext.createUri(basePath + "/accounts", criteria),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expected.size(), Objects.requireNonNull(response.getBody()).size());
   }
 
   @Test
-  void testGetAccountsUserRole_Success() {
-    final String username = testContext.getRandomUser().getUsername();
-    final AccountCriteria criteria = testContext.createAccountFilters();
-    criteria.setUsername(username);
-    final List<Account> expected = testContext.filterAccounts(criteria);
-
-    ResponseEntity<List<AccountDto>> response = testGetAccounts(username, criteria);
-
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(expected.size(), Objects.requireNonNull(response.getBody()).size());
-  }
-
-  @Test
-  void testGetAccountsUserRole_Unauthorized() {
-    final String username = testContext.getRandomUser().getUsername();
-    final AccountCriteria criteria = testContext.createAccountFilters();
-    criteria.setUsername(null);
-
-    ResponseEntity<List<AccountDto>> response = testGetAccounts(username, criteria);
-
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-  }
-
-  private ResponseEntity<List<AccountDto>> testGetAccounts(
-      String username, AccountCriteria criteria) {
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    return restTemplate.exchange(
-        testContext.createUri(basePath + "/accounts", criteria),
-        HttpMethod.GET,
-        new HttpEntity<>(headers),
-        new ParameterizedTypeReference<>() {});
-  }
-
-  @Test
-  void testGetAccount_Success() {
-    final String username = testContext.getAdminUser().getUsername();
-    final UUID accountId =
-        testContext.getRandomAccount(testContext.getRandomUser().getUsername()).getAccountId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+  void testGetAccount() {
+    final UserModel user = testContext.getRandomAdminOrUser();
+    final UUID accountId = testContext.getRandomAccount(user.getUsername()).getAccountId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
 
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(
@@ -151,27 +127,9 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void testGetAccount_Unauthorized() {
-    final String username = testContext.getRandomUser().getUsername();
-    final UUID accountId =
-        testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-
-    ResponseEntity<AccountDto> response =
-        restTemplate.exchange(
-            basePath + "/accounts/" + accountId,
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
-            AccountDto.class);
-
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-  }
-
-  @Test
-  void testUpdateAccount_Success() {
-    final String admin = testContext.getAdminUser().getUsername();
-    final UUID accountId =
-        testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
+  void testUpdateAccount() {
+    final UserModel user = testContext.getRandomAdminOrUser();
+    final UUID accountId = testContext.getRandomAccount(user.getUsername()).getAccountId();
     AccountUpdateRequestDto request =
         new AccountUpdateRequestDto(
             null,
@@ -181,7 +139,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             RandomUtils.randomString(25),
             RandomUtils.randomBoolean());
 
-    headers.setBearerAuth(testContext.getAuthenticationToken(admin));
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(
             basePath + "/accounts/" + accountId,
@@ -194,40 +152,14 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.balance(), response.getBody().getBalance());
     assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
     assertEquals(request.isDefault(), response.getBody().isDefault());
-    assertEquals(1, accountRepository.findDefaultAccountsByUser(admin).size());
-  }
-
-  @Test
-  void testUpdateAccount_Unauthorized() {
-    final String username = testContext.getRandomUser().getUsername();
-    final UUID accountId =
-        testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            null,
-            RandomUtils.randomBigDecimal(),
-            null,
-            null,
-            RandomUtils.randomString(25),
-            RandomUtils.randomBoolean());
-
-    ResponseEntity<AccountDto> response =
-        restTemplate.exchange(
-            basePath + "/accounts/" + accountId,
-            HttpMethod.PUT,
-            new HttpEntity<>(request, headers),
-            AccountDto.class);
-
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertEquals(1, accountRepository.findDefaultAccountsByUser(user.getUsername()).size());
   }
 
   @Test
   void testDeleteAccount_Success() {
-    final String admin = testContext.getAdminUser().getUsername();
-    final UUID accountId =
-        testContext.getRandomAccount(testContext.getRandomUser().getUsername()).getAccountId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(admin));
+    final UserModel user = testContext.getRandomAdminOrUser();
+    final UUID accountId = testContext.getRandomAccount(user.getUsername()).getAccountId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
 
     ResponseEntity<Void> response =
         restTemplate.exchange(
@@ -238,24 +170,6 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertEquals(testContext.getAccountsCount() - 1, accountRepository.count());
-  }
-
-  @Test
-  void testDeleteAccount_Unauthorized() {
-    final String username = testContext.getRandomUser().getUsername();
-    final UUID accountId =
-        testContext.getRandomAccount(testContext.getAdminUser().getUsername()).getAccountId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-
-    ResponseEntity<Void> response =
-        restTemplate.exchange(
-            basePath + "/accounts/" + accountId,
-            HttpMethod.DELETE,
-            new HttpEntity<>(headers),
-            Void.class);
-
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    assertEquals(testContext.getAccountsCount(), accountRepository.count());
   }
 
   private void compareActualWithExpectedAccount(AccountDto actual, AccountDto expected) {

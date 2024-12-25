@@ -10,10 +10,10 @@ import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.services.BudgetManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
-import it.moneyverse.core.boot.SecurityAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.List;
 import java.util.UUID;
@@ -28,9 +28,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -39,12 +39,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
     controllers = BudgetManagementController.class,
     excludeAutoConfiguration = {
       DatasourceAutoConfiguration.class,
-      SecurityAutoConfiguration.class,
       UserServiceGrpcClientAutoConfiguration.class,
       KafkaAutoConfiguration.class
     })
 @ExtendWith(MockitoExtension.class)
-@AutoConfigureMockMvc(addFilters = false)
 class BudgetManagementControllerTest {
 
   @Value("${spring.security.base-path}")
@@ -68,8 +66,28 @@ class BudgetManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/budgets")
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isCreated());
+  }
+
+  @Test
+  void testCreateBudget_Forbidden() throws Exception {
+    BudgetRequestDto request =
+        new BudgetRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(basePath + "/budgets")
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
   }
 
   @ParameterizedTest
@@ -79,7 +97,8 @@ class BudgetManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/budgets")
                 .content(requestSupplier.get().toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isBadRequest());
     verify(budgetService, never()).createBudget(requestSupplier.get());
   }
@@ -122,7 +141,8 @@ class BudgetManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/budgets")
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isConflict());
   }
 
@@ -140,7 +160,8 @@ class BudgetManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/budgets")
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
   }
 
@@ -152,8 +173,19 @@ class BudgetManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/budgets")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetBudgets_Unauthorized() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/budgets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -164,8 +196,20 @@ class BudgetManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/budgets/" + budgetId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetBudget_Unauthorized() throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/budgets/" + budgetId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -176,7 +220,8 @@ class BudgetManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/budgets/" + budgetId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
   }
 
@@ -195,8 +240,28 @@ class BudgetManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.put(basePath + "/budgets/" + budgetId)
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void testUpdateBudget_Forbidden() throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+    BudgetUpdateRequestDto request =
+        new BudgetUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal());
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/budgets/" + budgetId)
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
   }
 
   @Test
@@ -214,7 +279,8 @@ class BudgetManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.put(basePath + "/budgets/" + budgetId)
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
   }
 
@@ -227,7 +293,8 @@ class BudgetManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.delete(basePath + "/budgets/" + budgetId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNoContent());
   }
 
@@ -239,7 +306,20 @@ class BudgetManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.delete(basePath + "/budgets/" + budgetId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testDeleteBudget_Forbidden() throws Exception {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/budgets/" + budgetId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
   }
 }

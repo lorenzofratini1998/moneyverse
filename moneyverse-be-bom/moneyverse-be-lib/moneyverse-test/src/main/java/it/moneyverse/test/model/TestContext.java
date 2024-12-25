@@ -32,6 +32,10 @@ public abstract class TestContext<SELF extends TestContext<SELF>> {
     return users;
   }
 
+  public UserModel getRandomAdminOrUser() {
+    return users.get(RandomUtils.randomInteger(0, users.size() - 1));
+  }
+
   public UserModel getRandomUser() {
     List<UserModel> users =
         getUsers().stream().filter(user -> !user.getRole().equals(UserRoleEnum.ADMIN)).toList();

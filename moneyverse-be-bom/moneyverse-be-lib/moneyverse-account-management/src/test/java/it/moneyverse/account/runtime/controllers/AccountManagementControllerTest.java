@@ -12,11 +12,11 @@ import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.services.AccountManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
-import it.moneyverse.core.boot.SecurityAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.List;
 import java.util.UUID;
@@ -31,24 +31,21 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(
-    properties = {"keycloak.host=test", "keycloak.port=0", "keycloak.realm-name=test"},
     controllers = AccountManagementController.class,
     excludeAutoConfiguration = {
       DatasourceAutoConfiguration.class,
-      SecurityAutoConfiguration.class,
       UserServiceGrpcClientAutoConfiguration.class,
       KafkaAutoConfiguration.class
     })
 @ExtendWith(MockitoExtension.class)
-@AutoConfigureMockMvc(addFilters = false)
 class AccountManagementControllerTest {
 
   @Value("${spring.security.base-path}")
@@ -73,8 +70,29 @@ class AccountManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/accounts")
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isCreated());
+  }
+
+  @Test
+  void testCreateAccount_Forbidden() throws Exception {
+    AccountRequestDto request =
+        new AccountRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15));
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(basePath + "/accounts")
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
   }
 
   @ParameterizedTest
@@ -84,7 +102,8 @@ class AccountManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/accounts")
                 .content(requestSupplier.get().toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isBadRequest());
     verify(accountService, never()).createAccount(requestSupplier.get());
   }
@@ -104,7 +123,8 @@ class AccountManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/accounts")
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isConflict());
   }
 
@@ -123,7 +143,8 @@ class AccountManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.post(basePath + "/accounts")
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
   }
 
@@ -135,8 +156,19 @@ class AccountManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/accounts")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetAccounts_Unauthorized() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -147,7 +179,8 @@ class AccountManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/accounts/" + accountId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
   }
 
@@ -160,8 +193,21 @@ class AccountManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/accounts/" + accountId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testGetAccount_Unauthorized() throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/accounts/" + accountId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -182,7 +228,8 @@ class AccountManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.put(basePath + "/accounts/" + accountId)
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
   }
 
@@ -205,8 +252,30 @@ class AccountManagementControllerTest {
         .perform(
             MockMvcRequestBuilders.put(basePath + "/accounts/" + accountId)
                 .content(request.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testUpdateAccount_Forbidden() throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
+            null);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/accounts/" + accountId)
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
   }
 
   @Test
@@ -218,7 +287,8 @@ class AccountManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.delete(basePath + "/accounts/" + accountId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNoContent());
   }
 
@@ -231,8 +301,21 @@ class AccountManagementControllerTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.delete(basePath + "/accounts/" + accountId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testDeleteAccount_Forbidden() throws Exception {
+    UUID accountId = RandomUtils.randomUUID();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/accounts/" + accountId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
   }
 
   private static Stream<Supplier<AccountRequestDto>> invalidAccountRequestProvider() {
