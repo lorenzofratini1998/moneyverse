@@ -1,5 +1,7 @@
 package it.moneyverse.budget.services;
 
+import static it.moneyverse.core.utils.constants.CommonConstants.BACKEND;
+
 import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetDto;
@@ -61,15 +63,18 @@ public class BudgetManagementService implements BudgetService {
   public void createDefaultBudgets(String username) {
     checkIfUserExists(username);
     LOGGER.info("Creating default budgets for user {}", username);
-    List<Budget> defaultBudgets = defaultBudgetTemplateRepository.findAll()
-            .stream()
-            .map(defaultBudgetTemplate -> {
-              Budget budget = new Budget();
-              budget.setUsername(username);
-              budget.setBudgetName(defaultBudgetTemplate.getName());
-              budget.setDescription(defaultBudgetTemplate.getDescription());
-              return budget;
-            })
+    List<Budget> defaultBudgets =
+        defaultBudgetTemplateRepository.findAll().stream()
+            .map(
+                defaultBudgetTemplate -> {
+                  Budget budget = new Budget();
+                  budget.setUsername(username);
+                  budget.setBudgetName(defaultBudgetTemplate.getName());
+                  budget.setDescription(defaultBudgetTemplate.getDescription());
+                  budget.setCreatedBy(BACKEND);
+                  budget.setUpdatedBy(BACKEND);
+                  return budget;
+                })
             .toList();
     budgetRepository.saveAll(defaultBudgets);
   }

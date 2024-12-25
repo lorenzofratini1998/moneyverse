@@ -49,6 +49,10 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
     return budgets;
   }
 
+  public List<Budget> getBudgets(String username) {
+    return budgets.stream().filter(budget -> username.equals(budget.getUsername())).toList();
+  }
+
   public List<DefaultBudgetTemplate> getDefaultBudgetTemplates() {
     return defaultBudgetTemplates;
   }
