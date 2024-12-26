@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.utils.AccountCriteriaRandomGenerator;
 import it.moneyverse.account.utils.AccountTestContext;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
@@ -47,11 +48,16 @@ public class AccountCustomRepositoryImplTest {
   @BeforeAll
   public static void beforeAll() {
     testContext = new AccountTestContext();
+    testContext.getCategories().forEach(category -> category.setAccountCategoryId(null));
     testContext.getAccounts().forEach(account -> account.setAccountId(null));
   }
 
   @BeforeEach
   public void setup() {
+    for (AccountCategory category : testContext.getCategories()) {
+      entityManager.persist(category);
+    }
+    entityManager.flush();
     for (Account account : testContext.getAccounts()) {
       entityManager.persist(account);
     }

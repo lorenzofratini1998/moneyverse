@@ -3,11 +3,12 @@ package it.moneyverse.account.utils.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import it.moneyverse.account.model.dto.AccountCategoryDto;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
-import it.moneyverse.core.enums.AccountCategoryEnum;
+import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,28 +19,49 @@ import org.junit.jupiter.api.Test;
 class AccountMapperTest {
 
   @Test
+  void testToAccountCategoryDto_NullAccountCategory() {
+    assertNull(AccountMapper.toAccountCategoryDto(null));
+  }
+
+  @Test
+  void testToAccountCategoryDto_ValidAccountCategory() {
+    AccountCategory category = new AccountCategory();
+    category.setAccountCategoryId(RandomUtils.randomBigDecimal().longValue());
+    category.setName(RandomUtils.randomString(15).toUpperCase());
+    category.setDescription(RandomUtils.randomString(30));
+
+    AccountCategoryDto result = AccountMapper.toAccountCategoryDto(category);
+
+    assertEquals(category.getAccountCategoryId(), result.getAccountCategoryId());
+    assertEquals(category.getName(), result.getName());
+    assertEquals(category.getDescription(), result.getDescription());
+  }
+
+  @Test
   void testToAccountEntity_NullAccountRequest() {
-    assertNull(AccountMapper.toAccount(null));
+    assertNull(AccountMapper.toAccount(null, null));
   }
 
   @Test
   void testToAccountEntity_ValidAccountRequest() {
+    AccountCategory category = new AccountCategory();
+    category.setName(RandomUtils.randomString(15).toUpperCase());
     AccountRequestDto request =
         new AccountRequestDto(
             RandomUtils.randomString(25),
             RandomUtils.randomString(25),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            category.getName(),
             RandomUtils.randomString(25));
 
-    Account account = AccountMapper.toAccount(request);
+    Account account = AccountMapper.toAccount(request, category);
 
     assertEquals(request.username(), account.getUsername());
     assertEquals(request.accountName(), account.getAccountName());
     assertEquals(request.balance(), account.getBalance());
     assertEquals(request.balanceTarget(), account.getBalanceTarget());
-    assertEquals(request.accountCategory(), account.getAccountCategory());
+    assertEquals(request.accountCategory(), account.getAccountCategory().getName());
     assertEquals(request.accountDescription(), account.getAccountDescription());
   }
 
@@ -59,7 +81,7 @@ class AccountMapperTest {
     assertEquals(account.getAccountName(), accountDto.getAccountName());
     assertEquals(account.getBalance(), accountDto.getBalance());
     assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
-    assertEquals(account.getAccountCategory(), accountDto.getAccountCategory());
+    assertEquals(account.getAccountCategory().getName(), accountDto.getAccountCategory());
     assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
     assertEquals(account.isDefault(), accountDto.isDefault());
   }
@@ -88,7 +110,7 @@ class AccountMapperTest {
       assertEquals(account.getAccountName(), accountDto.getAccountName());
       assertEquals(account.getBalance(), accountDto.getBalance());
       assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
-      assertEquals(account.getAccountCategory(), accountDto.getAccountCategory());
+      assertEquals(account.getAccountCategory().getName(), accountDto.getAccountCategory());
       assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
       assertEquals(account.isDefault(), accountDto.isDefault());
     }
@@ -97,33 +119,37 @@ class AccountMapperTest {
   @Test
   void testToAccount_PartialUpdate() {
     Account account = createAccount();
+    AccountCategory category = new AccountCategory();
+    category.setName(RandomUtils.randomString(15).toUpperCase());
     AccountUpdateRequestDto request =
         new AccountUpdateRequestDto(
             RandomUtils.randomString(25),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            category.getName(),
             RandomUtils.randomString(25),
             RandomUtils.randomBoolean());
 
-    Account result = AccountMapper.partialUpdate(account, request);
+    Account result = AccountMapper.partialUpdate(account, request, category);
 
     assertEquals(request.accountName(), result.getAccountName());
     assertEquals(request.balance(), result.getBalance());
     assertEquals(request.balanceTarget(), result.getBalanceTarget());
-    assertEquals(request.accountCategory(), result.getAccountCategory());
+    assertEquals(request.accountCategory(), result.getAccountCategory().getName());
     assertEquals(request.accountDescription(), result.getAccountDescription());
     assertEquals(request.isDefault(), result.isDefault());
   }
 
   private Account createAccount() {
     Account account = new Account();
+    AccountCategory category = new AccountCategory();
+    category.setName(RandomUtils.randomString(15).toUpperCase());
     account.setAccountId(RandomUtils.randomUUID());
     account.setUsername(RandomUtils.randomString(25));
     account.setAccountName(RandomUtils.randomString(25));
     account.setBalance(RandomUtils.randomBigDecimal());
     account.setBalanceTarget(RandomUtils.randomBigDecimal());
-    account.setAccountCategory(RandomUtils.randomEnum(AccountCategoryEnum.class));
+    account.setAccountCategory(category);
     account.setAccountDescription(RandomUtils.randomString(25));
     account.setDefault(RandomUtils.randomBoolean());
     return account;

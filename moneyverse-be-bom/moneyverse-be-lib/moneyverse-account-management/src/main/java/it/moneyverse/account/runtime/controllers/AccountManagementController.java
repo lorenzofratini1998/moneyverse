@@ -1,13 +1,9 @@
 package it.moneyverse.account.runtime.controllers;
 
-import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.account.model.dto.AccountDto;
-import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
+import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.services.AccountService;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -67,5 +63,12 @@ public class AccountManagementController implements AccountOperations {
       "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@accountRepository.existsByUsernameAndAccountId(authentication.name, #accountId))")
   public void deleteAccount(@PathVariable UUID accountId) {
     accountService.deleteAccount(accountId);
+  }
+
+  @Override
+  @GetMapping("/accounts/categories")
+  @ResponseStatus(HttpStatus.OK)
+  public List<AccountCategoryDto> getAccountCategories() {
+    return accountService.getAccountCategories();
   }
 }

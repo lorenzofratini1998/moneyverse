@@ -3,7 +3,6 @@ package it.moneyverse.account.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,7 +18,7 @@ public class AccountDto implements Serializable {
   private final String accountName;
   private final BigDecimal balance;
   private final BigDecimal balanceTarget;
-  private final AccountCategoryEnum accountCategory;
+  private final String accountCategory;
   private final String accountDescription;
   private final Boolean isDefault;
 
@@ -58,7 +57,7 @@ public class AccountDto implements Serializable {
     return balanceTarget;
   }
 
-  public AccountCategoryEnum getAccountCategory() {
+  public String getAccountCategory() {
     return accountCategory;
   }
 
@@ -82,7 +81,7 @@ public class AccountDto implements Serializable {
     private String accountName;
     private BigDecimal balance;
     private BigDecimal balanceTarget;
-    private AccountCategoryEnum accountCategory;
+    private String accountCategory;
     private String accountDescription;
     private Boolean isDefault;
 
@@ -111,7 +110,7 @@ public class AccountDto implements Serializable {
       return this;
     }
 
-    public Builder withAccountCategory(AccountCategoryEnum accountCategory) {
+    public Builder withAccountCategory(String accountCategory) {
       this.accountCategory = accountCategory;
       return this;
     }

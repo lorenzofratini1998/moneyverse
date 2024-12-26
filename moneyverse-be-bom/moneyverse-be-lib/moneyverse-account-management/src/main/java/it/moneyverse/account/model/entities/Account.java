@@ -1,15 +1,7 @@
 package it.moneyverse.account.model.entities;
 
-import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.model.entities.Auditable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -40,16 +32,16 @@ public class Account extends Auditable implements Serializable {
   @Column(name = "BALANCE_TARGET")
   private BigDecimal balanceTarget;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "ACCOUNT_CATEGORY", nullable = false)
-  private AccountCategoryEnum accountCategory;
-
   @Column(name = "ACCOUNT_DESCRIPTION")
   private String accountDescription;
 
   @Column(name = "IS_DEFAULT")
   @ColumnDefault(value = "FALSE")
   private Boolean isDefault;
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "ACCOUNT_CATEGORY", nullable = false)
+  private AccountCategory accountCategory;
 
   public UUID getAccountId() {
     return accountId;
@@ -91,14 +83,6 @@ public class Account extends Auditable implements Serializable {
     this.balanceTarget = balanceTarget;
   }
 
-  public AccountCategoryEnum getAccountCategory() {
-    return accountCategory;
-  }
-
-  public void setAccountCategory(AccountCategoryEnum accountCategory) {
-    this.accountCategory = accountCategory;
-  }
-
   public String getAccountDescription() {
     return accountDescription;
   }
@@ -113,5 +97,13 @@ public class Account extends Auditable implements Serializable {
 
   public void setDefault(Boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  public AccountCategory getAccountCategory() {
+    return accountCategory;
+  }
+
+  public void setAccountCategory(AccountCategory accountCategory) {
+    this.accountCategory = accountCategory;
   }
 }

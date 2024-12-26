@@ -4,10 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.account.model.dto.AccountDto;
-import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
+import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
@@ -170,6 +167,23 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertEquals(testContext.getAccountsCount() - 1, accountRepository.count());
+  }
+
+  @Test
+  void testGetAccountCategories() {
+    final UserModel user = testContext.getRandomAdminOrUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+
+    ResponseEntity<List<AccountCategoryDto>> result =
+        restTemplate.exchange(
+            basePath + "/accounts/categories",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals(testContext.getCategories().size(), result.getBody().size());
   }
 
   private void compareActualWithExpectedAccount(AccountDto actual, AccountDto expected) {

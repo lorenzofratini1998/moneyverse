@@ -1,12 +1,10 @@
 package it.moneyverse.account.model.dto;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
-import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.utils.JsonUtils;
-
 import java.util.Optional;
 
 public class AccountCriteria {
@@ -14,7 +12,7 @@ public class AccountCriteria {
   private String username;
   private BoundCriteria balance;
   private BoundCriteria balanceTarget;
-  private AccountCategoryEnum accountCategory;
+  private String accountCategory;
   private Boolean isDefault;
   private PageCriteria page;
   private SortCriteria<AccountSortAttributeEnum> sort;
@@ -43,11 +41,11 @@ public class AccountCriteria {
     this.balanceTarget = balanceTarget;
   }
 
-  public Optional<AccountCategoryEnum> getAccountCategory() {
+  public Optional<String> getAccountCategory() {
     return Optional.ofNullable(accountCategory);
   }
 
-  public void setAccountCategory(AccountCategoryEnum accountCategory) {
+  public void setAccountCategory(String accountCategory) {
     this.accountCategory = accountCategory;
   }
 

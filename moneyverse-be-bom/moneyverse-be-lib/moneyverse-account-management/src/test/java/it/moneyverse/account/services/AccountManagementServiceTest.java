@@ -5,15 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.account.model.dto.AccountDto;
-import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
+import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.model.event.AccountDeletionEvent;
+import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
-import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
@@ -43,6 +41,7 @@ class AccountManagementServiceTest {
 
   @InjectMocks private AccountManagementService accountManagementService;
 
+  @Mock private AccountCategoryRepository accountCategoryRepository;
   @Mock private AccountRepository accountRepository;
   @Mock private UserServiceGrpcClient userServiceClient;
   @Mock private MessageProducer<UUID, String> messageProducer;
@@ -61,21 +60,23 @@ class AccountManagementServiceTest {
 
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(
-      @Mock Account account, @Mock AccountDto accountDto) {
+      @Mock Account account, @Mock AccountCategory category, @Mock AccountDto accountDto) {
     final String username = RandomUtils.randomString(15);
+    final String categoryName = RandomUtils.randomString(15).toUpperCase();
     AccountRequestDto request =
         new AccountRequestDto(
             username,
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            categoryName,
             RandomUtils.randomString(15));
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
         .thenReturn(false);
-    mapper.when(() -> AccountMapper.toAccount(request)).thenReturn(account);
+    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.of(category));
+    mapper.when(() -> AccountMapper.toAccount(request, category)).thenReturn(account);
     when(accountRepository.findDefaultAccountsByUser(request.username()))
         .thenReturn(Collections.emptyList());
     when(accountRepository.save(any(Account.class))).thenReturn(account);
@@ -87,7 +88,8 @@ class AccountManagementServiceTest {
     verify(userServiceClient, times(1)).checkIfUserExists(username);
     verify(accountRepository, times(1))
         .existsByUsernameAndAccountName(username, request.accountName());
-    mapper.verify(() -> AccountMapper.toAccount(request), times(1));
+    verify(accountCategoryRepository, times(1)).findByName(categoryName);
+    mapper.verify(() -> AccountMapper.toAccount(request, category), times(1));
     verify(accountRepository, times(1)).findDefaultAccountsByUser(request.username());
     verify(accountRepository, times(1)).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
@@ -96,13 +98,14 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenUserNotFound() {
     final String username = RandomUtils.randomString(15);
+    final String categoryName = RandomUtils.randomString(15).toUpperCase();
     AccountRequestDto request =
         new AccountRequestDto(
             username,
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            categoryName,
             RandomUtils.randomString(15));
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(false);
@@ -110,6 +113,7 @@ class AccountManagementServiceTest {
     assertThrows(
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
+    verify(accountCategoryRepository, never()).findByName(categoryName);
     verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, never())
@@ -120,13 +124,14 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenAccountAlreadyExists() {
     final String username = RandomUtils.randomString(15);
+    final String categoryName = RandomUtils.randomString(15).toUpperCase();
     AccountRequestDto request =
         new AccountRequestDto(
             username,
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            categoryName,
             RandomUtils.randomString(15));
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
@@ -137,11 +142,41 @@ class AccountManagementServiceTest {
         ResourceAlreadyExistsException.class,
         () -> accountManagementService.createAccount(request));
 
+    verify(accountCategoryRepository, never()).findByName(categoryName);
     verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
     verify(accountRepository, never()).save(any(Account.class));
     verify(userServiceClient, times(1)).checkIfUserExists(username);
     verify(accountRepository, times(1))
         .existsByUsernameAndAccountName(username, request.accountName());
+  }
+
+  @Test
+  void givenAccountRequest_WhenCreateAccount_ThenCategoryNotFound() {
+    final String username = RandomUtils.randomString(15);
+    final String categoryName = RandomUtils.randomString(15).toUpperCase();
+    AccountRequestDto request =
+        new AccountRequestDto(
+            username,
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            categoryName,
+            RandomUtils.randomString(15));
+
+    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
+        .thenReturn(false);
+    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
+
+    verify(accountCategoryRepository, times(1)).findByName(categoryName);
+    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
+    verify(accountRepository, never()).save(any(Account.class));
+    verify(accountRepository, times(1))
+        .existsByUsernameAndAccountName(username, request.accountName());
+    verify(userServiceClient, times(1)).checkIfUserExists(username);
   }
 
   @Test
@@ -184,19 +219,20 @@ class AccountManagementServiceTest {
 
   @Test
   void givenAccountId_WhenUpdateAccount_ThenReturnAccountDto(
-      @Mock Account account, @Mock AccountDto result) {
+      @Mock Account account, @Mock AccountCategory category, @Mock AccountDto result) {
     UUID accountId = RandomUtils.randomUUID();
     AccountUpdateRequestDto request =
         new AccountUpdateRequestDto(
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             null);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    mapper.when(() -> AccountMapper.partialUpdate(account, request)).thenReturn(account);
+    when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
+    mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.save(account)).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
 
@@ -204,26 +240,31 @@ class AccountManagementServiceTest {
 
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
-    mapper.verify(() -> AccountMapper.partialUpdate(account, request), times(1));
+    verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+    mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
   }
 
   @Test
   void givenAccountId_WhenUpdateAccountAlreadyExistentDefaultAccount_ThenReturnAccountDto(
-      @Mock Account account, @Mock Account defaultAccount, @Mock AccountDto result) {
+      @Mock Account account,
+      @Mock AccountCategory category,
+      @Mock Account defaultAccount,
+      @Mock AccountDto result) {
     UUID accountId = RandomUtils.randomUUID();
     AccountUpdateRequestDto request =
         new AccountUpdateRequestDto(
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             Boolean.TRUE);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    mapper.when(() -> AccountMapper.partialUpdate(account, request)).thenReturn(account);
+    when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
+    mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.findDefaultAccountsByUser(any())).thenReturn(List.of(defaultAccount));
     when(defaultAccount.getAccountId()).thenReturn(RandomUtils.randomUUID());
     when(accountRepository.save(defaultAccount)).thenReturn(defaultAccount);
@@ -234,7 +275,8 @@ class AccountManagementServiceTest {
 
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
-    mapper.verify(() -> AccountMapper.partialUpdate(account, request), times(1));
+    verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+    mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).findDefaultAccountsByUser(any());
     verify(accountRepository, times(1)).save(defaultAccount);
     verify(accountRepository, times(1)).save(account);
@@ -242,14 +284,14 @@ class AccountManagementServiceTest {
   }
 
   @Test
-  void givenAccountId_WhenUpdateAccount_ThenReturnResourceNotFound() {
+  void givenAccountId_WhenUpdateAccount_ThenReturnAccountNotFound() {
     UUID accountId = RandomUtils.randomUUID();
     AccountUpdateRequestDto request =
         new AccountUpdateRequestDto(
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             null);
 
@@ -260,8 +302,42 @@ class AccountManagementServiceTest {
         () -> accountManagementService.updateAccount(accountId, request));
 
     verify(accountRepository, times(1)).findById(accountId);
+    verify(accountCategoryRepository, never()).findByName(any(String.class));
     mapper.verify(
-        () -> AccountMapper.partialUpdate(any(Account.class), any(AccountUpdateRequestDto.class)),
+        () ->
+            AccountMapper.partialUpdate(
+                any(Account.class), any(AccountUpdateRequestDto.class), any(AccountCategory.class)),
+        never());
+    verify(accountRepository, never()).save(any(Account.class));
+    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
+  }
+
+  @Test
+  void givenAccountId_WhenUpdateAccount_ThenReturnCategoryNotFound(@Mock Account account) {
+    UUID accountId = RandomUtils.randomUUID();
+    final String categoryName = RandomUtils.randomString(15);
+    AccountUpdateRequestDto request =
+        new AccountUpdateRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomBigDecimal(),
+            categoryName,
+            RandomUtils.randomString(15),
+            null);
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> accountManagementService.updateAccount(accountId, request));
+
+    verify(accountRepository, times(1)).findById(accountId);
+    verify(accountCategoryRepository, times(1)).findByName(categoryName);
+    mapper.verify(
+        () ->
+            AccountMapper.partialUpdate(
+                any(Account.class), any(AccountUpdateRequestDto.class), any(AccountCategory.class)),
         never());
     verify(accountRepository, never()).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
@@ -294,5 +370,19 @@ class AccountManagementServiceTest {
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountDeletionTopic, never()).name();
     verify(messageProducer, never()).send(any(AccountDeletionEvent.class), any(String.class));
+  }
+
+  @Test
+  void whenGetAccountCategories_ThenReturnAccountCategories(
+      @Mock AccountCategory accountCategory, @Mock AccountCategoryDto accountCategoryDto) {
+    when(accountCategoryRepository.findAll()).thenReturn(List.of(accountCategory));
+    mapper
+        .when(() -> AccountMapper.toAccountCategoryDto(any(AccountCategory.class)))
+        .thenReturn(accountCategoryDto);
+
+    accountManagementService.getAccountCategories();
+
+    verify(accountCategoryRepository, times(1)).findAll();
+    mapper.verify(() -> AccountMapper.toAccountCategoryDto(any(AccountCategory.class)), times(1));
   }
 }

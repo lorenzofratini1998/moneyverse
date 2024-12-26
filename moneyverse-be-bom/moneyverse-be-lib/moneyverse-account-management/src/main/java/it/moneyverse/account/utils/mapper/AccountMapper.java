@@ -1,18 +1,30 @@
 package it.moneyverse.account.utils.mapper;
 
+import it.moneyverse.account.model.dto.AccountCategoryDto;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AccountMapper {
 
   private AccountMapper() {}
 
-  public static Account toAccount(AccountRequestDto request) {
+  public static AccountCategoryDto toAccountCategoryDto(AccountCategory accountCategory) {
+    if (accountCategory == null) {
+      return null;
+    }
+    return AccountCategoryDto.builder()
+        .withAccountCategoryId(accountCategory.getAccountCategoryId())
+        .withName(accountCategory.getName().toUpperCase())
+        .withDescription(accountCategory.getDescription())
+        .build();
+  }
+
+  public static Account toAccount(AccountRequestDto request, AccountCategory accountCategory) {
     if (request == null) {
       return null;
     }
@@ -21,7 +33,7 @@ public class AccountMapper {
     account.setAccountName(request.accountName());
     account.setBalance(request.balance());
     account.setBalanceTarget(request.balanceTarget());
-    account.setAccountCategory(request.accountCategory());
+    account.setAccountCategory(accountCategory);
     account.setAccountDescription(request.accountDescription());
     return account;
   }
@@ -36,7 +48,7 @@ public class AccountMapper {
         .withAccountName(account.getAccountName())
         .withBalance(account.getBalance())
         .withBalanceTarget(account.getBalanceTarget())
-        .withAccountCategory(account.getAccountCategory())
+        .withAccountCategory(account.getAccountCategory().getName().toUpperCase())
         .withAccountDescription(account.getAccountDescription())
         .withDefault(account.isDefault())
         .build();
@@ -49,7 +61,8 @@ public class AccountMapper {
     return entities.stream().map(AccountMapper::toAccountDto).toList();
   }
 
-  public static Account partialUpdate(Account account, AccountUpdateRequestDto request) {
+  public static Account partialUpdate(
+      Account account, AccountUpdateRequestDto request, AccountCategory accountCategory) {
     if (request == null) {
       return null;
     }
@@ -63,7 +76,7 @@ public class AccountMapper {
       account.setBalanceTarget(request.balanceTarget());
     }
     if (request.accountCategory() != null) {
-      account.setAccountCategory(request.accountCategory());
+      account.setAccountCategory(accountCategory);
     }
     if (request.accountDescription() != null) {
       account.setAccountDescription(request.accountDescription());

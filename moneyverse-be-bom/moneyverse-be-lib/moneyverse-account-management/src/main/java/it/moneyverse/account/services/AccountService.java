@@ -1,10 +1,6 @@
 package it.moneyverse.account.services;
 
-import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.account.model.dto.AccountDto;
-import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
-
+import it.moneyverse.account.model.dto.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,4 +17,6 @@ public interface AccountService {
   void deleteAccount(UUID accountId);
 
   void deleteAccountsByUsername(String username);
+
+  List<AccountCategoryDto> getAccountCategories();
 }

@@ -5,15 +5,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.account.model.dto.AccountDto;
-import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
+import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.services.AccountManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
-import it.moneyverse.core.enums.AccountCategoryEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
@@ -62,7 +58,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15));
     when(accountService.createAccount(request)).thenReturn(response);
 
@@ -83,7 +79,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15));
 
     mockMvc
@@ -116,7 +112,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15));
     when(accountService.createAccount(request)).thenThrow(ResourceAlreadyExistsException.class);
     mockMvc
@@ -136,7 +132,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15));
     when(accountService.createAccount(request)).thenThrow(ResourceNotFoundException.class);
     mockMvc
@@ -218,7 +214,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             null);
 
@@ -241,7 +237,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             null);
 
@@ -265,7 +261,7 @@ class AccountManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(AccountCategoryEnum.class),
+            RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             null);
 
@@ -318,6 +314,18 @@ class AccountManagementControllerTest {
         .andExpect(status().isForbidden());
   }
 
+  @Test
+  void testGetCategories_Success(@Mock AccountCategoryDto accountCategoryDto) throws Exception {
+    when(accountService.getAccountCategories()).thenReturn(List.of(accountCategoryDto));
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/accounts/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.jwt()))
+        .andExpect(status().isOk());
+  }
+
   private static Stream<Supplier<AccountRequestDto>> invalidAccountRequestProvider() {
     return Stream.of(
         AccountManagementControllerTest::createRequestWithNullUsername,
@@ -332,7 +340,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(AccountCategoryEnum.class),
+        RandomUtils.randomString(15),
         RandomUtils.randomString(15));
   }
 
@@ -342,7 +350,7 @@ class AccountManagementControllerTest {
         null,
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(AccountCategoryEnum.class),
+        RandomUtils.randomString(15),
         RandomUtils.randomString(15));
   }
 
@@ -363,7 +371,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(AccountCategoryEnum.class),
+        RandomUtils.randomString(15),
         RandomUtils.randomString(15));
   }
 }

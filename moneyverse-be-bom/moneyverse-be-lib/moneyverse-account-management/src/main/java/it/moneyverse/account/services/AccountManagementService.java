@@ -1,12 +1,11 @@
 package it.moneyverse.account.services;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
-import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.account.model.dto.AccountDto;
-import it.moneyverse.account.model.dto.AccountRequestDto;
-import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
+import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.model.event.AccountDeletionEvent;
+import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
 import it.moneyverse.core.enums.SortAttribute;
@@ -17,10 +16,9 @@ import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
+import it.moneyverse.core.services.UserServiceGrpcClient;
 import java.util.List;
 import java.util.UUID;
-
-import it.moneyverse.core.services.UserServiceGrpcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
@@ -32,15 +30,17 @@ public class AccountManagementService implements AccountService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountManagementService.class);
   private final AccountRepository accountRepository;
+  private final AccountCategoryRepository accountCategoryRepository;
   private final UserServiceClient userServiceClient;
   private final MessageProducer<UUID, String> messageProducer;
 
   public AccountManagementService(
       AccountRepository accountRepository,
+      AccountCategoryRepository accountCategoryRepository,
       UserServiceGrpcClient userServiceClient,
-      MessageProducer<UUID, String> messageProducer
-  ) {
+      MessageProducer<UUID, String> messageProducer) {
     this.accountRepository = accountRepository;
+    this.accountCategoryRepository = accountCategoryRepository;
     this.userServiceClient = userServiceClient;
     this.messageProducer = messageProducer;
   }
@@ -50,8 +50,9 @@ public class AccountManagementService implements AccountService {
   public AccountDto createAccount(AccountRequestDto request) {
     checkIfUserExists(request.username());
     checkIfAccountAlreadyExists(request.username(), request.accountName());
+    AccountCategory category = findAccountCategory(request.accountCategory());
     LOGGER.info("Creating account {} for user {}", request.accountName(), request.username());
-    Account account = AccountMapper.toAccount(request);
+    Account account = AccountMapper.toAccount(request, category);
     if (accountRepository.findDefaultAccountsByUser(request.username()).isEmpty()) {
       LOGGER.info("Setting default account for user {}", request.username());
       account.setDefault(Boolean.TRUE);
@@ -103,11 +104,11 @@ public class AccountManagementService implements AccountService {
   @Transactional
   public AccountDto updateAccount(UUID accountId, AccountUpdateRequestDto request) {
     Account account = findAccountById(accountId);
-    account = AccountMapper.partialUpdate(account, request);
+    AccountCategory category =
+        request.accountCategory() != null ? findAccountCategory(request.accountCategory()) : null;
+    account = AccountMapper.partialUpdate(account, request, category);
     if (Boolean.TRUE.equals(request.isDefault())) {
-      accountRepository
-          .findDefaultAccountsByUser(account.getUsername())
-          .stream()
+      accountRepository.findDefaultAccountsByUser(account.getUsername()).stream()
           .filter(defaultAcc -> !defaultAcc.getAccountId().equals(accountId))
           .forEach(
               defaultAcc -> {
@@ -118,6 +119,12 @@ public class AccountManagementService implements AccountService {
     AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
     LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUsername());
     return result;
+  }
+
+  private AccountCategory findAccountCategory(String name) {
+    return accountCategoryRepository
+        .findByName(name)
+        .orElseThrow(() -> new ResourceNotFoundException("Invalid account category"));
   }
 
   @Override
@@ -135,6 +142,14 @@ public class AccountManagementService implements AccountService {
   public void deleteAccountsByUsername(String username) {
     LOGGER.info("Deleting accounts by username {}", username);
     accountRepository.deleteAll(accountRepository.findAccountByUsername(username));
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public List<AccountCategoryDto> getAccountCategories() {
+    return accountCategoryRepository.findAll().stream()
+        .map(AccountMapper::toAccountCategoryDto)
+        .toList();
   }
 
   private Account findAccountById(UUID accountId) {
