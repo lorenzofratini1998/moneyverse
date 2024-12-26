@@ -2,35 +2,31 @@ package it.moneyverse.account.utils;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.core.enums.AccountCategoryEnum;
-import it.moneyverse.core.model.dto.BoundCriteria;
+import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
-import it.moneyverse.core.model.entities.AccountModel;
-import it.moneyverse.test.model.TestContext;
+import it.moneyverse.test.CriteriaRandomGenerator;
 import it.moneyverse.test.utils.RandomUtils;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 import org.springframework.data.domain.Sort;
 
-public class AccountCriteriaRandomGenerator {
+public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<AccountCriteria> {
 
-  private final TestContext testContext;
   private final AccountCriteria criteria;
+  private final AccountTestContext testContext;
 
-  public AccountCriteriaRandomGenerator(TestContext testContext) {
-    this.testContext = testContext;
+  public AccountCriteriaRandomGenerator(AccountTestContext testContext) {
     this.criteria = new AccountCriteria();
+    this.testContext = testContext;
   }
 
+  @Override
   public AccountCriteria generate() {
     withRandomUsername();
     withRandomBalance();
     withRandomBalanceTarget();
     withRandomAccountCategory();
+    withRandomCurrency();
     withRandomIsDefault();
     withPage();
     withSort();
@@ -45,9 +41,7 @@ public class AccountCriteriaRandomGenerator {
     criteria.setBalance(
         Math.random() < 0.5
             ? randomCriteriaBound(
-            testContext.getModel().getAccounts().stream()
-                .map(AccountModel::getBalance)
-                .toList())
+                testContext.getAccounts().stream().map(Account::getBalance).toList())
             : null);
   }
 
@@ -55,40 +49,17 @@ public class AccountCriteriaRandomGenerator {
     criteria.setBalanceTarget(
         Math.random() < 0.5
             ? randomCriteriaBound(
-            testContext.getModel().getAccounts().stream()
-                .map(AccountModel::getBalanceTarget)
-                .toList())
+                testContext.getAccounts().stream().map(Account::getBalanceTarget).toList())
             : null);
-  }
-
-  private BoundCriteria randomCriteriaBound(List<BigDecimal> values) {
-    BigDecimal minBalance = findMin(values);
-    BigDecimal maxBalance = findMax(values);
-    BoundCriteria criteria = new BoundCriteria();
-    criteria.setLower(
-        RandomUtils.randomDecimal(
-                minBalance.doubleValue(),
-                maxBalance.divide(BigDecimal.TWO, RoundingMode.HALF_DOWN).doubleValue())
-            .setScale(2, RoundingMode.HALF_DOWN));
-    criteria.setUpper(
-        RandomUtils.randomDecimal(
-                maxBalance.divide(BigDecimal.TWO, RoundingMode.HALF_DOWN).doubleValue(),
-                maxBalance.doubleValue())
-            .setScale(2, RoundingMode.HALF_DOWN));
-    return criteria;
-  }
-
-  private BigDecimal findMin(List<BigDecimal> values) {
-    return values.stream().filter(Objects::nonNull).min(Comparator.naturalOrder()).get();
-  }
-
-  private BigDecimal findMax(List<BigDecimal> values) {
-    return values.stream().filter(Objects::nonNull).max(Comparator.naturalOrder()).get();
   }
 
   private void withRandomAccountCategory() {
     criteria.setAccountCategory(
-        Math.random() < 0.5 ? RandomUtils.randomEnum(AccountCategoryEnum.class) : null);
+        Math.random() < 0.5 ? testContext.getRandomAccountCategory().getName() : null);
+  }
+
+  private void withRandomCurrency() {
+    criteria.setCurrency(Math.random() < 0.5 ? RandomUtils.randomEnum(CurrencyEnum.class) : null);
   }
 
   private void withRandomIsDefault() {
@@ -102,5 +73,4 @@ public class AccountCriteriaRandomGenerator {
   private void withSort() {
     criteria.setSort(new SortCriteria<>(AccountSortAttributeEnum.ACCOUNT_NAME, Sort.Direction.ASC));
   }
-
 }

@@ -1,14 +1,12 @@
 package it.moneyverse.core.boot;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.beans.UserDeletionTopic;
+import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.utils.properties.KafkaProperties;
+import jakarta.json.stream.JsonParsingException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import jakarta.json.stream.JsonParsingException;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
@@ -19,20 +17,15 @@ import org.apache.kafka.common.serialization.UUIDDeserializer;
 import org.apache.kafka.common.serialization.UUIDSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaAdmin;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.retrytopic.RetryTopicConfiguration;
-import org.springframework.kafka.retrytopic.RetryTopicConfigurationBuilder;
+import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 
 @Configuration
 @EnableConfigurationProperties(KafkaProperties.class)
@@ -90,25 +83,36 @@ public class KafkaAutoConfiguration {
   }
 
   @Bean
-  public ConcurrentKafkaListenerContainerFactory<UUID, String> kafkaListenerContainerFactory() {
+  public DefaultErrorHandler defaultErrorHandler(KafkaTemplate<UUID, String> kafkaTemplate) {
+    var recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate);
+
+    var exponentialBackOff =
+        new ExponentialBackOffWithMaxRetries(
+            kafkaProperties.getConsumer().getRetry().getAttempts());
+    exponentialBackOff.setInitialInterval(kafkaProperties.getConsumer().getRetry().getDelay());
+    exponentialBackOff.setMultiplier(kafkaProperties.getConsumer().getRetry().getMultiplier());
+    exponentialBackOff.setMaxInterval(
+        kafkaProperties.getConsumer().getRetry().getMaxRetryBackoffMs());
+
+    var errorHandler = new DefaultErrorHandler(recoverer, exponentialBackOff);
+    errorHandler.addNotRetryableExceptions(
+        JsonParsingException.class, ResourceNotFoundException.class);
+
+    return errorHandler;
+  }
+
+  @Bean
+  public ConcurrentKafkaListenerContainerFactory<UUID, String> kafkaListenerContainerFactory(
+      DefaultErrorHandler errorHandler) {
     ConcurrentKafkaListenerContainerFactory<UUID, String> factory =
         new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory());
+    factory.setCommonErrorHandler(errorHandler);
     return factory;
   }
 
-  @ConditionalOnBean(UserDeletionTopic.class)
   @Bean
-  public RetryTopicConfiguration userServiceRetryTopic(KafkaTemplate<UUID, String> template) {
-    return RetryTopicConfigurationBuilder.newInstance()
-        .includeTopic(UserDeletionTopic.TOPIC)
-        .maxAttempts(kafkaProperties.getConsumer().getRetry().getAttempts())
-        .exponentialBackoff(
-            kafkaProperties.getConsumer().getRetry().getDelay(),
-            kafkaProperties.getConsumer().getRetry().getMultiplier(),
-            kafkaProperties.getConsumer().getRetry().getMaxRetryBackoffMs())
-        .autoStartDltHandler(Boolean.TRUE)
-        .notRetryOn(List.of(JsonParsingException.class, ResourceNotFoundException.class))
-        .create(template);
+  public MessageProducer<UUID, String> messageProducer(KafkaTemplate<UUID, String> kafkaTemplate) {
+    return new MessageProducer<>(kafkaTemplate);
   }
 }

@@ -1,16 +1,8 @@
 package it.moneyverse.account.model.entities;
 
-import it.moneyverse.core.enums.AccountCategoryEnum;
-import it.moneyverse.core.model.entities.AccountModel;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.Auditable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,7 +11,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "ACCOUNTS")
-public class Account extends Auditable implements Serializable, AccountModel {
+public class Account extends Auditable implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 
@@ -41,10 +33,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
   @Column(name = "BALANCE_TARGET")
   private BigDecimal balanceTarget;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "ACCOUNT_CATEGORY", nullable = false)
-  private AccountCategoryEnum accountCategory;
-
   @Column(name = "ACCOUNT_DESCRIPTION")
   private String accountDescription;
 
@@ -52,7 +40,14 @@ public class Account extends Auditable implements Serializable, AccountModel {
   @ColumnDefault(value = "FALSE")
   private Boolean isDefault;
 
-  @Override
+  @Column(name = "CURRENCY", nullable = false, length = 3)
+  @Enumerated(EnumType.STRING)
+  private CurrencyEnum currency;
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "ACCOUNT_CATEGORY", nullable = false)
+  private AccountCategory accountCategory;
+
   public UUID getAccountId() {
     return accountId;
   }
@@ -61,7 +56,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.accountId = accountId;
   }
 
-  @Override
   public String getUsername() {
     return username;
   }
@@ -70,7 +64,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.username = username;
   }
 
-  @Override
   public String getAccountName() {
     return accountName;
   }
@@ -79,7 +72,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.accountName = accountName;
   }
 
-  @Override
   public BigDecimal getBalance() {
     return balance;
   }
@@ -88,7 +80,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.balance = balance;
   }
 
-  @Override
   public BigDecimal getBalanceTarget() {
     return balanceTarget;
   }
@@ -97,16 +88,6 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.balanceTarget = balanceTarget;
   }
 
-  @Override
-  public AccountCategoryEnum getAccountCategory() {
-    return accountCategory;
-  }
-
-  public void setAccountCategory(AccountCategoryEnum accountCategory) {
-    this.accountCategory = accountCategory;
-  }
-
-  @Override
   public String getAccountDescription() {
     return accountDescription;
   }
@@ -115,12 +96,27 @@ public class Account extends Auditable implements Serializable, AccountModel {
     this.accountDescription = accountDescription;
   }
 
-  @Override
   public Boolean isDefault() {
     return isDefault;
   }
 
   public void setDefault(Boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  public CurrencyEnum getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(CurrencyEnum currency) {
+    this.currency = currency;
+  }
+
+  public AccountCategory getAccountCategory() {
+    return accountCategory;
+  }
+
+  public void setAccountCategory(AccountCategory accountCategory) {
+    this.accountCategory = accountCategory;
   }
 }

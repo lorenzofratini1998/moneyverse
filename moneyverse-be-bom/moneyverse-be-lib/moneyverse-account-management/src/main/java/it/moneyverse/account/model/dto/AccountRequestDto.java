@@ -2,7 +2,7 @@ package it.moneyverse.account.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.moneyverse.core.enums.AccountCategoryEnum;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,8 +19,9 @@ public record AccountRequestDto(
     @NotEmpty(message = "'Account name' must not be empty or null") String accountName,
     BigDecimal balance,
     BigDecimal balanceTarget,
-    @NotNull(message = "'Account Category' must not be null") AccountCategoryEnum accountCategory,
-    String accountDescription)
+    @NotEmpty(message = "'Account Category' must not be empty or null") String accountCategory,
+    String accountDescription,
+    @NotNull(message = "'Currency' must not be null") CurrencyEnum currency)
     implements Serializable {
 
   @Override

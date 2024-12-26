@@ -3,7 +3,7 @@ package it.moneyverse.account.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import it.moneyverse.core.enums.AccountCategoryEnum;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,9 +19,10 @@ public class AccountDto implements Serializable {
   private final String accountName;
   private final BigDecimal balance;
   private final BigDecimal balanceTarget;
-  private final AccountCategoryEnum accountCategory;
+  private final String accountCategory;
   private final String accountDescription;
   private final Boolean isDefault;
+  private final CurrencyEnum currency;
 
   public AccountDto(Builder builder) {
     this.accountId = builder.accountId;
@@ -31,6 +32,7 @@ public class AccountDto implements Serializable {
     this.balanceTarget = builder.balanceTarget;
     this.accountCategory = builder.accountCategory;
     this.accountDescription = builder.accountDescription;
+    this.currency = builder.currency;
     this.isDefault = builder.isDefault;
   }
 
@@ -58,12 +60,16 @@ public class AccountDto implements Serializable {
     return balanceTarget;
   }
 
-  public AccountCategoryEnum getAccountCategory() {
+  public String getAccountCategory() {
     return accountCategory;
   }
 
   public String getAccountDescription() {
     return accountDescription;
+  }
+
+  public CurrencyEnum getCurrency() {
+    return currency;
   }
 
   public Boolean isDefault() {
@@ -82,9 +88,10 @@ public class AccountDto implements Serializable {
     private String accountName;
     private BigDecimal balance;
     private BigDecimal balanceTarget;
-    private AccountCategoryEnum accountCategory;
+    private String accountCategory;
     private String accountDescription;
     private Boolean isDefault;
+    private CurrencyEnum currency;
 
     public Builder withAccountId(UUID accountId) {
       this.accountId = accountId;
@@ -111,7 +118,7 @@ public class AccountDto implements Serializable {
       return this;
     }
 
-    public Builder withAccountCategory(AccountCategoryEnum accountCategory) {
+    public Builder withAccountCategory(String accountCategory) {
       this.accountCategory = accountCategory;
       return this;
     }
@@ -123,6 +130,11 @@ public class AccountDto implements Serializable {
 
     public Builder withDefault(Boolean isDefault) {
       this.isDefault = isDefault;
+      return this;
+    }
+
+    public Builder withCurrency(CurrencyEnum currency) {
+      this.currency = currency;
       return this;
     }
 

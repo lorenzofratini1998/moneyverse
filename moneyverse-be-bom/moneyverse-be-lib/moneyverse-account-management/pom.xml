@@ -59,9 +59,10 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-jpamodelgen</artifactId>
       <optional>true</optional>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>

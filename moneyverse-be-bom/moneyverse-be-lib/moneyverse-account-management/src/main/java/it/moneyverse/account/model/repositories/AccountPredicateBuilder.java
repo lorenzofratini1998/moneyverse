@@ -2,6 +2,7 @@ package it.moneyverse.account.model.repositories;
 
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory_;
 import it.moneyverse.account.model.entities.Account_;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
@@ -26,6 +27,7 @@ public class AccountPredicateBuilder {
     withBalance(param);
     withBalanceTarget(param);
     withAccountCategory(param);
+    withCurrency(param);
     withIsDefault(param);
     return cb.and(predicates.toArray(new Predicate[0]));
   }
@@ -74,7 +76,16 @@ public class AccountPredicateBuilder {
     param
         .getAccountCategory()
         .ifPresent(
-            category -> predicates.add(cb.equal(root.get(Account_.ACCOUNT_CATEGORY), category)));
+            category ->
+                predicates.add(
+                    cb.equal(
+                        root.get(Account_.ACCOUNT_CATEGORY).get(AccountCategory_.NAME), category)));
+  }
+
+  private void withCurrency(AccountCriteria param) {
+    param
+        .getCurrency()
+        .ifPresent(currency -> predicates.add(cb.equal(root.get(Account_.CURRENCY), currency)));
   }
 
   private void withIsDefault(AccountCriteria param) {

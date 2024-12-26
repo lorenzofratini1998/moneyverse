@@ -2,7 +2,7 @@ package it.moneyverse.test.operations.keycloak;
 
 import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_REALM;
 
-import it.moneyverse.test.model.TestContextModel;
+import it.moneyverse.core.model.entities.UserModel;
 import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public class CreateTestClientsStrategy implements KeycloakConfigurationStrategy 
   }
 
   @Override
-  public void configure(Keycloak client, TestContextModel testContext) {
+  public void configure(Keycloak client, List<UserModel> users) {
     for (String keycloakClient : keycloakClients) {
       ClientRepresentation clientRepresentation = new ClientRepresentation();
       clientRepresentation.setClientId(keycloakClient);

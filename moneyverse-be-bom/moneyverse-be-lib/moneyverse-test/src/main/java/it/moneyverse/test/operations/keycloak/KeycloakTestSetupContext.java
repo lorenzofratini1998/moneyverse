@@ -1,6 +1,6 @@
 package it.moneyverse.test.operations.keycloak;
 
-import it.moneyverse.test.model.TestContextModel;
+import it.moneyverse.core.model.entities.UserModel;
 import java.util.ArrayList;
 import java.util.List;
 import org.keycloak.admin.client.Keycloak;
@@ -14,7 +14,7 @@ public class KeycloakTestSetupContext {
     return this;
   }
 
-  public void execute(Keycloak client, TestContextModel context) {
-    strategies.forEach(strategy -> strategy.configure(client, context));
+  public void execute(Keycloak client, List<UserModel> users) {
+    strategies.forEach(strategy -> strategy.configure(client, users));
   }
 }

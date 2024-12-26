@@ -7,25 +7,50 @@ import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
+import it.moneyverse.account.model.entities.AccountFactory;
 import it.moneyverse.core.enums.SortAttribute;
-import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
-import it.moneyverse.core.model.entities.AccountModel;
 import it.moneyverse.test.model.TestContext;
-import it.moneyverse.test.model.entities.FakeAccount;
-import it.moneyverse.test.utils.helper.MapperTestHelper;
-import java.math.BigDecimal;
+import it.moneyverse.test.model.dto.ScriptMetadata;
+import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
+import it.moneyverse.test.services.SQLScriptService;
+import it.moneyverse.test.utils.RandomUtils;
+import java.nio.file.Path;
 import java.util.List;
 import org.springframework.data.domain.Sort;
 
-public class AccountTestContext extends TestContext {
+public class AccountTestContext extends TestContext<AccountTestContext> {
 
-  protected AccountTestContext(Builder builder) {
-    super(builder);
+  private static AccountTestContext currentInstance;
+
+  private final List<AccountCategory> categories;
+  private final List<Account> accounts;
+
+  public AccountTestContext() {
+    super();
+    categories = AccountFactory.createAccountCategories();
+    accounts = AccountFactory.createAccounts(getUsers(), categories);
+    setCurrentInstance(this);
   }
 
-  public static Builder builder() {
-    return new Builder();
+  private static void setCurrentInstance(AccountTestContext instance) {
+    currentInstance = instance;
+  }
+
+  protected static AccountTestContext getCurrentInstance() {
+    if (currentInstance == null) {
+      throw new IllegalStateException("TestContext instance is not set.");
+    }
+    return currentInstance;
+  }
+
+  public List<Account> getAccounts() {
+    return accounts;
+  }
+
+  public List<AccountCategory> getCategories() {
+    return categories;
   }
 
   private static AccountRequestDto toAccountRequest(Account account) {
@@ -34,17 +59,28 @@ public class AccountTestContext extends TestContext {
         account.getAccountName(),
         account.getBalance(),
         account.getBalanceTarget(),
-        account.getAccountCategory(),
-        account.getAccountDescription());
+        account.getAccountCategory().getName(),
+        account.getAccountDescription(),
+        account.getCurrency());
+  }
+
+  public Account getRandomAccount(String username) {
+    List<Account> userAccounts =
+        accounts.stream().filter(account -> account.getUsername().equals(username)).toList();
+    return userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
+  }
+
+  public AccountCategory getRandomAccountCategory() {
+    return categories.get(RandomUtils.randomInteger(0, categories.size() - 1));
   }
 
   public AccountRequestDto createAccountForUser(String username) {
-    return toAccountRequest(
-        MapperTestHelper.map(new FakeAccount(username, model.getAccounts().size()), Account.class));
+    AccountCategory category = getRandomAccountCategory();
+    return toAccountRequest(AccountFactory.fakeAccount(username, category, accounts.size()));
   }
 
   public AccountDto getExpectedAccountDto(AccountRequestDto request) {
-    if (getUserAccounts(request.username()).stream().anyMatch(AccountModel::isDefault)) {
+    if (getUserAccounts(request.username()).stream().anyMatch(Account::isDefault)) {
       return toAccountDto(request, Boolean.FALSE);
     }
     return toAccountDto(request, Boolean.TRUE);
@@ -58,6 +94,7 @@ public class AccountTestContext extends TestContext {
         .withAccountDescription(request.accountDescription())
         .withBalance(request.balance())
         .withBalanceTarget(request.balanceTarget())
+        .withCurrency(request.currency())
         .withDefault(isDefault)
         .build();
   }
@@ -66,8 +103,8 @@ public class AccountTestContext extends TestContext {
     return new AccountCriteriaRandomGenerator(getCurrentInstance()).generate();
   }
 
-  public List<AccountModel> filterAccounts(AccountCriteria criteria) {
-    return model.getAccounts().stream()
+  public List<Account> filterAccounts(AccountCriteria criteria) {
+    return accounts.stream()
         .filter(
             account ->
                 criteria
@@ -96,7 +133,13 @@ public class AccountTestContext extends TestContext {
             account ->
                 criteria
                     .getAccountCategory()
-                    .map(category -> category.equals(account.getAccountCategory()))
+                    .map(category -> category.equals(account.getAccountCategory().getName()))
+                    .orElse(true))
+        .filter(
+            account ->
+                criteria
+                    .getCurrency()
+                    .map(currency -> currency.equals(account.getCurrency()))
                     .orElse(true))
         .filter(
             account ->
@@ -110,13 +153,8 @@ public class AccountTestContext extends TestContext {
         .toList();
   }
 
-  private boolean filterByBound(BigDecimal value, BoundCriteria boundCriteria) {
-    return boundCriteria.getLower().map(lower -> value.compareTo(lower) >= 0).orElse(true)
-        && boundCriteria.getUpper().map(upper -> value.compareTo(upper) <= 0).orElse(true);
-  }
-
   private int sortByCriteria(
-      AccountModel a, AccountModel b, SortCriteria<AccountSortAttributeEnum> sortCriteria) {
+      Account a, Account b, SortCriteria<AccountSortAttributeEnum> sortCriteria) {
     if (sortCriteria == null) {
       return 0;
     }
@@ -127,7 +165,8 @@ public class AccountTestContext extends TestContext {
     int comparison =
         switch (attribute) {
           case ACCOUNT_NAME -> a.getAccountName().compareTo(b.getAccountName());
-          case ACCOUNT_CATEGORY -> a.getAccountCategory().compareTo(b.getAccountCategory());
+          case ACCOUNT_CATEGORY ->
+              a.getAccountCategory().getName().compareTo(b.getAccountCategory().getName());
           case BALANCE -> a.getBalance().compareTo(b.getBalance());
           case BALANCE_TARGET -> a.getBalanceTarget().compareTo(b.getBalanceTarget());
           case USERNAME -> a.getUsername().compareTo(b.getUsername());
@@ -138,25 +177,22 @@ public class AccountTestContext extends TestContext {
   }
 
   public int getAccountsCount() {
-    return model.getAccounts().size();
+    return accounts.size();
   }
 
-  public List<AccountModel> getUserAccounts(String username) {
-    return model.getAccounts().stream()
-        .filter(account -> username.equals(account.getUsername()))
-        .toList();
+  public List<Account> getUserAccounts(String username) {
+    return accounts.stream().filter(account -> username.equals(account.getUsername())).toList();
   }
 
-  public static class Builder extends TestContext.Builder<Builder> {
+  @Override
+  public AccountTestContext self() {
+    return this;
+  }
 
-    @Override
-    protected Builder self() {
-      return this;
-    }
-
-    @Override
-    public AccountTestContext build() {
-      return new AccountTestContext(this);
-    }
+  @Override
+  public AccountTestContext generateScript(Path dir) {
+    new EntityScriptGenerator(new ScriptMetadata(dir, categories, accounts), new SQLScriptService())
+        .execute();
+    return self();
   }
 }

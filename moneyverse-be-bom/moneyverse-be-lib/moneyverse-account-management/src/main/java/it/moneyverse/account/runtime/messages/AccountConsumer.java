@@ -1,18 +1,15 @@
 package it.moneyverse.account.runtime.messages;
 
-import it.moneyverse.account.model.event.UserDeletionEvent;
 import it.moneyverse.account.services.AccountService;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
+import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.core.utils.JsonUtils;
-
 import java.util.UUID;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -46,18 +43,6 @@ public class AccountConsumer {
     UserDeletionEvent event = JsonUtils.fromJson(record.value(), UserDeletionEvent.class);
     checkIfUserExists(event.username());
     accountService.deleteAccountsByUsername(event.username());
-  }
-
-  @DltHandler
-  public void onError(
-      ConsumerRecord<UUID, String> record,
-      @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-      Exception exception) {
-    LOGGER.error(
-        "Error received event: {} from topic: {}. Error: {}",
-        record.value(),
-        topic,
-        exception.getMessage());
   }
 
   private void checkIfUserExists(String username) {
