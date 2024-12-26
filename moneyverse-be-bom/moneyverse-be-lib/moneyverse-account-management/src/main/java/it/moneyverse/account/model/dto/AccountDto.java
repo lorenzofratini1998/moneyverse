@@ -3,6 +3,7 @@ package it.moneyverse.account.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ public class AccountDto implements Serializable {
   private final String accountCategory;
   private final String accountDescription;
   private final Boolean isDefault;
+  private final CurrencyEnum currency;
 
   public AccountDto(Builder builder) {
     this.accountId = builder.accountId;
@@ -30,6 +32,7 @@ public class AccountDto implements Serializable {
     this.balanceTarget = builder.balanceTarget;
     this.accountCategory = builder.accountCategory;
     this.accountDescription = builder.accountDescription;
+    this.currency = builder.currency;
     this.isDefault = builder.isDefault;
   }
 
@@ -65,6 +68,10 @@ public class AccountDto implements Serializable {
     return accountDescription;
   }
 
+  public CurrencyEnum getCurrency() {
+    return currency;
+  }
+
   public Boolean isDefault() {
     return isDefault;
   }
@@ -84,6 +91,7 @@ public class AccountDto implements Serializable {
     private String accountCategory;
     private String accountDescription;
     private Boolean isDefault;
+    private CurrencyEnum currency;
 
     public Builder withAccountId(UUID accountId) {
       this.accountId = accountId;
@@ -122,6 +130,11 @@ public class AccountDto implements Serializable {
 
     public Builder withDefault(Boolean isDefault) {
       this.isDefault = isDefault;
+      return this;
+    }
+
+    public Builder withCurrency(CurrencyEnum currency) {
+      this.currency = currency;
       return this;
     }
 

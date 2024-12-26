@@ -35,6 +35,7 @@ public class AccountMapper {
     account.setBalanceTarget(request.balanceTarget());
     account.setAccountCategory(accountCategory);
     account.setAccountDescription(request.accountDescription());
+    account.setCurrency(request.currency());
     return account;
   }
 
@@ -50,6 +51,7 @@ public class AccountMapper {
         .withBalanceTarget(account.getBalanceTarget())
         .withAccountCategory(account.getAccountCategory().getName().toUpperCase())
         .withAccountDescription(account.getAccountDescription())
+        .withCurrency(account.getCurrency())
         .withDefault(account.isDefault())
         .build();
   }
@@ -83,6 +85,9 @@ public class AccountMapper {
     }
     if (request.isDefault() != null) {
       account.setDefault(request.isDefault());
+    }
+    if (request.currency() != null) {
+      account.setCurrency(request.currency());
     }
     return account;
   }

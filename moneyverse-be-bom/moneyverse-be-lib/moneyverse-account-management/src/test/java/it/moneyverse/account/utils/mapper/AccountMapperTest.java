@@ -9,6 +9,7 @@ import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +54,8 @@ class AccountMapperTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
             category.getName(),
-            RandomUtils.randomString(25));
+            RandomUtils.randomString(25),
+            RandomUtils.randomEnum(CurrencyEnum.class));
 
     Account account = AccountMapper.toAccount(request, category);
 
@@ -63,6 +65,7 @@ class AccountMapperTest {
     assertEquals(request.balanceTarget(), account.getBalanceTarget());
     assertEquals(request.accountCategory(), account.getAccountCategory().getName());
     assertEquals(request.accountDescription(), account.getAccountDescription());
+    assertEquals(request.currency(), account.getCurrency());
   }
 
   @Test
@@ -128,6 +131,7 @@ class AccountMapperTest {
             RandomUtils.randomBigDecimal(),
             category.getName(),
             RandomUtils.randomString(25),
+            RandomUtils.randomEnum(CurrencyEnum.class),
             RandomUtils.randomBoolean());
 
     Account result = AccountMapper.partialUpdate(account, request, category);
@@ -137,6 +141,7 @@ class AccountMapperTest {
     assertEquals(request.balanceTarget(), result.getBalanceTarget());
     assertEquals(request.accountCategory(), result.getAccountCategory().getName());
     assertEquals(request.accountDescription(), result.getAccountDescription());
+    assertEquals(request.currency(), result.getCurrency());
     assertEquals(request.isDefault(), result.isDefault());
   }
 

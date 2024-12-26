@@ -1,5 +1,6 @@
 package it.moneyverse.budget.model.entities;
 
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.Auditable;
 import jakarta.persistence.*;
 import java.io.Serial;
@@ -36,6 +37,10 @@ public class Budget extends Auditable implements Serializable {
   @Column(name = "AMOUNT", nullable = false)
   @ColumnDefault(value = "0.0")
   private BigDecimal amount;
+
+  @Column(name = "CURRENCY", nullable = false, length = 3)
+  @Enumerated(EnumType.STRING)
+  private CurrencyEnum currency;
 
   public UUID getBudgetId() {
     return budgetId;
@@ -83,5 +88,13 @@ public class Budget extends Auditable implements Serializable {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+  public CurrencyEnum getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(CurrencyEnum currency) {
+    this.currency = currency;
   }
 }

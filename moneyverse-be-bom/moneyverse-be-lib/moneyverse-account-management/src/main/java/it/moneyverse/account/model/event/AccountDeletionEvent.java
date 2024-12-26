@@ -2,12 +2,11 @@ package it.moneyverse.account.model.event;
 
 import it.moneyverse.core.model.events.MessageEvent;
 import it.moneyverse.core.utils.JsonUtils;
-import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.util.ReflectionUtils;
 
 public class AccountDeletionEvent implements MessageEvent<UUID, String> {
 
@@ -15,8 +14,8 @@ public class AccountDeletionEvent implements MessageEvent<UUID, String> {
   private final String username;
 
   public AccountDeletionEvent(UUID accountId, String username) {
-      this.accountId = accountId;
-      this.username = username;
+    this.accountId = accountId;
+    this.username = username;
   }
 
   @Override

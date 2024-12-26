@@ -12,6 +12,7 @@ import it.moneyverse.budget.model.event.BudgetDeletionEvent;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.DefaultBudgetTemplateRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
@@ -60,7 +61,7 @@ public class BudgetManagementService implements BudgetService {
 
   @Override
   @Transactional
-  public void createDefaultBudgets(String username) {
+  public void createDefaultBudgets(String username, CurrencyEnum currency) {
     checkIfUserExists(username);
     LOGGER.info("Creating default budgets for user {}", username);
     List<Budget> defaultBudgets =
@@ -71,6 +72,7 @@ public class BudgetManagementService implements BudgetService {
                   budget.setUsername(username);
                   budget.setBudgetName(defaultBudgetTemplate.getName());
                   budget.setDescription(defaultBudgetTemplate.getDescription());
+                  budget.setCurrency(currency);
                   budget.setCreatedBy(BACKEND);
                   budget.setUpdatedBy(BACKEND);
                   return budget;

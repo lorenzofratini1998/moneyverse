@@ -4,7 +4,6 @@ import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +19,7 @@ public class BudgetMapper {
     budget.setDescription(request.description());
     budget.setBudgetLimit(request.budgetLimit());
     budget.setAmount(request.amount());
+    budget.setCurrency(request.currency());
     return budget;
   }
 
@@ -34,6 +34,7 @@ public class BudgetMapper {
         .withDescription(budget.getDescription())
         .withBudgetLimit(budget.getBudgetLimit())
         .withAmount(budget.getAmount())
+        .withCurrency(budget.getCurrency())
         .build();
   }
 
@@ -59,6 +60,9 @@ public class BudgetMapper {
     }
     if (request.amount() != null) {
       budget.setAmount(request.amount());
+    }
+    if (request.currency() != null) {
+      budget.setCurrency(request.currency());
     }
     return budget;
   }

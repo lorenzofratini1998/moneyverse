@@ -12,6 +12,7 @@ import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
@@ -20,10 +21,7 @@ import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceGrpcClient;
 import it.moneyverse.test.utils.RandomUtils;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,14 +61,7 @@ class AccountManagementServiceTest {
       @Mock Account account, @Mock AccountCategory category, @Mock AccountDto accountDto) {
     final String username = RandomUtils.randomString(15);
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request =
-        new AccountRequestDto(
-            username,
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            categoryName,
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequestDto(username, categoryName);
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
@@ -99,14 +90,7 @@ class AccountManagementServiceTest {
   void givenAccountRequest_WhenCreateAccount_ThenUserNotFound() {
     final String username = RandomUtils.randomString(15);
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request =
-        new AccountRequestDto(
-            username,
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            categoryName,
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequestDto(username, categoryName);
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(false);
 
@@ -125,14 +109,8 @@ class AccountManagementServiceTest {
   void givenAccountRequest_WhenCreateAccount_ThenAccountAlreadyExists() {
     final String username = RandomUtils.randomString(15);
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request =
-        new AccountRequestDto(
-            username,
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            categoryName,
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequestDto(username, categoryName);
+    ;
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
@@ -154,14 +132,7 @@ class AccountManagementServiceTest {
   void givenAccountRequest_WhenCreateAccount_ThenCategoryNotFound() {
     final String username = RandomUtils.randomString(15);
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request =
-        new AccountRequestDto(
-            username,
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            categoryName,
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequestDto(username, categoryName);
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
@@ -177,6 +148,17 @@ class AccountManagementServiceTest {
     verify(accountRepository, times(1))
         .existsByUsernameAndAccountName(username, request.accountName());
     verify(userServiceClient, times(1)).checkIfUserExists(username);
+  }
+
+  private AccountRequestDto createAccountRequestDto(String username, String categoryName) {
+    return new AccountRequestDto(
+        username,
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        categoryName,
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 
   @Test
@@ -221,14 +203,8 @@ class AccountManagementServiceTest {
   void givenAccountId_WhenUpdateAccount_ThenReturnAccountDto(
       @Mock Account account, @Mock AccountCategory category, @Mock AccountDto result) {
     UUID accountId = RandomUtils.randomUUID();
-    AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            null);
+    final String categoryName = RandomUtils.randomString(15);
+    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
@@ -260,6 +236,7 @@ class AccountManagementServiceTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomString(15),
             RandomUtils.randomString(15),
+            RandomUtils.randomEnum(CurrencyEnum.class),
             Boolean.TRUE);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
@@ -286,14 +263,8 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountId_WhenUpdateAccount_ThenReturnAccountNotFound() {
     UUID accountId = RandomUtils.randomUUID();
-    AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            null);
+    final String categoryName = RandomUtils.randomString(15);
+    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
@@ -316,14 +287,7 @@ class AccountManagementServiceTest {
   void givenAccountId_WhenUpdateAccount_ThenReturnCategoryNotFound(@Mock Account account) {
     UUID accountId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15);
-    AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            categoryName,
-            RandomUtils.randomString(15),
-            null);
+    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.empty());
@@ -341,6 +305,17 @@ class AccountManagementServiceTest {
         never());
     verify(accountRepository, never()).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
+  }
+
+  private AccountUpdateRequestDto createAccountUpdateRequestDto(String categoryName) {
+    return new AccountUpdateRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        categoryName,
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class),
+        null);
   }
 
   @Test

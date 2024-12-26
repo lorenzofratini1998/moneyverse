@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.Account_;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.test.utils.RandomUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -38,12 +39,15 @@ public class AccountPredicateBuilderTest {
     when(root.get(Account_.ACCOUNT_CATEGORY)).thenReturn(accountCategoryPath);
     when(criteria.getUsername()).thenReturn(Optional.of(RandomUtils.randomString(25)));
     when(criteria.getAccountCategory()).thenReturn(Optional.of(RandomUtils.randomString(15)));
+    when(criteria.getCurrency())
+        .thenReturn(Optional.of(RandomUtils.randomEnum(CurrencyEnum.class)));
     when(criteria.getIsDefault()).thenReturn(Optional.of(RandomUtils.randomBoolean()));
     when(criteria.getBalance()).thenReturn(Optional.of(randomBoundCriteria()));
     when(criteria.getBalanceTarget()).thenReturn(Optional.of(randomBoundCriteria()));
 
     when(cb.equal(any(), any(String.class))).thenReturn(predicate);
     when(cb.equal(any(), any(Boolean.class))).thenReturn(predicate);
+    when(cb.equal(any(), any(CurrencyEnum.class))).thenReturn(predicate);
     when(cb.greaterThan(any(), any(BigDecimal.class))).thenReturn(predicate);
     when(cb.lessThan(any(), any(BigDecimal.class))).thenReturn(predicate);
     when(cb.and(any(Predicate[].class))).thenReturn(predicate);
@@ -53,6 +57,7 @@ public class AccountPredicateBuilderTest {
     assertNotNull(result);
     verify(cb, times(2)).equal(any(), any(String.class));
     verify(cb, times(1)).equal(any(), any(Boolean.class));
+    verify(cb, times(1)).equal(any(), any(CurrencyEnum.class));
     verify(cb, times(2)).greaterThan(any(), any(BigDecimal.class));
     verify(cb, times(2)).lessThan(any(), any(BigDecimal.class));
     verify(cb, times(1)).and(any(Predicate[].class));

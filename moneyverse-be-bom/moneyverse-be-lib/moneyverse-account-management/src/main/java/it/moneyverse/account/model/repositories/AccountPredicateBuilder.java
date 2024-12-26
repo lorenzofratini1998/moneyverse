@@ -27,6 +27,7 @@ public class AccountPredicateBuilder {
     withBalance(param);
     withBalanceTarget(param);
     withAccountCategory(param);
+    withCurrency(param);
     withIsDefault(param);
     return cb.and(predicates.toArray(new Predicate[0]));
   }
@@ -79,6 +80,12 @@ public class AccountPredicateBuilder {
                 predicates.add(
                     cb.equal(
                         root.get(Account_.ACCOUNT_CATEGORY).get(AccountCategory_.NAME), category)));
+  }
+
+  private void withCurrency(AccountCriteria param) {
+    param
+        .getCurrency()
+        .ifPresent(currency -> predicates.add(cb.equal(root.get(Account_.CURRENCY), currency)));
   }
 
   private void withIsDefault(AccountCriteria param) {

@@ -11,6 +11,7 @@ import it.moneyverse.budget.services.BudgetManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
@@ -53,13 +54,7 @@ class BudgetManagementControllerTest {
 
   @Test
   void testCreateBudget_Success(@Mock BudgetDto response) throws Exception {
-    BudgetRequestDto request =
-        new BudgetRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+    BudgetRequestDto request = createBudgetRequest();
     when(budgetService.createBudget(request)).thenReturn(response);
 
     mockMvc
@@ -73,13 +68,7 @@ class BudgetManagementControllerTest {
 
   @Test
   void testCreateBudget_Forbidden() throws Exception {
-    BudgetRequestDto request =
-        new BudgetRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+    BudgetRequestDto request = createBudgetRequest();
 
     mockMvc
         .perform(
@@ -106,7 +95,8 @@ class BudgetManagementControllerTest {
   private static Stream<Supplier<BudgetRequestDto>> invalidBudgetRequestProvider() {
     return Stream.of(
         BudgetManagementControllerTest::createRequestWithNullUsername,
-        BudgetManagementControllerTest::createRequestWithNullBudgetName);
+        BudgetManagementControllerTest::createRequestWithNullBudgetName,
+        BudgetManagementControllerTest::createRequestWithNullCurrency);
   }
 
   private static BudgetRequestDto createRequestWithNullUsername() {
@@ -115,7 +105,8 @@ class BudgetManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal());
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 
   private static BudgetRequestDto createRequestWithNullBudgetName() {
@@ -124,7 +115,18 @@ class BudgetManagementControllerTest {
         null,
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal());
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomEnum(CurrencyEnum.class));
+  }
+
+  private static BudgetRequestDto createRequestWithNullCurrency() {
+    return new BudgetRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        null);
   }
 
   @Test
@@ -135,7 +137,8 @@ class BudgetManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(CurrencyEnum.class));
     when(budgetService.createBudget(request)).thenThrow(ResourceAlreadyExistsException.class);
     mockMvc
         .perform(
@@ -148,13 +151,7 @@ class BudgetManagementControllerTest {
 
   @Test
   void testBudgetCreation_UserNotFound() throws Exception {
-    BudgetRequestDto request =
-        new BudgetRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+    BudgetRequestDto request = createBudgetRequest();
     when(budgetService.createBudget(request)).thenThrow(ResourceNotFoundException.class);
     mockMvc
         .perform(
@@ -163,6 +160,16 @@ class BudgetManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
+  }
+
+  private BudgetRequestDto createBudgetRequest() {
+    return new BudgetRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 
   @Test
@@ -228,12 +235,7 @@ class BudgetManagementControllerTest {
   @Test
   void testUpdateBudgetSuccess(@Mock BudgetDto response) throws Exception {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request =
-        new BudgetUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+    BudgetUpdateRequestDto request = createBudgetUpdateRequest();
     when(budgetService.updateBudget(budgetId, request)).thenReturn(response);
 
     mockMvc
@@ -248,12 +250,7 @@ class BudgetManagementControllerTest {
   @Test
   void testUpdateBudget_Forbidden() throws Exception {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request =
-        new BudgetUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+    BudgetUpdateRequestDto request = createBudgetUpdateRequest();
 
     mockMvc
         .perform(
@@ -267,12 +264,7 @@ class BudgetManagementControllerTest {
   @Test
   void testUpdateBudget_NotFound() throws Exception {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request =
-        new BudgetUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal());
+    BudgetUpdateRequestDto request = createBudgetUpdateRequest();
     when(budgetService.updateBudget(budgetId, request)).thenThrow(ResourceNotFoundException.class);
 
     mockMvc
@@ -282,6 +274,15 @@ class BudgetManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
+  }
+
+  private BudgetUpdateRequestDto createBudgetUpdateRequest() {
+    return new BudgetUpdateRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 
   @Test

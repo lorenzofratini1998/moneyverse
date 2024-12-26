@@ -1,4 +1,5 @@
 package it.moneyverse.core.model.events;
 
-public record UserCreationEvent(String username) {
-}
+import it.moneyverse.core.enums.CurrencyEnum;
+
+public record UserCreationEvent(String username, CurrencyEnum currency) {}

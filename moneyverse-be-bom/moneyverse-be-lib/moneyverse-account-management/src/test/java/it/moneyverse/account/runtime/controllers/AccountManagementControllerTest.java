@@ -10,6 +10,7 @@ import it.moneyverse.account.services.AccountManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
@@ -52,14 +53,8 @@ class AccountManagementControllerTest {
 
   @Test
   void testCreateAccount_Success(@Mock AccountDto response) throws Exception {
-    AccountRequestDto request =
-        new AccountRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequest();
+
     when(accountService.createAccount(request)).thenReturn(response);
 
     mockMvc
@@ -73,14 +68,7 @@ class AccountManagementControllerTest {
 
   @Test
   void testCreateAccount_Forbidden() throws Exception {
-    AccountRequestDto request =
-        new AccountRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequest();
 
     mockMvc
         .perform(
@@ -106,14 +94,7 @@ class AccountManagementControllerTest {
 
   @Test
   void testAccountCreation_AccountAlreadyExists() throws Exception {
-    AccountRequestDto request =
-        new AccountRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequest();
     when(accountService.createAccount(request)).thenThrow(ResourceAlreadyExistsException.class);
     mockMvc
         .perform(
@@ -126,14 +107,7 @@ class AccountManagementControllerTest {
 
   @Test
   void testAccountCreation_AccountNotFound() throws Exception {
-    AccountRequestDto request =
-        new AccountRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15));
+    AccountRequestDto request = createAccountRequest();
     when(accountService.createAccount(request)).thenThrow(ResourceNotFoundException.class);
     mockMvc
         .perform(
@@ -142,6 +116,17 @@ class AccountManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
+  }
+
+  private AccountRequestDto createAccountRequest() {
+    return new AccountRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 
   @Test
@@ -209,14 +194,7 @@ class AccountManagementControllerTest {
   @Test
   void testUpdateAccount_Success(@Mock AccountDto response) throws Exception {
     UUID accountId = RandomUtils.randomUUID();
-    AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            null);
+    AccountUpdateRequestDto request = createAccountUpdateRequest();
 
     when(accountService.updateAccount(accountId, request)).thenReturn(response);
 
@@ -232,14 +210,7 @@ class AccountManagementControllerTest {
   @Test
   void testUpdateAccount_NotFound() throws Exception {
     UUID accountId = RandomUtils.randomUUID();
-    AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            null);
+    AccountUpdateRequestDto request = createAccountUpdateRequest();
 
     when(accountService.updateAccount(accountId, request))
         .thenThrow(ResourceNotFoundException.class);
@@ -256,14 +227,7 @@ class AccountManagementControllerTest {
   @Test
   void testUpdateAccount_Forbidden() throws Exception {
     UUID accountId = RandomUtils.randomUUID();
-    AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            null);
+    AccountUpdateRequestDto request = createAccountUpdateRequest();
 
     mockMvc
         .perform(
@@ -272,6 +236,17 @@ class AccountManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(SecurityMockMvcRequestPostProcessors.anonymous()))
         .andExpect(status().isForbidden());
+  }
+
+  private AccountUpdateRequestDto createAccountUpdateRequest() {
+    return new AccountUpdateRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class),
+        null);
   }
 
   @Test
@@ -331,6 +306,7 @@ class AccountManagementControllerTest {
         AccountManagementControllerTest::createRequestWithNullUsername,
         AccountManagementControllerTest::createRequestWithNullAccountName,
         AccountManagementControllerTest::createRequestWithNullAccountCategory,
+        AccountManagementControllerTest::createRequestWithNullCurrency,
         AccountManagementControllerTest::createRequestWithExceedUsername);
   }
 
@@ -341,7 +317,8 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
-        RandomUtils.randomString(15));
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 
   private static AccountRequestDto createRequestWithNullAccountName() {
@@ -351,7 +328,8 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
-        RandomUtils.randomString(15));
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 
   private static AccountRequestDto createRequestWithNullAccountCategory() {
@@ -361,7 +339,19 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         null,
-        RandomUtils.randomString(15));
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class));
+  }
+
+  private static AccountRequestDto createRequestWithNullCurrency() {
+    return new AccountRequestDto(
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomString(15),
+        RandomUtils.randomString(15),
+        null);
   }
 
   private static AccountRequestDto createRequestWithExceedUsername() {
@@ -372,6 +362,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
-        RandomUtils.randomString(15));
+        RandomUtils.randomString(15),
+        RandomUtils.randomEnum(CurrencyEnum.class));
   }
 }

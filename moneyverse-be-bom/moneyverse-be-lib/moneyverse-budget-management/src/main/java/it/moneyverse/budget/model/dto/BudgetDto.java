@@ -3,6 +3,7 @@ package it.moneyverse.budget.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ public class BudgetDto implements Serializable {
   private final String description;
   private final BigDecimal budgetLimit;
   private final BigDecimal amount;
+  private final CurrencyEnum currency;
 
   public BudgetDto(Builder builder) {
     this.budgetId = builder.budgetId;
@@ -27,6 +29,7 @@ public class BudgetDto implements Serializable {
     this.description = builder.description;
     this.budgetLimit = builder.budgetLimit;
     this.amount = builder.amount;
+    this.currency = builder.currency;
   }
 
   public UUID getBudgetId() {
@@ -53,6 +56,10 @@ public class BudgetDto implements Serializable {
     return amount;
   }
 
+  public CurrencyEnum getCurrency() {
+    return currency;
+  }
+
   public static class Builder {
     private UUID budgetId;
     private String username;
@@ -60,6 +67,7 @@ public class BudgetDto implements Serializable {
     private String description;
     private BigDecimal budgetLimit;
     private BigDecimal amount;
+    private CurrencyEnum currency;
 
     public Builder withBudgetId(UUID budgetId) {
       this.budgetId = budgetId;
@@ -88,6 +96,11 @@ public class BudgetDto implements Serializable {
 
     public Builder withAmount(BigDecimal amount) {
       this.amount = amount;
+      return this;
+    }
+
+    public Builder withCurrency(CurrencyEnum currency) {
+      this.currency = currency;
       return this;
     }
 

@@ -60,7 +60,8 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
         account.getBalance(),
         account.getBalanceTarget(),
         account.getAccountCategory().getName(),
-        account.getAccountDescription());
+        account.getAccountDescription(),
+        account.getCurrency());
   }
 
   public Account getRandomAccount(String username) {
@@ -93,6 +94,7 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
         .withAccountDescription(request.accountDescription())
         .withBalance(request.balance())
         .withBalanceTarget(request.balanceTarget())
+        .withCurrency(request.currency())
         .withDefault(isDefault)
         .build();
   }
@@ -132,6 +134,12 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
                 criteria
                     .getAccountCategory()
                     .map(category -> category.equals(account.getAccountCategory().getName()))
+                    .orElse(true))
+        .filter(
+            account ->
+                criteria
+                    .getCurrency()
+                    .map(currency -> currency.equals(account.getCurrency()))
                     .orElse(true))
         .filter(
             account ->

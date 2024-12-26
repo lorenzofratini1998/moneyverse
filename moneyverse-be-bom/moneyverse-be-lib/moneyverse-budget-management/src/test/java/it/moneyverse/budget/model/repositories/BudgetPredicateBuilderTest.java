@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.test.utils.RandomUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -33,8 +34,11 @@ class BudgetPredicateBuilderTest {
     when(criteria.getUsername()).thenReturn(Optional.of(RandomUtils.randomString(25)));
     when(criteria.getAmount()).thenReturn(Optional.of(randomBoundCriteria()));
     when(criteria.getBudgetLimit()).thenReturn(Optional.of(randomBoundCriteria()));
+    when(criteria.getCurrency())
+        .thenReturn(Optional.of(RandomUtils.randomEnum(CurrencyEnum.class)));
 
     when(cb.equal(any(), any(String.class))).thenReturn(predicate);
+    when(cb.equal(any(), any(CurrencyEnum.class))).thenReturn(predicate);
     when(cb.greaterThan(any(), any(BigDecimal.class))).thenReturn(predicate);
     when(cb.lessThan(any(), any(BigDecimal.class))).thenReturn(predicate);
     when(cb.and(any(Predicate[].class))).thenReturn(predicate);
@@ -43,6 +47,7 @@ class BudgetPredicateBuilderTest {
 
     assertNotNull(result);
     verify(cb, times(1)).equal(any(), any(String.class));
+    verify(cb, times(1)).equal(any(), any(CurrencyEnum.class));
     verify(cb, times(2)).greaterThan(any(), any(BigDecimal.class));
     verify(cb, times(2)).lessThan(any(), any(BigDecimal.class));
     verify(cb, times(1)).and(any(Predicate[].class));

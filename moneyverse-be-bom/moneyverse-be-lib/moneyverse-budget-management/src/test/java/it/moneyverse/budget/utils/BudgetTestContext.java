@@ -73,7 +73,8 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
         budget.getBudgetName(),
         budget.getDescription(),
         budget.getBudgetLimit(),
-        budget.getAmount());
+        budget.getAmount(),
+        budget.getCurrency());
   }
 
   public BudgetDto getExpectedBudgetDto(BudgetRequestDto request) {
@@ -83,6 +84,7 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
         .withDescription(request.description())
         .withBudgetLimit(request.budgetLimit())
         .withAmount(request.amount())
+        .withCurrency(request.currency())
         .build();
   }
 
@@ -115,6 +117,12 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
                         budgetLimitCriteria ->
                             budget.getBudgetLimit() != null
                                 && filterByBound(budget.getBudgetLimit(), budgetLimitCriteria))
+                    .orElse(true))
+        .filter(
+            budget ->
+                criteria
+                    .getCurrency()
+                    .map(currency -> currency.equals(budget.getCurrency()))
                     .orElse(true))
         .sorted((a, b) -> sortByCriteria(a, b, criteria.getSort()))
         .skip(criteria.getPage().getOffset())

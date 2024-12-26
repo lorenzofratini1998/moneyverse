@@ -3,9 +3,11 @@ package it.moneyverse.budget.utils;
 import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.CriteriaRandomGenerator;
+import it.moneyverse.test.utils.RandomUtils;
 import org.springframework.data.domain.Sort;
 
 public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<BudgetCriteria> {
@@ -23,6 +25,7 @@ public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<Budge
     withRandomUsername();
     withRandomAmount();
     withRandomBudgetLimit();
+    withRandomCurrency();
     withPage();
     withSort();
     return criteria;
@@ -45,6 +48,10 @@ public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<Budge
             ? randomCriteriaBound(
                 testContext.getBudgets().stream().map(Budget::getBudgetLimit).toList())
             : null);
+  }
+
+  private void withRandomCurrency() {
+    criteria.setCurrency(Math.random() < 0.5 ? RandomUtils.randomEnum(CurrencyEnum.class) : null);
   }
 
   private void withPage() {

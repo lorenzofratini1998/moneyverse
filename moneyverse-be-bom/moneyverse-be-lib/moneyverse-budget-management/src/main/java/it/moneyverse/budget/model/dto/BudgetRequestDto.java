@@ -2,11 +2,11 @@ package it.moneyverse.budget.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,7 +18,8 @@ public record BudgetRequestDto(
     @NotEmpty(message = "'Budget name' must not be empty or null") String budgetName,
     String description,
     BigDecimal budgetLimit,
-    BigDecimal amount) {
+    BigDecimal amount,
+    @NotNull(message = "'Currency' must not be null") CurrencyEnum currency) {
   @Override
   public String toString() {
     return JsonUtils.toJson(this);

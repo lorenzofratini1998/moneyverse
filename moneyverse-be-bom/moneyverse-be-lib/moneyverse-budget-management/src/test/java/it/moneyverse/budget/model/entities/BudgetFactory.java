@@ -2,6 +2,7 @@ package it.moneyverse.budget.model.entities;
 
 import static it.moneyverse.test.utils.FakeUtils.FAKE_USER;
 
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
 import java.math.RoundingMode;
@@ -51,6 +52,7 @@ public class BudgetFactory {
                 .setScale(2, RoundingMode.HALF_EVEN)
             : null);
     budget.setAmount(RandomUtils.randomBigDecimal().setScale(2, RoundingMode.HALF_EVEN));
+    budget.setCurrency(RandomUtils.randomEnum(CurrencyEnum.class));
     budget.setCreatedBy(FAKE_USER);
     budget.setCreatedAt(LocalDateTime.now());
     budget.setUpdatedBy(FAKE_USER);

@@ -131,7 +131,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final UUID budgetId = testContext.getRandomBudget(user.getUsername()).getBudgetId();
     BudgetUpdateRequestDto request =
         new BudgetUpdateRequestDto(
-            null, RandomUtils.randomString(25), null, RandomUtils.randomBigDecimal());
+            null, RandomUtils.randomString(25), null, RandomUtils.randomBigDecimal(), null);
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
 
     ResponseEntity<BudgetDto> response =

@@ -10,7 +10,6 @@ import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -50,19 +49,7 @@ public class BudgetConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     UserCreationEvent event = JsonUtils.fromJson(record.value(), UserCreationEvent.class);
-    budgetService.createDefaultBudgets(event.username());
-  }
-
-  @DltHandler
-  public void onError(
-      ConsumerRecord<UUID, String> record,
-      @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-      Exception exception) {
-    LOGGER.error(
-        "Error received event: {} from topic: {}. Error: {}",
-        record.value(),
-        topic,
-        exception.getMessage());
+    budgetService.createDefaultBudgets(event.username(), event.currency());
   }
 
   private static void logMessage(ConsumerRecord<UUID, String> record, String topic) {
