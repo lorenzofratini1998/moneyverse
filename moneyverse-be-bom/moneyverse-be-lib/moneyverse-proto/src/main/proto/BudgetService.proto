@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package it.moneyverse.grpc;
+
+option java_multiple_files = true;
+option java_package = "it.moneyverse.grpc.lib";
+option java_outer_classname = "BudgetServiceProto";
+
+service BudgetService {
+  rpc CheckIfBudgetExists (BudgetRequest) returns (BudgetResponse) {
+  }
+}
+
+message BudgetRequest {
+  string budgetId = 1;
+}
+
+message BudgetResponse {
+  bool exists = 1;
+}

@@ -12,7 +12,7 @@ import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
 import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
-import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
+import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
@@ -54,14 +54,14 @@ class AccountConsumerTest {
 
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
-  @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
+  @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
 
   @DynamicPropertySource
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKafkaContainer(kafkaContainer)
-        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort());
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort());
   }
 
   @BeforeAll
@@ -78,7 +78,7 @@ class AccountConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockUserService.mockExistentUser();
+    mockServer.mockExistentUser();
     kafkaTemplate.send(producerRecord);
 
     await()

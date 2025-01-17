@@ -12,7 +12,7 @@ import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
-import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
+import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
@@ -44,7 +44,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
-  @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
+  @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired protected AccountRepository accountRepository;
   private HttpHeaders headers;
 
@@ -53,7 +53,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKeycloak(keycloakContainer)
-        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort())
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer);
   }
 
@@ -73,7 +73,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     final String username = testContext.getRandomUser().getUsername();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     final AccountRequestDto request = testContext.createAccountForUser(username);
-    mockUserService.mockExistentUser();
+    mockServer.mockExistentUser();
     AccountDto expected = testContext.getExpectedAccountDto(request);
 
     ResponseEntity<AccountDto> response =

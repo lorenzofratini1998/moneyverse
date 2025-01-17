@@ -2,8 +2,10 @@ package it.moneyverse.test.services;
 
 import jakarta.persistence.*;
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -26,37 +28,48 @@ public class SQLScriptService implements ScriptService {
     String tableName = getTableName(clazz);
     StringBuilder columns = new StringBuilder();
     StringBuilder values = new StringBuilder();
+    StringBuilder manyToManyScript = new StringBuilder();
+
     Class<?> currentClass = clazz;
     while (currentClass != null && currentClass != Object.class) {
-      processFieldsForEntity(currentClass, entity, columns, values);
+      processFieldsForEntity(currentClass, entity, columns, values, manyToManyScript);
 
       currentClass = currentClass.getSuperclass();
     }
-    return INSERT_INTO_ROW_TEMPLATE.formatted(tableName, columns, values);
+    String entityScript = INSERT_INTO_ROW_TEMPLATE.formatted(tableName, columns, values);
+    return entityScript + "\n" + manyToManyScript;
   }
 
   private <T> void processFieldsForEntity(
-      Class<?> currentClass, T entity, StringBuilder columns, StringBuilder values) {
+      Class<?> currentClass,
+      T entity,
+      StringBuilder columns,
+      StringBuilder values,
+      StringBuilder manyToManyScript) {
     for (Field field : currentClass.getDeclaredFields()) {
       ReflectionUtils.makeAccessible(field);
       if (field.isAnnotationPresent(Column.class)) {
         appendColumnAndValue(field, entity, columns, values);
       } else if (field.isAnnotationPresent(JoinColumn.class)) {
         appendJoinColumnAndValue(field, entity, columns, values);
+      } else if (field.isAnnotationPresent(ManyToMany.class)
+          && field.isAnnotationPresent(JoinTable.class)) {
+        appendManyToManyScript(field, entity, manyToManyScript);
       }
     }
   }
 
   private <T> void appendColumnAndValue(
       Field field, T entity, StringBuilder columns, StringBuilder values) {
-    if (!columns.isEmpty()) {
-      columns.append(", ");
-      values.append(", ");
-    }
-    columns.append(getColumnName(field));
-
     Object value = getFieldValue(field, entity);
-    appendValue(value, values);
+    if (value != null) {
+      if (!columns.isEmpty()) {
+        columns.append(", ");
+        values.append(", ");
+      }
+      columns.append(getColumnName(field));
+      appendValue(value, values);
+    }
   }
 
   private String getColumnName(Field field) {
@@ -65,16 +78,52 @@ public class SQLScriptService implements ScriptService {
 
   private <T> void appendJoinColumnAndValue(
       Field field, T entity, StringBuilder columns, StringBuilder values) {
-    JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
-    if (!columns.isEmpty()) {
-      columns.append(", ");
-      values.append(", ");
-    }
-    columns.append(joinColumn.name());
     Object relatedEntity = getFieldValue(field, entity);
     Object foreignKeyValue = extractForeignKeyValue(relatedEntity);
+    if (foreignKeyValue != null) {
+      JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+      if (!columns.isEmpty()) {
+        columns.append(", ");
+        values.append(", ");
+      }
+      columns.append(joinColumn.name());
+      appendValue(foreignKeyValue, values);
+    }
+  }
 
-    appendValue(foreignKeyValue, values);
+  private <T> void appendManyToManyScript(Field field, T entity, StringBuilder manyToManyScript) {
+    JoinTable joinTable = field.getAnnotation(JoinTable.class);
+
+    String joinTableName = joinTable.name();
+    String joinColumnName = joinTable.joinColumns()[0].name();
+    String inverseJoinColumnName = joinTable.inverseJoinColumns()[0].name();
+
+    Object entityId = extractForeignKeyValue(entity);
+    Set<?> relatedEntities = (Set<?>) getFieldValue(field, entity);
+
+    for (Object relatedEntity : relatedEntities) {
+      Object relatedEntityId = extractForeignKeyValue(relatedEntity);
+      manyToManyScript
+          .append(
+              INSERT_INTO_ROW_TEMPLATE.formatted(
+                  joinTableName,
+                  joinColumnName + ", " + inverseJoinColumnName,
+                  formatValues(entityId, relatedEntityId)))
+          .append("\n");
+    }
+  }
+
+  private String formatValues(Object... values) {
+    StringBuilder formattedValues = new StringBuilder();
+    for (Object value : values) {
+      if (!formattedValues.isEmpty()) {
+        formattedValues.append(", ");
+      }
+      StringBuilder singleValue = new StringBuilder();
+      appendValue(value, singleValue);
+      formattedValues.append(singleValue);
+    }
+    return formattedValues.toString();
   }
 
   private Object extractForeignKeyValue(Object relatedEntity) {
@@ -102,13 +151,22 @@ public class SQLScriptService implements ScriptService {
   }
 
   private void appendValue(Object value, StringBuilder values) {
-    switch (value) {
-      case null -> values.append("NULL");
-      case String s -> values.append("'").append(escapeString(s)).append("'");
-      case Enum<?> ignored -> values.append("'").append(value).append("'");
-      case UUID ignored -> values.append("'").append(value).append("'");
-      case LocalDateTime ignored -> values.append("'").append(value).append("'");
-      default -> values.append(value);
+    if (value == null) {
+      values.append("NULL");
+      return;
+    }
+
+    if (value instanceof String
+        || value instanceof Enum
+        || value instanceof UUID
+        || value instanceof LocalDateTime
+        || value instanceof LocalDate
+        || value instanceof Character) {
+      values.append("'").append(escapeString(value.toString())).append("'");
+    } else if (value instanceof Number || value instanceof Boolean) {
+      values.append(value);
+    } else {
+      throw new IllegalArgumentException("Unsupported data type: " + value.getClass().getName());
     }
   }
 

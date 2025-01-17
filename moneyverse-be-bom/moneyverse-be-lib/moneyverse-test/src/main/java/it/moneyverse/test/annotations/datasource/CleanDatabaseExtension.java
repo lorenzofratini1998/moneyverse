@@ -4,7 +4,6 @@ import it.moneyverse.test.utils.helper.ExtensionContextHelper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

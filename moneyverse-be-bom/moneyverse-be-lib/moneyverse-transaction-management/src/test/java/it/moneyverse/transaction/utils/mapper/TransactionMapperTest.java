@@ -1,0 +1,147 @@
+package it.moneyverse.transaction.utils.mapper;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
+import it.moneyverse.core.enums.CurrencyEnum;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.dto.TransactionDto;
+import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.entities.Tag;
+import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.model.repositories.TagRepository;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class TransactionMapperTest {
+
+  @Mock private TagRepository tagRepository;
+
+  @Test
+  void testToTransaction_NullTransactionRequest() {
+    assertNull(TransactionMapper.toTransaction(null, tagRepository));
+  }
+
+  @Test
+  void testToTransaction_ValidTransactionRequest_EmptyTags() {
+    TransactionRequestDto request =
+        new TransactionRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomLocalDate(2024, 2025),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(CurrencyEnum.class),
+            null);
+
+    Transaction result = TransactionMapper.toTransaction(request, tagRepository);
+
+    assertEquals(request.username(), result.getUsername());
+    assertEquals(request.accountId(), result.getAccountId());
+    assertEquals(request.budgetId(), result.getBudgetId());
+    assertEquals(request.date(), result.getDate());
+    assertEquals(request.description(), result.getDescription());
+    assertEquals(request.currency(), result.getCurrency());
+    assertEquals(Collections.emptySet(), result.getTags());
+  }
+
+  @Test
+  void testToTransaction_ValidTransactionRequest_Tags(@Mock Tag tag) {
+    Long tagId = RandomUtils.randomLong();
+    TransactionRequestDto request =
+        new TransactionRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomLocalDate(2024, 2025),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(CurrencyEnum.class),
+            Collections.singleton(tagId));
+    when(tagRepository.findById(tagId)).thenReturn(Optional.of(tag));
+
+    Transaction result = TransactionMapper.toTransaction(request, tagRepository);
+
+    assertEquals(request.username(), result.getUsername());
+    assertEquals(request.accountId(), result.getAccountId());
+    assertEquals(request.budgetId(), result.getBudgetId());
+    assertEquals(request.date(), result.getDate());
+    assertEquals(request.description(), result.getDescription());
+    assertEquals(request.currency(), result.getCurrency());
+    assertEquals(Collections.singleton(tag), result.getTags());
+  }
+
+  @Test
+  void testToTransaction_ValidTransactionRequest_TagNotFound() {
+    Long tagId = RandomUtils.randomLong();
+    TransactionRequestDto request =
+        new TransactionRequestDto(
+            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomLocalDate(2024, 2025),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(CurrencyEnum.class),
+            Collections.singleton(tagId));
+    when(tagRepository.findById(tagId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> TransactionMapper.toTransaction(request, tagRepository));
+  }
+
+  @Test
+  void testToTransactionDto_NullTransactionEntity() {
+    assertNull(TransactionMapper.toTransactionDto(null));
+  }
+
+  @Test
+  void testToTransactionDto_ValidTransactionEntity() {
+    Transaction transaction = createTransaction();
+
+    TransactionDto result = TransactionMapper.toTransactionDto(transaction);
+
+    assertEquals(transaction.getTransactionId(), result.getTransactionId());
+    assertEquals(transaction.getUsername(), result.getUsername());
+    assertEquals(transaction.getAccountId(), result.getAccountId());
+    assertEquals(transaction.getBudgetId(), result.getBudgetId());
+    assertEquals(transaction.getDate(), result.getDate());
+    assertEquals(transaction.getDescription(), result.getDescription());
+    assertEquals(transaction.getAmount(), result.getAmount());
+    assertEquals(transaction.getCurrency(), result.getCurrency());
+    assertEquals(transaction.getTags().size(), result.getTags().size());
+  }
+
+  private Transaction createTransaction() {
+    Transaction transaction = new Transaction();
+    transaction.setTransactionId(RandomUtils.randomUUID());
+    transaction.setUsername(RandomUtils.randomString(15));
+    transaction.setAccountId(RandomUtils.randomUUID());
+    transaction.setBudgetId(RandomUtils.randomUUID());
+    transaction.setDate(RandomUtils.randomLocalDate(2024, 2025));
+    transaction.setDescription(RandomUtils.randomString(15));
+    transaction.setAmount(RandomUtils.randomBigDecimal());
+    transaction.setCurrency(RandomUtils.randomEnum(CurrencyEnum.class));
+    transaction.setTags(createTags());
+    return transaction;
+  }
+
+  private Set<Tag> createTags() {
+    int tagsCount = RandomUtils.randomInteger(0, 3);
+    Set<Tag> tags = new HashSet<>();
+    for (int i = 0; i < tagsCount; i++) {
+      tags.add(TagMapperTest.createTag());
+    }
+    return tags;
+  }
+}

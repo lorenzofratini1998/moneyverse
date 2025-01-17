@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package it.moneyverse.grpc;
+
+option java_multiple_files = true;
+option java_package = "it.moneyverse.grpc.lib";
+option java_outer_classname = "AccountServiceProto";
+
+service AccountService {
+  rpc CheckIfAccountExists (AccountRequest) returns (AccountResponse) {
+  }
+}
+
+message AccountRequest {
+  string accountId = 1;
+}
+
+message AccountResponse {
+  bool exists = 1;
+}

@@ -14,7 +14,7 @@ import it.moneyverse.budget.utils.BudgetTestContext;
 import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
-import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
+import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
@@ -41,7 +41,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
-  @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
+  @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired private BudgetRepository budgetRepository;
   private HttpHeaders headers;
 
@@ -50,7 +50,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKeycloak(keycloakContainer)
-        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort())
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer);
   }
 
@@ -70,7 +70,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final String username = testContext.getRandomUser().getUsername();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     final BudgetRequestDto request = testContext.createBudgetForUser(username);
-    mockUserService.mockExistentUser();
+    mockServer.mockExistentUser();
     BudgetDto expected = testContext.getExpectedBudgetDto(request);
 
     ResponseEntity<BudgetDto> response =

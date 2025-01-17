@@ -2,3 +2,5 @@ it.moneyverse.core.boot.DatasourceAutoConfiguration
 it.moneyverse.core.boot.KafkaAutoConfiguration
 it.moneyverse.core.boot.SecurityAutoConfiguration
 it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration
+it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration
+it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration

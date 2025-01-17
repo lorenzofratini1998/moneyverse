@@ -37,6 +37,18 @@ public class TestPropertyRegistry {
     return this;
   }
 
+  public TestPropertyRegistry withGrpcAccountService(String host, int port) {
+    registry.add(AccountServiceGrpcClientProperties.ACCOUNT_SERVICE_CLIENT_HOST, () -> host);
+    registry.add(AccountServiceGrpcClientProperties.ACCOUNT_SERVICE_CLIENT_PORT, () -> port);
+    return this;
+  }
+
+  public TestPropertyRegistry withGrpcBudgetService(String host, int port) {
+    registry.add(BudgetServiceGrpcClientProperties.BUDGET_SERVICE_CLIENT_HOST, () -> host);
+    registry.add(BudgetServiceGrpcClientProperties.BUDGET_SERVICE_CLIENT_PORT, () -> port);
+    return this;
+  }
+
   public TestPropertyRegistry withKafkaContainer(KafkaContainer container) {
     registry.add(KafkaProperties.KafkaAdminProperties.BOOTSTRAP_SERVERS, container::getBootstrapServers);
     registry.add(KafkaProperties.KafkaConsumerProperties.GROUP_ID, () -> "test-group");
