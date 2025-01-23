@@ -1,9 +1,13 @@
 package it.moneyverse.transaction.services;
 
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import java.util.List;
 
 public interface TransactionService {
 
   TransactionDto createTransaction(TransactionRequestDto request);
+
+  List<TransactionDto> getTransactions(TransactionCriteria criteria);
 }

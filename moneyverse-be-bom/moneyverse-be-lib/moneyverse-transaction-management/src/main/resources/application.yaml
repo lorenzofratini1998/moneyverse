@@ -1,6 +1,6 @@
 server:
   port:
-    ${PORT:8080}
+    8080
 
 spring:
   security:

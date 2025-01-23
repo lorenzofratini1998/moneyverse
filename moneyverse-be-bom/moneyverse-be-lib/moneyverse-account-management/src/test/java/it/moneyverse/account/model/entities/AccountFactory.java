@@ -1,6 +1,6 @@
 package it.moneyverse.account.model.entities;
 
-import static it.moneyverse.test.utils.FakeUtils.FAKE_USER;
+import static it.moneyverse.test.utils.FakeUtils.*;
 
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.UserModel;
@@ -15,9 +15,6 @@ import org.slf4j.LoggerFactory;
 public class AccountFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountFactory.class);
-  private static final Integer MIN_ACCOUNTS_PER_USER = 5;
-  private static final Integer MAX_ACCOUNTS_PER_USER = 20;
-  private static final Integer ACCOUNT_CATEGORY_NUMBER = 10;
 
   public static List<AccountCategory> createAccountCategories() {
     List<AccountCategory> accountCategories = new ArrayList<>();

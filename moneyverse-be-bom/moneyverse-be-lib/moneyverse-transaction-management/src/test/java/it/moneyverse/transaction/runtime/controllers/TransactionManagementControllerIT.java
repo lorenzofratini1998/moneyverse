@@ -9,20 +9,22 @@ import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
-import it.moneyverse.transaction.utils.mapper.TransactionTestContext;
+import it.moneyverse.transaction.utils.TransactionTestContext;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -86,5 +88,24 @@ public class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(expected.getAmount(), response.getBody().getAmount());
     assertEquals(expected.getCurrency(), response.getBody().getCurrency());
     assertEquals(Collections.emptySet(), response.getBody().getTags());
+  }
+
+  @Test
+  void testGetTransactions() {
+    final String username = testContext.getRandomUser().getUsername();
+    final TransactionCriteria criteria = testContext.createTransactionCriteria();
+    criteria.setUsername(username);
+    final List<Transaction> expected = testContext.filterTransactions(criteria);
+
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+    ResponseEntity<List<TransactionDto>> response =
+        restTemplate.exchange(
+            testContext.createUri(basePath + "/transactions", criteria),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(expected.size(), Objects.requireNonNull(response.getBody()).size());
   }
 }

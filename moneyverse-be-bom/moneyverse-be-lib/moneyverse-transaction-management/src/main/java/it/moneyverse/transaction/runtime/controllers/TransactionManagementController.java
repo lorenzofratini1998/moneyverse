@@ -1,8 +1,10 @@
 package it.moneyverse.transaction.runtime.controllers;
 
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.services.TransactionService;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -25,5 +27,14 @@ public class TransactionManagementController implements TransactionOperations {
   @PreAuthorize("#request.username == authentication.name")
   public TransactionDto createTransaction(@RequestBody TransactionRequestDto request) {
     return transactionService.createTransaction(request);
+  }
+
+  @Override
+  @GetMapping("/transactions")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (#criteria.username.isPresent() and #criteria.username.get().equals(authentication.name))")
+  public List<TransactionDto> getTransactions(TransactionCriteria criteria) {
+    return transactionService.getTransactions(criteria);
   }
 }

@@ -11,10 +11,7 @@ import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -102,7 +99,7 @@ class TransactionMapperTest {
 
   @Test
   void testToTransactionDto_NullTransactionEntity() {
-    assertNull(TransactionMapper.toTransactionDto(null));
+    assertNull(TransactionMapper.toTransactionDto((Transaction) null));
   }
 
   @Test
@@ -120,6 +117,37 @@ class TransactionMapperTest {
     assertEquals(transaction.getAmount(), result.getAmount());
     assertEquals(transaction.getCurrency(), result.getCurrency());
     assertEquals(transaction.getTags().size(), result.getTags().size());
+  }
+
+  @Test
+  void testToTransactionDto_EmptyTransactionList() {
+    assertEquals(
+        Collections.emptyList(), TransactionMapper.toTransactionDto(Collections.emptyList()));
+  }
+
+  @Test
+  void testToTransactionDto_NonEmptyTransactionList() {
+    int entitiesCount = RandomUtils.randomInteger(0, 10);
+    List<Transaction> transactions = new ArrayList<>(entitiesCount);
+    for (int i = 0; i < entitiesCount; i++) {
+      transactions.add(createTransaction());
+    }
+    List<TransactionDto> transactionDtos = TransactionMapper.toTransactionDto(transactions);
+
+    for (int i = 0; i < entitiesCount; i++) {
+      Transaction transaction = transactions.get(i);
+      TransactionDto transactionDto = transactionDtos.get(i);
+
+      assertEquals(transaction.getTransactionId(), transactionDto.getTransactionId());
+      assertEquals(transaction.getUsername(), transactionDto.getUsername());
+      assertEquals(transaction.getAccountId(), transactionDto.getAccountId());
+      assertEquals(transaction.getBudgetId(), transactionDto.getBudgetId());
+      assertEquals(transaction.getDate(), transactionDto.getDate());
+      assertEquals(transaction.getDescription(), transactionDto.getDescription());
+      assertEquals(transaction.getAmount(), transactionDto.getAmount());
+      assertEquals(transaction.getCurrency(), transactionDto.getCurrency());
+      assertEquals(transaction.getTags().size(), transactionDto.getTags().size());
+    }
   }
 
   private Transaction createTransaction() {

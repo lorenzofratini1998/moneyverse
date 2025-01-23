@@ -1,16 +1,23 @@
 package it.moneyverse.transaction.services;
 
+import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.PageCriteria;
+import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,5 +69,19 @@ public class TransactionManagementService implements TransactionService {
           "The requested %s with ID %s does not exist. Please check your input and try again."
               .formatted(resourceName, resourceId));
     }
+  }
+
+  @Override
+  public List<TransactionDto> getTransactions(TransactionCriteria criteria) {
+    if (criteria.getPage() == null) {
+      criteria.setPage(new PageCriteria());
+    }
+    if (criteria.getSort() == null) {
+      criteria.setSort(
+          new SortCriteria<>(
+              SortAttribute.getDefault(TransactionSortAttributeEnum.class), Sort.Direction.DESC));
+    }
+    LOGGER.info("Finding transactions with filters: {}", criteria);
+    return TransactionMapper.toTransactionDto(transactionRepository.findTransactions(criteria));
   }
 }

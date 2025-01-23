@@ -7,12 +7,15 @@ import it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.enums.CurrencyEnum;
+import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.services.TransactionManagementService;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -170,6 +173,27 @@ class TransactionManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         null,
         null);
+  }
+
+  @Test
+  void testGetAccounts_Success(
+      @Mock TransactionCriteria criteria, @Mock List<TransactionDto> response) throws Exception {
+    when(transactionService.getTransactions(criteria)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/transactions")
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetAccounts_Unauthorized() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/transactions")
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isUnauthorized());
   }
 
   private TransactionRequestDto createTransactionRequest(String username) {

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
@@ -14,6 +15,7 @@ import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,6 +107,17 @@ class TransactionManagementServiceTest {
         () -> TransactionMapper.toTransaction(request, tagRepository), times(1));
     verify(transactionRepository, times(1)).save(transaction);
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
+  }
+
+  @Test
+  void givenTransactionCriteria_WhenGetTransactions_ThenReturnTransactions(
+      @Mock TransactionCriteria transactionCriteria, @Mock List<Transaction> transactions) {
+    when(transactionRepository.findTransactions(transactionCriteria)).thenReturn(transactions);
+
+    transactionManagementService.getTransactions(transactionCriteria);
+
+    assertNotNull(transactions);
+    verify(transactionRepository, times(1)).findTransactions(transactionCriteria);
   }
 
   private TransactionRequestDto createTransactionRequest() {

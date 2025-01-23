@@ -1,10 +1,16 @@
-package it.moneyverse.transaction.utils.mapper;
+package it.moneyverse.transaction.utils;
 
+import static it.moneyverse.transaction.enums.TransactionSortAttributeEnum.*;
+
+import it.moneyverse.core.enums.SortAttribute;
+import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.annotations.datasource.TestModelEntity;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
+import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
@@ -13,6 +19,7 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.TransactionFactory;
 import java.nio.file.Path;
 import java.util.List;
+import org.springframework.data.domain.Sort;
 
 public class TransactionTestContext extends TestContext<TransactionTestContext> {
 
@@ -25,6 +32,7 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     super();
     this.tags = TagFactory.createTags(getUsers());
     this.transactions = TransactionFactory.createTransactions(getUsers(), tags);
+    setCurrentInstance(this);
   }
 
   private static void setCurrentInstance(TransactionTestContext testContext) {
@@ -69,6 +77,65 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
         .withCurrency(request.currency())
         .withDate(request.date())
         .build();
+  }
+
+  public List<Transaction> filterTransactions(TransactionCriteria criteria) {
+    return transactions.stream()
+        .filter(
+            transaction ->
+                criteria
+                    .getUsername()
+                    .map(username -> username.equals(transaction.getUsername()))
+                    .orElse(true))
+        .filter(
+            transaction ->
+                criteria.getAccounts().isEmpty()
+                    || criteria.getAccounts().get().contains(transaction.getAccountId()))
+        .filter(
+            transaction ->
+                criteria.getBudgets().isEmpty()
+                    || criteria.getBudgets().get().contains(transaction.getBudgetId()))
+        .filter(
+            transaction ->
+                criteria.getDate().map(date -> date.matches(transaction.getDate())).orElse(true))
+        .filter(
+            transaction ->
+                criteria
+                    .getAmount()
+                    .map(amount -> amount.matches(transaction.getAmount()))
+                    .orElse(true))
+        .filter(
+            transaction ->
+                criteria.getTags().isEmpty()
+                    || transaction.getTags().stream().anyMatch(criteria.getTags().get()::contains))
+        .sorted((a, b) -> sortByCriteria(a, b, criteria.getSort()))
+        .skip(criteria.getPage().getOffset())
+        .limit(criteria.getPage().getLimit())
+        .toList();
+  }
+
+  private int sortByCriteria(
+      Transaction a, Transaction b, SortCriteria<TransactionSortAttributeEnum> sortCriteria) {
+    if (sortCriteria == null) {
+      return 0;
+    }
+
+    SortAttribute attribute = sortCriteria.getAttribute();
+    Sort.Direction direction = sortCriteria.getDirection();
+
+    int comparison =
+        switch (attribute) {
+          case USERNAME -> a.getUsername().compareTo(b.getUsername());
+          case DATE -> a.getDate().compareTo(b.getDate());
+          case AMOUNT -> a.getAmount().compareTo(b.getAmount());
+          default -> 0;
+        };
+
+    return direction == Sort.Direction.ASC ? comparison : -comparison;
+  }
+
+  public TransactionCriteria createTransactionCriteria() {
+    return new TransactionCriteriaRandomGenerator(getCurrentInstance()).generate();
   }
 
   @Override

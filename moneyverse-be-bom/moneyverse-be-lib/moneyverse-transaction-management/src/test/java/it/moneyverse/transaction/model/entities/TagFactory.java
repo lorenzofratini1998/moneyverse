@@ -1,5 +1,8 @@
 package it.moneyverse.transaction.model.entities;
 
+import static it.moneyverse.test.utils.FakeUtils.MAX_TAGS_PER_USER;
+import static it.moneyverse.test.utils.FakeUtils.MIN_TAGS_PER_USER;
+
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
@@ -10,8 +13,6 @@ import org.slf4j.LoggerFactory;
 public class TagFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TagFactory.class);
-  private static final Integer MIN_TAGS_PER_USER = 0;
-  private static final Integer MAX_TAGS_PER_USER = 10;
 
   public static List<Tag> createTags(List<UserModel> users) {
     List<Tag> tags = new ArrayList<>();

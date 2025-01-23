@@ -5,6 +5,8 @@ import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
+import java.util.Collections;
+import java.util.List;
 
 public class TransactionMapper {
 
@@ -52,6 +54,13 @@ public class TransactionMapper {
         .withCurrency(transaction.getCurrency())
         .withTags(TagMapper.toTagDto(transaction.getTags()))
         .build();
+  }
+
+  public static List<TransactionDto> toTransactionDto(List<Transaction> entities) {
+    if (entities.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return entities.stream().map(TransactionMapper::toTransactionDto).toList();
   }
 
   private TransactionMapper() {}

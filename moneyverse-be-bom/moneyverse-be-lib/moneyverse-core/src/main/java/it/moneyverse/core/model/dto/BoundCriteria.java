@@ -8,6 +8,16 @@ public class BoundCriteria {
   private BigDecimal lower;
   private BigDecimal upper;
 
+  public boolean matches(BigDecimal amount) {
+    if (amount == null) {
+      return false;
+    }
+    if (lower != null && amount.compareTo(lower) <= 0) {
+      return false;
+    }
+    return upper == null || amount.compareTo(upper) < 0;
+  }
+
   public Optional<BigDecimal> getLower() {
     return Optional.ofNullable(lower);
   }
