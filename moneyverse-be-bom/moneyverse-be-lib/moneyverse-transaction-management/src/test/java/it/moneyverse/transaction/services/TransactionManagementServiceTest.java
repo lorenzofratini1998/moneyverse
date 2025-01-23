@@ -10,6 +10,7 @@ import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
@@ -153,8 +154,68 @@ class TransactionManagementServiceTest {
         () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
   }
 
+  @Test
+  void givenTransactionId_WhenUpdateTransaction_ThenReturnTransactionDto(
+      @Mock Transaction transaction, @Mock TransactionDto transactionDto) {
+    UUID transactionId = RandomUtils.randomUUID();
+    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+
+    when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+    transactionMapper
+        .when(() -> TransactionMapper.partialUpdate(transaction, request, tagRepository))
+        .thenReturn(transaction);
+    when(transactionRepository.save(transaction)).thenReturn(transaction);
+    transactionMapper
+        .when(() -> TransactionMapper.toTransactionDto(transaction))
+        .thenReturn(transactionDto);
+
+    transactionDto = transactionManagementService.updateTransaction(transactionId, request);
+
+    assertNotNull(transactionDto);
+    verify(transactionRepository, times(1)).findById(transactionId);
+    transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
+    verify(transactionRepository, times(1)).save(transaction);
+    transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
+  }
+
+  @Test
+  void givenTransactionId_WhenUpdateTransaction_ThenReturnNotFound() {
+    UUID transactionId = RandomUtils.randomUUID();
+    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+
+    when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> transactionManagementService.updateTransaction(transactionId, request));
+
+    verify(transactionRepository, times(1)).findById(transactionId);
+    transactionMapper.verify(
+        () ->
+            TransactionMapper.partialUpdate(
+                any(Transaction.class),
+                any(TransactionUpdateRequestDto.class),
+                any(TagRepository.class)),
+        never());
+    verify(transactionRepository, never()).save(any(Transaction.class));
+    transactionMapper.verify(
+        () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
+  }
+
+  private TransactionUpdateRequestDto createTransactionUpdateRequest() {
+    UUID tagId = RandomUtils.randomUUID();
+    return new TransactionUpdateRequestDto(
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomLocalDate(2024, 2024),
+        RandomUtils.randomString(30),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomEnum(CurrencyEnum.class),
+        Collections.singleton(tagId));
+  }
+
   private TransactionRequestDto createTransactionRequest() {
-    Long tagId = RandomUtils.randomLong();
+    UUID tagId = RandomUtils.randomUUID();
     return new TransactionRequestDto(
         RandomUtils.randomString(15),
         RandomUtils.randomUUID(),

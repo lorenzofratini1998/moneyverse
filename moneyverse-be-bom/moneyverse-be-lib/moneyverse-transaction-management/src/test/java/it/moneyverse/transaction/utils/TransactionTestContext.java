@@ -145,6 +145,11 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return userTransactions.get(RandomUtils.randomInteger(0, userTransactions.size() - 1));
   }
 
+  public Tag getRandomTag(String username) {
+    List<Tag> userTags = tags.stream().filter(t -> t.getUsername().equals(username)).toList();
+    return userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1));
+  }
+
   @Override
   public TransactionTestContext self() {
     return this;

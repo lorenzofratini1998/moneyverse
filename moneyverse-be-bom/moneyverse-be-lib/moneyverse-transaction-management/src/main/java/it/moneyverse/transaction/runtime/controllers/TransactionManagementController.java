@@ -3,6 +3,7 @@ package it.moneyverse.transaction.runtime.controllers;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.services.TransactionService;
 import java.util.List;
 import java.util.UUID;
@@ -46,5 +47,15 @@ public class TransactionManagementController implements TransactionOperations {
       "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@transactionRepository.existsByUsernameAndTransactionId(authentication.name, #transactionId))")
   public TransactionDto getTransaction(@PathVariable UUID transactionId) {
     return transactionService.getTransaction(transactionId);
+  }
+
+  @Override
+  @PutMapping("/transactions/{transactionId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@transactionRepository.existsByUsernameAndTransactionId(authentication.name, #transactionId))")
+  public TransactionDto updateTransaction(
+      @PathVariable UUID transactionId, @RequestBody TransactionUpdateRequestDto request) {
+    return transactionService.updateTransaction(transactionId, request);
   }
 }

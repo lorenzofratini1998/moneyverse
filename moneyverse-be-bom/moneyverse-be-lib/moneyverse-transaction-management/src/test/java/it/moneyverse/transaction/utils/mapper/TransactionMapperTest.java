@@ -1,6 +1,7 @@
 package it.moneyverse.transaction.utils.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import it.moneyverse.core.enums.CurrencyEnum;
@@ -8,10 +9,12 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -53,7 +56,7 @@ class TransactionMapperTest {
 
   @Test
   void testToTransaction_ValidTransactionRequest_Tags(@Mock Tag tag) {
-    Long tagId = RandomUtils.randomLong();
+    UUID tagId = RandomUtils.randomUUID();
     TransactionRequestDto request =
         new TransactionRequestDto(
             RandomUtils.randomString(15),
@@ -79,7 +82,7 @@ class TransactionMapperTest {
 
   @Test
   void testToTransaction_ValidTransactionRequest_TagNotFound() {
-    Long tagId = RandomUtils.randomLong();
+    UUID tagId = RandomUtils.randomUUID();
     TransactionRequestDto request =
         new TransactionRequestDto(
             RandomUtils.randomString(15),
@@ -148,6 +151,49 @@ class TransactionMapperTest {
       assertEquals(transaction.getCurrency(), transactionDto.getCurrency());
       assertEquals(transaction.getTags().size(), transactionDto.getTags().size());
     }
+  }
+
+  @Test
+  void testToTransaction_PartialUpdate(@Mock Tag tag) {
+    Transaction transaction = createTransaction();
+    TransactionUpdateRequestDto request =
+        new TransactionUpdateRequestDto(
+            RandomUtils.randomUUID(),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomLocalDate(2024, 2024),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(CurrencyEnum.class),
+            createTags().stream().map(Tag::getTagId).collect(Collectors.toSet()));
+    when(tagRepository.findById(any(UUID.class))).thenReturn(Optional.of(tag));
+
+    Transaction result = TransactionMapper.partialUpdate(transaction, request, tagRepository);
+
+    assertEquals(request.accountId(), result.getAccountId());
+    assertEquals(request.budgetId(), result.getBudgetId());
+    assertEquals(request.date(), result.getDate());
+    assertEquals(request.description(), result.getDescription());
+    assertEquals(request.currency(), result.getCurrency());
+    assertEquals(1, result.getTags().size());
+  }
+
+  @Test
+  void testToTransaction_PartialUpdate_TagNotFound() {
+    Transaction transaction = createTransaction();
+    TransactionUpdateRequestDto request =
+        new TransactionUpdateRequestDto(
+            RandomUtils.randomUUID(),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomLocalDate(2024, 2024),
+            RandomUtils.randomString(15),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(CurrencyEnum.class),
+            createTags().stream().map(Tag::getTagId).collect(Collectors.toSet()));
+    when(tagRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> TransactionMapper.partialUpdate(transaction, request, tagRepository));
   }
 
   private Transaction createTransaction() {

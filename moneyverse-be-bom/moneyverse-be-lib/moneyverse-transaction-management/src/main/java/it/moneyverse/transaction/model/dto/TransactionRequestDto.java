@@ -19,7 +19,7 @@ public record TransactionRequestDto(
     String description,
     @NotNull(message = "'Amount' must not be null") BigDecimal amount,
     @NotNull(message = "'Currency' must not be null") CurrencyEnum currency,
-    Set<Long> tags) {
+    Set<UUID> tags) {
   @Override
   public String toString() {
     return JsonUtils.toJson(this);

@@ -14,6 +14,7 @@ import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.services.TransactionManagementService;
 import java.util.Collections;
 import java.util.List;
@@ -234,8 +235,65 @@ class TransactionManagementControllerTest {
         .andExpect(status().isUnauthorized());
   }
 
+  @Test
+  void testUpdateTransaction_Success(@Mock TransactionDto response) throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+    when(transactionService.updateTransaction(transactionId, request)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/transactions/" + transactionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request.toString())
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testUpdateTransaction_NotFound() throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+    when(transactionService.updateTransaction(transactionId, request))
+        .thenThrow(ResourceNotFoundException.class);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/transactions/" + transactionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request.toString())
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testUpdateTransaction_Forbidden() throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/transactions/" + transactionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request.toString())
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
+  }
+
+  private TransactionUpdateRequestDto createTransactionUpdateRequest() {
+    UUID tagId = RandomUtils.randomUUID();
+    return new TransactionUpdateRequestDto(
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomLocalDate(2024, 2024),
+        RandomUtils.randomString(30),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomEnum(CurrencyEnum.class),
+        Collections.singleton(tagId));
+  }
+
   private TransactionRequestDto createTransactionRequest(String username) {
-    Long tagId = RandomUtils.randomLong();
+    UUID tagId = RandomUtils.randomUUID();
     return new TransactionRequestDto(
         username,
         RandomUtils.randomUUID(),

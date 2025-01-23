@@ -2,16 +2,19 @@ package it.moneyverse.transaction.runtime.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
@@ -127,5 +130,39 @@ public class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(transactionId, response.getBody().getTransactionId());
+  }
+
+  @Test
+  void testUpdateTransaction() {
+    final String username = testContext.getRandomUser().getUsername();
+    final UUID transactionId = testContext.getRandomTransaction(username).getTransactionId();
+    TransactionUpdateRequestDto request =
+        new TransactionUpdateRequestDto(
+            RandomUtils.randomUUID(),
+            RandomUtils.randomUUID(),
+            RandomUtils.randomLocalDate(2024, 2024),
+            RandomUtils.randomString(30),
+            RandomUtils.randomBigDecimal(),
+            RandomUtils.randomEnum(CurrencyEnum.class),
+            Collections.singleton(testContext.getRandomTag(username).getTagId()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<TransactionDto> response =
+        restTemplate.exchange(
+            basePath + "/transactions/" + transactionId,
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            TransactionDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(transactionId, response.getBody().getTransactionId());
+    assertEquals(request.accountId(), response.getBody().getAccountId());
+    assertEquals(request.budgetId(), response.getBody().getBudgetId());
+    assertEquals(request.date(), response.getBody().getDate());
+    assertEquals(request.description(), response.getBody().getDescription());
+    assertEquals(request.amount(), response.getBody().getAmount());
+    assertEquals(request.currency(), response.getBody().getCurrency());
+    assertEquals(request.tags().size(), response.getBody().getTags().size());
   }
 }
