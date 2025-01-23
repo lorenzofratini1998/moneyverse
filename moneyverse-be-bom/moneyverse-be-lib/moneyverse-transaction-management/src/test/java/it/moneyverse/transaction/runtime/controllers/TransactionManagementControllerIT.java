@@ -18,6 +18,7 @@ import it.moneyverse.transaction.utils.TransactionTestContext;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,5 +108,24 @@ public class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(expected.size(), Objects.requireNonNull(response.getBody()).size());
+  }
+
+  @Test
+  void testGetTransaction() {
+    final String username = testContext.getRandomUser().getUsername();
+    final TransactionCriteria criteria = testContext.createTransactionCriteria();
+    final UUID transactionId = testContext.getRandomTransaction(username).getTransactionId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<TransactionDto> response =
+        restTemplate.exchange(
+            basePath + "/transactions/" + transactionId,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            TransactionDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(transactionId, response.getBody().getTransactionId());
   }
 }

@@ -9,6 +9,7 @@ import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
@@ -136,6 +137,12 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   public TransactionCriteria createTransactionCriteria() {
     return new TransactionCriteriaRandomGenerator(getCurrentInstance()).generate();
+  }
+
+  public Transaction getRandomTransaction(String username) {
+    List<Transaction> userTransactions =
+        transactions.stream().filter(t -> t.getUsername().equals(username)).toList();
+    return userTransactions.get(RandomUtils.randomInteger(0, userTransactions.size() - 1));
   }
 
   @Override

@@ -16,6 +16,7 @@ import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,6 +119,38 @@ class TransactionManagementServiceTest {
 
     assertNotNull(transactions);
     verify(transactionRepository, times(1)).findTransactions(transactionCriteria);
+  }
+
+  @Test
+  void givenTransactionId_WhenGetTransaction_ThenReturnTransaction(
+      @Mock Transaction transaction, @Mock TransactionDto transactionDto) {
+    UUID transactionId = RandomUtils.randomUUID();
+
+    when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+    transactionMapper
+        .when(() -> TransactionMapper.toTransactionDto(transaction))
+        .thenReturn(transactionDto);
+
+    transactionDto = transactionManagementService.getTransaction(transactionId);
+
+    assertNotNull(transactionDto);
+    verify(transactionRepository, times(1)).findById(transactionId);
+    transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
+  }
+
+  @Test
+  void givenTransactionId_WhenGetTransaction_ThenReturnNotFound() {
+    UUID transactionId = RandomUtils.randomUUID();
+
+    when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> transactionManagementService.getTransaction(transactionId));
+
+    verify(transactionRepository, times(1)).findById(transactionId);
+    transactionMapper.verify(
+        () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
   }
 
   private TransactionRequestDto createTransactionRequest() {

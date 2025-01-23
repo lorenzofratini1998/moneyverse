@@ -72,6 +72,7 @@ public class TransactionManagementService implements TransactionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<TransactionDto> getTransactions(TransactionCriteria criteria) {
     if (criteria.getPage() == null) {
       criteria.setPage(new PageCriteria());
@@ -83,5 +84,20 @@ public class TransactionManagementService implements TransactionService {
     }
     LOGGER.info("Finding transactions with filters: {}", criteria);
     return TransactionMapper.toTransactionDto(transactionRepository.findTransactions(criteria));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public TransactionDto getTransaction(UUID transactionId) {
+    return TransactionMapper.toTransactionDto(findTransactionById(transactionId));
+  }
+
+  private Transaction findTransactionById(UUID transactionId) {
+    return transactionRepository
+        .findById(transactionId)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Transaction with id %s not found".formatted(transactionId)));
   }
 }

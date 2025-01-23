@@ -7,6 +7,7 @@ import it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.enums.CurrencyEnum;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
@@ -16,6 +17,7 @@ import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.services.TransactionManagementService;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -176,7 +178,7 @@ class TransactionManagementControllerTest {
   }
 
   @Test
-  void testGetAccounts_Success(
+  void testGetTransactions_Success(
       @Mock TransactionCriteria criteria, @Mock List<TransactionDto> response) throws Exception {
     when(transactionService.getTransactions(criteria)).thenReturn(response);
 
@@ -188,10 +190,46 @@ class TransactionManagementControllerTest {
   }
 
   @Test
-  void testGetAccounts_Unauthorized() throws Exception {
+  void testGetTransactions_Unauthorized() throws Exception {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(basePath + "/transactions")
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void testGetTransaction_Success(@Mock TransactionDto response) throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+    when(transactionService.getTransaction(transactionId)).thenReturn(response);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/transactions/" + transactionId)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetTransaction_NotFound() throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+    when(transactionService.getTransaction(transactionId))
+        .thenThrow(ResourceNotFoundException.class);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/transactions/" + transactionId)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testGetTransaction_Unauthorized() throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/transactions/" + transactionId)
                 .with(SecurityMockMvcRequestPostProcessors.anonymous()))
         .andExpect(status().isUnauthorized());
   }
