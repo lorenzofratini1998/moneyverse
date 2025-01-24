@@ -5,12 +5,13 @@ import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.services.TransactionService;
-import java.util.List;
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
@@ -58,4 +59,15 @@ public class TransactionManagementController implements TransactionOperations {
       @PathVariable UUID transactionId, @RequestBody TransactionUpdateRequestDto request) {
     return transactionService.updateTransaction(transactionId, request);
   }
+
+  @Override
+  @DeleteMapping("/transactions/{transactionId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@transactionRepository.existsByUsernameAndTransactionId(authentication.name, #transactionId))")
+  public void deleteTransaction(@PathVariable UUID transactionId) {
+    transactionService.deleteTransaction(transactionId);
+  }
+
+
 }

@@ -13,14 +13,15 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 public class TransactionManagementService implements TransactionService {
@@ -88,6 +89,22 @@ public class TransactionManagementService implements TransactionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
+  public TransactionDto getTransaction(UUID transactionId) {
+    return TransactionMapper.toTransactionDto(findTransactionById(transactionId));
+  }
+
+  private Transaction findTransactionById(UUID transactionId) {
+    return transactionRepository
+            .findById(transactionId)
+            .orElseThrow(
+                    () ->
+                        new ResourceNotFoundException(
+                            "Transaction with id %s not found".formatted(transactionId)));
+  }
+
+  @Override
+  @Transactional
   public TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request) {
     Transaction transaction = findTransactionById(transactionId);
     transaction = TransactionMapper.partialUpdate(transaction, request, tagRepository);
@@ -99,17 +116,11 @@ public class TransactionManagementService implements TransactionService {
   }
 
   @Override
-  @Transactional(readOnly = true)
-  public TransactionDto getTransaction(UUID transactionId) {
-    return TransactionMapper.toTransactionDto(findTransactionById(transactionId));
-  }
-
-  private Transaction findTransactionById(UUID transactionId) {
-    return transactionRepository
-        .findById(transactionId)
-        .orElseThrow(
-            () ->
-                new ResourceNotFoundException(
-                    "Transaction with id %s not found".formatted(transactionId)));
+  @Transactional
+  public void deleteTransaction(UUID transactionId) {
+    Transaction transaction = findTransactionById(transactionId);
+    transactionRepository.delete(transaction);
+    LOGGER.info(
+        "Deleted transaction: {} for user {}", transaction.getTransactionId(), transaction.getUsername());
   }
 }

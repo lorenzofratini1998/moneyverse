@@ -1,7 +1,5 @@
 package it.moneyverse.transaction.runtime.controllers;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
@@ -18,10 +16,6 @@ import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +26,14 @@ import org.springframework.http.*;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @IntegrationTest
 public class TransactionManagementControllerIT extends AbstractIntegrationTest {
@@ -164,5 +166,22 @@ public class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.amount(), response.getBody().getAmount());
     assertEquals(request.currency(), response.getBody().getCurrency());
     assertEquals(request.tags().size(), response.getBody().getTags().size());
+  }
+
+  @Test
+  void testDeleteTransaction() {
+    final String username = testContext.getRandomUser().getUsername();
+    final UUID transactionId = testContext.getRandomTransaction(username).getTransactionId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/transactions/" + transactionId,
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class);
+
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertEquals(testContext.getTransactions().size() - 1, transactionRepository.findAll().size());
   }
 }

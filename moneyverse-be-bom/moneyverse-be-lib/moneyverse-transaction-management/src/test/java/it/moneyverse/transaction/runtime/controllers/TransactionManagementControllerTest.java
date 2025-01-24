@@ -1,8 +1,5 @@
 package it.moneyverse.transaction.runtime.controllers;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
@@ -16,16 +13,12 @@ import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.services.TransactionManagementService;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +29,15 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
     controllers = {TransactionManagementController.class},
@@ -277,6 +279,42 @@ class TransactionManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request.toString())
                 .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void testDeleteTransaction_Success() throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+
+    Mockito.doNothing().when(transactionService).deleteTransaction(transactionId);
+
+    mockMvc
+        .perform(
+          MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
+                  .with(MockAdminRequestPostProcessor.mockAdmin()))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void testDeleteTransaction_NotFound() throws Exception {
+    UUID transactionId = RandomUtils.randomUUID();
+    Mockito.doThrow(ResourceNotFoundException.class).when(transactionService).deleteTransaction(transactionId);
+
+    mockMvc
+        .perform(
+          MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
+                  .with(MockAdminRequestPostProcessor.mockAdmin()))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testDeleteTransaction_Forbidden() throws Exception {
+      UUID transactionId = RandomUtils.randomUUID();
+
+      mockMvc
+        .perform(
+          MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
+                  .with(SecurityMockMvcRequestPostProcessors.anonymous()))
         .andExpect(status().isForbidden());
   }
 

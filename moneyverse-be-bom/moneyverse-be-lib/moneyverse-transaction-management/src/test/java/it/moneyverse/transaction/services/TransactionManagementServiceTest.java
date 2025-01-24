@@ -1,9 +1,5 @@
 package it.moneyverse.transaction.services;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
@@ -15,10 +11,6 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +19,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionManagementServiceTest {
@@ -200,6 +201,33 @@ class TransactionManagementServiceTest {
     verify(transactionRepository, never()).save(any(Transaction.class));
     transactionMapper.verify(
         () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
+  }
+
+  @Test
+  void givenTransactionId_WhenDeleteTransaction_ThenDeleteTransaction(
+          @Mock Transaction transaction
+  ) {
+    UUID transactionId = RandomUtils.randomUUID();
+    when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+
+    transactionManagementService.deleteTransaction(transactionId);
+
+    verify(transactionRepository, times(1)).findById(transactionId);
+    verify(transactionRepository, times(1)).delete(transaction);
+  }
+
+  @Test
+  void givenTransactionId_WhenDeleteTransaction_ThenTransactionNotFound() {
+    UUID transactionId = RandomUtils.randomUUID();
+    when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> transactionManagementService.deleteTransaction(transactionId)
+    );
+
+    verify(transactionRepository, times(1)).findById(transactionId);
+    verify(transactionRepository, never()).delete(any(Transaction.class));
   }
 
   private TransactionUpdateRequestDto createTransactionUpdateRequest() {
