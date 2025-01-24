@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 import static it.moneyverse.transaction.enums.TransactionSortAttributeEnum.*;
 
@@ -58,6 +59,10 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   public List<Transaction> getTransactions(String username) {
     return transactions.stream().filter(t -> t.getUsername().equals(username)).toList();
+  }
+
+  public List<Transaction> getTransactionsByAccountId(UUID accountId) {
+    return transactions.stream().filter(t -> t.getAccountId().equals(accountId)).toList();
   }
 
   public TransactionRequestDto createTransactionRequest(String username) {

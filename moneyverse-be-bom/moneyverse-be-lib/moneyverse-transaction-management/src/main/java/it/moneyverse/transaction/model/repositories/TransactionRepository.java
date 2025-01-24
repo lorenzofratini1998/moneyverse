@@ -10,4 +10,5 @@ public interface TransactionRepository
     extends JpaRepository<Transaction, UUID>, TransactionCustomRepository {
   boolean existsByUsernameAndTransactionId(String username, UUID transactionId);
   List<Transaction> findTransactionByUsername(String username);
+  List<Transaction> findTransactionByAccountId(UUID accountId);
 }

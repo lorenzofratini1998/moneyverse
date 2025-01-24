@@ -1,6 +1,8 @@
 package it.moneyverse.transaction.runtime.messages;
 
+import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
+import it.moneyverse.core.model.events.AccountDeletionEvent;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
@@ -42,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         })
 @Testcontainers
 @CleanDatabaseAfterEachTest
-public class TransactionConsumerTest {
+class TransactionConsumerTest {
 
     private static TransactionTestContext testContext;
 
@@ -93,5 +95,25 @@ public class TransactionConsumerTest {
             .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(
                 () -> assertEquals(initialSize - userBudgets.size(), transactionRepository.count()));
+    }
+
+    @Test
+    void testOnAccountDeletion() {
+        final UUID accountId = testContext.getTransactions().get(RandomUtils.randomInteger(0, testContext.getTransactions().size() - 1)).getAccountId();
+        final List<Transaction> accountTransactions = testContext.getTransactionsByAccountId(accountId);
+        final long initialSize = transactionRepository.count();
+        String event = JsonUtils.toJson(new AccountDeletionEvent(accountId));
+        final ProducerRecord<UUID, String> producerRecord =
+                new ProducerRecord<>(AccountDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
+
+        mockServer.mockExistentAccount();
+
+        kafkaTemplate.send(producerRecord);
+
+        await()
+            .pollInterval(Duration.ofSeconds(5))
+            .atMost(30, TimeUnit.SECONDS)
+            .untilAsserted(
+                () -> assertEquals(initialSize - accountTransactions.size(), transactionRepository.count()));
     }
 }

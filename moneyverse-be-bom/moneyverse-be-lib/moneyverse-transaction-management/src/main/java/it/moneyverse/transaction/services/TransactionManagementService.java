@@ -128,11 +128,18 @@ public class TransactionManagementService implements TransactionService {
   }
 
   @Override
-  public void deleteAllTransactions(String username) {
+  public void deleteAllTransactionsByUsername(String username) {
     if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
       throw new ResourceNotFoundException("User %s does not exists".formatted(username));
     }
     LOGGER.info("Deleting transactions by username {}", username);
     transactionRepository.deleteAll(transactionRepository.findTransactionByUsername(username));
+  }
+
+  @Override
+  public void deleteAllTransactionsByAccountId(UUID accountId) {
+    checkIfResourceExists(accountId, accountServiceClient::checkIfAccountExists, "Account");
+    LOGGER.info("Deleting transactions by account id {}", accountId);
+    transactionRepository.deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
 }
