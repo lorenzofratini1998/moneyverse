@@ -16,7 +16,7 @@ import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
 import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
-import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
+import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -60,16 +59,14 @@ public class BudgetConsumerTest {
 
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
-  @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
-
-  @Autowired private KafkaOperations<UUID, String> operations;
+  @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
 
   @DynamicPropertySource
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKafkaContainer(kafkaContainer)
-        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort());
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort());
   }
 
   @BeforeAll
@@ -86,7 +83,7 @@ public class BudgetConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockUserService.mockExistentUser();
+    mockServer.mockExistentUser();
 
     kafkaTemplate.send(producerRecord);
 
@@ -107,7 +104,7 @@ public class BudgetConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserCreationTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockUserService.mockExistentUser();
+    mockServer.mockExistentUser();
     kafkaTemplate.send(producerRecord);
 
     await()

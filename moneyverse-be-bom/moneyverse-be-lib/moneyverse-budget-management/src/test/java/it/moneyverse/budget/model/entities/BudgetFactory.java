@@ -1,6 +1,6 @@
 package it.moneyverse.budget.model.entities;
 
-import static it.moneyverse.test.utils.FakeUtils.FAKE_USER;
+import static it.moneyverse.test.utils.FakeUtils.*;
 
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.UserModel;
@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 
 public class BudgetFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(BudgetFactory.class);
-  private static final Integer MIN_BUDGETS_PER_USER = 3;
-  private static final Integer MAX_BUDGETS_PER_USER = 15;
-  private static final Integer DEFAULT_BUDGETS_PER_USER = 3;
 
   public static List<Budget> createBudgets(List<UserModel> users) {
     List<Budget> budgets = new ArrayList<>();

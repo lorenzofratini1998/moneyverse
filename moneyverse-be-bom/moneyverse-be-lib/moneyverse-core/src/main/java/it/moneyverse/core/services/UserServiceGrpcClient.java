@@ -21,7 +21,9 @@ public class UserServiceGrpcClient implements UserServiceClient {
   }
 
   @Override
-  @CircuitBreaker(name = UserServiceGrpcCircuitBreakerProperties.USER_SERVICE_GRPC, fallbackMethod = "fallbackCheckIfUserExists")
+  @CircuitBreaker(
+      name = UserServiceGrpcCircuitBreakerProperties.USER_SERVICE_GRPC,
+      fallbackMethod = "fallbackCheckIfUserExists")
   public Boolean checkIfUserExists(String username) {
     final UserResponse response =
         stub.checkIfUserExists(UserRequest.newBuilder().setUsername(username).build());
@@ -29,7 +31,10 @@ public class UserServiceGrpcClient implements UserServiceClient {
   }
 
   protected Boolean fallbackCheckIfUserExists(String username, Throwable throwable) {
-    LOGGER.error("Impossible to contact the UserService to check whether the user {} exists. Returning FALSE as fallback: {}", username, throwable.getMessage());
+    LOGGER.error(
+        "Impossible to contact the UserService to check whether the user {} exists. Returning FALSE as fallback: {}",
+        username,
+        throwable.getMessage());
     return false;
   }
 }

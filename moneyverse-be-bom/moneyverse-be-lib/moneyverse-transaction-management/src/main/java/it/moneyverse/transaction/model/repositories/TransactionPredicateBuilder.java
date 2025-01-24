@@ -1,0 +1,119 @@
+package it.moneyverse.transaction.model.repositories;
+
+import it.moneyverse.transaction.model.dto.TransactionCriteria;
+import it.moneyverse.transaction.model.entities.Tag;
+import it.moneyverse.transaction.model.entities.Tag_;
+import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.model.entities.Transaction_;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TransactionPredicateBuilder {
+
+  private final CriteriaBuilder cb;
+  private final Root<Transaction> root;
+  private final List<Predicate> predicates;
+
+  public TransactionPredicateBuilder(CriteriaBuilder cb, Root<Transaction> root) {
+    this.cb = cb;
+    this.root = root;
+    this.predicates = new ArrayList<>();
+  }
+
+  public Predicate build(TransactionCriteria param) {
+    withUsername(param);
+    withAccounts(param);
+    withBudgets(param);
+    withDate(param);
+    withAmount(param);
+    withTags(param);
+    return cb.and(predicates.toArray(new Predicate[0]));
+  }
+
+  private void withUsername(TransactionCriteria param) {
+    param
+        .getUsername()
+        .ifPresent(username -> predicates.add(cb.equal(root.get(Transaction_.USERNAME), username)));
+  }
+
+  private void withAccounts(TransactionCriteria criteria) {
+    criteria
+        .getAccounts()
+        .ifPresent(
+            accounts -> {
+              Predicate[] accountPredicates =
+                  accounts.stream()
+                      .map(account -> cb.equal(root.get(Transaction_.ACCOUNT_ID), account))
+                      .toArray(Predicate[]::new);
+              predicates.add(cb.or(accountPredicates));
+            });
+  }
+
+  private void withBudgets(TransactionCriteria param) {
+    param
+        .getBudgets()
+        .ifPresent(
+            budgets -> {
+              Predicate[] budgetPredicates =
+                  budgets.stream()
+                      .map(budget -> cb.equal(root.get(Transaction_.BUDGET_ID), budget))
+                      .toArray(Predicate[]::new);
+              predicates.add(cb.or(budgetPredicates));
+            });
+  }
+
+  private void withDate(TransactionCriteria param) {
+    param
+        .getDate()
+        .ifPresent(
+            date -> {
+              date.getStart()
+                  .ifPresent(
+                      min ->
+                          predicates.add(
+                              cb.greaterThanOrEqualTo(root.get(Transaction_.DATE), min)));
+              date.getEnd()
+                  .ifPresent(
+                      max ->
+                          predicates.add(cb.lessThanOrEqualTo(root.get(Transaction_.DATE), max)));
+            });
+  }
+
+  private void withAmount(TransactionCriteria param) {
+    param
+        .getAmount()
+        .ifPresent(
+            amount -> {
+              amount
+                  .getLower()
+                  .ifPresent(
+                      lower ->
+                          predicates.add(
+                              cb.greaterThanOrEqualTo(root.get(Transaction_.AMOUNT), lower)));
+              amount
+                  .getUpper()
+                  .ifPresent(
+                      upper ->
+                          predicates.add(
+                              cb.lessThanOrEqualTo(root.get(Transaction_.AMOUNT), upper)));
+            });
+  }
+
+  private void withTags(TransactionCriteria criteria) {
+    criteria
+        .getTags()
+        .ifPresent(
+            tags -> {
+              Join<Transaction, Tag> tagsJoin = root.join(Transaction_.TAGS);
+              Predicate[] tagPredicates =
+                  tags.stream()
+                      .map(tag -> cb.equal(tagsJoin.get(Tag_.TAG_ID), tag))
+                      .toArray(Predicate[]::new);
+              predicates.add(cb.and(tagPredicates));
+            });
+  }
+}

@@ -13,6 +13,7 @@ public abstract class AbstractIntegrationTest {
   protected static Path tempDir;
   @Value("${spring.security.base-path}")
   protected String basePath;
+
   @Autowired protected TestRestTemplate restTemplate;
 
   protected AbstractIntegrationTest() {}

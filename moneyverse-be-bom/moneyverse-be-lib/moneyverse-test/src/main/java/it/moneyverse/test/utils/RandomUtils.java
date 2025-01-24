@@ -17,6 +17,10 @@ public class RandomUtils {
     return UUID.randomUUID();
   }
 
+  public static Long randomLong() {
+    return RANDOM.nextLong();
+  }
+
   public static Integer randomInteger(Integer min, Integer max) {
     return RANDOM.nextInt(min, max + 1);
   }

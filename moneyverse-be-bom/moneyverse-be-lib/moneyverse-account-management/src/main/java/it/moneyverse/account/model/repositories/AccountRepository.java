@@ -3,7 +3,6 @@ package it.moneyverse.account.model.repositories;
 import it.moneyverse.account.model.entities.Account;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,4 +18,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID>, Account
   boolean existsByUsernameAndAccountId(String username, UUID accountId);
 
   List<Account> findAccountByUsername(String username);
+
+  boolean existsByAccountId(UUID accountId);
 }

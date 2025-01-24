@@ -1,9 +1,5 @@
 package it.moneyverse.budget.runtime.controllers;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
@@ -14,15 +10,13 @@ import it.moneyverse.budget.utils.BudgetTestContext;
 import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
-import it.moneyverse.test.extensions.grpc.GrpcMockUserService;
+import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +28,13 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @IntegrationTest
 class BudgetManagementControllerIT extends AbstractIntegrationTest {
 
@@ -41,7 +42,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
-  @RegisterExtension static GrpcMockUserService mockUserService = new GrpcMockUserService();
+  @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired private BudgetRepository budgetRepository;
   private HttpHeaders headers;
 
@@ -50,7 +51,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKeycloak(keycloakContainer)
-        .withGrpcUserService(mockUserService.getHost(), mockUserService.getPort())
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer);
   }
 
@@ -70,7 +71,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final String username = testContext.getRandomUser().getUsername();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     final BudgetRequestDto request = testContext.createBudgetForUser(username);
-    mockUserService.mockExistentUser();
+    mockServer.mockExistentUser();
     BudgetDto expected = testContext.getExpectedBudgetDto(request);
 
     ResponseEntity<BudgetDto> response =
@@ -149,7 +150,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void testDeleteAccount() {
+  void testDeleteTransaction() {
     final UserModel user = testContext.getRandomAdminOrUser();
     final UUID budgetId = testContext.getRandomBudget(user.getUsername()).getBudgetId();
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));

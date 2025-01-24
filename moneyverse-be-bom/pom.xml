@@ -21,6 +21,7 @@
     <moneyverse-core.version>1.0.0-SNAPSHOT</moneyverse-core.version>
     <moneyverse-proto.version>1.0.0-SNAPSHOT</moneyverse-proto.version>
     <moneyverse-test.version>1.0.0-SNAPSHOT</moneyverse-test.version>
+      <moneyverse-transaction-management.version>1.0.0-SNAPSHOT</moneyverse-transaction-management.version>
   </properties>
 
   <dependencyManagement>
@@ -49,6 +50,11 @@
         <artifactId>moneyverse-test</artifactId>
         <groupId>it.moneyverse</groupId>
         <version>${moneyverse-test.version}</version>
+      </dependency>
+        <dependency>
+            <artifactId>moneyverse-transaction-management</artifactId>
+            <groupId>it.moneyverse</groupId>
+            <version>${moneyverse-transaction-management.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
