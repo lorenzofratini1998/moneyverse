@@ -4,6 +4,7 @@ import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
@@ -30,17 +31,19 @@ public class TransactionManagementService implements TransactionService {
 
   private final AccountServiceClient accountServiceClient;
   private final BudgetServiceClient budgetServiceClient;
+  private final UserServiceClient userServiceClient;
   private final TransactionRepository transactionRepository;
   private final TagRepository tagRepository;
 
   public TransactionManagementService(
-      AccountServiceClient accountServiceClient,
-      BudgetServiceClient budgetServiceClient,
-      TransactionRepository transactionRepository,
-      TagRepository tagRepository) {
+          AccountServiceClient accountServiceClient,
+          BudgetServiceClient budgetServiceClient, UserServiceClient userServiceClient,
+          TransactionRepository transactionRepository,
+          TagRepository tagRepository) {
     this.accountServiceClient = accountServiceClient;
     this.budgetServiceClient = budgetServiceClient;
-    this.transactionRepository = transactionRepository;
+      this.userServiceClient = userServiceClient;
+      this.transactionRepository = transactionRepository;
     this.tagRepository = tagRepository;
   }
 
@@ -122,5 +125,14 @@ public class TransactionManagementService implements TransactionService {
     transactionRepository.delete(transaction);
     LOGGER.info(
         "Deleted transaction: {} for user {}", transaction.getTransactionId(), transaction.getUsername());
+  }
+
+  @Override
+  public void deleteAllTransactions(String username) {
+    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
+      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+    }
+    LOGGER.info("Deleting transactions by username {}", username);
+    transactionRepository.deleteAll(transactionRepository.findTransactionByUsername(username));
   }
 }

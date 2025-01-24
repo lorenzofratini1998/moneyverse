@@ -1,20 +1,21 @@
 package it.moneyverse.transaction.model.repositories;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import it.moneyverse.core.boot.*;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.utils.TransactionTestContext;
 import jakarta.persistence.EntityManager;
-import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest(
     properties = {
@@ -34,6 +35,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
       KafkaAutoConfiguration.class,
       AccountServiceGrpcClientAutoConfiguration.class,
       BudgetServiceGrpcClientAutoConfiguration.class,
+      UserServiceGrpcClientAutoConfiguration.class
     })
 public class TransactionCustomRepositoryImplTest {
 

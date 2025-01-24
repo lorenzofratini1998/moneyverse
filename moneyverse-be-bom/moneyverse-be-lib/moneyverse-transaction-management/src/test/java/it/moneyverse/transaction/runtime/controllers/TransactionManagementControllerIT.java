@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @IntegrationTest
-public class TransactionManagementControllerIT extends AbstractIntegrationTest {
+class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
   protected static TransactionTestContext testContext;
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
@@ -54,6 +54,7 @@ public class TransactionManagementControllerIT extends AbstractIntegrationTest {
         .withKeycloak(keycloakContainer)
         .withGrpcAccountService(mockServer.getHost(), mockServer.getPort())
         .withGrpcBudgetService(mockServer.getHost(), mockServer.getPort())
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer);
   }
 

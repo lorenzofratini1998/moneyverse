@@ -1,4 +1,4 @@
-package it.moneyverse.budget.runtime.runtime;
+package it.moneyverse.budget.runtime.messages;
 
 import it.moneyverse.budget.services.BudgetService;
 import it.moneyverse.core.model.beans.UserCreationTopic;
@@ -6,20 +6,20 @@ import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.UserCreationEvent;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
-import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
+import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
+
 @Component
 public class BudgetConsumer {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BudgetConsumer.class);
   private final BudgetService budgetService;
 
   public BudgetConsumer(BudgetService budgetService) {
@@ -52,7 +52,5 @@ public class BudgetConsumer {
     budgetService.createDefaultBudgets(event.username(), event.currency());
   }
 
-  private static void logMessage(ConsumerRecord<UUID, String> record, String topic) {
-    LOGGER.info("Received event: {} from topic: {}", record.value(), topic);
-  }
+
 }

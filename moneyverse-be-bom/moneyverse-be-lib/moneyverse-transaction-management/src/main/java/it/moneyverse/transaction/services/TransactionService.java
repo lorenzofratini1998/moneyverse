@@ -19,4 +19,5 @@ public interface TransactionService {
   TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request);
 
   void deleteTransaction(UUID transactionId);
+  void deleteAllTransactions(String username);
 }

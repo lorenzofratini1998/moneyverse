@@ -1,7 +1,5 @@
 package it.moneyverse.transaction.utils;
 
-import static it.moneyverse.transaction.enums.TransactionSortAttributeEnum.*;
-
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.annotations.datasource.TestModelEntity;
@@ -18,9 +16,12 @@ import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.TagFactory;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.TransactionFactory;
+import org.springframework.data.domain.Sort;
+
 import java.nio.file.Path;
 import java.util.List;
-import org.springframework.data.domain.Sort;
+
+import static it.moneyverse.transaction.enums.TransactionSortAttributeEnum.*;
 
 public class TransactionTestContext extends TestContext<TransactionTestContext> {
 
@@ -53,6 +54,10 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   public List<Transaction> getTransactions() {
     return transactions;
+  }
+
+  public List<Transaction> getTransactions(String username) {
+    return transactions.stream().filter(t -> t.getUsername().equals(username)).toList();
   }
 
   public TransactionRequestDto createTransactionRequest(String username) {
