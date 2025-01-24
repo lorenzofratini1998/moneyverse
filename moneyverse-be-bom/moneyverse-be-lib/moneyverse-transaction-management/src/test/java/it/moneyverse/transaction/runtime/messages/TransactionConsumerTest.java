@@ -1,8 +1,10 @@
 package it.moneyverse.transaction.runtime.messages;
 
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
+import it.moneyverse.core.model.beans.BudgetDeletionTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.AccountDeletionEvent;
+import it.moneyverse.core.model.events.BudgetDeletionEvent;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
@@ -36,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest(
         properties = {
@@ -115,5 +118,28 @@ class TransactionConsumerTest {
             .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(
                 () -> assertEquals(initialSize - accountTransactions.size(), transactionRepository.count()));
+    }
+
+    @Test
+    void testOnBudgetDeletion() {
+        final UUID budgetId = testContext.getTransactions().get(RandomUtils.randomInteger(0, testContext.getTransactions().size() - 1)).getBudgetId();
+        final List<Transaction> budgetTransactions = testContext.getTransactionsByAccountId(budgetId);
+        String event = JsonUtils.toJson(new BudgetDeletionEvent(budgetId));
+        final ProducerRecord<UUID, String> producerRecord =
+                new ProducerRecord<>(BudgetDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
+
+        mockServer.mockExistentBudget();
+
+        kafkaTemplate.send(producerRecord);
+
+        await()
+            .pollInterval(Duration.ofSeconds(5))
+            .atMost(30, TimeUnit.SECONDS)
+            .untilAsserted(
+                () -> {
+                    for (Transaction transaction : budgetTransactions) {
+                        assertNull(transactionRepository.findById(transaction.getTransactionId()).orElseThrow(IllegalArgumentException::new).getBudgetId());
+                    }
+                });
     }
 }

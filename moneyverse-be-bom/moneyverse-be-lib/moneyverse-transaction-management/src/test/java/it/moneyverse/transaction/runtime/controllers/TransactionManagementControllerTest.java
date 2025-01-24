@@ -102,7 +102,6 @@ class TransactionManagementControllerTest {
     return Stream.of(
         TransactionManagementControllerTest::createRequestWithNullUsername,
         TransactionManagementControllerTest::createRequestWithNullAccountId,
-        TransactionManagementControllerTest::createRequestWithNullBudgetId,
         TransactionManagementControllerTest::createRequestWithNullDate,
         TransactionManagementControllerTest::createRequestWithNullAmount,
         TransactionManagementControllerTest::createRequestWithNullCurrency);
@@ -125,18 +124,6 @@ class TransactionManagementControllerTest {
         RandomUtils.randomString(15),
         null,
         RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2025),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
-        null);
-  }
-
-  private static TransactionRequestDto createRequestWithNullBudgetId() {
-    return new TransactionRequestDto(
-        RandomUtils.randomString(15),
-        RandomUtils.randomUUID(),
-        null,
         RandomUtils.randomLocalDate(2024, 2025),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),

@@ -2,6 +2,7 @@ package it.moneyverse.transaction.services;
 
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
@@ -36,6 +37,7 @@ class TransactionManagementServiceTest {
 
   @Mock private AccountServiceGrpcClient accountServiceClient;
   @Mock private BudgetServiceGrpcClient budgetServiceClient;
+  @Mock private UserServiceClient userServiceClient;
   @Mock private TransactionRepository transactionRepository;
   @Mock private TagRepository tagRepository;
   private MockedStatic<TransactionMapper> transactionMapper;
@@ -253,5 +255,78 @@ class TransactionManagementServiceTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomEnum(CurrencyEnum.class),
         Collections.singleton(tagId));
+  }
+
+  @Test
+  void givenUsername_WhenDeleteAllTransactions_ThenDeleteAllTransactions() {
+      String username = RandomUtils.randomString(15);
+
+      when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+
+      transactionManagementService.deleteAllTransactionsByUsername(username);
+
+      verify(userServiceClient, times(1)).checkIfUserExists(username);
+      verify(transactionRepository, times(1)).deleteAll(transactionRepository.findTransactionByUsername(username));
+  }
+
+  @Test
+  void givenUsername_WhenDeleteAllTransactions_ThenUserNotFound() {
+    String username = RandomUtils.randomString(15);
+
+    when(userServiceClient.checkIfUserExists(username)).thenReturn(false);
+
+    assertThrows(ResourceNotFoundException.class, () -> transactionManagementService.deleteAllTransactionsByUsername(username));
+
+    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(transactionRepository, times(0)).deleteAll(transactionRepository.findTransactionByUsername(username));
+  }
+
+  @Test
+  void givenAccountId_WhenDeleteAllTransactions_ThenDeleteAllTransactions() {
+    UUID accountId = RandomUtils.randomUUID();
+
+    when(accountServiceClient.checkIfAccountExists(accountId)).thenReturn(true);
+
+    transactionManagementService.deleteAllTransactionsByAccountId(accountId);
+
+    verify(accountServiceClient, times(1)).checkIfAccountExists(accountId);
+    verify(transactionRepository, times(1)).deleteAll(transactionRepository.findTransactionByAccountId(accountId));
+  }
+
+  @Test
+  void givenAccountId_WhenDeleteAllTransactions_ThenUserNotFound() {
+    UUID accountId = RandomUtils.randomUUID();
+
+    when(accountServiceClient.checkIfAccountExists(accountId)).thenReturn(false);
+
+    assertThrows(ResourceNotFoundException.class, () -> transactionManagementService.deleteAllTransactionsByAccountId(accountId));
+
+    verify(accountServiceClient, times(1)).checkIfAccountExists(accountId);
+    verify(transactionRepository, times(0)).deleteAll(transactionRepository.findTransactionByAccountId(accountId));
+  }
+
+  @Test
+  void givenBudgetId_RemoveBudgetFromTransactions_ThenRemoveBudgets(@Mock List<Transaction> transactions) {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    when(budgetServiceClient.checkIfBudgetExists(budgetId)).thenReturn(true);
+    when(transactionRepository.findTransactionByBudgetId(budgetId)).thenReturn(transactions);
+
+    transactionManagementService.removeBudgetFromTransactions(budgetId);
+
+    verify(budgetServiceClient, times(1)).checkIfBudgetExists(budgetId);
+    verify(transactionRepository, times(1)).saveAll(transactions);
+  }
+
+  @Test
+  void givenBudgetId_RemoveBudgetFromTransactions_ThenBudgetNotFound() {
+    UUID budgetId = RandomUtils.randomUUID();
+
+    when(budgetServiceClient.checkIfBudgetExists(budgetId)).thenReturn(false);
+
+    assertThrows(ResourceNotFoundException.class, () -> transactionManagementService.removeBudgetFromTransactions(budgetId));
+
+    verify(budgetServiceClient, times(1)).checkIfBudgetExists(budgetId);
+    verify(transactionRepository, never()).saveAll(any(List.class));
   }
 }

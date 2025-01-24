@@ -4,6 +4,7 @@ import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -14,7 +15,7 @@ public record TransactionRequestDto(
         @Size(max = 64, message = "'Username' must not exceed 64 characters")
         String username,
     @NotNull(message = "'Account ID' must not be null") UUID accountId,
-    @NotNull(message = "'Budget ID' must not be null") UUID budgetId,
+    UUID budgetId,
     @NotNull(message = "'Date' must not be null") LocalDate date,
     String description,
     @NotNull(message = "'Amount' must not be null") BigDecimal amount,

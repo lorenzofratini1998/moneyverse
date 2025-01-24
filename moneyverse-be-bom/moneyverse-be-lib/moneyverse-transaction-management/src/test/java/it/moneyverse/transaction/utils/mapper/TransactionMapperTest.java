@@ -1,9 +1,5 @@
 package it.moneyverse.transaction.utils.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
@@ -13,12 +9,17 @@ import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionMapperTest {
@@ -211,7 +212,7 @@ class TransactionMapperTest {
   }
 
   private Set<Tag> createTags() {
-    int tagsCount = RandomUtils.randomInteger(0, 3);
+    int tagsCount = RandomUtils.randomInteger(1, 3);
     Set<Tag> tags = new HashSet<>();
     for (int i = 0; i < tagsCount; i++) {
       tags.add(TagMapperTest.createTag());

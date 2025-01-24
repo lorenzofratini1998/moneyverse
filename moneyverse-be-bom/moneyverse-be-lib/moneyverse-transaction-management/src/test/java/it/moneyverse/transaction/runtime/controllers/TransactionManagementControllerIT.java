@@ -119,7 +119,6 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetTransaction() {
     final String username = testContext.getRandomUser().getUsername();
-    final TransactionCriteria criteria = testContext.createTransactionCriteria();
     final UUID transactionId = testContext.getRandomTransaction(username).getTransactionId();
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
 

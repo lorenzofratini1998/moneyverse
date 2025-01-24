@@ -3,6 +3,7 @@ package it.moneyverse.transaction.model.entities;
 import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.Auditable;
 import jakarta.persistence.*;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -28,7 +29,7 @@ public class Transaction extends Auditable implements Serializable {
   @Column(name = "ACCOUNT_ID", nullable = false)
   private UUID accountId;
 
-  @Column(name = "BUDGET_ID", nullable = false)
+  @Column(name = "BUDGET_ID")
   private UUID budgetId;
 
   @Column(name = "DATE", nullable = false)

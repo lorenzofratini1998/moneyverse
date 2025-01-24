@@ -65,6 +65,10 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return transactions.stream().filter(t -> t.getAccountId().equals(accountId)).toList();
   }
 
+  public List<Transaction> getTransactionsByBudgetId(UUID budgetId) {
+    return transactions.stream().filter(t -> t.getAccountId().equals(budgetId)).toList();
+  }
+
   public TransactionRequestDto createTransactionRequest(String username) {
     Transaction transaction = TransactionFactory.fakeTransaction(username);
     return new TransactionRequestDto(

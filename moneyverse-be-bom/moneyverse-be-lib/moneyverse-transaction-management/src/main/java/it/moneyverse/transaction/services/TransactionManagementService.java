@@ -142,4 +142,13 @@ public class TransactionManagementService implements TransactionService {
     LOGGER.info("Deleting transactions by account id {}", accountId);
     transactionRepository.deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
+
+  @Override
+  public void removeBudgetFromTransactions(UUID budgetId) {
+    checkIfResourceExists(budgetId, budgetServiceClient::checkIfBudgetExists, "Budget");
+    LOGGER.info("Removing budget {} from transactions", budgetId);
+    List<Transaction> transactions = transactionRepository.findTransactionByBudgetId(budgetId);
+    transactions.forEach(transaction -> transaction.setBudgetId(null));
+    transactionRepository.saveAll(transactions);
+  }
 }

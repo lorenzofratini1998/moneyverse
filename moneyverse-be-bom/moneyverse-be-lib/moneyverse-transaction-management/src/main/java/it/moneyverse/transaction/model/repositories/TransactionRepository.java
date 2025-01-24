@@ -11,4 +11,5 @@ public interface TransactionRepository
   boolean existsByUsernameAndTransactionId(String username, UUID transactionId);
   List<Transaction> findTransactionByUsername(String username);
   List<Transaction> findTransactionByAccountId(UUID accountId);
+  List<Transaction> findTransactionByBudgetId(UUID budgetId);
 }
