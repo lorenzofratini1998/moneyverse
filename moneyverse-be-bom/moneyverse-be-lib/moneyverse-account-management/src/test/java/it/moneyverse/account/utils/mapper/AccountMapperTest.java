@@ -9,7 +9,6 @@ import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +54,7 @@ class AccountMapperTest {
             RandomUtils.randomBigDecimal(),
             category.getName(),
             RandomUtils.randomString(25),
-            RandomUtils.randomEnum(CurrencyEnum.class));
+            RandomUtils.randomString(3).toUpperCase());
 
     Account account = AccountMapper.toAccount(request, category);
 
@@ -131,7 +130,7 @@ class AccountMapperTest {
             RandomUtils.randomBigDecimal(),
             category.getName(),
             RandomUtils.randomString(25),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             RandomUtils.randomBoolean());
 
     Account result = AccountMapper.partialUpdate(account, request, category);

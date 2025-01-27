@@ -1,8 +1,6 @@
 package it.moneyverse.currency;
 
-import it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration;
-import it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration;
-import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
+import it.moneyverse.core.boot.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,7 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
     exclude = {
       AccountServiceGrpcClientAutoConfiguration.class,
       BudgetServiceGrpcClientAutoConfiguration.class,
-      UserServiceGrpcClientAutoConfiguration.class
+      UserServiceGrpcClientAutoConfiguration.class,
+      CurrencyServiceGrpcClientAutoConfiguration.class,
+      KafkaAutoConfiguration.class
     })
 public class CurrencyManagementApplication {
 

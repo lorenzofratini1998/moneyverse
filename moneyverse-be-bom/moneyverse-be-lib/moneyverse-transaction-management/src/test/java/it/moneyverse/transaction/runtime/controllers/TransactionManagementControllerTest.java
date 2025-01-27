@@ -1,9 +1,11 @@
 package it.moneyverse.transaction.runtime.controllers;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
@@ -13,6 +15,11 @@ import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.services.TransactionManagementService;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,15 +36,6 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
     controllers = {TransactionManagementController.class},
@@ -115,7 +113,7 @@ class TransactionManagementControllerTest {
         RandomUtils.randomLocalDate(2024, 2025),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
@@ -127,7 +125,7 @@ class TransactionManagementControllerTest {
         RandomUtils.randomLocalDate(2024, 2025),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
@@ -139,7 +137,7 @@ class TransactionManagementControllerTest {
         null,
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
@@ -151,7 +149,7 @@ class TransactionManagementControllerTest {
         RandomUtils.randomLocalDate(2024, 2025),
         RandomUtils.randomString(15),
         null,
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
@@ -313,7 +311,7 @@ class TransactionManagementControllerTest {
         RandomUtils.randomLocalDate(2024, 2024),
         RandomUtils.randomString(30),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         Collections.singleton(tagId));
   }
 
@@ -326,7 +324,7 @@ class TransactionManagementControllerTest {
         RandomUtils.randomLocalDate(2024, 2025),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         Collections.singleton(tagId));
   }
 }

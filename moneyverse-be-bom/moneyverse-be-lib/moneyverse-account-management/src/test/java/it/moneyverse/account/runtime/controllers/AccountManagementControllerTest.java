@@ -10,7 +10,6 @@ import it.moneyverse.account.services.AccountManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
@@ -126,7 +125,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test
@@ -245,7 +244,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
@@ -318,7 +317,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   private static AccountRequestDto createRequestWithNullAccountName() {
@@ -329,7 +328,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   private static AccountRequestDto createRequestWithNullAccountCategory() {
@@ -340,7 +339,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         null,
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   private static AccountRequestDto createRequestWithNullCurrency() {
@@ -363,6 +362,6 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 }

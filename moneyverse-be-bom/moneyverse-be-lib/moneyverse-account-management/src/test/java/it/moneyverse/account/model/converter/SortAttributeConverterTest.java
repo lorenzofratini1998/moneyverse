@@ -10,11 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Unit Tests for {@link SortAttributeConverter}
- */
+/** Unit Tests for {@link SortAttributeConverter} */
 @ExtendWith(MockitoExtension.class)
-public class SortAttributeConverterTest {
+class SortAttributeConverterTest {
 
   @InjectMocks SortAttributeConverter sortAttributeConverter;
 

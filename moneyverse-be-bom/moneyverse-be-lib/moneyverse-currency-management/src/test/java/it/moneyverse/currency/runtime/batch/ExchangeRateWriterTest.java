@@ -3,7 +3,6 @@ package it.moneyverse.currency.runtime.batch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
-import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.SecurityAutoConfiguration;
 import it.moneyverse.currency.model.entities.ExchangeRate;
 import it.moneyverse.currency.model.repositories.ExchangeRateRepository;
@@ -33,8 +32,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
     excludeAutoConfiguration = {
       FlywayAutoConfiguration.class,
       SecurityAutoConfiguration.class,
-      DatasourceAutoConfiguration.class,
-      KafkaAutoConfiguration.class
+      DatasourceAutoConfiguration.class
     })
 class ExchangeRateWriterTest {
 

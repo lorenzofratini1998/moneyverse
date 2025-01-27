@@ -1,6 +1,9 @@
 package it.moneyverse.transaction.utils.mapper;
 
-import it.moneyverse.core.enums.CurrencyEnum;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionDto;
@@ -9,17 +12,12 @@ import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionMapperTest {
@@ -41,7 +39,7 @@ class TransactionMapperTest {
             RandomUtils.randomLocalDate(2024, 2025),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             null);
 
     Transaction result = TransactionMapper.toTransaction(request, tagRepository);
@@ -66,7 +64,7 @@ class TransactionMapperTest {
             RandomUtils.randomLocalDate(2024, 2025),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             Collections.singleton(tagId));
     when(tagRepository.findById(tagId)).thenReturn(Optional.of(tag));
 
@@ -92,7 +90,7 @@ class TransactionMapperTest {
             RandomUtils.randomLocalDate(2024, 2025),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             Collections.singleton(tagId));
     when(tagRepository.findById(tagId)).thenReturn(Optional.empty());
 
@@ -164,7 +162,7 @@ class TransactionMapperTest {
             RandomUtils.randomLocalDate(2024, 2024),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             createTags().stream().map(Tag::getTagId).collect(Collectors.toSet()));
     when(tagRepository.findById(any(UUID.class))).thenReturn(Optional.of(tag));
 
@@ -188,7 +186,7 @@ class TransactionMapperTest {
             RandomUtils.randomLocalDate(2024, 2024),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             createTags().stream().map(Tag::getTagId).collect(Collectors.toSet()));
     when(tagRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
@@ -206,7 +204,7 @@ class TransactionMapperTest {
     transaction.setDate(RandomUtils.randomLocalDate(2024, 2025));
     transaction.setDescription(RandomUtils.randomString(15));
     transaction.setAmount(RandomUtils.randomBigDecimal());
-    transaction.setCurrency(RandomUtils.randomEnum(CurrencyEnum.class));
+    transaction.setCurrency(RandomUtils.randomString(3).toUpperCase());
     transaction.setTags(createTags());
     return transaction;
   }

@@ -3,7 +3,6 @@ package it.moneyverse.currency.runtime.controllers;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.currency.model.dto.CurrencyDto;
 import it.moneyverse.currency.services.CurrencyManagementService;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
@@ -22,7 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(
     controllers = {CurrencyManagementController.class},
-    excludeAutoConfiguration = {DataSourceAutoConfiguration.class, KafkaAutoConfiguration.class})
+    excludeAutoConfiguration = {DataSourceAutoConfiguration.class})
 @ExtendWith(MockitoExtension.class)
 class CurrencyManagementControllerTest {
 

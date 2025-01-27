@@ -7,7 +7,6 @@ import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +30,7 @@ class BudgetMapperTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class));
+            RandomUtils.randomString(3).toUpperCase());
 
     Budget budget = BudgetMapper.toBudget(request);
 
@@ -98,7 +97,7 @@ class BudgetMapperTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class));
+            RandomUtils.randomString(3).toUpperCase());
 
     Budget result = BudgetMapper.partialUpdate(budget, request);
 

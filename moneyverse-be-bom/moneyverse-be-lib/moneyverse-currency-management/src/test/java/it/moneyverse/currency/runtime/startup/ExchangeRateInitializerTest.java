@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
-import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.SecurityAutoConfiguration;
 import it.moneyverse.currency.model.repositories.CurrencyRepository;
 import it.moneyverse.currency.model.repositories.ExchangeRateRepository;
@@ -42,8 +41,7 @@ import org.springframework.web.client.RestTemplate;
     excludeAutoConfiguration = {
       FlywayAutoConfiguration.class,
       SecurityAutoConfiguration.class,
-      DatasourceAutoConfiguration.class,
-      KafkaAutoConfiguration.class
+      DatasourceAutoConfiguration.class
     })
 @ExtendWith(MockitoExtension.class)
 class ExchangeRateInitializerTest {

@@ -24,7 +24,6 @@ import org.testcontainers.junit.jupiter.Container;
 @IntegrationTest
 @TestPropertySource(
     properties = {
-            "spring.autoconfigure.exclude=it.moneyverse.core.boot.KafkaAutoConfiguration",
             "spring.runner.initializer.enabled=false"
     })
 class CurrencyManagementControllerIT extends AbstractIntegrationTest {

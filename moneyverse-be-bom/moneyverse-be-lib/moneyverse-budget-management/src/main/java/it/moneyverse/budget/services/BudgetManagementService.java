@@ -12,13 +12,13 @@ import it.moneyverse.budget.model.event.BudgetDeletionEvent;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.DefaultBudgetTemplateRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.BudgetDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import java.util.List;
@@ -37,20 +37,27 @@ public class BudgetManagementService implements BudgetService {
   private final BudgetRepository budgetRepository;
   private final DefaultBudgetTemplateRepository defaultBudgetTemplateRepository;
   private final UserServiceClient userServiceClient;
+  private final CurrencyServiceClient currencyServiceClient;
   private final MessageProducer<UUID, String> messageProducer;
 
   public BudgetManagementService(
-          BudgetRepository budgetRepository, DefaultBudgetTemplateRepository defaultBudgetTemplateRepository, UserServiceClient userServiceClient, MessageProducer<UUID, String> messageProducer) {
+      BudgetRepository budgetRepository,
+      DefaultBudgetTemplateRepository defaultBudgetTemplateRepository,
+      UserServiceClient userServiceClient,
+      CurrencyServiceClient currencyServiceClient,
+      MessageProducer<UUID, String> messageProducer) {
     this.budgetRepository = budgetRepository;
-      this.defaultBudgetTemplateRepository = defaultBudgetTemplateRepository;
-      this.userServiceClient = userServiceClient;
-      this.messageProducer = messageProducer;
+    this.defaultBudgetTemplateRepository = defaultBudgetTemplateRepository;
+    this.userServiceClient = userServiceClient;
+    this.currencyServiceClient = currencyServiceClient;
+    this.messageProducer = messageProducer;
   }
 
   @Override
   @Transactional
   public BudgetDto createBudget(BudgetRequestDto request) {
     checkIfUserExists(request.username());
+    checkIfCurrencyExists(request.currency());
     checkIfBudgetAlreadyExists(request.username(), request.budgetName());
     LOGGER.info("Creating budget {} for user {}", request.budgetName(), request.username());
     Budget budget = BudgetMapper.toBudget(request);
@@ -61,8 +68,9 @@ public class BudgetManagementService implements BudgetService {
 
   @Override
   @Transactional
-  public void createDefaultBudgets(String username, CurrencyEnum currency) {
+  public void createDefaultBudgets(String username, String currency) {
     checkIfUserExists(username);
+    checkIfCurrencyExists(currency);
     LOGGER.info("Creating default budgets for user {}", username);
     List<Budget> defaultBudgets =
         defaultBudgetTemplateRepository.findAll().stream()
@@ -96,8 +104,8 @@ public class BudgetManagementService implements BudgetService {
     }
     if (criteria.getSort() == null) {
       criteria.setSort(
-              new SortCriteria<>(
-                      SortAttribute.getDefault(BudgetSortAttributeEnum.class), Sort.Direction.ASC));
+          new SortCriteria<>(
+              SortAttribute.getDefault(BudgetSortAttributeEnum.class), Sort.Direction.ASC));
     }
     LOGGER.info("Finding budgets with filters: {}", criteria);
     return BudgetMapper.toBudgetDto(budgetRepository.findBudgets(criteria));
@@ -113,6 +121,9 @@ public class BudgetManagementService implements BudgetService {
   @Transactional
   public BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto budgetDto) {
     Budget budget = findBudgetById(budgetId);
+    if (budgetDto.currency() != null) {
+      checkIfCurrencyExists(budgetDto.currency());
+    }
     budget = BudgetMapper.partialUpdate(budget, budgetDto);
     BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
     LOGGER.info("Updated budget {} for user {}", result, budget.getUsername());
@@ -143,9 +154,16 @@ public class BudgetManagementService implements BudgetService {
     }
   }
 
+  private void checkIfCurrencyExists(String currency) {
+    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
+      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
+    }
+  }
+
   private Budget findBudgetById(UUID budgetId) {
     return budgetRepository
         .findById(budgetId)
-        .orElseThrow(() -> new ResourceNotFoundException("Budget with id %s not found".formatted(budgetId)));
+        .orElseThrow(
+            () -> new ResourceNotFoundException("Budget with id %s not found".formatted(budgetId)));
   }
 }

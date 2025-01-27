@@ -2,7 +2,6 @@ package it.moneyverse.budget.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +18,7 @@ public record BudgetRequestDto(
     String description,
     BigDecimal budgetLimit,
     BigDecimal amount,
-    @NotNull(message = "'Currency' must not be null") CurrencyEnum currency) {
+    @NotEmpty(message = "'Currency' must not be null or empty") String currency) {
   @Override
   public String toString() {
     return JsonUtils.toJson(this);

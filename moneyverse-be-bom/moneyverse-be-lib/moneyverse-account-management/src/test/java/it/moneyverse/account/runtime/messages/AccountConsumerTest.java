@@ -61,7 +61,8 @@ class AccountConsumerTest {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKafkaContainer(kafkaContainer)
-        .withGrpcUserService(mockServer.getHost(), mockServer.getPort());
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
+        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort());
   }
 
   @BeforeAll

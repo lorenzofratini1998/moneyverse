@@ -13,9 +13,9 @@ import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.event.BudgetDeletionEvent;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
@@ -40,6 +40,7 @@ class BudgetManagementServiceTest {
 
   @Mock private BudgetRepository budgetRepository;
   @Mock private UserServiceClient userServiceClient;
+  @Mock private CurrencyServiceClient currencyServiceClient;
   @Mock private MessageProducer<UUID, String> messageProducer;
   private MockedStatic<BudgetMapper> mapper;
 
@@ -60,6 +61,7 @@ class BudgetManagementServiceTest {
     BudgetRequestDto request = createBudgetRequest(username);
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     when(budgetRepository.existsByUsernameAndBudgetName(username, request.budgetName()))
         .thenReturn(false);
     mapper.when(() -> BudgetMapper.toBudget(request)).thenReturn(budget);
@@ -93,11 +95,29 @@ class BudgetManagementServiceTest {
   }
 
   @Test
+  void givenBudgetRequest_WhenCreateBudget_ThenCurrencyNotFound() {
+    final String username = RandomUtils.randomString(15);
+    BudgetRequestDto request = createBudgetRequest(username);
+
+    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> budgetManagementService.createBudget(request));
+
+    verify(budgetRepository, never()).save(any(Budget.class));
+    verify(budgetRepository, never()).existsByUsernameAndBudgetName(username, request.budgetName());
+    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+  }
+
+  @Test
   void givenBudgetRequest_WhenCreateBudget_ThenBudgetAlreadyExists() {
     final String username = RandomUtils.randomString(15);
     BudgetRequestDto request = createBudgetRequest(username);
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     when(budgetRepository.existsByUsernameAndBudgetName(username, request.budgetName()))
         .thenReturn(true);
 
@@ -117,7 +137,7 @@ class BudgetManagementServiceTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test
@@ -155,6 +175,7 @@ class BudgetManagementServiceTest {
     BudgetUpdateRequestDto request = createBudgetUpdateRequest();
 
     when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     mapper.when(() -> BudgetMapper.partialUpdate(budget, request)).thenReturn(budget);
     when(budgetRepository.save(budget)).thenReturn(budget);
     mapper.when(() -> BudgetMapper.toBudgetDto(budget)).thenReturn(budgetDto);
@@ -163,13 +184,14 @@ class BudgetManagementServiceTest {
 
     assertNotNull(budgetDto);
     verify(budgetRepository, times(1)).findById(budgetId);
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     mapper.verify(() -> BudgetMapper.partialUpdate(budget, request), times(1));
     verify(budgetRepository, times(1)).save(budget);
     mapper.verify(() -> BudgetMapper.toBudgetDto(budget), times(1));
   }
 
   @Test
-  void givenBudgetId_WhenUpdateBudget_ThenReturnResourceNotFound() {
+  void givenBudgetId_WhenUpdateBudget_ThenUserNotFound() {
     UUID budgetId = RandomUtils.randomUUID();
     BudgetUpdateRequestDto request = createBudgetUpdateRequest();
 
@@ -193,7 +215,7 @@ class BudgetManagementServiceTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test

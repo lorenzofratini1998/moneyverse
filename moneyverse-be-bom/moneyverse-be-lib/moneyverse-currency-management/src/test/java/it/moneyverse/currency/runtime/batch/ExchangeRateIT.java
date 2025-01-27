@@ -36,7 +36,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
-      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.KafkaAutoConfiguration",
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration",
       "spring.runner.initializer.enabled=false"
     })
 @SpringBatchTest

@@ -1,69 +1,68 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>it.moneyverse</groupId>
-    <artifactId>moneyverse-bom</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+  <groupId>it.moneyverse</groupId>
+  <artifactId>moneyverse-bom</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <name>moneyverse-bom</name>
-    <description>Bill of Materials (BOM) for the Moneyverse project, managing shared dependencies.</description>
+  <name>moneyverse-bom</name>
+  <description>Bill of Materials (BOM) for the Moneyverse project, managing shared dependencies.</description>
 
-    <modules>
-        <module>moneyverse-be-lib</module>
-        <module>moneyverse-be-lib/moneyverse-currency-management</module>
-    </modules>
+  <modules>
+    <module>moneyverse-be-lib</module>
+  </modules>
 
-    <properties>
-        <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
-        <moneyverse-budget-management.version>1.0.0-SNAPSHOT</moneyverse-budget-management.version>
-        <moneyverse-core.version>1.0.0-SNAPSHOT</moneyverse-core.version>
-        <moneyverse-currency.version>1.0.0-SNAPSHOT</moneyverse-currency.version>
-        <moneyverse-proto.version>1.0.0-SNAPSHOT</moneyverse-proto.version>
-        <moneyverse-test.version>1.0.0-SNAPSHOT</moneyverse-test.version>
-        <moneyverse-transaction-management.version>1.0.0-SNAPSHOT</moneyverse-transaction-management.version>
-    </properties>
+  <properties>
+    <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
+    <moneyverse-budget-management.version>1.0.0-SNAPSHOT</moneyverse-budget-management.version>
+    <moneyverse-core.version>1.0.0-SNAPSHOT</moneyverse-core.version>
+    <moneyverse-currency-management.version>1.0.0-SNAPSHOT</moneyverse-currency-management.version>
+    <moneyverse-proto.version>1.0.0-SNAPSHOT</moneyverse-proto.version>
+    <moneyverse-test.version>1.0.0-SNAPSHOT</moneyverse-test.version>
+    <moneyverse-transaction-management.version>1.0.0-SNAPSHOT</moneyverse-transaction-management.version>
+  </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>it.moneyverse</groupId>
-                <artifactId>moneyverse-account-management</artifactId>
-                <version>${moneyverse-account-management.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.moneyverse</groupId>
-                <artifactId>moneyverse-budget-management</artifactId>
-                <version>${moneyverse-budget-management.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.moneyverse</groupId>
-                <artifactId>moneyverse-core</artifactId>
-                <version>${moneyverse-core.version}</version>
-            </dependency>
-            <dependency>
-                <artifactId>moneyverse-currency-management</artifactId>
-                <groupId>it.moneyverse</groupId>
-                <version>${moneyverse-currency-management.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.moneyverse</groupId>
-                <artifactId>moneyverse-proto</artifactId>
-                <version>${moneyverse-proto.version}</version>
-            </dependency>
-            <dependency>
-                <artifactId>moneyverse-test</artifactId>
-                <groupId>it.moneyverse</groupId>
-                <version>${moneyverse-test.version}</version>
-            </dependency>
-            <dependency>
-                <artifactId>moneyverse-transaction-management</artifactId>
-                <groupId>it.moneyverse</groupId>
-                <version>${moneyverse-transaction-management.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-account-management</artifactId>
+        <version>${moneyverse-account-management.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-budget-management</artifactId>
+        <version>${moneyverse-budget-management.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-core</artifactId>
+        <version>${moneyverse-core.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>moneyverse-currency-management</artifactId>
+        <groupId>it.moneyverse</groupId>
+        <version>${moneyverse-currency-management.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>it.moneyverse</groupId>
+        <artifactId>moneyverse-proto</artifactId>
+        <version>${moneyverse-proto.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>moneyverse-test</artifactId>
+        <groupId>it.moneyverse</groupId>
+        <version>${moneyverse-test.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>moneyverse-transaction-management</artifactId>
+        <groupId>it.moneyverse</groupId>
+        <version>${moneyverse-transaction-management.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
 </project>

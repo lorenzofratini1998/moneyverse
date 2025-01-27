@@ -1,7 +1,11 @@
 package it.moneyverse.transaction.services;
 
-import it.moneyverse.core.enums.CurrencyEnum;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
@@ -12,6 +16,10 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,15 +29,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class TransactionManagementServiceTest {
 
@@ -38,6 +37,7 @@ class TransactionManagementServiceTest {
   @Mock private AccountServiceGrpcClient accountServiceClient;
   @Mock private BudgetServiceGrpcClient budgetServiceClient;
   @Mock private UserServiceClient userServiceClient;
+  @Mock private CurrencyServiceClient currencyServiceClient;
   @Mock private TransactionRepository transactionRepository;
   @Mock private TagRepository tagRepository;
   private MockedStatic<TransactionMapper> transactionMapper;
@@ -90,11 +90,33 @@ class TransactionManagementServiceTest {
   }
 
   @Test
+  void givenTransactionRequest_WhenCreateTransaction_ThenCurrencyNotFound() {
+    TransactionRequestDto request = createTransactionRequest();
+    when(accountServiceClient.checkIfAccountExists(request.accountId())).thenReturn(true);
+    when(budgetServiceClient.checkIfBudgetExists(request.budgetId())).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> transactionManagementService.createTransaction(request));
+
+    verify(accountServiceClient, times(1)).checkIfAccountExists(request.accountId());
+    verify(budgetServiceClient, times(1)).checkIfBudgetExists(request.budgetId());
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+    transactionMapper.verify(
+        () -> TransactionMapper.toTransaction(request, tagRepository), never());
+    verify(transactionRepository, never()).save(any(Transaction.class));
+    transactionMapper.verify(
+        () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
+  }
+
+  @Test
   void givenTransactionRequest_WhenCreateTransaction_ThenReturnCreatedTransaction(
       @Mock Transaction transaction, @Mock TransactionDto transactionDto) {
     TransactionRequestDto request = createTransactionRequest();
     when(accountServiceClient.checkIfAccountExists(request.accountId())).thenReturn(true);
     when(budgetServiceClient.checkIfBudgetExists(request.budgetId())).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     transactionMapper
         .when(() -> TransactionMapper.toTransaction(request, tagRepository))
         .thenReturn(transaction);
@@ -108,6 +130,7 @@ class TransactionManagementServiceTest {
     assertNotNull(result);
     verify(accountServiceClient, times(1)).checkIfAccountExists(request.accountId());
     verify(budgetServiceClient, times(1)).checkIfBudgetExists(request.budgetId());
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     transactionMapper.verify(
         () -> TransactionMapper.toTransaction(request, tagRepository), times(1));
     verify(transactionRepository, times(1)).save(transaction);
@@ -164,6 +187,7 @@ class TransactionManagementServiceTest {
     TransactionUpdateRequestDto request = createTransactionUpdateRequest();
 
     when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     transactionMapper
         .when(() -> TransactionMapper.partialUpdate(transaction, request, tagRepository))
         .thenReturn(transaction);
@@ -176,6 +200,7 @@ class TransactionManagementServiceTest {
 
     assertNotNull(transactionDto);
     verify(transactionRepository, times(1)).findById(transactionId);
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
     verify(transactionRepository, times(1)).save(transaction);
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
@@ -240,7 +265,7 @@ class TransactionManagementServiceTest {
         RandomUtils.randomLocalDate(2024, 2024),
         RandomUtils.randomString(30),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         Collections.singleton(tagId));
   }
 
@@ -253,7 +278,7 @@ class TransactionManagementServiceTest {
         RandomUtils.randomLocalDate(2024, 2025),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         Collections.singleton(tagId));
   }
 
