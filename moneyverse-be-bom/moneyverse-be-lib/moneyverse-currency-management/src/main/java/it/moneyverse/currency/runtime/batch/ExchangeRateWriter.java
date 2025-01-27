@@ -23,6 +23,8 @@ public class ExchangeRateWriter implements ItemWriter<List<ExchangeRate>> {
   public void write(Chunk<? extends List<ExchangeRate>> chunk) {
     LOGGER.info("Writing exchange-rates to batch");
     List<ExchangeRate> entities = chunk.getItems().stream().flatMap(List::stream).toList();
-    exchangeRateRepository.saveAll(entities);
+    if (!entities.isEmpty()) {
+      exchangeRateRepository.saveAll(entities);
+    }
   }
 }

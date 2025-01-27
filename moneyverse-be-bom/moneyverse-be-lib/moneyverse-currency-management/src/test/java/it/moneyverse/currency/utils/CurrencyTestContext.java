@@ -18,6 +18,22 @@ public class CurrencyTestContext extends TestContext<CurrencyTestContext> {
   public CurrencyTestContext() {
     super();
     currencies = CurrencyFactory.createCurrencies();
+    setCurrentInstance(this);
+  }
+
+  private static void setCurrentInstance(CurrencyTestContext instance) {
+    currentInstance = instance;
+  }
+
+  private static CurrencyTestContext getCurrentInstance() {
+    if (currentInstance == null) {
+      throw new IllegalStateException("TestContext instance is not set.");
+    }
+    return currentInstance;
+  }
+
+  public List<Currency> getCurrencies() {
+    return currencies;
   }
 
   @Override

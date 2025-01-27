@@ -27,7 +27,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
       "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
       "spring.jpa.hibernate.ddl-auto=create",
       "spring.jpa.properties.hibernate.show_sql=false",
-      "flyway.enabled=false"
+      "flyway.enabled=false",
+      "spring.runner.initializer.enabled=false"
     },
     excludeAutoConfiguration = {
       FlywayAutoConfiguration.class,
@@ -35,7 +36,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
       DatasourceAutoConfiguration.class,
       KafkaAutoConfiguration.class
     })
-public class ExchangeRateWriterTest {
+class ExchangeRateWriterTest {
 
   @Autowired private ExchangeRateRepository exchangeRateRepository;
 

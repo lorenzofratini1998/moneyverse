@@ -4,6 +4,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
+import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Series {
@@ -15,7 +16,7 @@ public class Series {
   private String currencyDenom;
 
   @XmlElement(name = "Obs")
-  private Obs obs;
+  private List<Obs> obs;
 
   public String getCurrency() {
     return currency;
@@ -33,11 +34,11 @@ public class Series {
     this.currencyDenom = currencyDenom;
   }
 
-  public Obs getObs() {
+  public List<Obs> getObs() {
     return obs;
   }
 
-  public void setObs(Obs obs) {
+  public void setObs(List<Obs> obs) {
     this.obs = obs;
   }
 }

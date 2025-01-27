@@ -2,11 +2,13 @@ package it.moneyverse.currency.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.io.Serializable;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize(builder = CurrencyDto.Builder.class)
 public class CurrencyDto implements Serializable {
 
   private final UUID currencyId;

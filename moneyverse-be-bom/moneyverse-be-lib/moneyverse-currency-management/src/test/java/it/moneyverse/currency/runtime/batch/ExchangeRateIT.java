@@ -36,13 +36,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
-      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.KafkaAutoConfiguration"
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.KafkaAutoConfiguration",
+      "spring.runner.initializer.enabled=false"
     })
 @SpringBatchTest
 @Testcontainers
-// @CleanDatabaseAfterEachTest
 @ExtendWith(SpringExtension.class)
-public class ExchangeRateIT {
+class ExchangeRateIT {
 
   protected static CurrencyTestContext testContext;
 

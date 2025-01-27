@@ -1,40 +1,31 @@
 package it.moneyverse.currency.runtime.batch;
 
-import it.moneyverse.currency.model.entities.Currency;
-import it.moneyverse.currency.model.repositories.CurrencyRepository;
+import it.moneyverse.currency.services.ExchangeRateService;
 import java.time.LocalDate;
-import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ExchangeRateReader implements ItemReader<String> {
 
-  private static final String URL =
-      "https://data-api.ecb.europa.eu/service/data/EXR/D.%s.EUR.SP00.A?startPeriod=%s&endPeriod=%s&detail=dataonly&format=structurespecificdata";
+  private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeRateReader.class);
 
-  private final RestTemplate restTemplate;
-  private final CurrencyRepository currencyRepository;
+  private final ExchangeRateService exchangeRateService;
+
   private boolean batchJobState = false;
 
-  public ExchangeRateReader(RestTemplate restTemplate, CurrencyRepository currencyRepository) {
-    this.restTemplate = restTemplate;
-    this.currencyRepository = currencyRepository;
-  }
+    public ExchangeRateReader(ExchangeRateService exchangeRateService) {
+        this.exchangeRateService = exchangeRateService;
+    }
 
-  @Override
+    @Override
   public String read() {
     if (!batchJobState) {
-      final String currencies =
-          currencyRepository.findAll().stream()
-              .map(Currency::getCode)
-              .map(String::toUpperCase)
-              .collect(Collectors.joining("+"));
-      ResponseEntity<String> response =
-          restTemplate.getForEntity(
-              URL.formatted(currencies, LocalDate.now(), LocalDate.now()), String.class);
+      LOGGER.info("Reading exchange-rates from batch for date: {}", LocalDate.now());
+      ResponseEntity<String> response = exchangeRateService.readExchangeRates(LocalDate.now(), LocalDate.now());
       batchJobState = true;
       return response.getBody();
     }
