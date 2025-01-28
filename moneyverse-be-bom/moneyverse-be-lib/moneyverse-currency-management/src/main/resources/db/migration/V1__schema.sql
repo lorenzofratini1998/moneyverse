@@ -1,9 +1,11 @@
 CREATE TABLE currencies
 (
     currency_id   UUID       NOT NULL,
-    currency_code VARCHAR(3) NOT NULL,
+    iso_code   VARCHAR(3) NOT NULL,
     currency_name VARCHAR(50),
     country       VARCHAR(50),
+    is_default BOOLEAN DEFAULT FALSE,
+    is_enabled BOOLEAN DEFAULT TRUE,
     CONSTRAINT pk_currencies PRIMARY KEY (currency_id)
 );
 
@@ -21,4 +23,4 @@ ALTER TABLE exchange_rates
     ADD CONSTRAINT uc_cb901954895f44f4050b93199 UNIQUE (date, currency_to);
 
 ALTER TABLE currencies
-    ADD CONSTRAINT uc_currencies_currency_code UNIQUE (currency_code);
+    ADD CONSTRAINT uc_currencies_iso_code UNIQUE (iso_code);

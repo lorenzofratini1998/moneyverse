@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "CURRENCIES")
@@ -16,7 +17,7 @@ public class Currency implements Serializable {
   @Column(name = "CURRENCY_ID")
   private UUID currencyId;
 
-  @Column(name = "CURRENCY_CODE", length = 3, nullable = false, unique = true)
+  @Column(name = "ISO_CODE", length = 3, nullable = false, unique = true)
   private String code;
 
   @Column(name = "CURRENCY_NAME", length = 50)
@@ -24,6 +25,14 @@ public class Currency implements Serializable {
 
   @Column(name = "COUNTRY", length = 50)
   private String country;
+
+  @Column(name = "IS_DEFAULT", nullable = false)
+  @ColumnDefault("FALSE")
+  private Boolean isDefault;
+
+  @Column(name = "IS_ENABLED", nullable = false)
+  @ColumnDefault("TRUE")
+  private Boolean isEnabled;
 
   public UUID getCurrencyId() {
     return currencyId;
@@ -55,5 +64,21 @@ public class Currency implements Serializable {
 
   public void setCountry(String country) {
     this.country = country;
+  }
+
+  public Boolean isDefault() {
+    return isDefault;
+  }
+
+  public void setDefault(Boolean aDefault) {
+    isDefault = aDefault;
+  }
+
+  public Boolean isEnabled() {
+    return isEnabled;
+  }
+
+  public void setEnabled(Boolean enabled) {
+    isEnabled = enabled;
   }
 }

@@ -53,7 +53,7 @@ public class ExchangeRateManagementService implements ExchangeRateService {
   }
 
   private String getCurrenciesURL() {
-    return currencyRepository.findAll().stream()
+    return currencyRepository.findByIsEnabled(true).stream()
         .map(Currency::getCode)
         .map(String::toUpperCase)
         .collect(Collectors.joining("+"));

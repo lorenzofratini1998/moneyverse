@@ -23,6 +23,8 @@ public class CurrencyMapper {
         .withName(currency.getName())
         .withCode(currency.getCode())
         .withCountry(currency.getCountry())
+        .withDefault(currency.isDefault())
+        .withEnabled(currency.isEnabled())
         .build();
   }
 

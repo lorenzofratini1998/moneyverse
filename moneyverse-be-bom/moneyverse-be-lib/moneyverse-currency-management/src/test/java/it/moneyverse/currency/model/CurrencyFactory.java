@@ -22,6 +22,8 @@ public class CurrencyFactory {
     currency.setCode(RandomUtils.randomString(3).toUpperCase());
     currency.setCountry(RandomUtils.randomString(20));
     currency.setName(RandomUtils.randomString(20));
+    currency.setDefault(RandomUtils.randomBoolean());
+    currency.setEnabled(RandomUtils.randomBoolean());
     return currency;
   }
 

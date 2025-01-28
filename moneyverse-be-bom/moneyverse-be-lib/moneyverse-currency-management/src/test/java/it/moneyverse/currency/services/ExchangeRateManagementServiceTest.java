@@ -32,7 +32,7 @@ class ExchangeRateManagementServiceTest {
 
   @Test
   void testReadExchangeRates(@Mock Currency currency) {
-    when(currencyRepository.findAll()).thenReturn(List.of(currency));
+    when(currencyRepository.findByIsEnabled(true)).thenReturn(List.of(currency));
     when(currency.getCode()).thenReturn(RandomUtils.randomString(3));
     String responseBody = "<mocked XML response>";
     when(restTemplate.getForEntity(anyString(), eq(String.class)))
@@ -47,7 +47,7 @@ class ExchangeRateManagementServiceTest {
 
   @Test
   void testReadExchangeRates_Failed(@Mock Currency currency) {
-    when(currencyRepository.findAll()).thenReturn(List.of(currency));
+    when(currencyRepository.findByIsEnabled(true)).thenReturn(List.of(currency));
     when(currency.getCode()).thenReturn(RandomUtils.randomString(3));
     String responseBody = "<mocked XML response>";
     when(restTemplate.getForEntity(anyString(), eq(String.class)))

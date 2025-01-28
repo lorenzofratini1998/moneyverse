@@ -7,6 +7,7 @@ import it.moneyverse.currency.model.dto.CurrencyDto;
 import it.moneyverse.currency.services.CurrencyManagementService;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -33,7 +34,7 @@ class CurrencyManagementControllerTest {
 
   @Test
   void testGetCurrencies_Success(@Mock CurrencyDto dto) throws Exception {
-    when(currencyManagementService.getCurrencies()).thenReturn(List.of(dto));
+    when(currencyManagementService.getCurrencies(Optional.empty())).thenReturn(List.of(dto));
 
     mockMvc
         .perform(
