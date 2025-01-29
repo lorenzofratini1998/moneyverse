@@ -7,7 +7,6 @@ import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.DefaultBudgetTemplateRepository;
 import it.moneyverse.budget.utils.BudgetTestContext;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.beans.UserCreationTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.entities.UserModel;
@@ -46,7 +45,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     })
 @Testcontainers
 @CleanDatabaseAfterEachTest
-public class BudgetConsumerTest {
+class BudgetConsumerTest {
 
   protected static BudgetTestContext testContext;
 
@@ -66,7 +65,8 @@ public class BudgetConsumerTest {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
         .withKafkaContainer(kafkaContainer)
-        .withGrpcUserService(mockServer.getHost(), mockServer.getPort());
+        .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
+        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort());
   }
 
   @BeforeAll
@@ -100,11 +100,12 @@ public class BudgetConsumerTest {
     String event =
         JsonUtils.toJson(
             new UserCreationEvent(
-                RandomUtils.randomString(15), RandomUtils.randomEnum(CurrencyEnum.class)));
+                RandomUtils.randomString(15), RandomUtils.randomString(3).toUpperCase()));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserCreationTopic.TOPIC, RandomUtils.randomUUID(), event);
 
     mockServer.mockExistentUser();
+    mockServer.mockExistentCurrency();
     kafkaTemplate.send(producerRecord);
 
     await()

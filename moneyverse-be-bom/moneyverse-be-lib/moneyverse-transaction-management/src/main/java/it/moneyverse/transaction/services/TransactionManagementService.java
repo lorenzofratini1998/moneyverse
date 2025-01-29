@@ -4,6 +4,7 @@ import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
@@ -14,15 +15,14 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Function;
 
 @Service
 public class TransactionManagementService implements TransactionService {
@@ -32,18 +32,22 @@ public class TransactionManagementService implements TransactionService {
   private final AccountServiceClient accountServiceClient;
   private final BudgetServiceClient budgetServiceClient;
   private final UserServiceClient userServiceClient;
+  private final CurrencyServiceClient currencyServiceClient;
   private final TransactionRepository transactionRepository;
   private final TagRepository tagRepository;
 
   public TransactionManagementService(
-          AccountServiceClient accountServiceClient,
-          BudgetServiceClient budgetServiceClient, UserServiceClient userServiceClient,
-          TransactionRepository transactionRepository,
-          TagRepository tagRepository) {
+      AccountServiceClient accountServiceClient,
+      BudgetServiceClient budgetServiceClient,
+      UserServiceClient userServiceClient,
+      CurrencyServiceClient currencyServiceClient,
+      TransactionRepository transactionRepository,
+      TagRepository tagRepository) {
     this.accountServiceClient = accountServiceClient;
     this.budgetServiceClient = budgetServiceClient;
-      this.userServiceClient = userServiceClient;
-      this.transactionRepository = transactionRepository;
+    this.userServiceClient = userServiceClient;
+    this.currencyServiceClient = currencyServiceClient;
+    this.transactionRepository = transactionRepository;
     this.tagRepository = tagRepository;
   }
 
@@ -53,6 +57,7 @@ public class TransactionManagementService implements TransactionService {
     checkIfResourceExists(
         request.accountId(), accountServiceClient::checkIfAccountExists, "Account");
     checkIfResourceExists(request.budgetId(), budgetServiceClient::checkIfBudgetExists, "Budget");
+    checkIfCurrencyExists(request.currency());
     LOGGER.info(
         "Creating transaction for account {} and budget {}",
         request.accountId(),
@@ -99,17 +104,20 @@ public class TransactionManagementService implements TransactionService {
 
   private Transaction findTransactionById(UUID transactionId) {
     return transactionRepository
-            .findById(transactionId)
-            .orElseThrow(
-                    () ->
-                        new ResourceNotFoundException(
-                            "Transaction with id %s not found".formatted(transactionId)));
+        .findById(transactionId)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Transaction with id %s not found".formatted(transactionId)));
   }
 
   @Override
   @Transactional
   public TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request) {
     Transaction transaction = findTransactionById(transactionId);
+    if (request.currency() != null) {
+      checkIfCurrencyExists(request.currency());
+    }
     transaction = TransactionMapper.partialUpdate(transaction, request, tagRepository);
     TransactionDto result =
         TransactionMapper.toTransactionDto(transactionRepository.save(transaction));
@@ -118,13 +126,21 @@ public class TransactionManagementService implements TransactionService {
     return result;
   }
 
+  private void checkIfCurrencyExists(String currency) {
+    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
+      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
+    }
+  }
+
   @Override
   @Transactional
   public void deleteTransaction(UUID transactionId) {
     Transaction transaction = findTransactionById(transactionId);
     transactionRepository.delete(transaction);
     LOGGER.info(
-        "Deleted transaction: {} for user {}", transaction.getTransactionId(), transaction.getUsername());
+        "Deleted transaction: {} for user {}",
+        transaction.getTransactionId(),
+        transaction.getUsername());
   }
 
   @Override

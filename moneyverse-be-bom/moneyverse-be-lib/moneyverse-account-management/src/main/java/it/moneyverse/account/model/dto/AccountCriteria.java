@@ -1,7 +1,6 @@
 package it.moneyverse.account.model.dto;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
@@ -14,7 +13,7 @@ public class AccountCriteria {
   private BoundCriteria balance;
   private BoundCriteria balanceTarget;
   private String accountCategory;
-  private CurrencyEnum currency;
+  private String currency;
   private Boolean isDefault;
   private PageCriteria page;
   private SortCriteria<AccountSortAttributeEnum> sort;
@@ -51,11 +50,11 @@ public class AccountCriteria {
     this.accountCategory = accountCategory;
   }
 
-  public Optional<CurrencyEnum> getCurrency() {
+  public Optional<String> getCurrency() {
     return Optional.ofNullable(currency);
   }
 
-  public void setCurrency(CurrencyEnum currency) {
+  public void setCurrency(String currency) {
     this.currency = currency;
   }
 

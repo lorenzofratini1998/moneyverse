@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import it.moneyverse.core.enums.CurrencyEnum;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,7 +26,7 @@ public class TransactionDto implements Serializable {
   private final LocalDate date;
   private final String description;
   private final BigDecimal amount;
-  private final CurrencyEnum currency;
+  private final String currency;
   private final Set<TagDto> tags;
 
   public TransactionDto(Builder builder) {
@@ -54,7 +53,7 @@ public class TransactionDto implements Serializable {
     private LocalDate date;
     private String description;
     private BigDecimal amount;
-    private CurrencyEnum currency;
+    private String currency;
     private Set<TagDto> tags;
 
     public Builder withTransactionId(UUID transactionId) {
@@ -92,7 +91,7 @@ public class TransactionDto implements Serializable {
       return this;
     }
 
-    public Builder withCurrency(CurrencyEnum currency) {
+    public Builder withCurrency(String currency) {
       this.currency = currency;
       return this;
     }
@@ -135,7 +134,7 @@ public class TransactionDto implements Serializable {
     return amount;
   }
 
-  public CurrencyEnum getCurrency() {
+  public String getCurrency() {
     return currency;
   }
 

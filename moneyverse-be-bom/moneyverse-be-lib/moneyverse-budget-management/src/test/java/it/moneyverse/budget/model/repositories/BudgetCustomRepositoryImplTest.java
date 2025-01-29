@@ -6,10 +6,7 @@ import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.utils.BudgetCriteriaRandomGenerator;
 import it.moneyverse.budget.utils.BudgetTestContext;
-import it.moneyverse.core.boot.DatasourceAutoConfiguration;
-import it.moneyverse.core.boot.KafkaAutoConfiguration;
-import it.moneyverse.core.boot.SecurityAutoConfiguration;
-import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
+import it.moneyverse.core.boot.*;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,6 +31,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
       FlywayAutoConfiguration.class,
       SecurityAutoConfiguration.class,
       UserServiceGrpcClientAutoConfiguration.class,
+      CurrencyServiceGrpcClientAutoConfiguration.class,
       DatasourceAutoConfiguration.class,
       KafkaAutoConfiguration.class
     })

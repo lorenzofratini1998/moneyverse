@@ -2,7 +2,6 @@ package it.moneyverse.account.model.entities;
 
 import static it.moneyverse.test.utils.FakeUtils.*;
 
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
 import java.math.RoundingMode;
@@ -64,7 +63,7 @@ public class AccountFactory {
             : null);
     account.setAccountCategory(category);
     account.setAccountDescription("Account Description %s".formatted(counter));
-    account.setCurrency(RandomUtils.randomEnum(CurrencyEnum.class));
+    account.setCurrency(RandomUtils.randomString(3).toUpperCase());
     account.setDefault(counter == 1);
     account.setCreatedBy(FAKE_USER);
     account.setCreatedAt(LocalDateTime.now());

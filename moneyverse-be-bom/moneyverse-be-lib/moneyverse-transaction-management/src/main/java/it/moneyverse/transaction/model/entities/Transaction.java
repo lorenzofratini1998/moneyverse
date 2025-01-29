@@ -1,9 +1,7 @@
 package it.moneyverse.transaction.model.entities;
 
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.Auditable;
 import jakarta.persistence.*;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -42,8 +40,7 @@ public class Transaction extends Auditable implements Serializable {
   private BigDecimal amount;
 
   @Column(name = "CURRENCY", nullable = false, length = 3)
-  @Enumerated(EnumType.STRING)
-  private CurrencyEnum currency;
+  private String currency;
 
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JoinTable(
@@ -118,11 +115,11 @@ public class Transaction extends Auditable implements Serializable {
     this.amount = amount;
   }
 
-  public CurrencyEnum getCurrency() {
+  public String getCurrency() {
     return currency;
   }
 
-  public void setCurrency(CurrencyEnum currency) {
+  public void setCurrency(String currency) {
     this.currency = currency;
   }
 

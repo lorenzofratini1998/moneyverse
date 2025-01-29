@@ -1,0 +1,12 @@
+server:
+  port:
+    ${PORT:8080}
+
+spring:
+  security:
+    base-path: /currencyManagement/api/v1
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false

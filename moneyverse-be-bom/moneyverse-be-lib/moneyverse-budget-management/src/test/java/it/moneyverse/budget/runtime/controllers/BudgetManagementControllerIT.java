@@ -1,5 +1,9 @@
 package it.moneyverse.budget.runtime.controllers;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
@@ -17,6 +21,8 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,13 +33,6 @@ import org.springframework.http.*;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
-
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @IntegrationTest
 class BudgetManagementControllerIT extends AbstractIntegrationTest {
@@ -52,6 +51,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
         .withPostgres(postgresContainer)
         .withKeycloak(keycloakContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
+        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer);
   }
 
@@ -72,6 +72,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     final BudgetRequestDto request = testContext.createBudgetForUser(username);
     mockServer.mockExistentUser();
+    mockServer.mockExistentCurrency();
     BudgetDto expected = testContext.getExpectedBudgetDto(request);
 
     ResponseEntity<BudgetDto> response =

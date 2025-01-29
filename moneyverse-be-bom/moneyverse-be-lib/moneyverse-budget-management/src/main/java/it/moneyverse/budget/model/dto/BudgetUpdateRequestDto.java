@@ -2,7 +2,6 @@ package it.moneyverse.budget.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,10 +13,10 @@ public record BudgetUpdateRequestDto(
     String description,
     BigDecimal amount,
     BigDecimal budgetLimit,
-    CurrencyEnum currency)
+    String currency)
     implements Serializable {
-    @Override
-    public String toString() {
-        return JsonUtils.toJson(this);
-    }
+  @Override
+  public String toString() {
+    return JsonUtils.toJson(this);
+  }
 }

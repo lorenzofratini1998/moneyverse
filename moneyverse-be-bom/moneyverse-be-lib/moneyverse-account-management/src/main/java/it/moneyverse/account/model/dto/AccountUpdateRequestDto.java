@@ -2,7 +2,6 @@ package it.moneyverse.account.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -15,7 +14,7 @@ public record AccountUpdateRequestDto(
     BigDecimal balanceTarget,
     String accountCategory,
     String accountDescription,
-    CurrencyEnum currency,
+    String currency,
     Boolean isDefault)
     implements Serializable {
     @Override
