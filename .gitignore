@@ -1,2 +1,4 @@
 target/
 .idea
+moneyverse-fe/node_modules
+moneyverse-fe/.angular

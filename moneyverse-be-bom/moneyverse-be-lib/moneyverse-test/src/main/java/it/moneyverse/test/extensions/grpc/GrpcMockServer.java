@@ -34,6 +34,12 @@ public class GrpcMockServer extends GrpcMockExtension {
             .willReturn(BudgetResponse.newBuilder().setExists(true).build()));
   }
 
+  public void mockExistentCurrency() {
+    stubFor(
+        unaryMethod(CurrencyServiceGrpc.getCheckIfCurrencyExistsMethod())
+            .willReturn(CurrencyResponse.newBuilder().setExists(true).build()));
+  }
+
   public int getPort() {
     return port;
   }

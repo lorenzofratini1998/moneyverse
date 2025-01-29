@@ -8,7 +8,6 @@ import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
@@ -54,6 +53,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
         .withPostgres(postgresContainer)
         .withKeycloak(keycloakContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
+        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer);
   }
 
@@ -74,6 +74,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
     final AccountRequestDto request = testContext.createAccountForUser(username);
     mockServer.mockExistentUser();
+    mockServer.mockExistentCurrency();
     AccountDto expected = testContext.getExpectedAccountDto(request);
 
     ResponseEntity<AccountDto> response =
@@ -135,10 +136,12 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             null,
             null,
             RandomUtils.randomString(25),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             RandomUtils.randomBoolean());
 
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+    mockServer.mockExistentCurrency();
+
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(
             basePath + "/accounts/" + accountId,

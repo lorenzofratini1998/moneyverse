@@ -14,6 +14,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.core.services.UserServiceGrpcClient;
@@ -32,16 +33,19 @@ public class AccountManagementService implements AccountService {
   private final AccountRepository accountRepository;
   private final AccountCategoryRepository accountCategoryRepository;
   private final UserServiceClient userServiceClient;
+  private final CurrencyServiceClient currencyServiceClient;
   private final MessageProducer<UUID, String> messageProducer;
 
   public AccountManagementService(
       AccountRepository accountRepository,
       AccountCategoryRepository accountCategoryRepository,
       UserServiceGrpcClient userServiceClient,
+      CurrencyServiceClient currencyServiceClient,
       MessageProducer<UUID, String> messageProducer) {
     this.accountRepository = accountRepository;
     this.accountCategoryRepository = accountCategoryRepository;
     this.userServiceClient = userServiceClient;
+    this.currencyServiceClient = currencyServiceClient;
     this.messageProducer = messageProducer;
   }
 
@@ -49,6 +53,7 @@ public class AccountManagementService implements AccountService {
   @Transactional
   public AccountDto createAccount(AccountRequestDto request) {
     checkIfUserExists(request.username());
+    checkIfCurrencyExists(request.currency());
     checkIfAccountAlreadyExists(request.username(), request.accountName());
     AccountCategory category = findAccountCategory(request.accountCategory());
     LOGGER.info("Creating account {} for user {}", request.accountName(), request.username());
@@ -67,6 +72,12 @@ public class AccountManagementService implements AccountService {
   private void checkIfUserExists(String username) {
     if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
       throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+    }
+  }
+
+  private void checkIfCurrencyExists(String currency) {
+    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
+      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
     }
   }
 
@@ -106,6 +117,9 @@ public class AccountManagementService implements AccountService {
     Account account = findAccountById(accountId);
     AccountCategory category =
         request.accountCategory() != null ? findAccountCategory(request.accountCategory()) : null;
+    if (request.currency() != null) {
+      checkIfCurrencyExists(request.currency());
+    }
     account = AccountMapper.partialUpdate(account, request, category);
     if (Boolean.TRUE.equals(request.isDefault())) {
       accountRepository.findDefaultAccountsByUser(account.getUsername()).stream()

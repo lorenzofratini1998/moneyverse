@@ -3,7 +3,6 @@ package it.moneyverse.budget.utils;
 import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.CriteriaRandomGenerator;
@@ -51,7 +50,7 @@ public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<Budge
   }
 
   private void withRandomCurrency() {
-    criteria.setCurrency(Math.random() < 0.5 ? RandomUtils.randomEnum(CurrencyEnum.class) : null);
+    criteria.setCurrency(Math.random() < 0.5 ? RandomUtils.randomString(3).toUpperCase() : null);
   }
 
   private void withPage() {

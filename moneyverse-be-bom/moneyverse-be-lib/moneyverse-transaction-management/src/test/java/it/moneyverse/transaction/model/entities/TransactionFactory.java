@@ -2,7 +2,6 @@ package it.moneyverse.transaction.model.entities;
 
 import static it.moneyverse.test.utils.FakeUtils.*;
 
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
 import java.time.LocalDateTime;
@@ -88,7 +87,7 @@ public class TransactionFactory {
     transaction.setDate(RandomUtils.randomLocalDate(2024, 2024));
     transaction.setDescription(RandomUtils.randomString(30));
     transaction.setAmount(RandomUtils.randomBigDecimal());
-    transaction.setCurrency(RandomUtils.randomEnum(CurrencyEnum.class));
+    transaction.setCurrency(RandomUtils.randomString(3).toUpperCase());
     transaction.setCreatedBy(FAKE_USER);
     transaction.setCreatedAt(LocalDateTime.now());
     transaction.setUpdatedBy(FAKE_USER);

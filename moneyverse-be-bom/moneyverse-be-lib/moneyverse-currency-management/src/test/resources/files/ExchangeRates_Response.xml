@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message:StructureSpecificData xmlns:message="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message"
+                               xmlns:common="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common"
+                               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                               xmlns:data="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/structurespecific"
+                               xmlns:ecb_exr1="urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=ECB:ECB_EXR1(1.0):ObsLevelDim:TIME_PERIOD"
+                               xsi:schemaLocation="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message http://data-api.ecb.europa.eu:80/vocabulary/sdmx/2_1/SDMXMessage.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common http://data-api.ecb.europa.eu:80/vocabulary/sdmx/2_1/SDMXCommon.xsd urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=ECB:ECB_EXR1(1.0):ObsLevelDim:TIME_PERIOD http://data-api.ecb.europa.eu:80/service/schema/datastructure/ECB/ECB_EXR1/1.0">
+    <message:Header>
+        <message:ID>3c75c1ba-47b7-421c-9e7d-595c89d4c430</message:ID>
+        <message:Test>false</message:Test>
+        <message:Prepared>2025-01-26T19:40:58.975+01:00</message:Prepared>
+        <message:Sender id="ECB"/>
+        <message:Structure structureID="ECB_EXR1" dimensionAtObservation="TIME_PERIOD"
+                           namespace="urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=ECB:ECB_EXR1(1.0):ObsLevelDim:TIME_PERIOD">
+            <common:Structure>
+                <URN>urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=ECB:ECB_EXR1(1.0)</URN>
+            </common:Structure>
+        </message:Structure>
+    </message:Header>
+    <message:DataSet data:action="Replace" data:validFromDate="2025-01-26T19:40:58.975+01:00"
+                     data:structureRef="ECB_EXR1" data:dataScope="DataStructure" xsi:type="ecb_exr1:DataSetType">
+        <Series FREQ="D" CURRENCY="AUD" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1.6618"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="BGN" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1.9558"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="BRL" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="6.42"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="CAD" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1.4885"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="CHF" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="0.9371"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="CNY" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="7.5338"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="CZK" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="25.177"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="DKK" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="7.4583"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="GBP" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="0.83118"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="HKD" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="8.0261"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="HUF" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="412.9"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="IDR" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="16726.78"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="ILS" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="3.7676"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="INR" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="88.507"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="ISK" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="143.9"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="JPY" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="162.04"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="KRW" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1515.07"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="MXN" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="21.4375"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="MYR" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="4.6223"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="NOK" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="11.7173"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="NZD" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1.8402"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="PHP" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="59.769"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="PLN" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="4.2753"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="RON" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="4.9743"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="SEK" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="11.4223"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="SGD" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1.4091"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="THB" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="35.355"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="TRY" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="36.4523"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="USD" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1.0321"/>
+        </Series>
+        <Series FREQ="D" CURRENCY="ZAR" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
+            <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="19.2719"/>
+        </Series>
+    </message:DataSet>
+</message:StructureSpecificData>

@@ -11,7 +11,6 @@ import it.moneyverse.budget.services.BudgetManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
@@ -106,7 +105,7 @@ class BudgetManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   private static BudgetRequestDto createRequestWithNullBudgetName() {
@@ -116,7 +115,7 @@ class BudgetManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   private static BudgetRequestDto createRequestWithNullCurrency() {
@@ -138,7 +137,7 @@ class BudgetManagementControllerTest {
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class));
+            RandomUtils.randomString(3).toUpperCase());
     when(budgetService.createBudget(request)).thenThrow(ResourceAlreadyExistsException.class);
     mockMvc
         .perform(
@@ -169,7 +168,7 @@ class BudgetManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test
@@ -282,7 +281,7 @@ class BudgetManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test

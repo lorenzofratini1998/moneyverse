@@ -1,6 +1,5 @@
 package it.moneyverse.account.model.entities;
 
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.entities.Auditable;
 import jakarta.persistence.*;
 import java.io.Serial;
@@ -41,8 +40,7 @@ public class Account extends Auditable implements Serializable {
   private Boolean isDefault;
 
   @Column(name = "CURRENCY", nullable = false, length = 3)
-  @Enumerated(EnumType.STRING)
-  private CurrencyEnum currency;
+  private String currency;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "ACCOUNT_CATEGORY", nullable = false)
@@ -104,11 +102,11 @@ public class Account extends Auditable implements Serializable {
     this.isDefault = isDefault;
   }
 
-  public CurrencyEnum getCurrency() {
+  public String getCurrency() {
     return currency;
   }
 
-  public void setCurrency(CurrencyEnum currency) {
+  public void setCurrency(String currency) {
     this.currency = currency;
   }
 

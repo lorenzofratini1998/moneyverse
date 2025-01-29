@@ -49,8 +49,15 @@ public class TestPropertyRegistry {
     return this;
   }
 
+  public TestPropertyRegistry withGrpcCurrencyService(String host, int port) {
+    registry.add(CurrencyServiceGrpcClientProperties.CURRENCY_SERVICE_CLIENT_HOST, () -> host);
+    registry.add(CurrencyServiceGrpcClientProperties.CURRENCY_SERVICE_CLIENT_PORT, () -> port);
+    return this;
+  }
+
   public TestPropertyRegistry withKafkaContainer(KafkaContainer container) {
-    registry.add(KafkaProperties.KafkaAdminProperties.BOOTSTRAP_SERVERS, container::getBootstrapServers);
+    registry.add(
+        KafkaProperties.KafkaAdminProperties.BOOTSTRAP_SERVERS, container::getBootstrapServers);
     registry.add(KafkaProperties.KafkaConsumerProperties.GROUP_ID, () -> "test-group");
     return this;
   }

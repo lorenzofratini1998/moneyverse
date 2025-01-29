@@ -3,7 +3,6 @@ package it.moneyverse.account.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -22,7 +21,7 @@ public class AccountDto implements Serializable {
   private final String accountCategory;
   private final String accountDescription;
   private final Boolean isDefault;
-  private final CurrencyEnum currency;
+  private final String currency;
 
   public AccountDto(Builder builder) {
     this.accountId = builder.accountId;
@@ -68,7 +67,7 @@ public class AccountDto implements Serializable {
     return accountDescription;
   }
 
-  public CurrencyEnum getCurrency() {
+  public String getCurrency() {
     return currency;
   }
 
@@ -91,7 +90,7 @@ public class AccountDto implements Serializable {
     private String accountCategory;
     private String accountDescription;
     private Boolean isDefault;
-    private CurrencyEnum currency;
+    private String currency;
 
     public Builder withAccountId(UUID accountId) {
       this.accountId = accountId;
@@ -133,7 +132,7 @@ public class AccountDto implements Serializable {
       return this;
     }
 
-    public Builder withCurrency(CurrencyEnum currency) {
+    public Builder withCurrency(String currency) {
       this.currency = currency;
       return this;
     }

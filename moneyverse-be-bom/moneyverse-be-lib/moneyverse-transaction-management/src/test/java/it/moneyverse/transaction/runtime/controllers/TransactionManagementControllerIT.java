@@ -1,6 +1,8 @@
 package it.moneyverse.transaction.runtime.controllers;
 
-import it.moneyverse.core.enums.CurrencyEnum;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
@@ -16,6 +18,10 @@ import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,14 +32,6 @@ import org.springframework.http.*;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @IntegrationTest
 class TransactionManagementControllerIT extends AbstractIntegrationTest {
@@ -55,6 +53,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
         .withGrpcAccountService(mockServer.getHost(), mockServer.getPort())
         .withGrpcBudgetService(mockServer.getHost(), mockServer.getPort())
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
+        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer);
   }
 
@@ -78,6 +77,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     final TransactionRequestDto request = testContext.createTransactionRequest(username);
     mockServer.mockExistentAccount();
     mockServer.mockExistentBudget();
+    mockServer.mockExistentCurrency();
     TransactionDto expected = testContext.getExpectedTransactionDto(request);
 
     ResponseEntity<TransactionDto> response =
@@ -145,9 +145,10 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
             RandomUtils.randomLocalDate(2024, 2024),
             RandomUtils.randomString(30),
             RandomUtils.randomBigDecimal(),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             Collections.singleton(testContext.getRandomTag(username).getTagId()));
     headers.setBearerAuth(testContext.getAuthenticationToken(username));
+    mockServer.mockExistentCurrency();
 
     ResponseEntity<TransactionDto> response =
         restTemplate.exchange(

@@ -1,10 +1,9 @@
 package it.moneyverse.transaction.model.dto;
 
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -19,7 +18,7 @@ public record TransactionRequestDto(
     @NotNull(message = "'Date' must not be null") LocalDate date,
     String description,
     @NotNull(message = "'Amount' must not be null") BigDecimal amount,
-    @NotNull(message = "'Currency' must not be null") CurrencyEnum currency,
+    @NotEmpty(message = "'Currency' must not be null or empty") String currency,
     Set<UUID> tags) {
   @Override
   public String toString() {

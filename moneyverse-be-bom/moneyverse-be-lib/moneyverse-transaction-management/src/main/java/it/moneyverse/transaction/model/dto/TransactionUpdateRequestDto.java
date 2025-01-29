@@ -1,6 +1,5 @@
 package it.moneyverse.transaction.model.dto;
 
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,7 +13,7 @@ public record TransactionUpdateRequestDto(
     LocalDate date,
     String description,
     BigDecimal amount,
-    CurrencyEnum currency,
+    String currency,
     Set<UUID> tags)
     implements Serializable {
   @Override

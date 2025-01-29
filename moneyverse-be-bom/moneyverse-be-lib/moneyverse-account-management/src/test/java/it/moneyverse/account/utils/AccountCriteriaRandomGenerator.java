@@ -3,7 +3,6 @@ package it.moneyverse.account.utils;
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.entities.Account;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.CriteriaRandomGenerator;
@@ -59,7 +58,7 @@ public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<Acco
   }
 
   private void withRandomCurrency() {
-    criteria.setCurrency(Math.random() < 0.5 ? RandomUtils.randomEnum(CurrencyEnum.class) : null);
+    criteria.setCurrency(Math.random() < 0.5 ? RandomUtils.randomString(3).toUpperCase() : null);
   }
 
   private void withRandomIsDefault() {

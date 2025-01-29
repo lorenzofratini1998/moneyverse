@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package it.moneyverse.grpc;
+
+option java_multiple_files = true;
+option java_package = "it.moneyverse.grpc.lib";
+option java_outer_classname = "CurrencyServiceProto";
+
+service CurrencyService {
+  rpc CheckIfCurrencyExists (CurrencyRequest) returns (CurrencyResponse) {
+  }
+}
+
+message CurrencyRequest {
+  string code = 1;
+}
+
+message CurrencyResponse {
+  bool exists = 1;
+}

@@ -1,7 +1,6 @@
 package it.moneyverse.budget.model.dto;
 
 import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
@@ -13,7 +12,7 @@ public class BudgetCriteria {
   private String username;
   private BoundCriteria amount;
   private BoundCriteria budgetLimit;
-  private CurrencyEnum currency;
+  private String currency;
   private PageCriteria page;
   private SortCriteria<BudgetSortAttributeEnum> sort;
 
@@ -41,11 +40,11 @@ public class BudgetCriteria {
     this.budgetLimit = budgetLimit;
   }
 
-  public Optional<CurrencyEnum> getCurrency() {
+  public Optional<String> getCurrency() {
     return Optional.ofNullable(currency);
   }
 
-  public void setCurrency(CurrencyEnum currency) {
+  public void setCurrency(String currency) {
     this.currency = currency;
   }
 

@@ -12,12 +12,12 @@ import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.mapper.AccountMapper;
-import it.moneyverse.core.enums.CurrencyEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.CurrencyServiceGrpcClient;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceGrpcClient;
 import it.moneyverse.test.utils.RandomUtils;
@@ -42,6 +42,7 @@ class AccountManagementServiceTest {
   @Mock private AccountCategoryRepository accountCategoryRepository;
   @Mock private AccountRepository accountRepository;
   @Mock private UserServiceGrpcClient userServiceClient;
+  @Mock private CurrencyServiceGrpcClient currencyServiceClient;
   @Mock private MessageProducer<UUID, String> messageProducer;
   @Mock private AccountDeletionTopic accountDeletionTopic;
   private MockedStatic<AccountMapper> mapper;
@@ -64,6 +65,7 @@ class AccountManagementServiceTest {
     AccountRequestDto request = createAccountRequestDto(username, categoryName);
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
         .thenReturn(false);
     when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.of(category));
@@ -77,6 +79,7 @@ class AccountManagementServiceTest {
 
     assertNotNull(accountDto);
     verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     verify(accountRepository, times(1))
         .existsByUsernameAndAccountName(username, request.accountName());
     verify(accountCategoryRepository, times(1)).findByName(categoryName);
@@ -106,13 +109,35 @@ class AccountManagementServiceTest {
   }
 
   @Test
+  void givenAccountRequest_WhenCreateAccount_ThenCurrencyNotFound() {
+    final String username = RandomUtils.randomString(15);
+    final String categoryName = RandomUtils.randomString(15).toUpperCase();
+    AccountRequestDto request = createAccountRequestDto(username, categoryName);
+
+    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
+
+    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+    verify(accountCategoryRepository, never()).findByName(categoryName);
+    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
+    verify(accountRepository, never()).save(any(Account.class));
+    verify(accountRepository, never())
+        .existsByUsernameAndAccountName(username, request.accountName());
+    verify(userServiceClient, times(1)).checkIfUserExists(username);
+  }
+
+  @Test
   void givenAccountRequest_WhenCreateAccount_ThenAccountAlreadyExists() {
     final String username = RandomUtils.randomString(15);
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
     AccountRequestDto request = createAccountRequestDto(username, categoryName);
-    ;
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
         .thenReturn(true);
 
@@ -135,6 +160,7 @@ class AccountManagementServiceTest {
     AccountRequestDto request = createAccountRequestDto(username, categoryName);
 
     when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
         .thenReturn(false);
     when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.empty());
@@ -158,7 +184,7 @@ class AccountManagementServiceTest {
         RandomUtils.randomBigDecimal(),
         categoryName,
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class));
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test
@@ -208,6 +234,7 @@ class AccountManagementServiceTest {
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.save(account)).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
@@ -217,6 +244,7 @@ class AccountManagementServiceTest {
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
@@ -236,11 +264,12 @@ class AccountManagementServiceTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomString(15),
             RandomUtils.randomString(15),
-            RandomUtils.randomEnum(CurrencyEnum.class),
+            RandomUtils.randomString(3).toUpperCase(),
             Boolean.TRUE);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.findDefaultAccountsByUser(any())).thenReturn(List.of(defaultAccount));
     when(defaultAccount.getAccountId()).thenReturn(RandomUtils.randomUUID());
@@ -253,6 +282,7 @@ class AccountManagementServiceTest {
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).findDefaultAccountsByUser(any());
     verify(accountRepository, times(1)).save(defaultAccount);
@@ -307,6 +337,33 @@ class AccountManagementServiceTest {
     mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
   }
 
+  @Test
+  void givenAccountId_WhenUpdateAccount_ThenReturnCurrencyNotFound(
+      @Mock Account account, @Mock AccountCategory category) {
+    UUID accountId = RandomUtils.randomUUID();
+    final String categoryName = RandomUtils.randomString(15);
+    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.of(category));
+    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> accountManagementService.updateAccount(accountId, request));
+
+    verify(accountRepository, times(1)).findById(accountId);
+    verify(accountCategoryRepository, times(1)).findByName(categoryName);
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+    mapper.verify(
+        () ->
+            AccountMapper.partialUpdate(
+                any(Account.class), any(AccountUpdateRequestDto.class), any(AccountCategory.class)),
+        never());
+    verify(accountRepository, never()).save(any(Account.class));
+    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
+  }
+
   private AccountUpdateRequestDto createAccountUpdateRequestDto(String categoryName) {
     return new AccountUpdateRequestDto(
         RandomUtils.randomString(15),
@@ -314,7 +371,7 @@ class AccountManagementServiceTest {
         RandomUtils.randomBigDecimal(),
         categoryName,
         RandomUtils.randomString(15),
-        RandomUtils.randomEnum(CurrencyEnum.class),
+        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
