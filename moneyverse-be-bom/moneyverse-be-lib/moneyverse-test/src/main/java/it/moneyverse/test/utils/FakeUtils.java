@@ -3,6 +3,9 @@ package it.moneyverse.test.utils;
 public class FakeUtils {
 
   public static final String FAKE_USER = "FAKE_USER";
+  public static final String ONBOARD = "ONBOARD";
+  public static final Integer MIN_USERS = 10;
+  public static final Integer MAX_USERS = 50;
   public static final Integer MIN_ACCOUNTS_PER_USER = 5;
   public static final Integer MAX_ACCOUNTS_PER_USER = 20;
   public static final Integer ACCOUNT_CATEGORY_NUMBER = 10;

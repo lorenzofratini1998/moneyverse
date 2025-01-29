@@ -5,6 +5,7 @@ import it.moneyverse.core.model.auth.AuthenticatedUser;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,11 +24,28 @@ public class MockUserRequestPostProcessor {
     };
   }
 
+  public static RequestPostProcessor mockUser(UUID userId) {
+    return request -> {
+      SecurityMockMvcRequestPostProcessors.jwt().postProcessRequest(request);
+      SecurityMockMvcRequestPostProcessors.authentication(createMockAuthentication(userId))
+          .postProcessRequest(request);
+      return request;
+    };
+  }
+
   private static Authentication createMockAuthentication(String username) {
     Collection<GrantedAuthority> authorities =
         List.of(new SimpleGrantedAuthority("ROLE_" + UserRoleEnum.USER));
     Principal principal =
         AuthenticatedUser.builder().withUsername(username).withAuthorities(authorities).build();
+    return new UsernamePasswordAuthenticationToken(principal, null, authorities);
+  }
+
+  private static Authentication createMockAuthentication(UUID userId) {
+    Collection<GrantedAuthority> authorities =
+        List.of(new SimpleGrantedAuthority("ROLE_" + UserRoleEnum.USER));
+    Principal principal =
+        AuthenticatedUser.builder().withId(userId.toString()).withAuthorities(authorities).build();
     return new UsernamePasswordAuthenticationToken(principal, null, authorities);
   }
 }

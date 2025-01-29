@@ -1,34 +1,49 @@
 package it.moneyverse.test.model.entities;
 
+import static it.moneyverse.test.utils.FakeUtils.ONBOARD;
+
 import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class FakeUser extends FakeAuditable implements UserModel {
 
-  private final UUID userId;
+  private UUID userId;
   private final String name;
   private final String surname;
   private final String email;
   private final String username;
   private final String password;
   private final UserRoleEnum role;
+  private final Map<String, String> attributes;
 
   public FakeUser(Integer counter) {
     counter = counter + 1;
-    this.userId = RandomUtils.randomUUID();
     this.name = "Test %s".formatted(counter);
     this.surname = "Test %s".formatted(counter);
     this.email = "test%s@example.com".formatted(counter);
     this.username = "test%s@example.com".formatted(counter);
     this.password = RandomUtils.randomUUID().toString();
     this.role = counter == 1 ? UserRoleEnum.ADMIN : UserRoleEnum.USER;
+    this.attributes =
+        new HashMap<>() {
+          {
+            put(ONBOARD, RandomUtils.randomBoolean().toString());
+          }
+        };
   }
 
   @Override
   public UUID getUserId() {
     return userId;
+  }
+
+  @Override
+  public void setUserId(UUID userId) {
+    this.userId = userId;
   }
 
   @Override
@@ -59,5 +74,10 @@ public class FakeUser extends FakeAuditable implements UserModel {
   @Override
   public UserRoleEnum getRole() {
     return role;
+  }
+
+  @Override
+  public Map<String, String> getAttributes() {
+    return attributes;
   }
 }

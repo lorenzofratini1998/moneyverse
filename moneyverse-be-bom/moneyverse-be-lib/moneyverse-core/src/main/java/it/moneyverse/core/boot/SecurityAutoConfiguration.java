@@ -2,10 +2,10 @@ package it.moneyverse.core.boot;
 
 import it.moneyverse.core.security.converter.KeycloakJwtAuthenticationConverter;
 import it.moneyverse.core.security.converter.KeycloakJwtRolesConverter;
+import it.moneyverse.core.services.SecurityService;
 import it.moneyverse.core.utils.SecurityContextUtils;
-import java.util.Optional;
-
 import it.moneyverse.core.utils.properties.KeycloakProperties;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,8 +39,8 @@ public class SecurityAutoConfiguration {
   private final KeycloakProperties keycloakProperties;
 
   public SecurityAutoConfiguration(KeycloakProperties keycloakProperties) {
-      this.keycloakProperties = keycloakProperties;
-      LOGGER.info("Starting to load beans from {}", SecurityAutoConfiguration.class);
+    this.keycloakProperties = keycloakProperties;
+    LOGGER.info("Starting to load beans from {}", SecurityAutoConfiguration.class);
   }
 
   @Bean
@@ -67,9 +67,9 @@ public class SecurityAutoConfiguration {
         oauth2 ->
             oauth2.jwt(
                 jwtConfigurer -> {
-                    jwtConfigurer.jwkSetUri(keycloakProperties.getJwkSetUri());
-                    jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter);
-  }));
+                  jwtConfigurer.jwkSetUri(keycloakProperties.getJwkSetUri());
+                  jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter);
+                }));
 
     httpSecurity.authorizeHttpRequests(
         authz ->
@@ -83,16 +83,23 @@ public class SecurityAutoConfiguration {
   }
 
   @Bean
-  public AuditorAware<String> auditorAware() { return () -> {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !authentication.isAuthenticated()) {
-      return Optional.empty();
-    }
-    return Optional.of((SecurityContextUtils.getAuthenticatedUser().getUsername()));
-  }; }
+  public AuditorAware<String> auditorAware() {
+    return () -> {
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      if (authentication == null || !authentication.isAuthenticated()) {
+        return Optional.empty();
+      }
+      return Optional.of((SecurityContextUtils.getAuthenticatedUser().getUsername()));
+    };
+  }
 
   @Bean
   public JwtDecoder jwtDecoder() {
     return JwtDecoders.fromIssuerLocation(keycloakProperties.getIssuerUri());
+  }
+
+  @Bean
+  public SecurityService securityService() {
+    return new SecurityService();
   }
 }

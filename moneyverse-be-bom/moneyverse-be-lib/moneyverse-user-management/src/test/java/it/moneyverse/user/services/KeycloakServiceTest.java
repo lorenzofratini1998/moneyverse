@@ -1,0 +1,154 @@
+package it.moneyverse.user.services;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import it.moneyverse.core.utils.properties.KeycloakProperties;
+import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.user.exceptions.UserServiceException;
+import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.utils.mapper.UserMapper;
+import jakarta.ws.rs.NotFoundException;
+import java.util.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class KeycloakServiceTest {
+
+  private static final String REALM_NAME = RandomUtils.randomString(10);
+
+  @InjectMocks KeycloakService keycloakService;
+
+  @Mock Keycloak keycloakClient;
+  @Mock KeycloakProperties keycloakProperties;
+  @Mock RealmResource realm;
+  @Mock UsersResource usersResource;
+  @Mock UserResource userResource;
+  MockedStatic<UserMapper> userMapper;
+
+  @BeforeEach
+  void setup() {
+    userMapper = mockStatic(UserMapper.class);
+    when(keycloakProperties.getRealmName()).thenReturn(REALM_NAME);
+  }
+
+  @AfterEach
+  void tearDown() {
+    userMapper.close();
+  }
+
+  @Test
+  void givenUserId_WhenGetUserById_ThenReturnUser(
+      @Mock UserRepresentation user, @Mock UserDto userDto) {
+    UUID userId = RandomUtils.randomUUID();
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(user);
+    userMapper.when(() -> UserMapper.toUserDto(user)).thenReturn(userDto);
+
+    Optional<UserDto> response = keycloakService.getUserById(userId);
+
+    assertTrue(response.isPresent());
+    verify(keycloakClient, times(1)).realm(REALM_NAME);
+    verify(realm, times(1)).users();
+    verify(usersResource, times(1)).get(userId.toString());
+    verify(userResource, times(1)).toRepresentation();
+    userMapper.verify(() -> UserMapper.toUserDto(user), times(1));
+  }
+
+  @Test
+  void givenUserId_WhenGetUserByUsername_ThenUserNotFound() {
+    UUID userId = RandomUtils.randomUUID();
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenThrow(NotFoundException.class);
+
+    Optional<UserDto> response = keycloakService.getUserById(userId);
+
+    assertFalse(response.isPresent());
+    verify(keycloakClient, times(1)).realm(REALM_NAME);
+    verify(realm, times(1)).users();
+    verify(usersResource, times(1)).get(userId.toString());
+    verify(userResource, times(1)).toRepresentation();
+    userMapper.verify(() -> UserMapper.toUserDto(any(UserRepresentation.class)), never());
+  }
+
+  @Test
+  void givenUserId_WhenGetUserByUsername_ThenReturnException() {
+    when(keycloakClient.realm(REALM_NAME)).thenThrow(RuntimeException.class);
+
+    assertThrows(
+        UserServiceException.class, () -> keycloakService.getUserById(RandomUtils.randomUUID()));
+  }
+
+  @Test
+  void givenUserIdAndAttributeKey_WhenGetUserAttributeValue_ThenReturnUserAttributeValue(
+      @Mock UserRepresentation user, @Mock Map<String, List<String>> attributes) {
+    UUID userId = RandomUtils.randomUUID();
+    String attributeKey = RandomUtils.randomString(10);
+    String attributeValue = RandomUtils.randomString(10);
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(user);
+    when(user.getAttributes()).thenReturn(attributes);
+    when(attributes.getOrDefault(attributeKey, Collections.emptyList()))
+        .thenReturn(List.of(attributeValue));
+
+    Optional<String> response = keycloakService.getUserAttributeValue(userId, attributeKey);
+    assertTrue(response.isPresent());
+  }
+
+  @Test
+  void givenUserIdAndAttributeKey_WhenGetUserAttributeValue_ThenReturnEmptyUserAttributeValue(
+      @Mock UserRepresentation user, @Mock Map<String, List<String>> attributes) {
+    UUID userId = RandomUtils.randomUUID();
+    String attributeKey = RandomUtils.randomString(10);
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(user);
+    when(user.getAttributes()).thenReturn(attributes);
+
+    Optional<String> response = keycloakService.getUserAttributeValue(userId, attributeKey);
+    assertFalse(response.isPresent());
+  }
+
+  @Test
+  void givenUserIdKeyAndValue_WhenSetUserAttribute_ThenSetUserAttribute(
+      @Mock UserRepresentation user, @Mock Map<String, List<String>> attributes) {
+    UUID userId = RandomUtils.randomUUID();
+    String attributeKey = RandomUtils.randomString(10);
+    String attributeValue = RandomUtils.randomString(10);
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(user);
+    when(user.getAttributes()).thenReturn(attributes);
+
+    keycloakService.setUserAttribute(userId, attributeKey, attributeValue);
+
+    verify(keycloakClient, times(2)).realm(REALM_NAME);
+    verify(realm, times(2)).users();
+    verify(usersResource, times(2)).get(userId.toString());
+    verify(userResource, times(1)).toRepresentation();
+    verify(userResource, times(1)).update(user);
+  }
+}
