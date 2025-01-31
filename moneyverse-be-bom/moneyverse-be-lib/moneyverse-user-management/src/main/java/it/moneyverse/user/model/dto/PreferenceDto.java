@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.io.Serializable;
-import java.util.List;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -12,25 +11,49 @@ import java.util.UUID;
 @JsonDeserialize(builder = PreferenceDto.Builder.class)
 public class PreferenceDto implements Serializable {
 
-  private final UUID userId;
-  private final List<PreferenceItemDto> preferences;
+  private final UUID preferenceId;
+  private final String name;
+  private final Boolean mandatory;
+  private final Boolean updatable;
+  private final String defaultValue;
 
   public PreferenceDto(Builder builder) {
-    this.userId = builder.userId;
-    this.preferences = builder.preferences;
+    this.preferenceId = builder.preferenceId;
+    this.name = builder.name;
+    this.mandatory = builder.mandatory;
+    this.updatable = builder.updatable;
+    this.defaultValue = builder.defaultValue;
   }
 
   public static class Builder {
-    private UUID userId;
-    private List<PreferenceItemDto> preferences;
+    private UUID preferenceId;
+    private String name;
+    private Boolean mandatory;
+    private Boolean updatable;
+    private String defaultValue;
 
-    public Builder withUserId(UUID userId) {
-      this.userId = userId;
+    public Builder withPreferenceId(UUID preferenceId) {
+      this.preferenceId = preferenceId;
       return this;
     }
 
-    public Builder withPreferences(List<PreferenceItemDto> preferences) {
-      this.preferences = preferences;
+    public Builder withName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder withMandatory(Boolean mandatory) {
+      this.mandatory = mandatory;
+      return this;
+    }
+
+    public Builder withUpdatable(Boolean updatable) {
+      this.updatable = updatable;
+      return this;
+    }
+
+    public Builder withDefaultValue(String defaultValue) {
+      this.defaultValue = defaultValue;
       return this;
     }
 
@@ -43,11 +66,23 @@ public class PreferenceDto implements Serializable {
     return new Builder();
   }
 
-  public UUID getUserId() {
-    return userId;
+  public UUID getPreferenceId() {
+    return preferenceId;
   }
 
-  public List<PreferenceItemDto> getPreferences() {
-    return preferences;
+  public String getName() {
+    return name;
+  }
+
+  public Boolean getMandatory() {
+    return mandatory;
+  }
+
+  public Boolean getUpdatable() {
+    return updatable;
+  }
+
+  public String getDefaultValue() {
+    return defaultValue;
   }
 }

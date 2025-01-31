@@ -16,6 +16,8 @@ public class FakeUtils {
   public static final Integer MAX_TRANSACTION_PER_USER = 100;
   public static final Integer MIN_TAGS_PER_USER = 0;
   public static final Integer MAX_TAGS_PER_USER = 10;
+  public static final Integer MIN_PREFERENCES = 3;
+  public static final Integer MAX_PREFERENCES = 10;
 
   private FakeUtils() {}
 }

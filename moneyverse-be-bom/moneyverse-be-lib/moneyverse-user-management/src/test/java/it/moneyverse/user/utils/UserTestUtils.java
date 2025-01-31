@@ -1,10 +1,12 @@
 package it.moneyverse.user.utils;
 
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.enums.PreferenceKeyEnum;
-import it.moneyverse.user.model.dto.PreferenceRequest;
-import java.util.Arrays;
+import it.moneyverse.user.model.dto.UserPreferenceRequest;
+import it.moneyverse.user.model.entities.Preference;
+import it.moneyverse.user.model.entities.UserPreference;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -34,30 +36,41 @@ public class UserTestUtils {
             RandomUtils.randomString(10), RandomUtils.randomString(5), RandomUtils.randomString(2));
   }
 
-  public static List<PreferenceRequest> createPreferencesRequest() {
-    return Arrays.stream(PreferenceKeyEnum.values())
-        .map(
-            preferenceKeyEnum ->
-                new PreferenceRequest(preferenceKeyEnum, RandomUtils.randomString(10)))
-        .toList();
+  public static UserPreference createUserPreference(UUID userId) {
+    UserPreference preference = new UserPreference();
+    preference.setUserId(userId);
+    preference.setUserPreferenceId(RandomUtils.randomUUID());
+    preference.setValue(RandomUtils.randomString(10));
+    preference.setPreference(createPreference());
+    return preference;
   }
 
-  public static Stream<Supplier<List<PreferenceRequest>>> invalidPreferencesRequestProvider() {
+  public static Preference createPreference() {
+    Preference preference = new Preference();
+    preference.setPreferenceId(RandomUtils.randomUUID());
+    preference.setName(RandomUtils.randomString(10));
+    preference.setDefaultValue(RandomUtils.randomString(10));
+    preference.setMandatory(RandomUtils.randomBoolean());
+    preference.setUpdatable(RandomUtils.randomBoolean());
+    return preference;
+  }
+
+  public static UserPreferenceRequest createUserPreferenceRequest(UUID preferenceId) {
+    return new UserPreferenceRequest(preferenceId, RandomUtils.randomString(10));
+  }
+
+  public static Stream<Supplier<List<UserPreferenceRequest>>> invalidPreferencesRequestProvider() {
     return Stream.of(
         UserTestUtils::createPreferenceRequestWithNullKey,
         UserTestUtils::createPreferenceRequestWithNullValue);
   }
 
-  private static List<PreferenceRequest> createPreferenceRequestWithNullKey() {
-    return Arrays.stream(PreferenceKeyEnum.values())
-        .map(preferenceKeyEnum -> new PreferenceRequest(null, RandomUtils.randomString(10)))
-        .toList();
+  private static List<UserPreferenceRequest> createPreferenceRequestWithNullKey() {
+    return Collections.singletonList(new UserPreferenceRequest(null, RandomUtils.randomString(10)));
   }
 
-  private static List<PreferenceRequest> createPreferenceRequestWithNullValue() {
-    return Arrays.stream(PreferenceKeyEnum.values())
-        .map(preferenceKeyEnum -> new PreferenceRequest(preferenceKeyEnum, null))
-        .toList();
+  private static List<UserPreferenceRequest> createPreferenceRequestWithNullValue() {
+    return Collections.singletonList(new UserPreferenceRequest(RandomUtils.randomUUID(), null));
   }
 
   private UserTestUtils() {}

@@ -1,18 +1,16 @@
 package it.moneyverse.user.model.entities;
 
-import it.moneyverse.core.model.entities.Auditable;
-import it.moneyverse.user.enums.PreferenceKeyEnum;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
-@Table(
-    name = "PREFERENCES",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"USER_ID", "PREFERENCE_KEY"})})
-public class Preference extends Auditable implements Serializable {
+@Table(name = "PREFERENCES")
+public class Preference implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 
@@ -21,19 +19,22 @@ public class Preference extends Auditable implements Serializable {
   @Column(name = "PREFERENCE_ID")
   private UUID preferenceId;
 
-  @Column(name = "USER_ID", nullable = false)
-  private UUID userId;
+  @Column(name = "NAME", nullable = false, unique = true)
+  private String name;
 
-  @Column(name = "PREFERENCE_KEY", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private PreferenceKeyEnum key;
+  @Column(name = "MANDATORY", nullable = false)
+  @ColumnDefault("FALSE")
+  private Boolean mandatory;
 
-  @Column(name = "PREFERENCE_VALUE", nullable = false)
-  private String value;
-
-  @Column(name = "UPDATABLE")
+  @Column(name = "UPDATABLE", nullable = false)
   @ColumnDefault("TRUE")
   private Boolean updatable;
+
+  @Column(name = "DEFAULT_VALUE")
+  private String defaultValue;
+
+  @OneToMany(mappedBy = "preference", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<UserPreference> userPreferences = new ArrayList<>();
 
   public UUID getPreferenceId() {
     return preferenceId;
@@ -43,35 +44,43 @@ public class Preference extends Auditable implements Serializable {
     this.preferenceId = preferenceId;
   }
 
-  public UUID getUserId() {
-    return userId;
+  public String getName() {
+    return name;
   }
 
-  public void setUserId(UUID userId) {
-    this.userId = userId;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public PreferenceKeyEnum getKey() {
-    return key;
+  public Boolean getMandatory() {
+    return mandatory;
   }
 
-  public void setKey(PreferenceKeyEnum key) {
-    this.key = key;
+  public void setMandatory(Boolean mandatory) {
+    this.mandatory = mandatory;
   }
 
-  public String getValue() {
-    return value;
-  }
-
-  public void setValue(String value) {
-    this.value = value;
-  }
-
-  public Boolean isUpdatable() {
+  public Boolean getUpdatable() {
     return updatable;
   }
 
   public void setUpdatable(Boolean updatable) {
     this.updatable = updatable;
+  }
+
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+  }
+
+  public List<UserPreference> getUserPreferences() {
+    return userPreferences;
+  }
+
+  public void setUserPreferences(List<UserPreference> userPreferences) {
+    this.userPreferences = userPreferences;
   }
 }

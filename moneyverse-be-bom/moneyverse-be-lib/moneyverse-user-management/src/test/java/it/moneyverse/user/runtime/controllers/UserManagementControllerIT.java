@@ -13,12 +13,16 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
-import it.moneyverse.user.enums.PreferenceKeyEnum;
 import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.PreferenceRequest;
+import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.user.model.dto.UserPreferenceRequest;
+import it.moneyverse.user.model.entities.Preference;
+import it.moneyverse.user.model.entities.UserPreference;
 import it.moneyverse.user.model.repositories.PreferenceRepository;
+import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.utils.UserTestContext;
 import it.moneyverse.user.utils.UserTestUtils;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,22 +30,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.junit.jupiter.Container;
 
 @IntegrationTest
-public class UserManagementControllerIT extends AbstractIntegrationTest {
+class UserManagementControllerIT extends AbstractIntegrationTest {
 
   protected static UserTestContext testContext;
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
+  @Autowired private UserPreferenceRepository userPreferenceRepository;
   @Autowired private PreferenceRepository preferenceRepository;
   private HttpHeaders headers;
 
@@ -65,8 +69,7 @@ public class UserManagementControllerIT extends AbstractIntegrationTest {
 
   @BeforeAll
   static void beforeAll() {
-    testContext =
-        new UserTestContext().generateScript(tempDir).insertUsersIntoKeycloak(keycloakContainer);
+    testContext = new UserTestContext(keycloakContainer).generateScript(tempDir);
   }
 
   @BeforeEach
@@ -75,21 +78,82 @@ public class UserManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testCreatePreferences() {
+  void testCreatePreferences() {
+    Preference preference = UserTestUtils.createPreference();
+    preference.setPreferenceId(null);
+    preference = preferenceRepository.save(preference);
     final UserModel userModel = testContext.getRandomUser();
     UUID userId = userModel.getUserId();
     headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
-    final List<PreferenceRequest> request = UserTestUtils.createPreferencesRequest();
+    final List<UserPreferenceRequest> request =
+        Collections.singletonList(
+            UserTestUtils.createUserPreferenceRequest(preference.getPreferenceId()));
     mockServer.mockExistentCurrency();
+    int initialSize = userPreferenceRepository.findAll().size();
 
-    ResponseEntity<PreferenceDto> response =
+    ResponseEntity<UserPreferenceDto> response =
         restTemplate.postForEntity(
             basePath + "/users/%s/preferences".formatted(userId),
             new HttpEntity<>(request, headers),
-            PreferenceDto.class);
+            UserPreferenceDto.class);
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(PreferenceKeyEnum.values().length, response.getBody().getPreferences().size());
+    assertEquals(
+        initialSize + response.getBody().getPreferences().size(),
+        userPreferenceRepository.findAll().size());
+  }
+
+  @Test
+  void testGetUserPreferences() {
+    final UserModel userModel = testContext.getRandomUser();
+    UUID userId = userModel.getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    final boolean mandatory = Math.random() < 0.5;
+    List<UserPreference> expected =
+        mandatory
+            ? testContext.getUserPreferencesByUserIdAndMandatory(userId, true)
+            : testContext.getUserPreferencesByUserId(userId);
+    String path = basePath + "/users/%s/preferences".formatted(userId);
+
+    ResponseEntity<UserPreferenceDto> response =
+        restTemplate.exchange(
+            mandatory
+                ? UriComponentsBuilder.fromUriString(path)
+                    .queryParam("mandatory", true)
+                    .toUriString()
+                : path,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            UserPreferenceDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(expected.size(), response.getBody().getPreferences().size());
+  }
+
+  @Test
+  void testGetPreferences() {
+    final UserModel userModel = testContext.getRandomUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    final boolean mandatory = Math.random() < 0.5;
+    List<Preference> expected =
+        mandatory ? testContext.getMandatoryPreferences() : testContext.getPreferences();
+    String path = basePath + "/preferences";
+
+    ResponseEntity<List<PreferenceDto>> response =
+        restTemplate.exchange(
+            mandatory
+                ? UriComponentsBuilder.fromUriString(path)
+                    .queryParam("mandatory", true)
+                    .toUriString()
+                : path,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(expected.size(), response.getBody().size());
   }
 }

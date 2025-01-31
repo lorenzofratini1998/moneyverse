@@ -1,18 +1,19 @@
 package it.moneyverse.user.services;
 
-import static it.moneyverse.user.utils.UserTestUtils.createPreferencesRequest;
-import static it.moneyverse.user.utils.UserUtils.ONBOARD;
+import static it.moneyverse.user.utils.UserTestUtils.createUserPreferenceRequest;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.PreferenceRequest;
 import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.entities.Preference;
+import it.moneyverse.user.model.entities.UserPreference;
 import it.moneyverse.user.model.repositories.PreferenceRepository;
+import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.utils.mapper.PreferenceMapper;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,7 @@ class UserManagementServiceTest {
 
   @Mock KeycloakService keycloakService;
   @Mock PreferenceRepository preferenceRepository;
+  @Mock UserPreferenceRepository userPreferenceRepository;
   private MockedStatic<PreferenceMapper> preferenceMapper;
 
   @BeforeEach
@@ -46,47 +48,66 @@ class UserManagementServiceTest {
   }
 
   @Test
-  void givenUserIdAndPreferences_WhenCreatePreferences_ThenPreferencesCreated(
-      @Mock List<Preference> preferences,
-      @Mock PreferenceDto preferenceDto,
+  void givenUserIdAndUserPreferences_WhenCreatePreferences_ThenUserPreferencesCreated(
+      @Mock Preference preference,
+      @Mock UserPreference userPreference,
+      @Mock UserPreferenceDto preferenceDto,
       @Mock UserDto userDto) {
-    List<PreferenceRequest> request = createPreferencesRequest();
     UUID userId = RandomUtils.randomUUID();
-    String attributeValue = RandomUtils.randomString(10);
+    List<UserPreferenceRequest> request = List.of(createUserPreferenceRequest(userId));
     when(keycloakService.getUserById(userId)).thenReturn(Optional.of(userDto));
+    when(preferenceRepository.findById(any(UUID.class))).thenReturn(Optional.of(preference));
+    when(preference.getName()).thenReturn("STRING");
     preferenceMapper
-        .when(() -> PreferenceMapper.toPreference(userId, request))
-        .thenReturn(preferences);
-    when(preferenceRepository.saveAll(preferences)).thenReturn(preferences);
+        .when(() -> PreferenceMapper.toUserPreference(userId, request.getFirst(), preference))
+        .thenReturn(userPreference);
+    when(userPreferenceRepository.saveAll(List.of(userPreference)))
+        .thenReturn(List.of(userPreference));
     preferenceMapper
-        .when(() -> PreferenceMapper.toPreferenceDto(userId, preferences))
+        .when(() -> PreferenceMapper.toUserPreferenceDto(userId, List.of(userPreference)))
         .thenReturn(preferenceDto);
-    when(keycloakService.getUserAttributeValue(userId, ONBOARD))
-        .thenReturn(Optional.of(attributeValue));
 
-    PreferenceDto result = userManagementService.createPreferences(userId, request);
+    UserPreferenceDto result = userManagementService.createUserPreferences(userId, request);
 
     assertNotNull(result);
     verify(keycloakService, times(1)).getUserById(userId);
-    preferenceMapper.verify(() -> PreferenceMapper.toPreference(userId, request), times(1));
-    verify(preferenceRepository, times(1)).saveAll(preferences);
-    preferenceMapper.verify(() -> PreferenceMapper.toPreferenceDto(userId, preferences), times(1));
-    verify(keycloakService, times(1)).getUserAttributeValue(userId, ONBOARD);
+    verify(preferenceRepository, times(1)).findById(any(UUID.class));
+    preferenceMapper.verify(
+        () -> PreferenceMapper.toUserPreference(userId, request.getFirst(), preference), times(1));
+    verify(userPreferenceRepository, times(1)).saveAll(List.of(userPreference));
+    preferenceMapper.verify(
+        () -> PreferenceMapper.toUserPreferenceDto(userId, List.of(userPreference)), times(1));
   }
 
   @Test
-  void givenUserIdAndPreferences_WhenCreatePreferences_ThenUserNotFound() {
-    List<PreferenceRequest> request = createPreferencesRequest();
+  void givenUserIdAndPreferences_WhenCreateUserPreferences_ThenUserNotFound() {
     UUID userId = RandomUtils.randomUUID();
+    List<UserPreferenceRequest> request = List.of(createUserPreferenceRequest(userId));
     when(keycloakService.getUserById(userId)).thenReturn(Optional.empty());
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> userManagementService.createPreferences(userId, request));
+        () -> userManagementService.createUserPreferences(userId, request));
 
     verify(keycloakService, times(1)).getUserById(userId);
-    preferenceMapper.verify(() -> PreferenceMapper.toPreference(userId, request), never());
     verify(preferenceRepository, never()).saveAll(any());
-    preferenceMapper.verify(() -> PreferenceMapper.toPreferenceDto(any(), any()), never());
   }
+
+  @Test
+  void givenUserIdAndPreferences_WhenCreateUserPreferences_ThenPreferenceNotFound(
+      @Mock UserDto userDto) {
+    UUID userId = RandomUtils.randomUUID();
+    List<UserPreferenceRequest> request = List.of(createUserPreferenceRequest(userId));
+    when(keycloakService.getUserById(userId)).thenReturn(Optional.of(userDto));
+    when(preferenceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> userManagementService.createUserPreferences(userId, request));
+
+    verify(keycloakService, times(1)).getUserById(userId);
+    verify(preferenceRepository, times(1)).findById(any(UUID.class));
+    verify(preferenceRepository, never()).saveAll(any());
+  }
+
 }

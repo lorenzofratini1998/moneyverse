@@ -1,6 +1,6 @@
 package it.moneyverse.user.runtime.controllers;
 
-import static it.moneyverse.user.utils.UserTestUtils.createPreferencesRequest;
+import static it.moneyverse.user.utils.UserTestUtils.createUserPreferenceRequest;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -8,9 +8,10 @@ import it.moneyverse.core.boot.CurrencyServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.PreferenceRequest;
+import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.services.UserManagementService;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -46,10 +47,11 @@ class UserManagementControllerTest {
   @MockitoBean private UserManagementService userManagementService;
 
   @Test
-  void testCreatePreferences_Success(@Mock PreferenceDto preferenceDto) throws Exception {
+  void testCreatePreferences_Success(@Mock UserPreferenceDto preferenceDto) throws Exception {
     UUID userId = RandomUtils.randomUUID();
-    List<PreferenceRequest> request = createPreferencesRequest();
-    when(userManagementService.createPreferences(userId, request)).thenReturn(preferenceDto);
+    List<UserPreferenceRequest> request =
+        Collections.singletonList(createUserPreferenceRequest(userId));
+    when(userManagementService.createUserPreferences(userId, request)).thenReturn(preferenceDto);
 
     mockMvc
         .perform(
@@ -62,7 +64,7 @@ class UserManagementControllerTest {
 
   @ParameterizedTest
   @MethodSource("it.moneyverse.user.utils.UserTestUtils#invalidPreferencesRequestProvider")
-  void testCreatePreferences_BadRequest(Supplier<List<PreferenceRequest>> requestSupplier)
+  void testCreatePreferences_BadRequest(Supplier<List<UserPreferenceRequest>> requestSupplier)
       throws Exception {
     UUID userId = RandomUtils.randomUUID();
     mockMvc
@@ -72,6 +74,6 @@ class UserManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockUserRequestPostProcessor.mockUser(userId)))
         .andExpect(status().isBadRequest());
-    verify(userManagementService, never()).createPreferences(userId, requestSupplier.get());
+    verify(userManagementService, never()).createUserPreferences(userId, requestSupplier.get());
   }
 }

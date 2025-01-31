@@ -25,6 +25,10 @@ public class RandomUtils {
     return RANDOM.nextInt(min, max + 1);
   }
 
+  public static Integer randomInteger(Integer max) {
+    return RANDOM.nextInt(max);
+  }
+
   public static BigDecimal randomDecimal(Double min, Double max) {
     return BigDecimal.valueOf(RANDOM.nextDouble(min, max));
   }

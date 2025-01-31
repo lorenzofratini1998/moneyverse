@@ -32,34 +32,6 @@ public class KeycloakService implements AuthenticationService {
     return Optional.ofNullable(UserMapper.toUserDto(getUserById(userId.toString())));
   }
 
-  @Override
-  public Optional<String> getUserAttributeValue(UUID userId, String key) {
-    return Optional.ofNullable(getUserById(userId.toString()))
-        .map(user -> user.getAttributes().getOrDefault(key, Collections.emptyList()))
-        .filter(list -> !list.isEmpty())
-        .map(List::getFirst)
-        .filter(value -> !value.isEmpty());
-  }
-
-  @Override
-  public void setUserAttribute(UUID userId, String key, String value) {
-    Optional<UserRepresentation> userRepresentation =
-        Optional.ofNullable(getUserById(userId.toString()));
-    userRepresentation.ifPresent(
-        user -> {
-          LOGGER.info("Setting user attribute '{}' with value '{}'", key, value);
-          Map<String, List<String>> attributes =
-              Optional.ofNullable(user.getAttributes()).orElse(new HashMap<>());
-          attributes.put(key, Collections.singletonList(value));
-          user.setAttributes(attributes);
-          keycloakClient
-              .realm(properties.getRealmName())
-              .users()
-              .get(userId.toString())
-              .update(user);
-        });
-  }
-
   private UserRepresentation getUserById(String userId) {
     try {
       return keycloakClient.realm(properties.getRealmName()).users().get(userId).toRepresentation();

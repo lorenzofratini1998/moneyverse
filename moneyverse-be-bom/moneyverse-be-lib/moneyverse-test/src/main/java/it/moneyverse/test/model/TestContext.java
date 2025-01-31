@@ -26,6 +26,12 @@ public abstract class TestContext<SELF extends TestContext<SELF>> {
   private final List<UserModel> users;
   private KeycloakTestSetupManager keycloakTestManager;
 
+  protected TestContext(KeycloakContainer keycloakContainer) {
+    this();
+    keycloakTestManager = new KeycloakTestSetupManager(keycloakContainer, users);
+    keycloakTestManager.setup();
+  }
+
   protected TestContext() {
     users = UserFactory.createUsers();
   }

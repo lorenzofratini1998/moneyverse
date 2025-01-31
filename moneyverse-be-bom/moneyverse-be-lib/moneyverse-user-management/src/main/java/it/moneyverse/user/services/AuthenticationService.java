@@ -8,7 +8,4 @@ public interface AuthenticationService {
 
   Optional<UserDto> getUserById(UUID userId);
 
-  Optional<String> getUserAttributeValue(UUID userId, String key);
-
-  void setUserAttribute(UUID userId, String key, String value);
 }
