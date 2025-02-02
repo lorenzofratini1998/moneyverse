@@ -1,17 +1,14 @@
 package it.moneyverse.user.runtime.controllers;
 
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceRequest;
-import jakarta.validation.Valid;
-import java.util.List;
+import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import java.util.UUID;
 
 public interface UserOperations {
 
-  UserPreferenceDto createPreferences(UUID userId, List<@Valid UserPreferenceRequest> request);
+  UserDto getUser(UUID userId);
 
-  UserPreferenceDto getUserPreferences(UUID userId, Boolean mandatory);
+  UserDto updateUser(UUID userId, UserUpdateRequestDto request);
 
-  List<PreferenceDto> getPreferences(Boolean mandatory);
+  void disableUser(UUID userId);
 }

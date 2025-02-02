@@ -1,12 +1,15 @@
 package it.moneyverse.user.services;
 
+import static it.moneyverse.user.utils.UserTestUtils.createUserUpdateRequest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.utils.properties.KeycloakProperties;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.user.exceptions.UserServiceException;
 import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import it.moneyverse.user.utils.mapper.UserMapper;
 import jakarta.ws.rs.NotFoundException;
 import java.util.*;
@@ -70,7 +73,7 @@ public class KeycloakServiceTest {
   }
 
   @Test
-  void givenUserId_WhenGetUserByUsername_ThenUserNotFound() {
+  void givenUserId_WhenGetUserById_ThenUserNotFound() {
     UUID userId = RandomUtils.randomUUID();
     when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
     when(realm.users()).thenReturn(usersResource);
@@ -93,5 +96,53 @@ public class KeycloakServiceTest {
 
     assertThrows(
         UserServiceException.class, () -> keycloakService.getUserById(RandomUtils.randomUUID()));
+  }
+
+  @Test
+  void givenUserId_WhenUpdateRequest_ThenReturnUpdateUser(
+      @Mock UserRepresentation user, @Mock UserDto userDto) {
+    UUID userId = RandomUtils.randomUUID();
+    UserUpdateRequestDto request = createUserUpdateRequest();
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(user);
+    userMapper.when(() -> UserMapper.toUserDto(user)).thenReturn(userDto);
+    userMapper.when(() -> UserMapper.partialUpdate(user, request)).thenReturn(user);
+
+    UserDto result = keycloakService.updateUser(userId, request);
+
+    assertNotNull(result);
+    verify(userResource, times(1)).update(user);
+    verify(userResource, times(1)).sendVerifyEmail();
+  }
+
+  @Test
+  void givenUserId_WhenDisableUser_ThenDisableUser(@Mock UserRepresentation user) {
+    UUID userId = RandomUtils.randomUUID();
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(user);
+
+    keycloakService.disableUser(userId);
+
+    verify(userResource, times(1)).update(user);
+  }
+
+  @Test
+  void givenUserId_WhenDisableUser_ThenUserNotFound() {
+    UUID userId = RandomUtils.randomUUID();
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenThrow(NotFoundException.class);
+
+    assertThrows(ResourceNotFoundException.class, () -> keycloakService.disableUser(userId));
+
+    verify(userResource, never()).update(any(UserRepresentation.class));
   }
 }

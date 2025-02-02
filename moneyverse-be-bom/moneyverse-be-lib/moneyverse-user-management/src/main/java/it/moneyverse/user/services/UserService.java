@@ -1,15 +1,14 @@
 package it.moneyverse.user.services;
 
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceRequest;
-import java.util.List;
+import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import java.util.UUID;
 
 public interface UserService {
-  UserPreferenceDto createUserPreferences(UUID userId, List<UserPreferenceRequest> request);
 
-  UserPreferenceDto getUserPreferences(UUID userId, Boolean mandatory);
+  UserDto getUser(UUID userId);
 
-  List<PreferenceDto> getPreferences(Boolean mandatory);
+  UserDto updateUser(UUID userId, UserUpdateRequestDto request);
+
+  void disableUser(UUID userId);
 }

@@ -1,15 +1,20 @@
 package it.moneyverse.user.runtime.controllers;
 
 import static it.moneyverse.user.utils.UserTestUtils.createUserPreferenceRequest;
+import static it.moneyverse.user.utils.UserTestUtils.createUserUpdateRequest;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import it.moneyverse.core.boot.CurrencyServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.user.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
+import it.moneyverse.user.model.dto.UserUpdateRequestDto;
+import it.moneyverse.user.services.PreferenceManagementService;
 import it.moneyverse.user.services.UserManagementService;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,14 +50,16 @@ class UserManagementControllerTest {
   String basePath;
 
   @Autowired private MockMvc mockMvc;
+  @MockitoBean private PreferenceManagementService preferenceManagementService;
   @MockitoBean private UserManagementService userManagementService;
 
   @Test
-  void testCreatePreferences_Success(@Mock UserPreferenceDto preferenceDto) throws Exception {
+  void testCreateUserPreferences_Success(@Mock UserPreferenceDto preferenceDto) throws Exception {
     UUID userId = RandomUtils.randomUUID();
     List<UserPreferenceRequest> request =
         Collections.singletonList(createUserPreferenceRequest(userId));
-    when(userManagementService.createUserPreferences(userId, request)).thenReturn(preferenceDto);
+    when(preferenceManagementService.createUserPreferences(userId, request))
+        .thenReturn(preferenceDto);
 
     mockMvc
         .perform(
@@ -64,7 +72,7 @@ class UserManagementControllerTest {
 
   @ParameterizedTest
   @MethodSource("it.moneyverse.user.utils.UserTestUtils#invalidPreferencesRequestProvider")
-  void testCreatePreferences_BadRequest(Supplier<List<UserPreferenceRequest>> requestSupplier)
+  void testCreateUserPreferences_BadRequest(Supplier<List<UserPreferenceRequest>> requestSupplier)
       throws Exception {
     UUID userId = RandomUtils.randomUUID();
     mockMvc
@@ -74,6 +82,92 @@ class UserManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockUserRequestPostProcessor.mockUser(userId)))
         .andExpect(status().isBadRequest());
-    verify(userManagementService, never()).createUserPreferences(userId, requestSupplier.get());
+    verify(preferenceManagementService, never())
+        .createUserPreferences(userId, requestSupplier.get());
+  }
+
+  @Test
+  void testGetUser_Success(@Mock UserDto userDto) throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+
+    when(userManagementService.getUser(userId)).thenReturn(userDto);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testGetUser_UserNotFound() throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+
+    when(userManagementService.getUser(userId)).thenThrow(ResourceNotFoundException.class);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(basePath + "/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testUpdateUser_Success(@Mock UserDto userDto) throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+    UserUpdateRequestDto request = createUserUpdateRequest();
+    when(userManagementService.updateUser(userId, request)).thenReturn(userDto);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/users/{userId}", userId)
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void testUpdateUser_UserNotFound() throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+    UserUpdateRequestDto request = createUserUpdateRequest();
+    when(userManagementService.updateUser(userId, request))
+        .thenThrow(ResourceNotFoundException.class);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(basePath + "/users/{userId}", userId)
+                .content(request.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testDisableUser_Success() throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+    Mockito.doNothing().when(userManagementService).disableUser(userId);
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch(basePath + "/users/{userId}/disable", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void testDisableUser_UserNotFound() throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+    Mockito.doThrow(ResourceNotFoundException.class)
+        .when(userManagementService)
+        .disableUser(userId);
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch(basePath + "/users/{userId}/disable", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isNotFound());
   }
 }

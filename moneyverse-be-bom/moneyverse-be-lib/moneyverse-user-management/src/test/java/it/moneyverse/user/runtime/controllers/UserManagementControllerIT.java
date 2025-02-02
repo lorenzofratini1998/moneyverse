@@ -1,7 +1,6 @@
 package it.moneyverse.user.runtime.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.utils.properties.KeycloakAdminProperties;
@@ -12,10 +11,9 @@ import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceRequest;
+import it.moneyverse.user.model.dto.*;
 import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;
 import it.moneyverse.user.model.repositories.PreferenceRepository;
@@ -78,7 +76,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void testCreatePreferences() {
+  void testCreateUserPreferences() {
     Preference preference = UserTestUtils.createPreference();
     preference.setPreferenceId(null);
     preference = preferenceRepository.save(preference);
@@ -155,5 +153,62 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(expected.size(), response.getBody().size());
+  }
+
+  @Test
+  void testGetUser() {
+    final UserModel userModel = testContext.getRandomUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+
+    ResponseEntity<UserDto> response =
+        restTemplate.exchange(
+            basePath + "/users/%s".formatted(userModel.getUserId()),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            UserDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(userModel.getUserId(), response.getBody().getUserId());
+    assertEquals(userModel.getName(), response.getBody().getFirstName());
+    assertEquals(userModel.getSurname(), response.getBody().getLastName());
+    assertEquals(userModel.getEmail(), response.getBody().getEmail());
+  }
+
+  @Test
+  void testGetUpdateUser() {
+    final UserModel userModel = testContext.getRandomUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    UserUpdateRequestDto request =
+        new UserUpdateRequestDto(RandomUtils.randomString(10), RandomUtils.randomString(10), null);
+
+    ResponseEntity<UserDto> response =
+        restTemplate.exchange(
+            basePath + "/users/%s".formatted(userModel.getUserId()),
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            UserDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(userModel.getUserId(), response.getBody().getUserId());
+    assertEquals(request.firstName(), response.getBody().getFirstName());
+    assertEquals(request.lastName(), response.getBody().getLastName());
+    assertEquals(userModel.getEmail(), response.getBody().getEmail());
+  }
+
+  @Test
+  void testDisableUser() {
+    final UserModel userModel = testContext.getRandomUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/users/%s/disable".formatted(userModel.getUserId()),
+            HttpMethod.PATCH,
+            new HttpEntity<>(headers),
+            Void.class);
+
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
   }
 }

@@ -2,6 +2,7 @@ package it.moneyverse.user.utils;
 
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
+import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;
 import java.util.Collections;
@@ -71,6 +72,10 @@ public class UserTestUtils {
 
   private static List<UserPreferenceRequest> createPreferenceRequestWithNullValue() {
     return Collections.singletonList(new UserPreferenceRequest(RandomUtils.randomUUID(), null));
+  }
+
+  public static UserUpdateRequestDto createUserUpdateRequest() {
+    return new UserUpdateRequestDto(randomFirstName(), randomLastName(), randomEmail());
   }
 
   private UserTestUtils() {}

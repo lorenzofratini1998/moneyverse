@@ -1,8 +1,7 @@
 package it.moneyverse.user.runtime.controllers;
 
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceRequest;
+import it.moneyverse.user.model.dto.*;
+import it.moneyverse.user.services.PreferenceService;
 import it.moneyverse.user.services.UserService;
 import java.util.List;
 import java.util.UUID;
@@ -14,11 +13,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
 @Validated
-public class UserManagementController implements UserOperations {
+public class UserManagementController implements UserOperations, PreferenceOperations {
 
+  private final PreferenceService preferenceService;
   private final UserService userService;
 
-  public UserManagementController(UserService userService) {
+  public UserManagementController(PreferenceService preferenceService, UserService userService) {
+    this.preferenceService = preferenceService;
     this.userService = userService;
   }
 
@@ -27,9 +28,9 @@ public class UserManagementController implements UserOperations {
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize(
       "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
-  public UserPreferenceDto createPreferences(
+  public UserPreferenceDto createUserPreferences(
       @PathVariable UUID userId, @RequestBody List<UserPreferenceRequest> request) {
-    return userService.createUserPreferences(userId, request);
+    return preferenceService.createUserPreferences(userId, request);
   }
 
   @Override
@@ -39,13 +40,40 @@ public class UserManagementController implements UserOperations {
       "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
   public UserPreferenceDto getUserPreferences(
       @PathVariable UUID userId, @RequestParam(required = false) Boolean mandatory) {
-    return userService.getUserPreferences(userId, mandatory);
+    return preferenceService.getUserPreferences(userId, mandatory);
   }
 
   @Override
   @GetMapping("/preferences")
   @ResponseStatus(HttpStatus.OK)
   public List<PreferenceDto> getPreferences(@RequestParam Boolean mandatory) {
-    return userService.getPreferences(mandatory);
+    return preferenceService.getPreferences(mandatory);
+  }
+
+  @Override
+  @GetMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  public UserDto getUser(@PathVariable UUID userId) {
+    return userService.getUser(userId);
+  }
+
+  @Override
+  @PutMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  public UserDto updateUser(@PathVariable UUID userId, @RequestBody UserUpdateRequestDto request) {
+    return userService.updateUser(userId, request);
+  }
+
+  @Override
+  @PatchMapping("/users/{userId}/disable")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  public void disableUser(@PathVariable UUID userId) {
+    userService.disableUser(userId);
   }
 }
