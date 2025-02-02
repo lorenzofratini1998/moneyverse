@@ -11,4 +11,6 @@ public interface UserOperations {
   UserDto updateUser(UUID userId, UserUpdateRequestDto request);
 
   void disableUser(UUID userId);
+
+  void deleteUser(UUID userId);
 }

@@ -12,4 +12,6 @@ public interface AuthenticationService {
   UserDto updateUser(UUID userId, UserUpdateRequestDto request);
 
   void disableUser(UUID userId);
+
+  void deleteUser(UUID userId);
 }

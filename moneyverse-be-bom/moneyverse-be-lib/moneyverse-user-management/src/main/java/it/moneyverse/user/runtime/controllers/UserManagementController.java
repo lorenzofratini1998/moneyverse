@@ -69,6 +69,15 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   }
 
   @Override
+  @DeleteMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  public void deleteUser(@PathVariable UUID userId) {
+    userService.deleteUser(userId);
+  }
+
+  @Override
   @PatchMapping("/users/{userId}/disable")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PreAuthorize(

@@ -170,4 +170,28 @@ class UserManagementControllerTest {
                 .with(MockUserRequestPostProcessor.mockUser(userId)))
         .andExpect(status().isNotFound());
   }
+
+  @Test
+  void testDeleteUser_Success() throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+    Mockito.doNothing().when(userManagementService).deleteUser(userId);
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void testDeleteUser_UserNotFound() throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+    Mockito.doThrow(ResourceNotFoundException.class).when(userManagementService).deleteUser(userId);
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(basePath + "/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isNotFound());
+  }
 }

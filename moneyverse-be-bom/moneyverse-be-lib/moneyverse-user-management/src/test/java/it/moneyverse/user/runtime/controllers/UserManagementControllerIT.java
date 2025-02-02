@@ -18,10 +18,12 @@ import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;
 import it.moneyverse.user.model.repositories.PreferenceRepository;
 import it.moneyverse.user.model.repositories.UserPreferenceRepository;
+import it.moneyverse.user.services.KeycloakService;
 import it.moneyverse.user.utils.UserTestContext;
 import it.moneyverse.user.utils.UserTestUtils;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +47,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired private UserPreferenceRepository userPreferenceRepository;
   @Autowired private PreferenceRepository preferenceRepository;
+  @Autowired private KeycloakService keycloakService;
   private HttpHeaders headers;
 
   @DynamicPropertySource
@@ -210,5 +213,21 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
             Void.class);
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+  }
+
+  @Test
+  void testDeleteUser() {
+    final UserModel userModel = testContext.getRandomUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/users/%s".formatted(userModel.getUserId()),
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class);
+
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertEquals(Optional.empty(), keycloakService.getUserById(userModel.getUserId()));
   }
 }

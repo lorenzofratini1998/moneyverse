@@ -11,4 +11,6 @@ public interface UserService {
   UserDto updateUser(UUID userId, UserUpdateRequestDto request);
 
   void disableUser(UUID userId);
+
+  void deleteUser(UUID userId);
 }

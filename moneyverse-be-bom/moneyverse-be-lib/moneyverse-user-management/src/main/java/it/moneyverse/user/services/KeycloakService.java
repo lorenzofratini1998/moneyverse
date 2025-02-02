@@ -55,6 +55,12 @@ public class KeycloakService implements AuthenticationService {
     getUsersResource().get(userId.toString()).update(userRepresentation);
   }
 
+  @Override
+  public void deleteUser(UUID userId) {
+    getUser(userId);
+    getUsersResource().get(userId.toString()).remove();
+  }
+
   private UserRepresentation getUser(UUID userId) {
     return getUserRepresentation(userId)
         .orElseThrow(

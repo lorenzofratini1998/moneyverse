@@ -145,4 +145,32 @@ public class KeycloakServiceTest {
 
     verify(userResource, never()).update(any(UserRepresentation.class));
   }
+
+  @Test
+  void givenUserId_WhenDeleteUser_ThenDeleteUser(@Mock UserRepresentation user) {
+    UUID userId = RandomUtils.randomUUID();
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(user);
+
+    keycloakService.deleteUser(userId);
+
+    verify(userResource, times(1)).remove();
+  }
+
+  @Test
+  void givenUserId_WhenDeleteUser_ThenUserNotFound() {
+    UUID userId = RandomUtils.randomUUID();
+
+    when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
+    when(realm.users()).thenReturn(usersResource);
+    when(usersResource.get(userId.toString())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenThrow(NotFoundException.class);
+
+    assertThrows(ResourceNotFoundException.class, () -> keycloakService.deleteUser(userId));
+
+    verify(userResource, never()).remove();
+  }
 }
