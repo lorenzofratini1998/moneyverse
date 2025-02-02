@@ -5,6 +5,7 @@ import it.moneyverse.core.utils.properties.UserServiceGrpcCircuitBreakerProperti
 import it.moneyverse.grpc.lib.UserRequest;
 import it.moneyverse.grpc.lib.UserResponse;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,16 +25,16 @@ public class UserServiceGrpcClient implements UserServiceClient {
   @CircuitBreaker(
       name = UserServiceGrpcCircuitBreakerProperties.USER_SERVICE_GRPC,
       fallbackMethod = "fallbackCheckIfUserExists")
-  public Boolean checkIfUserExists(String username) {
+  public Boolean checkIfUserExists(UUID userId) {
     final UserResponse response =
-        stub.checkIfUserExists(UserRequest.newBuilder().setUsername(username).build());
+        stub.checkIfUserExists(UserRequest.newBuilder().setUserId(userId.toString()).build());
     return response.getExists();
   }
 
-  protected Boolean fallbackCheckIfUserExists(String username, Throwable throwable) {
+  protected Boolean fallbackCheckIfUserExists(UUID userId, Throwable throwable) {
     LOGGER.error(
         "Impossible to contact the UserService to check whether the user {} exists. Returning FALSE as fallback: {}",
-        username,
+        userId,
         throwable.getMessage());
     return false;
   }
