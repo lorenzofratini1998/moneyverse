@@ -36,8 +36,8 @@ class AccountPredicateBuilderTest {
       @Mock Root<Account> root,
       @Mock Predicate predicate,
       @Mock Path<Object> accountCategoryPath) {
+    UUID userId = RandomUtils.randomUUID();
     when(root.get(Account_.ACCOUNT_CATEGORY)).thenReturn(accountCategoryPath);
-    when(criteria.getUserId()).thenReturn(Optional.of(RandomUtils.randomUUID()));
     when(criteria.getAccountCategory()).thenReturn(Optional.of(RandomUtils.randomString(15)));
     when(criteria.getCurrency()).thenReturn(Optional.of(RandomUtils.randomString(3)));
     when(criteria.getIsDefault()).thenReturn(Optional.of(RandomUtils.randomBoolean()));
@@ -51,7 +51,7 @@ class AccountPredicateBuilderTest {
     when(cb.lessThan(any(), any(BigDecimal.class))).thenReturn(predicate);
     when(cb.and(any(Predicate[].class))).thenReturn(predicate);
 
-    Predicate result = new AccountPredicateBuilder(cb, root).build(criteria);
+    Predicate result = new AccountPredicateBuilder(cb, root).build(userId, criteria);
 
     assertNotNull(result);
     verify(cb, times(1)).equal(any(), any(UUID.class));

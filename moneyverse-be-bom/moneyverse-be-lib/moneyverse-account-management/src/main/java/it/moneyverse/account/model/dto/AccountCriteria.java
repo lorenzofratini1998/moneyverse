@@ -6,11 +6,9 @@ import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.utils.JsonUtils;
 import java.util.Optional;
-import java.util.UUID;
 
 public class AccountCriteria {
-
-  private UUID userId;
+  
   private BoundCriteria balance;
   private BoundCriteria balanceTarget;
   private String accountCategory;
@@ -18,14 +16,6 @@ public class AccountCriteria {
   private Boolean isDefault;
   private PageCriteria page;
   private SortCriteria<AccountSortAttributeEnum> sort;
-
-  public Optional<UUID> getUserId() {
-    return Optional.ofNullable(userId);
-  }
-
-  public void setUserId(UUID userId) {
-    this.userId = userId;
-  }
 
   public Optional<BoundCriteria> getBalance() {
     return Optional.ofNullable(balance);

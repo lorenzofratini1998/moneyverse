@@ -8,7 +8,6 @@ import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
-import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
@@ -87,17 +86,14 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testGetAccounts() {
-    final UserModel user = testContext.getRandomUser();
+    final UUID userId = testContext.getRandomUser().getUserId();
     final AccountCriteria criteria = testContext.createAccountFilters();
-    if (user.getRole().equals(UserRoleEnum.USER)) {
-      criteria.setUserId(user.getUserId());
-    }
-    final List<Account> expected = testContext.filterAccounts(criteria);
+    final List<Account> expected = testContext.filterAccounts(userId, criteria);
 
-    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     ResponseEntity<List<AccountDto>> response =
         restTemplate.exchange(
-            testContext.createUri(basePath + "/accounts", criteria),
+            testContext.createUri(basePath + "/accounts/users/" + userId, criteria),
             HttpMethod.GET,
             new HttpEntity<>(headers),
             new ParameterizedTypeReference<>() {});

@@ -8,8 +8,10 @@ import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.utils.AccountCriteriaRandomGenerator;
 import it.moneyverse.account.utils.AccountTestContext;
 import it.moneyverse.core.boot.*;
+import it.moneyverse.test.utils.RandomUtils;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,10 +66,11 @@ public class AccountCustomRepositoryImplTest {
 
   @Test
   void givenCriteria_thenReturnFilteredAccounts() {
+    UUID userId = RandomUtils.randomUUID();
     AccountCriteria criteria = new AccountCriteriaRandomGenerator(testContext).generate();
-    List<Account> expected = testContext.filterAccounts(criteria);
+    List<Account> expected = testContext.filterAccounts(userId, criteria);
 
-    List<Account> actual = customRepository.findAccounts(criteria);
+    List<Account> actual = customRepository.findAccounts(userId, criteria);
 
     assertEquals(expected.size(), actual.size());
   }

@@ -8,7 +8,7 @@ public interface AccountService {
 
   AccountDto createAccount(AccountRequestDto accountRequestDto);
 
-  List<AccountDto> findAccounts(AccountCriteria criteria);
+  List<AccountDto> findAccounts(UUID userId, AccountCriteria criteria);
 
   AccountDto findAccountByAccountId(UUID accountId);
 

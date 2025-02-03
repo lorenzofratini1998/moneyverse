@@ -29,12 +29,11 @@ public class AccountManagementController implements AccountOperations {
   }
 
   @Override
-  @GetMapping("/accounts")
+  @GetMapping("/accounts/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize(
-      "(#criteria.userId.isPresent() and @securityService.isAuthenticatedUserOwner(#criteria.userId.get()))")
-  public List<AccountDto> getAccounts(AccountCriteria criteria) {
-    return accountService.findAccounts(criteria);
+  @PreAuthorize("(@securityService.isAuthenticatedUserOwner(#userId))")
+  public List<AccountDto> getAccounts(@PathVariable UUID userId, AccountCriteria criteria) {
+    return accountService.findAccounts(userId, criteria);
   }
 
   @Override

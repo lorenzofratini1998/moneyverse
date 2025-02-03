@@ -185,14 +185,15 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountCriteria_WhenGetAccounts_ThenReturnAccountList(
       @Mock AccountCriteria criteria, @Mock List<Account> accounts) {
-    when(accountRepository.findAccounts(criteria)).thenReturn(accounts);
+    UUID userId = RandomUtils.randomUUID();
+    when(accountRepository.findAccounts(userId, criteria)).thenReturn(accounts);
 
-    accountManagementService.findAccounts(criteria);
+    accountManagementService.findAccounts(userId, criteria);
 
     assertNotNull(accounts);
     verify(criteria, times(1)).setPage(any(PageCriteria.class));
     verify(criteria, times(1)).setSort(any(SortCriteria.class));
-    verify(accountRepository, times(1)).findAccounts(criteria);
+    verify(accountRepository, times(1)).findAccounts(userId, criteria);
   }
 
   @Test

@@ -90,7 +90,7 @@ public class AccountManagementService implements AccountService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<AccountDto> findAccounts(AccountCriteria criteria) {
+  public List<AccountDto> findAccounts(UUID userId, AccountCriteria criteria) {
     if (criteria.getPage() == null) {
       criteria.setPage(new PageCriteria());
     }
@@ -100,7 +100,7 @@ public class AccountManagementService implements AccountService {
               SortAttribute.getDefault(AccountSortAttributeEnum.class), Direction.ASC));
     }
     LOGGER.info("Finding accounts with filters: {}", criteria);
-    return AccountMapper.toAccountDto(accountRepository.findAccounts(criteria));
+    return AccountMapper.toAccountDto(accountRepository.findAccounts(userId, criteria));
   }
 
   @Override

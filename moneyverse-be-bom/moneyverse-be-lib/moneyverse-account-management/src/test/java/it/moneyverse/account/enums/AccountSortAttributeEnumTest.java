@@ -15,7 +15,6 @@ class AccountSortAttributeEnumTest {
     assertEquals(Account_.ACCOUNT_CATEGORY, AccountSortAttributeEnum.ACCOUNT_CATEGORY.getField());
     assertEquals(Account_.BALANCE, AccountSortAttributeEnum.BALANCE.getField());
     assertEquals(Account_.BALANCE_TARGET, AccountSortAttributeEnum.BALANCE_TARGET.getField());
-    assertEquals(Account_.USER_ID, AccountSortAttributeEnum.USER_ID.getField());
   }
 
   @Test
@@ -24,6 +23,5 @@ class AccountSortAttributeEnumTest {
     assertFalse(AccountSortAttributeEnum.ACCOUNT_CATEGORY.isDefault());
     assertFalse(AccountSortAttributeEnum.BALANCE.isDefault());
     assertFalse(AccountSortAttributeEnum.BALANCE_TARGET.isDefault());
-    assertFalse(AccountSortAttributeEnum.USER_ID.isDefault());
   }
 }

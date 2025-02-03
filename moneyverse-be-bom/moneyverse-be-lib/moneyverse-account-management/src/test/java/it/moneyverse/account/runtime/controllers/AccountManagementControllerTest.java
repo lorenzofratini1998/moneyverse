@@ -131,11 +131,12 @@ class AccountManagementControllerTest {
   @Test
   void testGetAccounts_Success(@Mock AccountCriteria criteria, @Mock List<AccountDto> response)
       throws Exception {
-    when(accountService.findAccounts(criteria)).thenReturn(response);
+    UUID userId = RandomUtils.randomUUID();
+    when(accountService.findAccounts(userId, criteria)).thenReturn(response);
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get(basePath + "/accounts")
+            MockMvcRequestBuilders.get(basePath + "/accounts/users/" + userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());

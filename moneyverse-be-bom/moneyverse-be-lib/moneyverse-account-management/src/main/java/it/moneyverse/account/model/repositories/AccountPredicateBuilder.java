@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AccountPredicateBuilder {
 
@@ -22,20 +23,14 @@ public class AccountPredicateBuilder {
     predicates = new ArrayList<>();
   }
 
-  public Predicate build(AccountCriteria param) {
-    withUserId(param);
+  public Predicate build(UUID userId, AccountCriteria param) {
+    predicates.add(cb.equal(root.get(Account_.USER_ID), userId));
     withBalance(param);
     withBalanceTarget(param);
     withAccountCategory(param);
     withCurrency(param);
     withIsDefault(param);
     return cb.and(predicates.toArray(new Predicate[0]));
-  }
-
-  private void withUserId(AccountCriteria param) {
-    param
-        .getUserId()
-        .ifPresent(userId -> predicates.add(cb.equal(root.get(Account_.USER_ID), userId)));
   }
 
   private void withBalance(AccountCriteria param) {

@@ -112,11 +112,9 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
     return new AccountCriteriaRandomGenerator(getCurrentInstance()).generate();
   }
 
-  public List<Account> filterAccounts(AccountCriteria criteria) {
+  public List<Account> filterAccounts(UUID userId, AccountCriteria criteria) {
     return accounts.stream()
-        .filter(
-            account ->
-                criteria.getUserId().map(userId -> userId.equals(account.getUserId())).orElse(true))
+        .filter(account -> userId.equals(account.getUserId()))
         .filter(
             account ->
                 criteria
@@ -175,7 +173,6 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
               a.getAccountCategory().getName().compareTo(b.getAccountCategory().getName());
           case BALANCE -> a.getBalance().compareTo(b.getBalance());
           case BALANCE_TARGET -> a.getBalanceTarget().compareTo(b.getBalanceTarget());
-          case USER_ID -> a.getUserId().compareTo(b.getUserId());
           default -> 0;
         };
 
