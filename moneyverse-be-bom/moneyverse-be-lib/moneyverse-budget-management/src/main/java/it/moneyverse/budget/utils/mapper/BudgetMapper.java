@@ -14,7 +14,7 @@ public class BudgetMapper {
       return null;
     }
     Budget budget = new Budget();
-    budget.setUsername(request.username());
+    budget.setUserId(request.userId());
     budget.setBudgetName(request.budgetName());
     budget.setDescription(request.description());
     budget.setBudgetLimit(request.budgetLimit());
@@ -29,7 +29,7 @@ public class BudgetMapper {
     }
     return BudgetDto.builder()
         .withBudgetId(budget.getBudgetId())
-        .withUsername(budget.getUsername())
+        .withUserId(budget.getUserId())
         .withBudgetName(budget.getBudgetName())
         .withDescription(budget.getDescription())
         .withBudgetLimit(budget.getBudgetLimit())

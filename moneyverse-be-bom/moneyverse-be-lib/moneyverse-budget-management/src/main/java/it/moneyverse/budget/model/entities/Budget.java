@@ -11,7 +11,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 @Table(
     name = "BUDGETS",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"USERNAME", "BUDGET_NAME"})})
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"USER_ID", "BUDGET_NAME"})})
 public class Budget extends Auditable implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
@@ -21,8 +21,8 @@ public class Budget extends Auditable implements Serializable {
   @Column(name = "BUDGET_ID")
   private UUID budgetId;
 
-  @Column(name = "USERNAME", nullable = false)
-  private String username;
+  @Column(name = "USER_ID", nullable = false)
+  private UUID userId;
 
   @Column(name = "BUDGET_NAME", nullable = false)
   private String budgetName;
@@ -48,12 +48,12 @@ public class Budget extends Auditable implements Serializable {
     this.budgetId = budgetId;
   }
 
-  public String getUsername() {
-    return username;
+  public UUID getUserId() {
+    return userId;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setUserId(UUID userId) {
+    this.userId = userId;
   }
 
   public String getBudgetName() {

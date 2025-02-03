@@ -56,28 +56,28 @@ public class BudgetManagementService implements BudgetService {
   @Override
   @Transactional
   public BudgetDto createBudget(BudgetRequestDto request) {
-    checkIfUserExists(request.username());
+    checkIfUserExists(request.userId());
     checkIfCurrencyExists(request.currency());
-    checkIfBudgetAlreadyExists(request.username(), request.budgetName());
-    LOGGER.info("Creating budget {} for user {}", request.budgetName(), request.username());
+    checkIfBudgetAlreadyExists(request.userId(), request.budgetName());
+    LOGGER.info("Creating budget {} for user {}", request.budgetName(), request.userId());
     Budget budget = BudgetMapper.toBudget(request);
     BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
-    LOGGER.info("Created budget {} for user {}", result, request.username());
+    LOGGER.info("Created budget {} for user {}", result, request.userId());
     return result;
   }
 
   @Override
   @Transactional
-  public void createDefaultBudgets(String username, String currency) {
-    checkIfUserExists(username);
+  public void createDefaultBudgets(UUID userId, String currency) {
+    checkIfUserExists(userId);
     checkIfCurrencyExists(currency);
-    LOGGER.info("Creating default budgets for user {}", username);
+    LOGGER.info("Creating default budgets for user {}", userId);
     List<Budget> defaultBudgets =
         defaultBudgetTemplateRepository.findAll().stream()
             .map(
                 defaultBudgetTemplate -> {
                   Budget budget = new Budget();
-                  budget.setUsername(username);
+                  budget.setUserId(userId);
                   budget.setBudgetName(defaultBudgetTemplate.getName());
                   budget.setDescription(defaultBudgetTemplate.getDescription());
                   budget.setCurrency(currency);
@@ -89,10 +89,10 @@ public class BudgetManagementService implements BudgetService {
     budgetRepository.saveAll(defaultBudgets);
   }
 
-  private void checkIfBudgetAlreadyExists(String username, String budgetName) {
-    if (Boolean.TRUE.equals(budgetRepository.existsByUsernameAndBudgetName(username, budgetName))) {
+  private void checkIfBudgetAlreadyExists(UUID userId, String budgetName) {
+    if (Boolean.TRUE.equals(budgetRepository.existsByUserIdAndBudgetName(userId, budgetName))) {
       throw new ResourceAlreadyExistsException(
-          "Budget with name %s already exists for user %s".formatted(budgetName, username));
+          "Budget with name %s already exists for user %s".formatted(budgetName, userId));
     }
   }
 
@@ -126,7 +126,7 @@ public class BudgetManagementService implements BudgetService {
     }
     budget = BudgetMapper.partialUpdate(budget, budgetDto);
     BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
-    LOGGER.info("Updated budget {} for user {}", result, budget.getUsername());
+    LOGGER.info("Updated budget {} for user {}", result, budget.getUserId());
     return result;
   }
 
@@ -136,21 +136,21 @@ public class BudgetManagementService implements BudgetService {
     Budget budget = findBudgetById(budgetId);
     budgetRepository.delete(budget);
     messageProducer.send(
-        new BudgetDeletionEvent(budgetId, budget.getUsername()), BudgetDeletionTopic.TOPIC);
-    LOGGER.info("Deleted budget {} for user {}", budget, budget.getUsername());
+        new BudgetDeletionEvent(budgetId, budget.getUserId()), BudgetDeletionTopic.TOPIC);
+    LOGGER.info("Deleted budget {} for user {}", budget, budget.getUserId());
   }
 
   @Override
   @Transactional
-  public void deleteAllBudgets(String username) {
-    checkIfUserExists(username);
-    LOGGER.info("Deleting accounts by username {}", username);
-    budgetRepository.deleteAll(budgetRepository.findBudgetByUsername(username));
+  public void deleteAllBudgets(UUID userId) {
+    checkIfUserExists(userId);
+    LOGGER.info("Deleting accounts by username {}", userId);
+    budgetRepository.deleteAll(budgetRepository.findBudgetByUserId(userId));
   }
 
-  private void checkIfUserExists(String username) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+  private void checkIfUserExists(UUID userId) {
+    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
+      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
     }
   }
 

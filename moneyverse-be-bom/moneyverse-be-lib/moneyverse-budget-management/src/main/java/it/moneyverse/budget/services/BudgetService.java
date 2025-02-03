@@ -11,11 +11,12 @@ public interface BudgetService {
 
   BudgetDto createBudget(BudgetRequestDto budgetDto);
 
-  void createDefaultBudgets(String username, String currency);
+  void createDefaultBudgets(UUID userId, String currency);
 
   List<BudgetDto> getBudgets(BudgetCriteria criteria);
   BudgetDto getBudget(UUID budgetId);
   BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto budgetDto);
   void deleteBudget(UUID budgetId);
-  void deleteAllBudgets(String username);
+
+  void deleteAllBudgets(UUID userId);
 }

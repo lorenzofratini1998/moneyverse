@@ -77,9 +77,9 @@ class BudgetConsumerTest {
   @Test
   void testOnUserDeletion() {
     final UserModel userModel = testContext.getRandomUser();
-    final List<Budget> userBudgets = testContext.getBudgets(userModel.getUsername());
+    final List<Budget> userBudgets = testContext.getBudgets(userModel.getUserId());
     final long initialSize = budgetRepository.count();
-    String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUsername()));
+    String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUserId()));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
@@ -100,7 +100,7 @@ class BudgetConsumerTest {
     String event =
         JsonUtils.toJson(
             new UserCreationEvent(
-                RandomUtils.randomString(15), RandomUtils.randomString(3).toUpperCase()));
+                RandomUtils.randomUUID(), RandomUtils.randomString(3).toUpperCase()));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserCreationTopic.TOPIC, RandomUtils.randomUUID(), event);
 

@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ public class BudgetFactory {
     for (UserModel user : users) {
       int numBudgetsPerUser = RandomUtils.randomInteger(MIN_BUDGETS_PER_USER, MAX_BUDGETS_PER_USER);
       for (int i = 0; i < numBudgetsPerUser; i++) {
-        budgets.add(BudgetFactory.fakeBudget(user.getUsername(), i));
+        budgets.add(BudgetFactory.fakeBudget(user.getUserId(), i));
       }
     }
     LOGGER.info("Created {} random budgets for testing", budgets.size());
@@ -35,11 +36,11 @@ public class BudgetFactory {
     return defaultBudgetTemplates;
   }
 
-  public static Budget fakeBudget(String username, Integer counter) {
+  public static Budget fakeBudget(UUID userId, Integer counter) {
     counter = counter + 1;
     Budget budget = new Budget();
     budget.setBudgetId(RandomUtils.randomUUID());
-    budget.setUsername(username);
+    budget.setUserId(userId);
     budget.setBudgetName("Budget %s".formatted(counter));
     budget.setDescription(RandomUtils.randomString(30));
     budget.setBudgetLimit(

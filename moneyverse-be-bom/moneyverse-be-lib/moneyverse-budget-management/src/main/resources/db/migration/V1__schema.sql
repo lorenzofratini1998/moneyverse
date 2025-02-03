@@ -1,11 +1,11 @@
 CREATE TABLE budgets
 (
     budget_id          UUID         NOT NULL,
-    username           VARCHAR(255) NOT NULL,
+    user_id UUID NOT NULL,
     budget_name        VARCHAR(255) NOT NULL,
     budget_description VARCHAR(255),
     budget_limit       DECIMAL(18, 2),
-    amount             DECIMAL(18, 2)              DEFAULT 0.0,
+    amount  DECIMAL(18, 2) DEFAULT 0.0,
     currency           VARCHAR(3)   NOT NULL,
     created_by         VARCHAR(255) NOT NULL,
     created_at         TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -23,7 +23,7 @@ CREATE TABLE default_budget_templates
 );
 
 ALTER TABLE budgets
-    ADD CONSTRAINT uc_520ab3469ae1482057b4c5fb4 UNIQUE (username, budget_name);
+    ADD CONSTRAINT uc_520ab3469ae1482057b4c5fb4 UNIQUE (user_id, budget_name);
 
 ALTER TABLE default_budget_templates
     ADD CONSTRAINT uc_default_budget_templates_name UNIQUE (name);

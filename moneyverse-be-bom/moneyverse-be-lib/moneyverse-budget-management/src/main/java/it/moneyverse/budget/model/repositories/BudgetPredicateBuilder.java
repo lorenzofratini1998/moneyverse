@@ -22,17 +22,17 @@ public class BudgetPredicateBuilder {
   }
 
   public Predicate build(BudgetCriteria param) {
-    withUsername(param);
+    withUserId(param);
     withAmount(param);
     withBudgetLimit(param);
     withCurrency(param);
     return cb.and(predicates.toArray(new Predicate[0]));
   }
 
-  private void withUsername(BudgetCriteria param) {
+  private void withUserId(BudgetCriteria param) {
     param
-        .getUsername()
-        .ifPresent(username -> predicates.add(cb.equal(root.get(Budget_.USERNAME), username)));
+        .getUserId()
+        .ifPresent(userId -> predicates.add(cb.equal(root.get(Budget_.USER_ID), userId)));
   }
 
   private void withAmount(BudgetCriteria param) {

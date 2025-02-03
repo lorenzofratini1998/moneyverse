@@ -11,6 +11,7 @@ import it.moneyverse.budget.model.entities.BudgetFactory;
 import it.moneyverse.budget.model.entities.DefaultBudgetTemplate;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
@@ -18,6 +19,7 @@ import it.moneyverse.test.services.SQLScriptService;
 import it.moneyverse.test.utils.RandomUtils;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Sort;
 
 public class BudgetTestContext extends TestContext<BudgetTestContext> {
@@ -26,6 +28,13 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
 
   private final List<Budget> budgets;
   private final List<DefaultBudgetTemplate> defaultBudgetTemplates;
+
+  public BudgetTestContext(KeycloakContainer keycloakContainer) {
+    super(keycloakContainer);
+    budgets = BudgetFactory.createBudgets(getUsers());
+    defaultBudgetTemplates = BudgetFactory.createDefaultBudgetTemplates();
+    setCurrentInstance(this);
+  }
 
   public BudgetTestContext() {
     super();
@@ -49,27 +58,27 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
     return budgets;
   }
 
-  public List<Budget> getBudgets(String username) {
-    return budgets.stream().filter(budget -> username.equals(budget.getUsername())).toList();
+  public List<Budget> getBudgets(UUID userId) {
+    return budgets.stream().filter(budget -> userId.equals(budget.getUserId())).toList();
   }
 
   public List<DefaultBudgetTemplate> getDefaultBudgetTemplates() {
     return defaultBudgetTemplates;
   }
 
-  public Budget getRandomBudget(String username) {
+  public Budget getRandomBudget(UUID userId) {
     List<Budget> userBudgets =
-        budgets.stream().filter(budget -> budget.getUsername().equals(username)).toList();
+        budgets.stream().filter(budget -> budget.getUserId().equals(userId)).toList();
     return userBudgets.get(RandomUtils.randomInteger(0, userBudgets.size() - 1));
   }
 
-  public BudgetRequestDto createBudgetForUser(String username) {
-    return toBudgetRequest(BudgetFactory.fakeBudget(username, budgets.size()));
+  public BudgetRequestDto createBudgetForUser(UUID userId) {
+    return toBudgetRequest(BudgetFactory.fakeBudget(userId, budgets.size()));
   }
 
   private BudgetRequestDto toBudgetRequest(Budget budget) {
     return new BudgetRequestDto(
-        budget.getUsername(),
+        budget.getUserId(),
         budget.getBudgetName(),
         budget.getDescription(),
         budget.getBudgetLimit(),
@@ -79,7 +88,7 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
 
   public BudgetDto getExpectedBudgetDto(BudgetRequestDto request) {
     return BudgetDto.builder()
-        .withUsername(request.username())
+        .withUserId(request.userId())
         .withBudgetName(request.budgetName())
         .withDescription(request.description())
         .withBudgetLimit(request.budgetLimit())
@@ -96,10 +105,7 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
     return budgets.stream()
         .filter(
             budget ->
-                criteria
-                    .getUsername()
-                    .map(username -> username.equals(budget.getUsername()))
-                    .orElse(true))
+                criteria.getUserId().map(userId -> userId.equals(budget.getUserId())).orElse(true))
         .filter(
             budget ->
                 criteria

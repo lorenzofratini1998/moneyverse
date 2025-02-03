@@ -93,12 +93,12 @@ class BudgetManagementControllerTest {
 
   private static Stream<Supplier<BudgetRequestDto>> invalidBudgetRequestProvider() {
     return Stream.of(
-        BudgetManagementControllerTest::createRequestWithNullUsername,
+        BudgetManagementControllerTest::createRequestWithNullUserId,
         BudgetManagementControllerTest::createRequestWithNullBudgetName,
         BudgetManagementControllerTest::createRequestWithNullCurrency);
   }
 
-  private static BudgetRequestDto createRequestWithNullUsername() {
+  private static BudgetRequestDto createRequestWithNullUserId() {
     return new BudgetRequestDto(
         null,
         RandomUtils.randomString(15),
@@ -110,7 +110,7 @@ class BudgetManagementControllerTest {
 
   private static BudgetRequestDto createRequestWithNullBudgetName() {
     return new BudgetRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         null,
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
@@ -120,7 +120,7 @@ class BudgetManagementControllerTest {
 
   private static BudgetRequestDto createRequestWithNullCurrency() {
     return new BudgetRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
@@ -132,7 +132,7 @@ class BudgetManagementControllerTest {
   void testBudgetCreation_BudgetAlreadyExists() throws Exception {
     BudgetRequestDto request =
         new BudgetRequestDto(
-            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
             RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
@@ -163,7 +163,7 @@ class BudgetManagementControllerTest {
 
   private BudgetRequestDto createBudgetRequest() {
     return new BudgetRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
