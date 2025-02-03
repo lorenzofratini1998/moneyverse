@@ -17,6 +17,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -36,7 +37,7 @@ class AccountPredicateBuilderTest {
       @Mock Predicate predicate,
       @Mock Path<Object> accountCategoryPath) {
     when(root.get(Account_.ACCOUNT_CATEGORY)).thenReturn(accountCategoryPath);
-    when(criteria.getUsername()).thenReturn(Optional.of(RandomUtils.randomString(25)));
+    when(criteria.getUserId()).thenReturn(Optional.of(RandomUtils.randomUUID()));
     when(criteria.getAccountCategory()).thenReturn(Optional.of(RandomUtils.randomString(15)));
     when(criteria.getCurrency()).thenReturn(Optional.of(RandomUtils.randomString(3)));
     when(criteria.getIsDefault()).thenReturn(Optional.of(RandomUtils.randomBoolean()));
@@ -53,7 +54,8 @@ class AccountPredicateBuilderTest {
     Predicate result = new AccountPredicateBuilder(cb, root).build(criteria);
 
     assertNotNull(result);
-    verify(cb, times(3)).equal(any(), any(String.class));
+    verify(cb, times(1)).equal(any(), any(UUID.class));
+    verify(cb, times(2)).equal(any(), any(String.class));
     verify(cb, times(1)).equal(any(), any(Boolean.class));
     verify(cb, times(2)).greaterThan(any(), any(BigDecimal.class));
     verify(cb, times(2)).lessThan(any(), any(BigDecimal.class));

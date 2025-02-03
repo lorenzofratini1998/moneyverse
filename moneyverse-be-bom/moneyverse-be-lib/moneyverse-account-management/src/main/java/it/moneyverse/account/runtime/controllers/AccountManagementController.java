@@ -23,8 +23,7 @@ public class AccountManagementController implements AccountOperations {
   @Override
   @PostMapping("/accounts")
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize(
-      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or #request.username == authentication.name")
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
   public AccountDto createAccount(@RequestBody AccountRequestDto request) {
     return accountService.createAccount(request);
   }
@@ -33,7 +32,7 @@ public class AccountManagementController implements AccountOperations {
   @GetMapping("/accounts")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
-      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (#criteria.username.isPresent() and #criteria.username.get().equals(authentication.name))")
+      "(#criteria.userId.isPresent() and @securityService.isAuthenticatedUserOwner(#criteria.userId.get()))")
   public List<AccountDto> getAccounts(AccountCriteria criteria) {
     return accountService.findAccounts(criteria);
   }
@@ -42,7 +41,7 @@ public class AccountManagementController implements AccountOperations {
   @GetMapping("/accounts/{accountId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
-      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@accountRepository.existsByUsernameAndAccountId(authentication.name, #accountId))")
+      "@accountRepository.existsByUserIdAndAccountId(@securityService.getAuthenticatedUserId(), #accountId)")
   public AccountDto findAccountById(@PathVariable UUID accountId) {
     return accountService.findAccountByAccountId(accountId);
   }
@@ -51,8 +50,9 @@ public class AccountManagementController implements AccountOperations {
   @PutMapping("/accounts/{accountId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
-      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@accountRepository.existsByUsernameAndAccountId(authentication.name, #accountId))")
-  public AccountDto updateAccount(@PathVariable UUID accountId, @RequestBody AccountUpdateRequestDto request) {
+      "@accountRepository.existsByUserIdAndAccountId(@securityService.getAuthenticatedUserId(), #accountId)")
+  public AccountDto updateAccount(
+      @PathVariable UUID accountId, @RequestBody AccountUpdateRequestDto request) {
     return accountService.updateAccount(accountId, request);
   }
 
@@ -60,7 +60,7 @@ public class AccountManagementController implements AccountOperations {
   @DeleteMapping("/accounts/{accountId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PreAuthorize(
-      "hasRole(T(it.moneyverse.core.enums.UserRoleEnum).ADMIN.name()) or (@accountRepository.existsByUsernameAndAccountId(authentication.name, #accountId))")
+      "@accountRepository.existsByUserIdAndAccountId(@securityService.getAuthenticatedUserId(), #accountId)")
   public void deleteAccount(@PathVariable UUID accountId) {
     accountService.deleteAccount(accountId);
   }

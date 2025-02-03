@@ -119,7 +119,7 @@ class AccountManagementControllerTest {
 
   private AccountRequestDto createAccountRequest() {
     return new AccountRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
@@ -302,14 +302,13 @@ class AccountManagementControllerTest {
 
   private static Stream<Supplier<AccountRequestDto>> invalidAccountRequestProvider() {
     return Stream.of(
-        AccountManagementControllerTest::createRequestWithNullUsername,
+        AccountManagementControllerTest::createRequestWithNullUserId,
         AccountManagementControllerTest::createRequestWithNullAccountName,
         AccountManagementControllerTest::createRequestWithNullAccountCategory,
-        AccountManagementControllerTest::createRequestWithNullCurrency,
-        AccountManagementControllerTest::createRequestWithExceedUsername);
+        AccountManagementControllerTest::createRequestWithNullCurrency);
   }
 
-  private static AccountRequestDto createRequestWithNullUsername() {
+  private static AccountRequestDto createRequestWithNullUserId() {
     return new AccountRequestDto(
         null,
         RandomUtils.randomString(15),
@@ -322,7 +321,7 @@ class AccountManagementControllerTest {
 
   private static AccountRequestDto createRequestWithNullAccountName() {
     return new AccountRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         null,
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
@@ -333,7 +332,7 @@ class AccountManagementControllerTest {
 
   private static AccountRequestDto createRequestWithNullAccountCategory() {
     return new AccountRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
@@ -344,24 +343,12 @@ class AccountManagementControllerTest {
 
   private static AccountRequestDto createRequestWithNullCurrency() {
     return new AccountRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
         null);
-  }
-
-  private static AccountRequestDto createRequestWithExceedUsername() {
-    final String username = RandomUtils.randomString(100);
-    return new AccountRequestDto(
-        username,
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase());
   }
 }

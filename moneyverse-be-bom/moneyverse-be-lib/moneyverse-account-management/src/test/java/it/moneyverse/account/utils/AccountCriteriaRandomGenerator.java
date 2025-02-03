@@ -33,7 +33,7 @@ public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<Acco
   }
 
   private void withRandomUsername() {
-    criteria.setUsername(Math.random() < 0.5 ? testContext.getRandomUser().getUsername() : null);
+    criteria.setUserId(Math.random() < 0.5 ? testContext.getRandomUser().getUserId() : null);
   }
 
   private void withRandomBalance() {

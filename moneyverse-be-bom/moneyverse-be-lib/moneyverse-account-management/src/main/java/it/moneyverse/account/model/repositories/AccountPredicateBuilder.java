@@ -23,7 +23,7 @@ public class AccountPredicateBuilder {
   }
 
   public Predicate build(AccountCriteria param) {
-    withUsername(param);
+    withUserId(param);
     withBalance(param);
     withBalanceTarget(param);
     withAccountCategory(param);
@@ -32,10 +32,10 @@ public class AccountPredicateBuilder {
     return cb.and(predicates.toArray(new Predicate[0]));
   }
 
-  private void withUsername(AccountCriteria param) {
+  private void withUserId(AccountCriteria param) {
     param
-        .getUsername()
-        .ifPresent(username -> predicates.add(cb.equal(root.get(Account_.USERNAME), username)));
+        .getUserId()
+        .ifPresent(userId -> predicates.add(cb.equal(root.get(Account_.USER_ID), userId)));
   }
 
   private void withBalance(AccountCriteria param) {

@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -57,21 +58,21 @@ public abstract class TestContext<SELF extends TestContext<SELF>> {
         .orElseThrow(() -> new IllegalStateException("No admin found"));
   }
 
-  public String getAuthenticationToken(String username) {
-    return keycloakTestManager.getTestAuthenticationToken(getUserCredential(username));
+  public String getAuthenticationToken(UUID userId) {
+    return keycloakTestManager.getTestAuthenticationToken(getUserCredential(userId));
   }
 
-  private UserCredential getUserCredential(String username) {
-    return Optional.of(getUser(username))
+  private UserCredential getUserCredential(UUID userId) {
+    return Optional.of(getUser(userId))
         .map(user -> new UserCredential(user.getUsername(), user.getPassword()))
-        .orElseThrow(() -> new IllegalArgumentException("No user found with username " + username));
+        .orElseThrow(() -> new IllegalArgumentException("No user found with username " + userId));
   }
 
-  private UserModel getUser(String username) {
+  private UserModel getUser(UUID userId) {
     return getUsers().stream()
-        .filter(user -> user.getUsername().equals(username))
+        .filter(user -> user.getUserId().equals(userId))
         .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("No user found with username " + username));
+        .orElseThrow(() -> new IllegalArgumentException("No user found with user ID " + userId));
   }
 
   protected boolean filterByBound(BigDecimal value, BoundCriteria boundCriteria) {

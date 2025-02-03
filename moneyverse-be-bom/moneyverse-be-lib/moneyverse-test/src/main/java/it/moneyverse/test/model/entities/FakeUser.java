@@ -22,6 +22,7 @@ public class FakeUser extends FakeAuditable implements UserModel {
 
   public FakeUser(Integer counter) {
     counter = counter + 1;
+    this.userId = RandomUtils.randomUUID();
     this.name = "Test %s".formatted(counter);
     this.surname = "Test %s".formatted(counter);
     this.email = "test%s@example.com".formatted(counter);

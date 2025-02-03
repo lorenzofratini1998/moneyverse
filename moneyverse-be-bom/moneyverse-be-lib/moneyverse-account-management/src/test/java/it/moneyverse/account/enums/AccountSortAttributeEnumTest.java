@@ -7,23 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import it.moneyverse.account.model.entities.Account_;
 import org.junit.jupiter.api.Test;
 
-public class AccountSortAttributeEnumTest {
+class AccountSortAttributeEnumTest {
 
   @Test
-  public void fieldTest() {
+  void fieldTest() {
     assertEquals(Account_.ACCOUNT_NAME, AccountSortAttributeEnum.ACCOUNT_NAME.getField());
     assertEquals(Account_.ACCOUNT_CATEGORY, AccountSortAttributeEnum.ACCOUNT_CATEGORY.getField());
     assertEquals(Account_.BALANCE, AccountSortAttributeEnum.BALANCE.getField());
     assertEquals(Account_.BALANCE_TARGET, AccountSortAttributeEnum.BALANCE_TARGET.getField());
-    assertEquals(Account_.USERNAME, AccountSortAttributeEnum.USERNAME.getField());
+    assertEquals(Account_.USER_ID, AccountSortAttributeEnum.USER_ID.getField());
   }
 
   @Test
-  public void isDefaultTest() {
+  void isDefaultTest() {
     assertTrue(AccountSortAttributeEnum.ACCOUNT_NAME.isDefault());
     assertFalse(AccountSortAttributeEnum.ACCOUNT_CATEGORY.isDefault());
     assertFalse(AccountSortAttributeEnum.BALANCE.isDefault());
     assertFalse(AccountSortAttributeEnum.BALANCE_TARGET.isDefault());
-    assertFalse(AccountSortAttributeEnum.USERNAME.isDefault());
+    assertFalse(AccountSortAttributeEnum.USER_ID.isDefault());
   }
 }

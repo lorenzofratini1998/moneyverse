@@ -60,17 +60,17 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(
       @Mock Account account, @Mock AccountCategory category, @Mock AccountDto accountDto) {
-    final String username = RandomUtils.randomString(15);
+    final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(username, categoryName);
+    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
-    when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
+    when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
         .thenReturn(false);
     when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.of(category));
     mapper.when(() -> AccountMapper.toAccount(request, category)).thenReturn(account);
-    when(accountRepository.findDefaultAccountsByUser(request.username()))
+    when(accountRepository.findDefaultAccountsByUserId(request.userId()))
         .thenReturn(Collections.emptyList());
     when(accountRepository.save(any(Account.class))).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(accountDto);
@@ -78,67 +78,64 @@ class AccountManagementServiceTest {
     accountDto = accountManagementService.createAccount(request);
 
     assertNotNull(accountDto);
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
     verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
-    verify(accountRepository, times(1))
-        .existsByUsernameAndAccountName(username, request.accountName());
+    verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
     verify(accountCategoryRepository, times(1)).findByName(categoryName);
     mapper.verify(() -> AccountMapper.toAccount(request, category), times(1));
-    verify(accountRepository, times(1)).findDefaultAccountsByUser(request.username());
+    verify(accountRepository, times(1)).findDefaultAccountsByUserId(request.userId());
     verify(accountRepository, times(1)).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
   }
 
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenUserNotFound() {
-    final String username = RandomUtils.randomString(15);
+    final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(username, categoryName);
+    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(false);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
     verify(accountCategoryRepository, never()).findByName(categoryName);
-    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
+    verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
-    verify(accountRepository, never())
-        .existsByUsernameAndAccountName(username, request.accountName());
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(accountRepository, never()).existsByUserIdAndAccountName(userId, request.accountName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
   }
 
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenCurrencyNotFound() {
-    final String username = RandomUtils.randomString(15);
+    final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(username, categoryName);
+    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
     verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     verify(accountCategoryRepository, never()).findByName(categoryName);
-    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
+    verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
-    verify(accountRepository, never())
-        .existsByUsernameAndAccountName(username, request.accountName());
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(accountRepository, never()).existsByUserIdAndAccountName(userId, request.accountName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
   }
 
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenAccountAlreadyExists() {
-    final String username = RandomUtils.randomString(15);
+    final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(username, categoryName);
+    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
-    when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
+    when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
         .thenReturn(true);
 
     assertThrows(
@@ -146,22 +143,21 @@ class AccountManagementServiceTest {
         () -> accountManagementService.createAccount(request));
 
     verify(accountCategoryRepository, never()).findByName(categoryName);
-    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
+    verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
-    verify(accountRepository, times(1))
-        .existsByUsernameAndAccountName(username, request.accountName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
+    verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
   }
 
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenCategoryNotFound() {
-    final String username = RandomUtils.randomString(15);
+    final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(username, categoryName);
+    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
-    when(accountRepository.existsByUsernameAndAccountName(username, request.accountName()))
+    when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
         .thenReturn(false);
     when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.empty());
 
@@ -169,16 +165,15 @@ class AccountManagementServiceTest {
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
     verify(accountCategoryRepository, times(1)).findByName(categoryName);
-    verify(accountRepository, never()).findDefaultAccountsByUser(request.username());
+    verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
-    verify(accountRepository, times(1))
-        .existsByUsernameAndAccountName(username, request.accountName());
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
   }
 
-  private AccountRequestDto createAccountRequestDto(String username, String categoryName) {
+  private AccountRequestDto createAccountRequestDto(UUID userId, String categoryName) {
     return new AccountRequestDto(
-        username,
+        userId,
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
@@ -271,7 +266,7 @@ class AccountManagementServiceTest {
     when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
-    when(accountRepository.findDefaultAccountsByUser(any())).thenReturn(List.of(defaultAccount));
+    when(accountRepository.findDefaultAccountsByUserId(any())).thenReturn(List.of(defaultAccount));
     when(defaultAccount.getAccountId()).thenReturn(RandomUtils.randomUUID());
     when(accountRepository.save(defaultAccount)).thenReturn(defaultAccount);
     when(accountRepository.save(account)).thenReturn(account);
@@ -284,7 +279,7 @@ class AccountManagementServiceTest {
     verify(accountCategoryRepository, times(1)).findByName(any(String.class));
     verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
-    verify(accountRepository, times(1)).findDefaultAccountsByUser(any());
+    verify(accountRepository, times(1)).findDefaultAccountsByUserId(any());
     verify(accountRepository, times(1)).save(defaultAccount);
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));

@@ -52,26 +52,26 @@ public class AccountManagementService implements AccountService {
   @Override
   @Transactional
   public AccountDto createAccount(AccountRequestDto request) {
-    checkIfUserExists(request.username());
+    checkIfUserExists(request.userId());
     checkIfCurrencyExists(request.currency());
-    checkIfAccountAlreadyExists(request.username(), request.accountName());
+    checkIfAccountAlreadyExists(request.userId(), request.accountName());
     AccountCategory category = findAccountCategory(request.accountCategory());
-    LOGGER.info("Creating account {} for user {}", request.accountName(), request.username());
+    LOGGER.info("Creating account {} for user {}", request.accountName(), request.userId());
     Account account = AccountMapper.toAccount(request, category);
-    if (accountRepository.findDefaultAccountsByUser(request.username()).isEmpty()) {
-      LOGGER.info("Setting default account for user {}", request.username());
+    if (accountRepository.findDefaultAccountsByUserId(request.userId()).isEmpty()) {
+      LOGGER.info("Setting default account for user {}", request.userId());
       account.setDefault(Boolean.TRUE);
     } else {
       account.setDefault(Boolean.FALSE);
     }
     AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
-    LOGGER.info("Saved account {} for user {}", result.getAccountId(), request.username());
+    LOGGER.info("Saved account {} for user {}", result.getAccountId(), request.userId());
     return result;
   }
 
-  private void checkIfUserExists(String username) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+  private void checkIfUserExists(UUID userId) {
+    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
+      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
     }
   }
 
@@ -81,9 +81,8 @@ public class AccountManagementService implements AccountService {
     }
   }
 
-  private void checkIfAccountAlreadyExists(String username, String accountName) {
-    if (Boolean.TRUE.equals(
-        accountRepository.existsByUsernameAndAccountName(username, accountName))) {
+  private void checkIfAccountAlreadyExists(UUID userId, String accountName) {
+    if (Boolean.TRUE.equals(accountRepository.existsByUserIdAndAccountName(userId, accountName))) {
       throw new ResourceAlreadyExistsException(
           "Account with name %s already exists".formatted(accountName));
     }
@@ -122,7 +121,7 @@ public class AccountManagementService implements AccountService {
     }
     account = AccountMapper.partialUpdate(account, request, category);
     if (Boolean.TRUE.equals(request.isDefault())) {
-      accountRepository.findDefaultAccountsByUser(account.getUsername()).stream()
+      accountRepository.findDefaultAccountsByUserId(account.getUserId()).stream()
           .filter(defaultAcc -> !defaultAcc.getAccountId().equals(accountId))
           .forEach(
               defaultAcc -> {
@@ -131,7 +130,7 @@ public class AccountManagementService implements AccountService {
               });
     }
     AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
-    LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUsername());
+    LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUserId());
     return result;
   }
 
@@ -147,15 +146,15 @@ public class AccountManagementService implements AccountService {
     Account account = findAccountById(accountId);
     accountRepository.delete(account);
     messageProducer.send(
-        new AccountDeletionEvent(accountId, account.getUsername()), AccountDeletionTopic.TOPIC);
-    LOGGER.info("Deleted account {} for user {}", account.getUsername(), account.getUsername());
+        new AccountDeletionEvent(accountId, account.getUserId()), AccountDeletionTopic.TOPIC);
+    LOGGER.info("Deleted account {} for user {}", account.getAccountId(), account.getUserId());
   }
 
   @Transactional
   @Override
-  public void deleteAccountsByUsername(String username) {
-    LOGGER.info("Deleting accounts by username {}", username);
-    accountRepository.deleteAll(accountRepository.findAccountByUsername(username));
+  public void deleteAccountsByUserId(UUID userId) {
+    LOGGER.info("Deleting accounts by user ID {}", userId);
+    accountRepository.deleteAll(accountRepository.findAccountByUserId(userId));
   }
 
   @Transactional(readOnly = true)

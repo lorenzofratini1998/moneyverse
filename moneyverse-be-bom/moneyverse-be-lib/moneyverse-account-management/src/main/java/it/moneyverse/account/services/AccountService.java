@@ -16,7 +16,7 @@ public interface AccountService {
 
   void deleteAccount(UUID accountId);
 
-  void deleteAccountsByUsername(String username);
+  void deleteAccountsByUserId(UUID userId);
 
   List<AccountCategoryDto> getAccountCategories();
 }

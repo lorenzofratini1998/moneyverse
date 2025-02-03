@@ -4,9 +4,19 @@ import java.util.UUID;
 
 public class UserDeletionEvent implements MessageEvent<UUID, String> {
 
-  private final UUID userId;
+  private UUID userId;
+
+  public UserDeletionEvent() {}
 
   public UserDeletionEvent(UUID userId) {
+    this.userId = userId;
+  }
+
+  public UUID getUserId() {
+    return userId;
+  }
+
+  public void setUserId(UUID userId) {
     this.userId = userId;
   }
 

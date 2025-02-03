@@ -5,16 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record AccountRequestDto(
-    @NotNull(message = "'Username' must not be null")
-        @Size(max = 64, message = "'Username' must not exceed 64 characters")
-        String username,
+    @NotNull(message = "'User ID' must not be null") UUID userId,
     @NotEmpty(message = "'Account name' must not be empty or null") String accountName,
     BigDecimal balance,
     BigDecimal balanceTarget,

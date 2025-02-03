@@ -5,7 +5,11 @@ import java.util.UUID;
 
 public class SecurityService {
 
-  public Boolean isAuthenticatedUser(UUID userId) {
-    return userId.equals(UUID.fromString(SecurityContextUtils.getAuthenticatedUser().getId()));
+  public boolean isAuthenticatedUserOwner(UUID userId) {
+    return userId.equals(SecurityContextUtils.getAuthenticatedUser().getId());
+  }
+
+  public UUID getAuthenticatedUserId() {
+    return SecurityContextUtils.getAuthenticatedUser().getId();
   }
 }

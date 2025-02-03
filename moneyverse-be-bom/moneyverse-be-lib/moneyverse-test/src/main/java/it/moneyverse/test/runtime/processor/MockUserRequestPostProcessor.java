@@ -45,7 +45,7 @@ public class MockUserRequestPostProcessor {
     Collection<GrantedAuthority> authorities =
         List.of(new SimpleGrantedAuthority("ROLE_" + UserRoleEnum.USER));
     Principal principal =
-        AuthenticatedUser.builder().withId(userId.toString()).withAuthorities(authorities).build();
+        AuthenticatedUser.builder().withId(userId).withAuthorities(authorities).build();
     return new UsernamePasswordAuthenticationToken(principal, null, authorities);
   }
 }

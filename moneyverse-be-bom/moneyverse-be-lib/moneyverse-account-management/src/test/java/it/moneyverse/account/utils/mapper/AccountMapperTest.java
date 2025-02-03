@@ -48,7 +48,7 @@ class AccountMapperTest {
     category.setName(RandomUtils.randomString(15).toUpperCase());
     AccountRequestDto request =
         new AccountRequestDto(
-            RandomUtils.randomString(25),
+            RandomUtils.randomUUID(),
             RandomUtils.randomString(25),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
@@ -58,7 +58,7 @@ class AccountMapperTest {
 
     Account account = AccountMapper.toAccount(request, category);
 
-    assertEquals(request.username(), account.getUsername());
+    assertEquals(request.userId(), account.getUserId());
     assertEquals(request.accountName(), account.getAccountName());
     assertEquals(request.balance(), account.getBalance());
     assertEquals(request.balanceTarget(), account.getBalanceTarget());
@@ -79,7 +79,7 @@ class AccountMapperTest {
     AccountDto accountDto = AccountMapper.toAccountDto(account);
 
     assertEquals(account.getAccountId(), accountDto.getAccountId());
-    assertEquals(account.getUsername(), accountDto.getUsername());
+    assertEquals(account.getUserId(), accountDto.getUserId());
     assertEquals(account.getAccountName(), accountDto.getAccountName());
     assertEquals(account.getBalance(), accountDto.getBalance());
     assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
@@ -108,7 +108,7 @@ class AccountMapperTest {
       AccountDto accountDto = accountDtos.get(i);
 
       assertEquals(account.getAccountId(), accountDto.getAccountId());
-      assertEquals(account.getUsername(), accountDto.getUsername());
+      assertEquals(account.getUserId(), accountDto.getUserId());
       assertEquals(account.getAccountName(), accountDto.getAccountName());
       assertEquals(account.getBalance(), accountDto.getBalance());
       assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
@@ -149,7 +149,7 @@ class AccountMapperTest {
     AccountCategory category = new AccountCategory();
     category.setName(RandomUtils.randomString(15).toUpperCase());
     account.setAccountId(RandomUtils.randomUUID());
-    account.setUsername(RandomUtils.randomString(25));
+    account.setUserId(RandomUtils.randomUUID());
     account.setAccountName(RandomUtils.randomString(25));
     account.setBalance(RandomUtils.randomBigDecimal());
     account.setBalanceTarget(RandomUtils.randomBigDecimal());

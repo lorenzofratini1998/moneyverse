@@ -48,10 +48,10 @@ public enum AccountSortAttributeEnum implements SortAttribute {
       return false;
     }
   },
-  USERNAME {
+  USER_ID {
     @Override
     public String getField() {
-      return Account_.USERNAME;
+      return Account_.USER_ID;
     }
 
     @Override

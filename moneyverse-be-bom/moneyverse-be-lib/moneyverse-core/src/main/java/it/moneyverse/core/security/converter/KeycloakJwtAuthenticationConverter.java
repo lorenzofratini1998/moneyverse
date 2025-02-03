@@ -10,6 +10,7 @@ import it.moneyverse.core.model.auth.AuthenticatedUser;
 import jakarta.annotation.Nonnull;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.UUID;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +32,7 @@ public class KeycloakJwtAuthenticationConverter
     Collection<GrantedAuthority> authorities = authoritiesConverter.convert(jwt);
     Principal principal =
         AuthenticatedUser.builder()
-            .withId(jwt.getSubject())
+            .withId(UUID.fromString(jwt.getSubject()))
             .withName(jwt.getClaimAsString(CLAIM_GIVEN_NAME))
             .withSurname(jwt.getClaimAsString(CLAIM_FAMILY_NAME))
             .withUsername(jwt.getClaimAsString(CLAIM_PREFERRED_USERNAME))
