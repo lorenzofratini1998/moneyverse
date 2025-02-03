@@ -21,7 +21,7 @@ public class TagMapper {
     }
     return TagDto.builder()
         .withTagId(tag.getTagId())
-        .withUsername(tag.getUsername())
+        .withUserId(tag.getUserId())
         .withTagName(tag.getTagName())
         .withDescription(tag.getDescription())
         .build();

@@ -25,7 +25,7 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class TransactionPredicateBuilderTest {
+class TransactionPredicateBuilderTest {
 
   @Test
   void testBuildPredicate(
@@ -35,7 +35,7 @@ public class TransactionPredicateBuilderTest {
       @Mock Predicate predicate,
       @Mock Join<Transaction, Tag> tagJoins,
       @Mock Path<Object> object) {
-    when(criteria.getUsername()).thenReturn(Optional.of(RandomUtils.randomString(25)));
+    when(criteria.getUserId()).thenReturn(Optional.of(RandomUtils.randomUUID()));
     when(criteria.getAccounts()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
     when(criteria.getBudgets()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
     when(criteria.getAmount()).thenReturn(Optional.of(randomBoundCriteria()));
@@ -57,8 +57,7 @@ public class TransactionPredicateBuilderTest {
     Predicate result = new TransactionPredicateBuilder(cb, root).build(criteria);
 
     assertNotNull(result);
-    verify(cb, times(1)).equal(any(), any(String.class));
-    verify(cb, times(3)).equal(any(), any(UUID.class));
+    verify(cb, times(4)).equal(any(), any(UUID.class));
     verify(cb, times(1)).lessThanOrEqualTo(any(), any(BigDecimal.class));
     verify(cb, times(1)).greaterThanOrEqualTo(any(), any(BigDecimal.class));
     verify(cb, times(1)).lessThanOrEqualTo(any(), any(LocalDate.class));

@@ -39,14 +39,14 @@ public class TransactionCriteriaRandomGenerator
   }
 
   private void withRandomUsername() {
-    criteria.setUsername(Math.random() < 0.5 ? testContext.getRandomUser().getUsername() : null);
+    criteria.setUserId(Math.random() < 0.5 ? testContext.getRandomUser().getUserId() : null);
   }
 
   private void withRandomAccounts() {
-    if (criteria.getUsername().isPresent() && Math.random() < 0.5) {
+    if (criteria.getUserId().isPresent() && Math.random() < 0.5) {
       List<UUID> accounts =
           testContext.getTransactions().stream()
-              .filter(transaction -> transaction.getUsername().equals(criteria.getUsername().get()))
+              .filter(transaction -> transaction.getUserId().equals(criteria.getUserId().get()))
               .map(Transaction::getAccountId)
               .toList();
       List<UUID> randomAccounts = new ArrayList<>();
@@ -62,10 +62,10 @@ public class TransactionCriteriaRandomGenerator
   }
 
   private void withRandomBudgets() {
-    if (criteria.getUsername().isPresent() && Math.random() < 0.5) {
+    if (criteria.getUserId().isPresent() && Math.random() < 0.5) {
       List<UUID> budgets =
           testContext.getTransactions().stream()
-              .filter(transaction -> transaction.getUsername().equals(criteria.getUsername().get()))
+              .filter(transaction -> transaction.getUserId().equals(criteria.getUserId().get()))
               .map(Transaction::getBudgetId)
               .toList();
       List<UUID> randomBudgets = new ArrayList<>();
@@ -93,10 +93,10 @@ public class TransactionCriteriaRandomGenerator
   }
 
   private void withRandomTags() {
-    if (criteria.getUsername().isPresent() && Math.random() < 0.5) {
+    if (criteria.getUserId().isPresent() && Math.random() < 0.5) {
       List<UUID> tags =
           testContext.getTransactions().stream()
-              .filter(transaction -> transaction.getUsername().equals(criteria.getUsername().get()))
+              .filter(transaction -> transaction.getUserId().equals(criteria.getUserId().get()))
               .flatMap(t -> t.getTags().stream().map(Tag::getTagId))
               .toList();
       List<UUID> randomTags = new ArrayList<>();

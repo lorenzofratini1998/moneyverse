@@ -1,8 +1,11 @@
 package it.moneyverse.transaction.utils;
 
+import static it.moneyverse.transaction.enums.TransactionSortAttributeEnum.*;
+
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.annotations.datasource.TestModelEntity;
+import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
@@ -16,13 +19,10 @@ import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.TagFactory;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.TransactionFactory;
-import org.springframework.data.domain.Sort;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-
-import static it.moneyverse.transaction.enums.TransactionSortAttributeEnum.*;
+import org.springframework.data.domain.Sort;
 
 public class TransactionTestContext extends TestContext<TransactionTestContext> {
 
@@ -30,6 +30,13 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   @TestModelEntity private final List<Tag> tags;
   @TestModelEntity private final List<Transaction> transactions;
+
+  public TransactionTestContext(KeycloakContainer keycloakContainer) {
+    super(keycloakContainer);
+    this.tags = TagFactory.createTags(getUsers());
+    this.transactions = TransactionFactory.createTransactions(getUsers(), tags);
+    setCurrentInstance(this);
+  }
 
   public TransactionTestContext() {
     super();
@@ -57,8 +64,8 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return transactions;
   }
 
-  public List<Transaction> getTransactions(String username) {
-    return transactions.stream().filter(t -> t.getUsername().equals(username)).toList();
+  public List<Transaction> getTransactions(UUID userId) {
+    return transactions.stream().filter(t -> t.getUserId().equals(userId)).toList();
   }
 
   public List<Transaction> getTransactionsByAccountId(UUID accountId) {
@@ -69,10 +76,10 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return transactions.stream().filter(t -> t.getAccountId().equals(budgetId)).toList();
   }
 
-  public TransactionRequestDto createTransactionRequest(String username) {
-    Transaction transaction = TransactionFactory.fakeTransaction(username);
+  public TransactionRequestDto createTransactionRequest(UUID userId) {
+    Transaction transaction = TransactionFactory.fakeTransaction(userId);
     return new TransactionRequestDto(
-        transaction.getUsername(),
+        transaction.getUserId(),
         transaction.getAccountId(),
         transaction.getBudgetId(),
         transaction.getDate(),
@@ -84,7 +91,7 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   public TransactionDto getExpectedTransactionDto(TransactionRequestDto request) {
     return TransactionDto.builder()
-        .withUsername(request.username())
+        .withUserId(request.userId())
         .withAccountId(request.accountId())
         .withBudgetId(request.budgetId())
         .withDescription(request.description())
@@ -99,8 +106,8 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
         .filter(
             transaction ->
                 criteria
-                    .getUsername()
-                    .map(username -> username.equals(transaction.getUsername()))
+                    .getUserId()
+                    .map(userId -> userId.equals(transaction.getUserId()))
                     .orElse(true))
         .filter(
             transaction ->
@@ -140,7 +147,7 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
     int comparison =
         switch (attribute) {
-          case USERNAME -> a.getUsername().compareTo(b.getUsername());
+          case USER_ID -> a.getUserId().compareTo(b.getUserId());
           case DATE -> a.getDate().compareTo(b.getDate());
           case AMOUNT -> a.getAmount().compareTo(b.getAmount());
           default -> 0;
@@ -153,14 +160,14 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return new TransactionCriteriaRandomGenerator(getCurrentInstance()).generate();
   }
 
-  public Transaction getRandomTransaction(String username) {
+  public Transaction getRandomTransaction(UUID userId) {
     List<Transaction> userTransactions =
-        transactions.stream().filter(t -> t.getUsername().equals(username)).toList();
+        transactions.stream().filter(t -> t.getUserId().equals(userId)).toList();
     return userTransactions.get(RandomUtils.randomInteger(0, userTransactions.size() - 1));
   }
 
-  public Tag getRandomTag(String username) {
-    List<Tag> userTags = tags.stream().filter(t -> t.getUsername().equals(username)).toList();
+  public Tag getRandomTag(UUID userId) {
+    List<Tag> userTags = tags.stream().filter(t -> t.getUserId().equals(userId)).toList();
     return userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1));
   }
 

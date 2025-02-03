@@ -10,7 +10,7 @@ import java.util.UUID;
 @Entity
 @Table(
     name = "TAGS",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"USERNAME", "TAG_NAME"})})
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"USER_ID", "TAG_NAME"})})
 public class Tag implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
@@ -20,8 +20,8 @@ public class Tag implements Serializable {
   @Column(name = "TAG_ID")
   private UUID tagId;
 
-  @Column(name = "USERNAME", nullable = false)
-  private String username;
+  @Column(name = "USER_ID", nullable = false)
+  private UUID userId;
 
   @Column(name = "TAG_NAME", nullable = false)
   private String tagName;
@@ -40,12 +40,12 @@ public class Tag implements Serializable {
     this.tagId = tagId;
   }
 
-  public String getUsername() {
-    return username;
+  public UUID getUserId() {
+    return userId;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setUserId(UUID userId) {
+    this.userId = userId;
   }
 
   public String getTagName() {

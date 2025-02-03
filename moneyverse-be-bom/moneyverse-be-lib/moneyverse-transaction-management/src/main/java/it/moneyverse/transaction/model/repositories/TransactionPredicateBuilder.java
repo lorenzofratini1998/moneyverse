@@ -25,7 +25,7 @@ public class TransactionPredicateBuilder {
   }
 
   public Predicate build(TransactionCriteria param) {
-    withUsername(param);
+    withUserId(param);
     withAccounts(param);
     withBudgets(param);
     withDate(param);
@@ -34,10 +34,10 @@ public class TransactionPredicateBuilder {
     return cb.and(predicates.toArray(new Predicate[0]));
   }
 
-  private void withUsername(TransactionCriteria param) {
+  private void withUserId(TransactionCriteria param) {
     param
-        .getUsername()
-        .ifPresent(username -> predicates.add(cb.equal(root.get(Transaction_.USERNAME), username)));
+        .getUserId()
+        .ifPresent(userId -> predicates.add(cb.equal(root.get(Transaction_.USER_ID), userId)));
   }
 
   private void withAccounts(TransactionCriteria criteria) {

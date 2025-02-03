@@ -272,7 +272,7 @@ class TransactionManagementServiceTest {
   private TransactionRequestDto createTransactionRequest() {
     UUID tagId = RandomUtils.randomUUID();
     return new TransactionRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomLocalDate(2024, 2025),
@@ -284,26 +284,30 @@ class TransactionManagementServiceTest {
 
   @Test
   void givenUsername_WhenDeleteAllTransactions_ThenDeleteAllTransactions() {
-      String username = RandomUtils.randomString(15);
+    UUID userId = RandomUtils.randomUUID();
 
-      when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
 
-      transactionManagementService.deleteAllTransactionsByUsername(username);
+    transactionManagementService.deleteAllTransactionsByUserId(userId);
 
-      verify(userServiceClient, times(1)).checkIfUserExists(username);
-      verify(transactionRepository, times(1)).deleteAll(transactionRepository.findTransactionByUsername(username));
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
+    verify(transactionRepository, times(1))
+        .deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 
   @Test
   void givenUsername_WhenDeleteAllTransactions_ThenUserNotFound() {
-    String username = RandomUtils.randomString(15);
+    UUID userId = RandomUtils.randomUUID();
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(false);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(false);
 
-    assertThrows(ResourceNotFoundException.class, () -> transactionManagementService.deleteAllTransactionsByUsername(username));
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> transactionManagementService.deleteAllTransactionsByUserId(userId));
 
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
-    verify(transactionRepository, times(0)).deleteAll(transactionRepository.findTransactionByUsername(username));
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
+    verify(transactionRepository, times(0))
+        .deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 
   @Test

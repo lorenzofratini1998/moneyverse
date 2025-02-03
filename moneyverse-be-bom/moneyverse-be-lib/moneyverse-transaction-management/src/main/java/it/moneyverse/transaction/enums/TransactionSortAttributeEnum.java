@@ -4,10 +4,10 @@ import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.transaction.model.entities.Transaction_;
 
 public enum TransactionSortAttributeEnum implements SortAttribute {
-  USERNAME {
+  USER_ID {
     @Override
     public String getField() {
-      return Transaction_.USERNAME;
+      return Transaction_.USER_ID;
     }
 
     @Override

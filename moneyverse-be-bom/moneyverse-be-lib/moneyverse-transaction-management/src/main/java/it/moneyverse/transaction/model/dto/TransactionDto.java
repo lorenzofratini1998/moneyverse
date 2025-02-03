@@ -20,7 +20,7 @@ import java.util.UUID;
 public class TransactionDto implements Serializable {
 
   private final UUID transactionId;
-  private final String username;
+  private final UUID userId;
   private final UUID accountId;
   private final UUID budgetId;
   private final LocalDate date;
@@ -31,7 +31,7 @@ public class TransactionDto implements Serializable {
 
   public TransactionDto(Builder builder) {
     this.transactionId = builder.transactionId;
-    this.username = builder.username;
+    this.userId = builder.userId;
     this.accountId = builder.accountId;
     this.budgetId = builder.budgetId;
     this.date = builder.date;
@@ -47,7 +47,7 @@ public class TransactionDto implements Serializable {
 
   public static class Builder {
     private UUID transactionId;
-    private String username;
+    private UUID userId;
     private UUID accountId;
     private UUID budgetId;
     private LocalDate date;
@@ -61,8 +61,8 @@ public class TransactionDto implements Serializable {
       return this;
     }
 
-    public Builder withUsername(String username) {
-      this.username = username;
+    public Builder withUserId(UUID userId) {
+      this.userId = userId;
       return this;
     }
 
@@ -110,8 +110,8 @@ public class TransactionDto implements Serializable {
     return transactionId;
   }
 
-  public String getUsername() {
-    return username;
+  public UUID getUserId() {
+    return userId;
   }
 
   public UUID getAccountId() {

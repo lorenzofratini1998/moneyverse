@@ -122,7 +122,7 @@ public class TransactionManagementService implements TransactionService {
     TransactionDto result =
         TransactionMapper.toTransactionDto(transactionRepository.save(transaction));
     LOGGER.info(
-        "Updated transaction: {} for user {}", result.getTransactionId(), result.getUsername());
+        "Updated transaction: {} for user {}", result.getTransactionId(), result.getUserId());
     return result;
   }
 
@@ -140,16 +140,16 @@ public class TransactionManagementService implements TransactionService {
     LOGGER.info(
         "Deleted transaction: {} for user {}",
         transaction.getTransactionId(),
-        transaction.getUsername());
+        transaction.getUserId());
   }
 
   @Override
-  public void deleteAllTransactionsByUsername(String username) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+  public void deleteAllTransactionsByUserId(UUID userId) {
+    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
+      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
     }
-    LOGGER.info("Deleting transactions by username {}", username);
-    transactionRepository.deleteAll(transactionRepository.findTransactionByUsername(username));
+    LOGGER.info("Deleting transactions by userId {}", userId);
+    transactionRepository.deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 
   @Override
