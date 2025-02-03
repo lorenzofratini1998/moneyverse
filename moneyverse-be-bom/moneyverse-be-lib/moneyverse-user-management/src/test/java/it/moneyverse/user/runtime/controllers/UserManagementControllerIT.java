@@ -85,7 +85,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
     preference = preferenceRepository.save(preference);
     final UserModel userModel = testContext.getRandomUser();
     UUID userId = userModel.getUserId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final List<UserPreferenceRequest> request =
         Collections.singletonList(
             UserTestUtils.createUserPreferenceRequest(preference.getPreferenceId()));
@@ -109,7 +109,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   void testGetUserPreferences() {
     final UserModel userModel = testContext.getRandomUser();
     UUID userId = userModel.getUserId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final boolean mandatory = Math.random() < 0.5;
     List<UserPreference> expected =
         mandatory
@@ -136,7 +136,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetPreferences() {
     final UserModel userModel = testContext.getRandomUser();
-    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
     final boolean mandatory = Math.random() < 0.5;
     List<Preference> expected =
         mandatory ? testContext.getMandatoryPreferences() : testContext.getPreferences();
@@ -161,7 +161,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetUser() {
     final UserModel userModel = testContext.getRandomUser();
-    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
 
     ResponseEntity<UserDto> response =
         restTemplate.exchange(
@@ -181,7 +181,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetUpdateUser() {
     final UserModel userModel = testContext.getRandomUser();
-    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
     UserUpdateRequestDto request =
         new UserUpdateRequestDto(RandomUtils.randomString(10), RandomUtils.randomString(10), null);
 
@@ -203,7 +203,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testDisableUser() {
     final UserModel userModel = testContext.getRandomUser();
-    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
 
     ResponseEntity<Void> response =
         restTemplate.exchange(
@@ -218,7 +218,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testDeleteUser() {
     final UserModel userModel = testContext.getRandomUser();
-    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
 
     ResponseEntity<Void> response =
         restTemplate.exchange(

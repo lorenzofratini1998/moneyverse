@@ -26,8 +26,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @Override
   @PostMapping("/users/{userId}/preferences")
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize(
-      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
   public UserPreferenceDto createUserPreferences(
       @PathVariable UUID userId, @RequestBody List<UserPreferenceRequest> request) {
     return preferenceService.createUserPreferences(userId, request);
@@ -36,8 +35,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @Override
   @GetMapping("/users/{userId}/preferences")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize(
-      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
   public UserPreferenceDto getUserPreferences(
       @PathVariable UUID userId, @RequestParam(required = false) Boolean mandatory) {
     return preferenceService.getUserPreferences(userId, mandatory);
@@ -53,8 +51,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @Override
   @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize(
-      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
   public UserDto getUser(@PathVariable UUID userId) {
     return userService.getUser(userId);
   }
@@ -62,8 +59,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @Override
   @PutMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize(
-      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
   public UserDto updateUser(@PathVariable UUID userId, @RequestBody UserUpdateRequestDto request) {
     return userService.updateUser(userId, request);
   }
@@ -71,8 +67,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @Override
   @DeleteMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize(
-      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
   public void deleteUser(@PathVariable UUID userId) {
     userService.deleteUser(userId);
   }
@@ -80,8 +75,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @Override
   @PatchMapping("/users/{userId}/disable")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize(
-      "T(it.moneyverse.core.utils.SecurityContextUtils).getAuthenticatedUser().id.equals(#userId.toString())")
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
   public void disableUser(@PathVariable UUID userId) {
     userService.disableUser(userId);
   }
