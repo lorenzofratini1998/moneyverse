@@ -32,12 +32,11 @@ public class BudgetManagementController implements BudgetOperations {
   }
 
   @Override
-  @GetMapping("/budgets")
+  @GetMapping("/budgets/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize(
-      "(#criteria.userId.isPresent() and @securityService.isAuthenticatedUserOwner(#criteria.userId.get()))")
-  public List<BudgetDto> getBudgets(BudgetCriteria criteria) {
-    return budgetService.getBudgets(criteria);
+  @PreAuthorize("(@securityService.isAuthenticatedUserOwner(#userId))")
+  public List<BudgetDto> getBudgets(@PathVariable UUID userId, BudgetCriteria criteria) {
+    return budgetService.getBudgets(userId, criteria);
   }
 
   @Override

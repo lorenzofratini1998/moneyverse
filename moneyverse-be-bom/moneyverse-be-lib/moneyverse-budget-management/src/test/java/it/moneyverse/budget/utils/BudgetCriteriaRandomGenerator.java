@@ -21,17 +21,12 @@ public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<Budge
 
   @Override
   public BudgetCriteria generate() {
-    withRandomUsername();
     withRandomAmount();
     withRandomBudgetLimit();
     withRandomCurrency();
     withPage();
     withSort();
     return criteria;
-  }
-
-  private void withRandomUsername() {
-    criteria.setUserId(Math.random() < 0.5 ? testContext.getRandomUser().getUserId() : null);
   }
 
   private void withRandomAmount() {

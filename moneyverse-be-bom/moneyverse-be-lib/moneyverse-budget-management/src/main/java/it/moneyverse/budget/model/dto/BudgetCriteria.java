@@ -6,24 +6,14 @@ import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.utils.JsonUtils;
 import java.util.Optional;
-import java.util.UUID;
 
 public class BudgetCriteria {
-
-  private UUID userId;
+  
   private BoundCriteria amount;
   private BoundCriteria budgetLimit;
   private String currency;
   private PageCriteria page;
   private SortCriteria<BudgetSortAttributeEnum> sort;
-
-  public Optional<UUID> getUserId() {
-    return Optional.ofNullable(userId);
-  }
-
-  public void setUserId(UUID userId) {
-    this.userId = userId;
-  }
 
   public Optional<BoundCriteria> getAmount() {
     return Optional.ofNullable(amount);

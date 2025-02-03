@@ -13,7 +13,8 @@ public interface BudgetService {
 
   void createDefaultBudgets(UUID userId, String currency);
 
-  List<BudgetDto> getBudgets(BudgetCriteria criteria);
+  List<BudgetDto> getBudgets(UUID userId, BudgetCriteria criteria);
+
   BudgetDto getBudget(UUID budgetId);
   BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto budgetDto);
   void deleteBudget(UUID budgetId);

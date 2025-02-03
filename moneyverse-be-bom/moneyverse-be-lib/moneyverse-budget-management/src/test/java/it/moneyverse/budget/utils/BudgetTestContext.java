@@ -101,11 +101,9 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
     return budgets.size();
   }
 
-  public List<Budget> filterBudgets(BudgetCriteria criteria) {
+  public List<Budget> filterBudgets(UUID userId, BudgetCriteria criteria) {
     return budgets.stream()
-        .filter(
-            budget ->
-                criteria.getUserId().map(userId -> userId.equals(budget.getUserId())).orElse(true))
+        .filter(budget -> userId.equals(budget.getUserId()))
         .filter(
             budget ->
                 criteria

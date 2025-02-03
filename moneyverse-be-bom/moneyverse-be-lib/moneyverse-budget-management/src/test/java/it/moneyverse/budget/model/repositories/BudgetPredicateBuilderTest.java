@@ -31,7 +31,7 @@ class BudgetPredicateBuilderTest {
       @Mock CriteriaBuilder cb,
       @Mock Root<Budget> root,
       @Mock Predicate predicate) {
-    when(criteria.getUserId()).thenReturn(Optional.of(RandomUtils.randomUUID()));
+    UUID userId = RandomUtils.randomUUID();
     when(criteria.getAmount()).thenReturn(Optional.of(randomBoundCriteria()));
     when(criteria.getBudgetLimit()).thenReturn(Optional.of(randomBoundCriteria()));
     when(criteria.getCurrency()).thenReturn(Optional.of(RandomUtils.randomString(3).toUpperCase()));
@@ -41,10 +41,9 @@ class BudgetPredicateBuilderTest {
     when(cb.lessThan(any(), any(BigDecimal.class))).thenReturn(predicate);
     when(cb.and(any(Predicate[].class))).thenReturn(predicate);
 
-    Predicate result = new BudgetPredicateBuilder(cb, root).build(criteria);
+    Predicate result = new BudgetPredicateBuilder(cb, root).build(userId, criteria);
 
     assertNotNull(result);
-    verify(cb, times(1)).equal(any(), any(UUID.class));
     verify(cb, times(1)).equal(any(), any(String.class));
     verify(cb, times(2)).greaterThan(any(), any(BigDecimal.class));
     verify(cb, times(2)).lessThan(any(), any(BigDecimal.class));

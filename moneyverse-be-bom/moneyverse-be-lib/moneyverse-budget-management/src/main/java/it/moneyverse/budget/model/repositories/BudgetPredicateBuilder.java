@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class BudgetPredicateBuilder {
 
@@ -21,18 +22,12 @@ public class BudgetPredicateBuilder {
     this.predicates = new ArrayList<>();
   }
 
-  public Predicate build(BudgetCriteria param) {
-    withUserId(param);
+  public Predicate build(UUID userId, BudgetCriteria param) {
+    predicates.add(cb.equal(root.get(Budget_.USER_ID), userId));
     withAmount(param);
     withBudgetLimit(param);
     withCurrency(param);
     return cb.and(predicates.toArray(new Predicate[0]));
-  }
-
-  private void withUserId(BudgetCriteria param) {
-    param
-        .getUserId()
-        .ifPresent(userId -> predicates.add(cb.equal(root.get(Budget_.USER_ID), userId)));
   }
 
   private void withAmount(BudgetCriteria param) {

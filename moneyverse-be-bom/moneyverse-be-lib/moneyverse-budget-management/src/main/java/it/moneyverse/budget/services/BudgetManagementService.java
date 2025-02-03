@@ -98,7 +98,7 @@ public class BudgetManagementService implements BudgetService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<BudgetDto> getBudgets(BudgetCriteria criteria) {
+  public List<BudgetDto> getBudgets(UUID userId, BudgetCriteria criteria) {
     if (criteria.getPage() == null) {
       criteria.setPage(new PageCriteria());
     }
@@ -108,7 +108,7 @@ public class BudgetManagementService implements BudgetService {
               SortAttribute.getDefault(BudgetSortAttributeEnum.class), Sort.Direction.ASC));
     }
     LOGGER.info("Finding budgets with filters: {}", criteria);
-    return BudgetMapper.toBudgetDto(budgetRepository.findBudgets(criteria));
+    return BudgetMapper.toBudgetDto(budgetRepository.findBudgets(userId, criteria));
   }
 
   @Override

@@ -174,11 +174,12 @@ class BudgetManagementControllerTest {
   @Test
   void testGetBudgets_Success(@Mock BudgetCriteria criteria, @Mock List<BudgetDto> response)
       throws Exception {
-    when(budgetService.getBudgets(criteria)).thenReturn(response);
+    UUID userId = RandomUtils.randomUUID();
+    when(budgetService.getBudgets(userId, criteria)).thenReturn(response);
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get(basePath + "/budgets")
+            MockMvcRequestBuilders.get(basePath + "/budgets/users/" + userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
