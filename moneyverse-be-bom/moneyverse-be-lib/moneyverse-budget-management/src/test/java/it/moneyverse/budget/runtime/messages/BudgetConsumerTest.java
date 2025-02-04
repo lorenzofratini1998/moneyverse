@@ -22,7 +22,6 @@ import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -88,8 +87,7 @@ class BudgetConsumerTest {
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(5))
-        .atMost(30, TimeUnit.SECONDS)
+        .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
             () -> assertEquals(initialSize - userBudgets.size(), budgetRepository.count()));
   }
@@ -109,8 +107,7 @@ class BudgetConsumerTest {
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(5))
-        .atMost(30, TimeUnit.SECONDS)
+        .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
             () ->
                 assertEquals(

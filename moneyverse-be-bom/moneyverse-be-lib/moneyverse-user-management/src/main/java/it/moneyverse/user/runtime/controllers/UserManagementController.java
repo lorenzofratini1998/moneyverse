@@ -44,7 +44,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @Override
   @GetMapping("/preferences")
   @ResponseStatus(HttpStatus.OK)
-  public List<PreferenceDto> getPreferences(@RequestParam Boolean mandatory) {
+  public List<PreferenceDto> getPreferences(@RequestParam(required = false) Boolean mandatory) {
     return preferenceService.getPreferences(mandatory);
   }
 
