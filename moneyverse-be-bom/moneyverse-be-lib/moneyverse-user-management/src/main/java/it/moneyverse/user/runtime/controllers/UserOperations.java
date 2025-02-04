@@ -1,0 +1,16 @@
+package it.moneyverse.user.runtime.controllers;
+
+import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.model.dto.UserUpdateRequestDto;
+import java.util.UUID;
+
+public interface UserOperations {
+
+  UserDto getUser(UUID userId);
+
+  UserDto updateUser(UUID userId, UserUpdateRequestDto request);
+
+  void disableUser(UUID userId);
+
+  void deleteUser(UUID userId);
+}

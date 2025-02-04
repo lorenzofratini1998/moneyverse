@@ -18,7 +18,7 @@ public class TransactionMapper {
       return null;
     }
     Transaction transaction = new Transaction();
-    transaction.setUsername(request.username());
+    transaction.setUserId(request.userId());
     transaction.setAccountId(request.accountId());
     transaction.setBudgetId(request.budgetId());
     transaction.setDate(request.date());
@@ -47,7 +47,7 @@ public class TransactionMapper {
     }
     return TransactionDto.builder()
         .withTransactionId(transaction.getTransactionId())
-        .withUsername(transaction.getUsername())
+        .withUserId(transaction.getUserId())
         .withAccountId(transaction.getAccountId())
         .withBudgetId(transaction.getBudgetId())
         .withDate(transaction.getDate())

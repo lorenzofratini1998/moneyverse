@@ -47,16 +47,5 @@ public enum AccountSortAttributeEnum implements SortAttribute {
     public Boolean isDefault() {
       return false;
     }
-  },
-  USERNAME {
-    @Override
-    public String getField() {
-      return Account_.USERNAME;
-    }
-
-    @Override
-    public Boolean isDefault() {
-      return false;
-    }
   }
 }

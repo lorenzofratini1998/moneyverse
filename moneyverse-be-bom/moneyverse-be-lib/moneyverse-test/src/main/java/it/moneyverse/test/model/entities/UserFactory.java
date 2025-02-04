@@ -1,5 +1,8 @@
 package it.moneyverse.test.model.entities;
 
+import static it.moneyverse.test.utils.FakeUtils.MAX_USERS;
+import static it.moneyverse.test.utils.FakeUtils.MIN_USERS;
+
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
@@ -10,8 +13,6 @@ import org.slf4j.LoggerFactory;
 public class UserFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserFactory.class);
-  private static final Integer MIN_USERS = 50;
-  private static final Integer MAX_USERS = 200;
 
   public static List<UserModel> createUsers() {
     int numUsers = RandomUtils.randomInteger(MIN_USERS, MAX_USERS);

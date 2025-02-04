@@ -33,7 +33,7 @@ class TransactionMapperTest {
   void testToTransaction_ValidTransactionRequest_EmptyTags() {
     TransactionRequestDto request =
         new TransactionRequestDto(
-            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
             RandomUtils.randomUUID(),
             RandomUtils.randomUUID(),
             RandomUtils.randomLocalDate(2024, 2025),
@@ -44,7 +44,7 @@ class TransactionMapperTest {
 
     Transaction result = TransactionMapper.toTransaction(request, tagRepository);
 
-    assertEquals(request.username(), result.getUsername());
+    assertEquals(request.userId(), result.getUserId());
     assertEquals(request.accountId(), result.getAccountId());
     assertEquals(request.budgetId(), result.getBudgetId());
     assertEquals(request.date(), result.getDate());
@@ -58,7 +58,7 @@ class TransactionMapperTest {
     UUID tagId = RandomUtils.randomUUID();
     TransactionRequestDto request =
         new TransactionRequestDto(
-            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
             RandomUtils.randomUUID(),
             RandomUtils.randomUUID(),
             RandomUtils.randomLocalDate(2024, 2025),
@@ -70,7 +70,7 @@ class TransactionMapperTest {
 
     Transaction result = TransactionMapper.toTransaction(request, tagRepository);
 
-    assertEquals(request.username(), result.getUsername());
+    assertEquals(request.userId(), result.getUserId());
     assertEquals(request.accountId(), result.getAccountId());
     assertEquals(request.budgetId(), result.getBudgetId());
     assertEquals(request.date(), result.getDate());
@@ -84,7 +84,7 @@ class TransactionMapperTest {
     UUID tagId = RandomUtils.randomUUID();
     TransactionRequestDto request =
         new TransactionRequestDto(
-            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
             RandomUtils.randomUUID(),
             RandomUtils.randomUUID(),
             RandomUtils.randomLocalDate(2024, 2025),
@@ -111,7 +111,6 @@ class TransactionMapperTest {
     TransactionDto result = TransactionMapper.toTransactionDto(transaction);
 
     assertEquals(transaction.getTransactionId(), result.getTransactionId());
-    assertEquals(transaction.getUsername(), result.getUsername());
     assertEquals(transaction.getAccountId(), result.getAccountId());
     assertEquals(transaction.getBudgetId(), result.getBudgetId());
     assertEquals(transaction.getDate(), result.getDate());
@@ -141,7 +140,7 @@ class TransactionMapperTest {
       TransactionDto transactionDto = transactionDtos.get(i);
 
       assertEquals(transaction.getTransactionId(), transactionDto.getTransactionId());
-      assertEquals(transaction.getUsername(), transactionDto.getUsername());
+      assertEquals(transaction.getUserId(), transactionDto.getUserId());
       assertEquals(transaction.getAccountId(), transactionDto.getAccountId());
       assertEquals(transaction.getBudgetId(), transactionDto.getBudgetId());
       assertEquals(transaction.getDate(), transactionDto.getDate());
@@ -198,7 +197,7 @@ class TransactionMapperTest {
   private Transaction createTransaction() {
     Transaction transaction = new Transaction();
     transaction.setTransactionId(RandomUtils.randomUUID());
-    transaction.setUsername(RandomUtils.randomString(15));
+    transaction.setUserId(RandomUtils.randomUUID());
     transaction.setAccountId(RandomUtils.randomUUID());
     transaction.setBudgetId(RandomUtils.randomUUID());
     transaction.setDate(RandomUtils.randomLocalDate(2024, 2025));

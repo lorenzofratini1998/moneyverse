@@ -9,6 +9,7 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.utils.TransactionTestContext;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,10 +66,11 @@ public class TransactionCustomRepositoryImplTest {
 
   @Test
   void givenCriteria_TheReturnFilteredBudgets() {
-    TransactionCriteria criteria = testContext.createTransactionCriteria();
-    List<Transaction> expected = testContext.filterTransactions(criteria);
+    UUID userId = testContext.getRandomUser().getUserId();
+    TransactionCriteria criteria = testContext.createTransactionCriteria(userId);
+    List<Transaction> expected = testContext.filterTransactions(userId, criteria);
 
-    List<Transaction> actual = customRepository.findTransactions(criteria);
+    List<Transaction> actual = customRepository.findTransactions(userId, criteria);
     assertEquals(expected.size(), actual.size());
   }
 }

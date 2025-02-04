@@ -3,16 +3,13 @@ package it.moneyverse.transaction.model.dto;
 import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
 public record TransactionRequestDto(
-    @NotNull(message = "'Username' must not be null")
-        @Size(max = 64, message = "'Username' must not exceed 64 characters")
-        String username,
+    @NotNull(message = "'User ID' must not be null") UUID userId,
     @NotNull(message = "'Account ID' must not be null") UUID accountId,
     UUID budgetId,
     @NotNull(message = "'Date' must not be null") LocalDate date,

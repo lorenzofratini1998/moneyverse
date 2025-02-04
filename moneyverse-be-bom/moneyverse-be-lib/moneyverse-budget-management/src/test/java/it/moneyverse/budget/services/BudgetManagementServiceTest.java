@@ -57,12 +57,12 @@ class BudgetManagementServiceTest {
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenReturnCreatedBudget(
       @Mock Budget budget, @Mock BudgetDto budgetDto) {
-    final String username = RandomUtils.randomString(15);
-    BudgetRequestDto request = createBudgetRequest(username);
+    final UUID userId = RandomUtils.randomUUID();
+    BudgetRequestDto request = createBudgetRequest(userId);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
-    when(budgetRepository.existsByUsernameAndBudgetName(username, request.budgetName()))
+    when(budgetRepository.existsByUserIdAndBudgetName(userId, request.budgetName()))
         .thenReturn(false);
     mapper.when(() -> BudgetMapper.toBudget(request)).thenReturn(budget);
     when(budgetRepository.save(any(Budget.class))).thenReturn(budget);
@@ -71,9 +71,8 @@ class BudgetManagementServiceTest {
     budgetDto = budgetManagementService.createBudget(request);
 
     assertNotNull(budgetDto);
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
-    verify(budgetRepository, times(1))
-        .existsByUsernameAndBudgetName(username, request.budgetName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
+    verify(budgetRepository, times(1)).existsByUserIdAndBudgetName(userId, request.budgetName());
     mapper.verify(() -> BudgetMapper.toBudget(request), times(1));
     verify(budgetRepository, times(1)).save(any(Budget.class));
     mapper.verify(() -> BudgetMapper.toBudgetDto(budget), times(1));
@@ -81,58 +80,57 @@ class BudgetManagementServiceTest {
 
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenUserNotFound() {
-    final String username = RandomUtils.randomString(15);
-    BudgetRequestDto request = createBudgetRequest(username);
+    final UUID userId = RandomUtils.randomUUID();
+    BudgetRequestDto request = createBudgetRequest(userId);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(false);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class, () -> budgetManagementService.createBudget(request));
 
     verify(budgetRepository, never()).save(any(Budget.class));
-    verify(budgetRepository, never()).existsByUsernameAndBudgetName(username, request.budgetName());
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(budgetRepository, never()).existsByUserIdAndBudgetName(userId, request.budgetName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
   }
 
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenCurrencyNotFound() {
-    final String username = RandomUtils.randomString(15);
-    BudgetRequestDto request = createBudgetRequest(username);
+    final UUID userId = RandomUtils.randomUUID();
+    BudgetRequestDto request = createBudgetRequest(userId);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class, () -> budgetManagementService.createBudget(request));
 
     verify(budgetRepository, never()).save(any(Budget.class));
-    verify(budgetRepository, never()).existsByUsernameAndBudgetName(username, request.budgetName());
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
+    verify(budgetRepository, never()).existsByUserIdAndBudgetName(userId, request.budgetName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
     verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
   }
 
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenBudgetAlreadyExists() {
-    final String username = RandomUtils.randomString(15);
-    BudgetRequestDto request = createBudgetRequest(username);
+    final UUID userId = RandomUtils.randomUUID();
+    BudgetRequestDto request = createBudgetRequest(userId);
 
-    when(userServiceClient.checkIfUserExists(username)).thenReturn(true);
+    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
-    when(budgetRepository.existsByUsernameAndBudgetName(username, request.budgetName()))
+    when(budgetRepository.existsByUserIdAndBudgetName(userId, request.budgetName()))
         .thenReturn(true);
 
     assertThrows(
         ResourceAlreadyExistsException.class, () -> budgetManagementService.createBudget(request));
 
     verify(budgetRepository, never()).save(any(Budget.class));
-    verify(userServiceClient, times(1)).checkIfUserExists(username);
-    verify(budgetRepository, times(1))
-        .existsByUsernameAndBudgetName(username, request.budgetName());
+    verify(userServiceClient, times(1)).checkIfUserExists(userId);
+    verify(budgetRepository, times(1)).existsByUserIdAndBudgetName(userId, request.budgetName());
   }
 
-  private BudgetRequestDto createBudgetRequest(String username) {
+  private BudgetRequestDto createBudgetRequest(UUID userId) {
     return new BudgetRequestDto(
-        username,
+        userId,
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),

@@ -78,10 +78,10 @@ class TransactionConsumerTest {
 
   @Test
   void testOnUserDeletion() {
-    final String username = testContext.getRandomUser().getUsername();
-    final List<Transaction> userBudgets = testContext.getTransactions(username);
+    final UUID userId = testContext.getRandomUser().getUserId();
+    final List<Transaction> userBudgets = testContext.getTransactions(userId);
     final long initialSize = transactionRepository.count();
-    String event = JsonUtils.toJson(new UserDeletionEvent(username));
+    String event = JsonUtils.toJson(new UserDeletionEvent(userId));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 

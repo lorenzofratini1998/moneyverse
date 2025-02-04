@@ -23,10 +23,7 @@ public class AccountConsumer {
   private final AccountService accountService;
   private final UserServiceClient userServiceClient;
 
-  public AccountConsumer(
-          AccountService accountService,
-          UserServiceClient userServiceClient
-  ) {
+  public AccountConsumer(AccountService accountService, UserServiceClient userServiceClient) {
     this.accountService = accountService;
     this.userServiceClient = userServiceClient;
   }
@@ -41,13 +38,13 @@ public class AccountConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     LOGGER.info("Received event: {} from topic: {}", record.value(), topic);
     UserDeletionEvent event = JsonUtils.fromJson(record.value(), UserDeletionEvent.class);
-    checkIfUserExists(event.username());
-    accountService.deleteAccountsByUsername(event.username());
+    checkIfUserExists(event.key());
+    accountService.deleteAccountsByUserId(event.key());
   }
 
-  private void checkIfUserExists(String username) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(username))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(username));
+  private void checkIfUserExists(UUID userId) {
+    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
+      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
     }
   }
 }

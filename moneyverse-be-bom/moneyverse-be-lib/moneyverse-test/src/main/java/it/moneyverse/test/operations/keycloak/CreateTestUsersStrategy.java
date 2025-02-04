@@ -4,8 +4,8 @@ import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstan
 
 import it.moneyverse.core.model.entities.UserModel;
 import jakarta.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -30,17 +30,27 @@ public class CreateTestUsersStrategy implements KeycloakConfigurationStrategy {
 
   private void createUsers(List<UserModel> users) {
     users.stream().map(this::getUserRepresentation).forEach(this::saveTestUser);
+    RealmResource realm = keycloak.realm(TEST_REALM);
+    users.forEach(
+        user -> {
+          Optional.ofNullable(realm.users().searchByUsername(user.getUsername(), true).getFirst())
+              .map(UserRepresentation::getId)
+              .map(UUID::fromString)
+              .ifPresent(user::setUserId);
+        });
   }
 
   private UserRepresentation getUserRepresentation(UserModel fake) {
     UserRepresentation user = new UserRepresentation();
-    user.setId(fake.getUserId().toString());
     user.setUsername(fake.getUsername());
     user.setEmail(fake.getEmail());
     user.setEmailVerified(true);
     user.setFirstName(fake.getName());
     user.setLastName(fake.getSurname());
     user.setEnabled(true);
+    user.setAttributes(
+        fake.getAttributes().entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> List.of(entry.getValue()))));
     CredentialRepresentation credential = new CredentialRepresentation();
     credential.setType(CredentialRepresentation.PASSWORD);
     credential.setTemporary(false);
@@ -63,9 +73,12 @@ public class CreateTestUsersStrategy implements KeycloakConfigurationStrategy {
         user -> {
           RoleRepresentation realmRole =
               realm.roles().get(user.getRole().name()).toRepresentation();
-          String userId =
-              realm.users().searchByUsername(user.getUsername(), true).getFirst().getId();
-          realm.users().get(userId).roles().realmLevel().add(Collections.singletonList(realmRole));
+          realm
+              .users()
+              .get(user.getUserId().toString())
+              .roles()
+              .realmLevel()
+              .add(Collections.singletonList(realmRole));
         });
   }
 }

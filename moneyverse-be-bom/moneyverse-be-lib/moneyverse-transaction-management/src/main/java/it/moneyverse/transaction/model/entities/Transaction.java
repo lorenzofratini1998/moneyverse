@@ -21,8 +21,8 @@ public class Transaction extends Auditable implements Serializable {
   @Column(name = "TRANSACTION_ID")
   private UUID transactionId;
 
-  @Column(name = "USERNAME", nullable = false)
-  private String username;
+  @Column(name = "USER_ID", nullable = false)
+  private UUID userId;
 
   @Column(name = "ACCOUNT_ID", nullable = false)
   private UUID accountId;
@@ -67,12 +67,12 @@ public class Transaction extends Auditable implements Serializable {
     this.transactionId = transactionId;
   }
 
-  public String getUsername() {
-    return username;
+  public UUID getUserId() {
+    return userId;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setUserId(UUID userId) {
+    this.userId = userId;
   }
 
   public UUID getAccountId() {

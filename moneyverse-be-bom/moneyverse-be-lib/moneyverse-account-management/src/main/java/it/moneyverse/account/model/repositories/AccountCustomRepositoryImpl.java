@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Repository;
 
@@ -27,10 +28,10 @@ public class AccountCustomRepositoryImpl implements AccountCustomRepository {
   }
 
   @Override
-  public List<Account> findAccounts(AccountCriteria param) {
+  public List<Account> findAccounts(UUID userId, AccountCriteria param) {
     CriteriaQuery<Account> cq = cb.createQuery(Account.class);
     Root<Account> root = cq.from(Account.class);
-    Predicate predicate = new AccountPredicateBuilder(cb, root).build(param);
+    Predicate predicate = new AccountPredicateBuilder(cb, root).build(userId, param);
     cq.where(predicate);
     if (param.getSort() != null) {
       cq.orderBy(getOrder(param.getSort(), root));

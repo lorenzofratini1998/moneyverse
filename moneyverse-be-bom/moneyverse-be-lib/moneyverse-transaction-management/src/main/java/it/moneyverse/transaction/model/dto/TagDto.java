@@ -15,13 +15,13 @@ import java.util.UUID;
 public class TagDto implements Serializable {
 
   private final UUID tagId;
-  private final String username;
+  private final UUID userId;
   private final String tagName;
   private final String description;
 
   public TagDto(Builder builder) {
     this.tagId = builder.tagId;
-    this.username = builder.username;
+    this.userId = builder.userId;
     this.tagName = builder.tagName;
     this.description = builder.description;
   }
@@ -32,7 +32,7 @@ public class TagDto implements Serializable {
 
   public static class Builder {
     private UUID tagId;
-    private String username;
+    private UUID userId;
     private String tagName;
     private String description;
 
@@ -41,8 +41,8 @@ public class TagDto implements Serializable {
       return this;
     }
 
-    public Builder withUsername(String username) {
-      this.username = username;
+    public Builder withUserId(UUID userId) {
+      this.userId = userId;
       return this;
     }
 
@@ -65,15 +65,15 @@ public class TagDto implements Serializable {
     return tagId;
   }
 
-  public String getUsername() {
-    return username;
-  }
-
   public String getTagName() {
     return tagName;
   }
 
   public String getDescription() {
     return description;
+  }
+
+  public UUID getUserId() {
+    return userId;
   }
 }

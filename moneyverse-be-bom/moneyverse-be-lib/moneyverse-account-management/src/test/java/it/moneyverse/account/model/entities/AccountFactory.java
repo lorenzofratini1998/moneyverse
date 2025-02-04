@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,18 +42,18 @@ public class AccountFactory {
       for (int i = 0; i < numAccountsPerUser; i++) {
         AccountCategory category =
             categories.get(RandomUtils.randomInteger(0, categories.size() - 1));
-        accounts.add(AccountFactory.fakeAccount(user.getUsername(), category, i));
+        accounts.add(AccountFactory.fakeAccount(user.getUserId(), category, i));
       }
     }
     LOGGER.info("Created {} random accounts for testing", accounts.size());
     return accounts;
   }
 
-  public static Account fakeAccount(String username, AccountCategory category, Integer counter) {
+  public static Account fakeAccount(UUID userId, AccountCategory category, Integer counter) {
     counter = counter + 1;
     Account account = new Account();
     account.setAccountId(RandomUtils.randomUUID());
-    account.setUsername(username);
+    account.setUserId(userId);
     account.setAccountName("Account %s".formatted(counter));
     account.setBalance(
         RandomUtils.randomDecimal(0.0, Math.random() * 1000).setScale(2, RoundingMode.HALF_EVEN));

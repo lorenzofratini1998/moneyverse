@@ -8,8 +8,7 @@ import it.moneyverse.core.utils.JsonUtils;
 import java.util.Optional;
 
 public class AccountCriteria {
-
-  private String username;
+  
   private BoundCriteria balance;
   private BoundCriteria balanceTarget;
   private String accountCategory;
@@ -17,14 +16,6 @@ public class AccountCriteria {
   private Boolean isDefault;
   private PageCriteria page;
   private SortCriteria<AccountSortAttributeEnum> sort;
-
-  public Optional<String> getUsername() {
-    return Optional.ofNullable(username);
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
 
   public Optional<BoundCriteria> getBalance() {
     return Optional.ofNullable(balance);

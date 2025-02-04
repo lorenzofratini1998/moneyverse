@@ -1,21 +1,20 @@
 package it.moneyverse.budget.runtime.messages;
 
+import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
+
 import it.moneyverse.budget.services.BudgetService;
 import it.moneyverse.core.model.beans.UserCreationTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.UserCreationEvent;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
+import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
-
-import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
 
 @Component
 public class BudgetConsumer {
@@ -36,7 +35,7 @@ public class BudgetConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     UserDeletionEvent event = JsonUtils.fromJson(record.value(), UserDeletionEvent.class);
-    budgetService.deleteAllBudgets(event.username());
+    budgetService.deleteAllBudgets(event.key());
   }
 
   @RetryableTopic
@@ -49,8 +48,6 @@ public class BudgetConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     UserCreationEvent event = JsonUtils.fromJson(record.value(), UserCreationEvent.class);
-    budgetService.createDefaultBudgets(event.username(), event.currency());
+    budgetService.createDefaultBudgets(event.userId(), event.currency());
   }
-
-
 }

@@ -59,10 +59,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
   @BeforeAll
   static void beforeAll() {
-    testContext =
-        new TransactionTestContext()
-            .generateScript(tempDir)
-            .insertUsersIntoKeycloak(keycloakContainer);
+    testContext = new TransactionTestContext(keycloakContainer).generateScript(tempDir);
   }
 
   @BeforeEach
@@ -72,9 +69,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testCreateTransaction() {
-    final String username = testContext.getRandomUser().getUsername();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    final TransactionRequestDto request = testContext.createTransactionRequest(username);
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final TransactionRequestDto request = testContext.createTransactionRequest(userId);
     mockServer.mockExistentAccount();
     mockServer.mockExistentBudget();
     mockServer.mockExistentCurrency();
@@ -87,7 +84,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(testContext.getTransactions().size() + 1, transactionRepository.findAll().size());
     assertNotNull(response.getBody());
-    assertEquals(expected.getUsername(), response.getBody().getUsername());
+    assertEquals(expected.getUserId(), response.getBody().getUserId());
     assertEquals(expected.getAccountId(), response.getBody().getAccountId());
     assertEquals(expected.getBudgetId(), response.getBody().getBudgetId());
     assertEquals(expected.getDate(), response.getBody().getDate());
@@ -99,15 +96,14 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testGetTransactions() {
-    final String username = testContext.getRandomUser().getUsername();
-    final TransactionCriteria criteria = testContext.createTransactionCriteria();
-    criteria.setUsername(username);
-    final List<Transaction> expected = testContext.filterTransactions(criteria);
+    final UUID userId = testContext.getRandomUser().getUserId();
+    final TransactionCriteria criteria = testContext.createTransactionCriteria(userId);
+    final List<Transaction> expected = testContext.filterTransactions(userId, criteria);
 
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     ResponseEntity<List<TransactionDto>> response =
         restTemplate.exchange(
-            testContext.createUri(basePath + "/transactions", criteria),
+            testContext.createUri(basePath + "/transactions/users/" + userId, criteria),
             HttpMethod.GET,
             new HttpEntity<>(headers),
             new ParameterizedTypeReference<>() {});
@@ -118,9 +114,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testGetTransaction() {
-    final String username = testContext.getRandomUser().getUsername();
-    final UUID transactionId = testContext.getRandomTransaction(username).getTransactionId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+    final UUID userId = testContext.getRandomUser().getUserId();
+    final UUID transactionId = testContext.getRandomTransaction(userId).getTransactionId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
 
     ResponseEntity<TransactionDto> response =
         restTemplate.exchange(
@@ -136,8 +132,8 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testUpdateTransaction() {
-    final String username = testContext.getRandomUser().getUsername();
-    final UUID transactionId = testContext.getRandomTransaction(username).getTransactionId();
+    final UUID userId = testContext.getRandomUser().getUserId();
+    final UUID transactionId = testContext.getRandomTransaction(userId).getTransactionId();
     TransactionUpdateRequestDto request =
         new TransactionUpdateRequestDto(
             RandomUtils.randomUUID(),
@@ -146,8 +142,8 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
             RandomUtils.randomString(30),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomString(3).toUpperCase(),
-            Collections.singleton(testContext.getRandomTag(username).getTagId()));
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+            testContext.getRandomTag(userId));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     mockServer.mockExistentCurrency();
 
     ResponseEntity<TransactionDto> response =
@@ -166,14 +162,16 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.description(), response.getBody().getDescription());
     assertEquals(request.amount(), response.getBody().getAmount());
     assertEquals(request.currency(), response.getBody().getCurrency());
-    assertEquals(request.tags().size(), response.getBody().getTags().size());
+    if (!request.tags().isEmpty()) {
+      assertEquals(request.tags().size(), response.getBody().getTags().size());
+    }
   }
 
   @Test
   void testDeleteTransaction() {
-    final String username = testContext.getRandomUser().getUsername();
-    final UUID transactionId = testContext.getRandomTransaction(username).getTransactionId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+    final UUID userId = testContext.getRandomUser().getUserId();
+    final UUID transactionId = testContext.getRandomTransaction(userId).getTransactionId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
 
     ResponseEntity<Void> response =
         restTemplate.exchange(

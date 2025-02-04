@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class TransactionPredicateBuilder {
 
@@ -24,20 +25,14 @@ public class TransactionPredicateBuilder {
     this.predicates = new ArrayList<>();
   }
 
-  public Predicate build(TransactionCriteria param) {
-    withUsername(param);
+  public Predicate build(UUID userId, TransactionCriteria param) {
+    predicates.add(cb.equal(root.get(Transaction_.USER_ID), userId));
     withAccounts(param);
     withBudgets(param);
     withDate(param);
     withAmount(param);
     withTags(param);
     return cb.and(predicates.toArray(new Predicate[0]));
-  }
-
-  private void withUsername(TransactionCriteria param) {
-    param
-        .getUsername()
-        .ifPresent(username -> predicates.add(cb.equal(root.get(Transaction_.USERNAME), username)));
   }
 
   private void withAccounts(TransactionCriteria criteria) {

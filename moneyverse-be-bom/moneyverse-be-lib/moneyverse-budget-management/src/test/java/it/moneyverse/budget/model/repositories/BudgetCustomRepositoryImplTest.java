@@ -7,8 +7,10 @@ import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.utils.BudgetCriteriaRandomGenerator;
 import it.moneyverse.budget.utils.BudgetTestContext;
 import it.moneyverse.core.boot.*;
+import it.moneyverse.test.utils.RandomUtils;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,9 +61,10 @@ class BudgetCustomRepositoryImplTest {
   @Test
   void givenCriteria_thenReturnFilteredBudgets() {
     BudgetCriteria criteria = new BudgetCriteriaRandomGenerator(testContext).generate();
-    List<Budget> expected = testContext.filterBudgets(criteria);
+    UUID userId = RandomUtils.randomUUID();
+    List<Budget> expected = testContext.filterBudgets(userId, criteria);
 
-    List<Budget> actual = customRepository.findBudgets(criteria);
+    List<Budget> actual = customRepository.findBudgets(userId, criteria);
 
     assertEquals(expected.size(), actual.size());
   }

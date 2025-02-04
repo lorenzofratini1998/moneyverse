@@ -8,7 +8,6 @@ import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
-import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
@@ -59,8 +58,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   @BeforeAll
   static void beforeAll() {
-    testContext =
-        new AccountTestContext().generateScript(tempDir).insertUsersIntoKeycloak(keycloakContainer);
+    testContext = new AccountTestContext(keycloakContainer).generateScript(tempDir);
   }
 
   @BeforeEach
@@ -70,9 +68,9 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testCreateAccount() {
-    final String username = testContext.getRandomUser().getUsername();
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
-    final AccountRequestDto request = testContext.createAccountForUser(username);
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final AccountRequestDto request = testContext.createAccountForUser(userId);
     mockServer.mockExistentUser();
     mockServer.mockExistentCurrency();
     AccountDto expected = testContext.getExpectedAccountDto(request);
@@ -88,17 +86,14 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testGetAccounts() {
-    final UserModel user = testContext.getRandomAdminOrUser();
+    final UUID userId = testContext.getRandomUser().getUserId();
     final AccountCriteria criteria = testContext.createAccountFilters();
-    if (user.getRole().equals(UserRoleEnum.USER)) {
-      criteria.setUsername(user.getUsername());
-    }
-    final List<Account> expected = testContext.filterAccounts(criteria);
+    final List<Account> expected = testContext.filterAccounts(userId, criteria);
 
-    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     ResponseEntity<List<AccountDto>> response =
         restTemplate.exchange(
-            testContext.createUri(basePath + "/accounts", criteria),
+            testContext.createUri(basePath + "/accounts/users/" + userId, criteria),
             HttpMethod.GET,
             new HttpEntity<>(headers),
             new ParameterizedTypeReference<>() {});
@@ -109,9 +104,9 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testGetAccount() {
-    final UserModel user = testContext.getRandomAdminOrUser();
-    final UUID accountId = testContext.getRandomAccount(user.getUsername()).getAccountId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+    final UserModel user = testContext.getRandomUser();
+    final UUID accountId = testContext.getRandomAccount(user.getUserId()).getAccountId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
 
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(
@@ -127,8 +122,8 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testUpdateAccount() {
-    final UserModel user = testContext.getRandomAdminOrUser();
-    final UUID accountId = testContext.getRandomAccount(user.getUsername()).getAccountId();
+    final UserModel user = testContext.getRandomUser();
+    final UUID accountId = testContext.getRandomAccount(user.getUserId()).getAccountId();
     AccountUpdateRequestDto request =
         new AccountUpdateRequestDto(
             null,
@@ -139,7 +134,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             RandomUtils.randomString(3).toUpperCase(),
             RandomUtils.randomBoolean());
 
-    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
     mockServer.mockExistentCurrency();
 
     ResponseEntity<AccountDto> response =
@@ -154,14 +149,14 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.balance(), response.getBody().getBalance());
     assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
     assertEquals(request.isDefault(), response.getBody().isDefault());
-    assertEquals(1, accountRepository.findDefaultAccountsByUser(user.getUsername()).size());
+    assertEquals(1, accountRepository.findDefaultAccountsByUserId(user.getUserId()).size());
   }
 
   @Test
   void testDeleteAccount_Success() {
-    final UserModel user = testContext.getRandomAdminOrUser();
-    final UUID accountId = testContext.getRandomAccount(user.getUsername()).getAccountId();
-    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+    final UserModel user = testContext.getRandomUser();
+    final UUID accountId = testContext.getRandomAccount(user.getUserId()).getAccountId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
 
     ResponseEntity<Void> response =
         restTemplate.exchange(
@@ -176,8 +171,8 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testGetAccountCategories() {
-    final UserModel user = testContext.getRandomAdminOrUser();
-    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUsername()));
+    final UserModel user = testContext.getRandomUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
 
     ResponseEntity<List<AccountCategoryDto>> result =
         restTemplate.exchange(

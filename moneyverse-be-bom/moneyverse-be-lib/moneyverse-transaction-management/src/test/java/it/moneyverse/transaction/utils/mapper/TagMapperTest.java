@@ -25,7 +25,7 @@ class TagMapperTest {
     TagDto tagDto = TagMapper.toTagDto(tag);
 
     assertEquals(tag.getTagId(), tagDto.getTagId());
-    assertEquals(tag.getUsername(), tagDto.getUsername());
+    assertEquals(tag.getUserId(), tagDto.getUserId());
     assertEquals(tag.getTagName(), tagDto.getTagName());
     assertEquals(tag.getDescription(), tagDto.getDescription());
   }
@@ -54,7 +54,7 @@ class TagMapperTest {
                   () -> new AssertionError("TagDto with ID " + tag.getTagId() + " not found"));
 
       assertEquals(tag.getTagId(), tagDto.getTagId());
-      assertEquals(tag.getUsername(), tagDto.getUsername());
+      assertEquals(tag.getUserId(), tagDto.getUserId());
       assertEquals(tag.getTagName(), tagDto.getTagName());
       assertEquals(tag.getDescription(), tagDto.getDescription());
     }
@@ -63,7 +63,7 @@ class TagMapperTest {
   static Tag createTag() {
     Tag tag = new Tag();
     tag.setTagId(RandomUtils.randomUUID());
-    tag.setUsername(RandomUtils.randomString(15));
+    tag.setUserId(RandomUtils.randomUUID());
     tag.setTagName(RandomUtils.randomString(15));
     tag.setDescription(RandomUtils.randomString(15));
     return tag;

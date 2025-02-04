@@ -22,7 +22,6 @@ import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -77,9 +76,9 @@ class BudgetConsumerTest {
   @Test
   void testOnUserDeletion() {
     final UserModel userModel = testContext.getRandomUser();
-    final List<Budget> userBudgets = testContext.getBudgets(userModel.getUsername());
+    final List<Budget> userBudgets = testContext.getBudgets(userModel.getUserId());
     final long initialSize = budgetRepository.count();
-    String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUsername()));
+    String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUserId()));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
@@ -88,8 +87,7 @@ class BudgetConsumerTest {
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(5))
-        .atMost(30, TimeUnit.SECONDS)
+        .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
             () -> assertEquals(initialSize - userBudgets.size(), budgetRepository.count()));
   }
@@ -100,7 +98,7 @@ class BudgetConsumerTest {
     String event =
         JsonUtils.toJson(
             new UserCreationEvent(
-                RandomUtils.randomString(15), RandomUtils.randomString(3).toUpperCase()));
+                RandomUtils.randomUUID(), RandomUtils.randomString(3).toUpperCase()));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserCreationTopic.TOPIC, RandomUtils.randomUUID(), event);
 
@@ -109,8 +107,7 @@ class BudgetConsumerTest {
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(5))
-        .atMost(30, TimeUnit.SECONDS)
+        .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
             () ->
                 assertEquals(

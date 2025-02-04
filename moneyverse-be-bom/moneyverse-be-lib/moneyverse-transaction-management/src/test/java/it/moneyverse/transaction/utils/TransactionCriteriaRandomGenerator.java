@@ -19,15 +19,16 @@ public class TransactionCriteriaRandomGenerator
 
   private final TransactionCriteria criteria;
   private final TransactionTestContext testContext;
+  private final UUID userId;
 
-  public TransactionCriteriaRandomGenerator(TransactionTestContext testContext) {
+  public TransactionCriteriaRandomGenerator(UUID userId, TransactionTestContext testContext) {
     this.criteria = new TransactionCriteria();
     this.testContext = testContext;
+    this.userId = userId;
   }
 
   @Override
   public TransactionCriteria generate() {
-    withRandomUsername();
     withRandomAccounts();
     withRandomBudgets();
     withRandomDate();
@@ -38,15 +39,11 @@ public class TransactionCriteriaRandomGenerator
     return criteria;
   }
 
-  private void withRandomUsername() {
-    criteria.setUsername(Math.random() < 0.5 ? testContext.getRandomUser().getUsername() : null);
-  }
-
   private void withRandomAccounts() {
-    if (criteria.getUsername().isPresent() && Math.random() < 0.5) {
+    if (Math.random() < 0.5) {
       List<UUID> accounts =
           testContext.getTransactions().stream()
-              .filter(transaction -> transaction.getUsername().equals(criteria.getUsername().get()))
+              .filter(transaction -> transaction.getUserId().equals(userId))
               .map(Transaction::getAccountId)
               .toList();
       List<UUID> randomAccounts = new ArrayList<>();
@@ -62,10 +59,10 @@ public class TransactionCriteriaRandomGenerator
   }
 
   private void withRandomBudgets() {
-    if (criteria.getUsername().isPresent() && Math.random() < 0.5) {
+    if (Math.random() < 0.5) {
       List<UUID> budgets =
           testContext.getTransactions().stream()
-              .filter(transaction -> transaction.getUsername().equals(criteria.getUsername().get()))
+              .filter(transaction -> transaction.getUserId().equals(userId))
               .map(Transaction::getBudgetId)
               .toList();
       List<UUID> randomBudgets = new ArrayList<>();
@@ -93,12 +90,15 @@ public class TransactionCriteriaRandomGenerator
   }
 
   private void withRandomTags() {
-    if (criteria.getUsername().isPresent() && Math.random() < 0.5) {
+    if (Math.random() < 0.5) {
       List<UUID> tags =
           testContext.getTransactions().stream()
-              .filter(transaction -> transaction.getUsername().equals(criteria.getUsername().get()))
+              .filter(transaction -> transaction.getUserId().equals(userId))
               .flatMap(t -> t.getTags().stream().map(Tag::getTagId))
               .toList();
+      if (tags.isEmpty()) {
+        return;
+      }
       List<UUID> randomTags = new ArrayList<>();
       for (int i = 0;
           i < RandomUtils.randomInteger(FakeUtils.MIN_TAGS_PER_USER, FakeUtils.MAX_TAGS_PER_USER);

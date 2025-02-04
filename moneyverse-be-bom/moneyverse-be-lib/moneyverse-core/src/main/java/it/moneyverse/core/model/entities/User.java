@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -48,6 +49,7 @@ public class User extends Auditable implements Serializable, UserModel {
     return userId;
   }
 
+  @Override
   public void setUserId(UUID userId) {
     this.userId = userId;
   }
@@ -100,6 +102,11 @@ public class User extends Auditable implements Serializable, UserModel {
   @Override
   public UserRoleEnum getRole() {
     return role;
+  }
+
+  @Override
+  public Map<String, String> getAttributes() {
+    return Map.of();
   }
 
   public void setRole(UserRoleEnum role) {

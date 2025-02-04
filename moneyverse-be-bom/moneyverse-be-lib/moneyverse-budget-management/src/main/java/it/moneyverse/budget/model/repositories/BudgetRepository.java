@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, UUID>, BudgetCustomRepository {
-  Boolean existsByUsernameAndBudgetName(String username, String budgetName);
+  Boolean existsByUserIdAndBudgetName(UUID userId, String budgetName);
 
-  boolean existsByUsernameAndBudgetId(String username, UUID budgetId);
+  boolean existsByUserIdAndBudgetId(UUID userId, UUID budgetId);
 
-  List<Budget> findBudgetByUsername(String username);
+  List<Budget> findBudgetByUserId(UUID userId);
 
   boolean existsByBudgetId(UUID budgetId);
 }

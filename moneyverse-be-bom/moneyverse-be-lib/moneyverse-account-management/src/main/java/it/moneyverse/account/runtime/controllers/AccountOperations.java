@@ -9,7 +9,7 @@ public interface AccountOperations {
 
   AccountDto createAccount(@Valid AccountRequestDto request);
 
-  List<AccountDto> getAccounts(AccountCriteria criteria);
+  List<AccountDto> getAccounts(UUID userId, AccountCriteria criteria);
 
   AccountDto findAccountById(UUID accountId);
 
