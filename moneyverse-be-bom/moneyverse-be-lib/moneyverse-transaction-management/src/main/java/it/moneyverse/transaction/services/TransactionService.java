@@ -11,7 +11,7 @@ public interface TransactionService {
 
   TransactionDto createTransaction(TransactionRequestDto request);
 
-  List<TransactionDto> getTransactions(TransactionCriteria criteria);
+  List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
 
   TransactionDto getTransaction(UUID transactionId);
 

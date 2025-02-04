@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
@@ -23,10 +24,10 @@ public class TransactionCustomRepositoryImpl implements TransactionCustomReposit
   }
 
   @Override
-  public List<Transaction> findTransactions(TransactionCriteria param) {
+  public List<Transaction> findTransactions(UUID userId, TransactionCriteria param) {
     CriteriaQuery<Transaction> cq = cb.createQuery(Transaction.class);
     Root<Transaction> root = cq.from(Transaction.class);
-    Predicate predicate = new TransactionPredicateBuilder(cb, root).build(param);
+    Predicate predicate = new TransactionPredicateBuilder(cb, root).build(userId, param);
     cq.where(predicate);
     if (param.getSort() != null) {
       cq.orderBy(getOrder(param.getSort(), root));

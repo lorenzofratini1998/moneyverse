@@ -168,11 +168,12 @@ class TransactionManagementControllerTest {
   @Test
   void testGetTransactions_Success(
       @Mock TransactionCriteria criteria, @Mock List<TransactionDto> response) throws Exception {
-    when(transactionService.getTransactions(criteria)).thenReturn(response);
+    UUID userId = RandomUtils.randomUUID();
+    when(transactionService.getTransactions(userId, criteria)).thenReturn(response);
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get(basePath + "/transactions")
+            MockMvcRequestBuilders.get(basePath + "/transactions/users/" + userId)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
   }

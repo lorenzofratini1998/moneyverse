@@ -140,12 +140,14 @@ class TransactionManagementServiceTest {
   @Test
   void givenTransactionCriteria_WhenGetTransactions_ThenReturnTransactions(
       @Mock TransactionCriteria transactionCriteria, @Mock List<Transaction> transactions) {
-    when(transactionRepository.findTransactions(transactionCriteria)).thenReturn(transactions);
+    UUID userId = RandomUtils.randomUUID();
+    when(transactionRepository.findTransactions(userId, transactionCriteria))
+        .thenReturn(transactions);
 
-    transactionManagementService.getTransactions(transactionCriteria);
+    transactionManagementService.getTransactions(userId, transactionCriteria);
 
     assertNotNull(transactions);
-    verify(transactionRepository, times(1)).findTransactions(transactionCriteria);
+    verify(transactionRepository, times(1)).findTransactions(userId, transactionCriteria);
   }
 
   @Test

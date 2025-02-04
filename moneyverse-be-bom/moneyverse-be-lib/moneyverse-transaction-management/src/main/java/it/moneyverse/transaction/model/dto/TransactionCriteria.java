@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class TransactionCriteria {
-  private UUID userId;
   private List<UUID> accounts;
   private List<UUID> budgets;
   private DateCriteria date;
@@ -19,14 +18,6 @@ public class TransactionCriteria {
   private List<UUID> tags;
   private PageCriteria page;
   private SortCriteria<TransactionSortAttributeEnum> sort;
-
-  public Optional<UUID> getUserId() {
-    return Optional.ofNullable(userId);
-  }
-
-  public void setUserId(UUID userId) {
-    this.userId = userId;
-  }
 
   public Optional<List<UUID>> getAccounts() {
     return Optional.ofNullable(accounts);

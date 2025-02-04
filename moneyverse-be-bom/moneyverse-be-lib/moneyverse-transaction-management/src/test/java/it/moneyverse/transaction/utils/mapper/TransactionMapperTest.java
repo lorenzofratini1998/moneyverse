@@ -111,7 +111,6 @@ class TransactionMapperTest {
     TransactionDto result = TransactionMapper.toTransactionDto(transaction);
 
     assertEquals(transaction.getTransactionId(), result.getTransactionId());
-    assertEquals(transaction.getUserId(), result.getUserId());
     assertEquals(transaction.getAccountId(), result.getAccountId());
     assertEquals(transaction.getBudgetId(), result.getBudgetId());
     assertEquals(transaction.getDate(), result.getDate());

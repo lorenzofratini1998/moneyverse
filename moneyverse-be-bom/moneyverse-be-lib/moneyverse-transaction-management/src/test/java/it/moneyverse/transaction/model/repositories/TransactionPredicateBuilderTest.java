@@ -35,7 +35,7 @@ class TransactionPredicateBuilderTest {
       @Mock Predicate predicate,
       @Mock Join<Transaction, Tag> tagJoins,
       @Mock Path<Object> object) {
-    when(criteria.getUserId()).thenReturn(Optional.of(RandomUtils.randomUUID()));
+    UUID userId = RandomUtils.randomUUID();
     when(criteria.getAccounts()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
     when(criteria.getBudgets()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
     when(criteria.getAmount()).thenReturn(Optional.of(randomBoundCriteria()));
@@ -54,7 +54,7 @@ class TransactionPredicateBuilderTest {
     when(root.<Transaction, Tag>join(any(String.class))).thenReturn(tagJoins);
     when(tagJoins.get(any(String.class))).thenReturn(object);
 
-    Predicate result = new TransactionPredicateBuilder(cb, root).build(criteria);
+    Predicate result = new TransactionPredicateBuilder(cb, root).build(userId, criteria);
 
     assertNotNull(result);
     verify(cb, times(4)).equal(any(), any(UUID.class));

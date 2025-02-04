@@ -20,7 +20,9 @@ import it.moneyverse.transaction.model.entities.TagFactory;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.TransactionFactory;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;
 
@@ -101,14 +103,9 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
         .build();
   }
 
-  public List<Transaction> filterTransactions(TransactionCriteria criteria) {
+  public List<Transaction> filterTransactions(UUID userId, TransactionCriteria criteria) {
     return transactions.stream()
-        .filter(
-            transaction ->
-                criteria
-                    .getUserId()
-                    .map(userId -> userId.equals(transaction.getUserId()))
-                    .orElse(true))
+        .filter(transaction -> transaction.getUserId().equals(userId))
         .filter(
             transaction ->
                 criteria.getAccounts().isEmpty()
@@ -147,7 +144,6 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
     int comparison =
         switch (attribute) {
-          case USER_ID -> a.getUserId().compareTo(b.getUserId());
           case DATE -> a.getDate().compareTo(b.getDate());
           case AMOUNT -> a.getAmount().compareTo(b.getAmount());
           default -> 0;
@@ -156,8 +152,8 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return direction == Sort.Direction.ASC ? comparison : -comparison;
   }
 
-  public TransactionCriteria createTransactionCriteria() {
-    return new TransactionCriteriaRandomGenerator(getCurrentInstance()).generate();
+  public TransactionCriteria createTransactionCriteria(UUID userId) {
+    return new TransactionCriteriaRandomGenerator(userId, getCurrentInstance()).generate();
   }
 
   public Transaction getRandomTransaction(UUID userId) {
@@ -166,9 +162,12 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return userTransactions.get(RandomUtils.randomInteger(0, userTransactions.size() - 1));
   }
 
-  public Tag getRandomTag(UUID userId) {
+  public Set<UUID> getRandomTag(UUID userId) {
     List<Tag> userTags = tags.stream().filter(t -> t.getUserId().equals(userId)).toList();
-    return userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1));
+    return userTags.isEmpty()
+        ? null
+        : Collections.singleton(
+            userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1)).getTagId());
   }
 
   @Override

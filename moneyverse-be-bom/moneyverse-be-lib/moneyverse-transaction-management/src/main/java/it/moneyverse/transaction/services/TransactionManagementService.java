@@ -83,7 +83,7 @@ public class TransactionManagementService implements TransactionService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TransactionDto> getTransactions(TransactionCriteria criteria) {
+  public List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria) {
     if (criteria.getPage() == null) {
       criteria.setPage(new PageCriteria());
     }
@@ -93,7 +93,8 @@ public class TransactionManagementService implements TransactionService {
               SortAttribute.getDefault(TransactionSortAttributeEnum.class), Sort.Direction.DESC));
     }
     LOGGER.info("Finding transactions with filters: {}", criteria);
-    return TransactionMapper.toTransactionDto(transactionRepository.findTransactions(criteria));
+    return TransactionMapper.toTransactionDto(
+        transactionRepository.findTransactions(userId, criteria));
   }
 
   @Override

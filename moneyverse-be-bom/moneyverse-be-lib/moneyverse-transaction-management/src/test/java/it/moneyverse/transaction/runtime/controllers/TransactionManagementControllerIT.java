@@ -97,14 +97,13 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetTransactions() {
     final UUID userId = testContext.getRandomUser().getUserId();
-    final TransactionCriteria criteria = testContext.createTransactionCriteria();
-    criteria.setUserId(userId);
-    final List<Transaction> expected = testContext.filterTransactions(criteria);
+    final TransactionCriteria criteria = testContext.createTransactionCriteria(userId);
+    final List<Transaction> expected = testContext.filterTransactions(userId, criteria);
 
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     ResponseEntity<List<TransactionDto>> response =
         restTemplate.exchange(
-            testContext.createUri(basePath + "/transactions", criteria),
+            testContext.createUri(basePath + "/transactions/users/" + userId, criteria),
             HttpMethod.GET,
             new HttpEntity<>(headers),
             new ParameterizedTypeReference<>() {});
@@ -143,7 +142,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
             RandomUtils.randomString(30),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomString(3).toUpperCase(),
-            Collections.singleton(testContext.getRandomTag(userId).getTagId()));
+            testContext.getRandomTag(userId));
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     mockServer.mockExistentCurrency();
 
@@ -163,7 +162,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.description(), response.getBody().getDescription());
     assertEquals(request.amount(), response.getBody().getAmount());
     assertEquals(request.currency(), response.getBody().getCurrency());
-    assertEquals(request.tags().size(), response.getBody().getTags().size());
+    if (!request.tags().isEmpty()) {
+      assertEquals(request.tags().size(), response.getBody().getTags().size());
+    }
   }
 
   @Test

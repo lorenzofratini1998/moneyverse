@@ -32,12 +32,12 @@ public class TransactionManagementController implements TransactionOperations {
   }
 
   @Override
-  @GetMapping("/transactions")
+  @GetMapping("/transactions/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  @PreAuthorize(
-      "#criteria.userId.isPresent() and @securityService.isAuthenticatedUserOwner(#criteria.userId.get())")
-  public List<TransactionDto> getTransactions(TransactionCriteria criteria) {
-    return transactionService.getTransactions(criteria);
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
+  public List<TransactionDto> getTransactions(
+      @PathVariable UUID userId, TransactionCriteria criteria) {
+    return transactionService.getTransactions(userId, criteria);
   }
 
   @Override
