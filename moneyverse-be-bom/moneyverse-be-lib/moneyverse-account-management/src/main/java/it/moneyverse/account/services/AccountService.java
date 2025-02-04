@@ -8,7 +8,7 @@ public interface AccountService {
 
   AccountDto createAccount(AccountRequestDto accountRequestDto);
 
-  List<AccountDto> findAccounts(AccountCriteria criteria);
+  List<AccountDto> findAccounts(UUID userId, AccountCriteria criteria);
 
   AccountDto findAccountByAccountId(UUID accountId);
 
@@ -16,7 +16,7 @@ public interface AccountService {
 
   void deleteAccount(UUID accountId);
 
-  void deleteAccountsByUsername(String username);
+  void deleteAccountsByUserId(UUID userId);
 
   List<AccountCategoryDto> getAccountCategories();
 }

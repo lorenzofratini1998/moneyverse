@@ -21,7 +21,6 @@ public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<Acco
 
   @Override
   public AccountCriteria generate() {
-    withRandomUsername();
     withRandomBalance();
     withRandomBalanceTarget();
     withRandomAccountCategory();
@@ -30,10 +29,6 @@ public class AccountCriteriaRandomGenerator extends CriteriaRandomGenerator<Acco
     withPage();
     withSort();
     return criteria;
-  }
-
-  private void withRandomUsername() {
-    criteria.setUsername(Math.random() < 0.5 ? testContext.getRandomUser().getUsername() : null);
   }
 
   private void withRandomBalance() {

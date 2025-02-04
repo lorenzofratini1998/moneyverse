@@ -9,12 +9,12 @@ CREATE TABLE account_categories
 CREATE TABLE accounts
 (
     account_id          UUID         NOT NULL,
-    username            VARCHAR(64)  NOT NULL,
+    user_id    UUID NOT NULL,
     account_name        VARCHAR(255) NOT NULL,
-    balance             DECIMAL(18, 2)              DEFAULT 0.0,
+    balance    DECIMAL(18, 2) DEFAULT 0.0,
     balance_target      DECIMAL(18, 2),
     account_description VARCHAR(255),
-    is_default          BOOLEAN                     DEFAULT FALSE,
+    is_default BOOLEAN        DEFAULT FALSE,
     currency            VARCHAR(3)   NOT NULL,
     account_category    BIGINT       NOT NULL,
     created_by          VARCHAR(255) NOT NULL,

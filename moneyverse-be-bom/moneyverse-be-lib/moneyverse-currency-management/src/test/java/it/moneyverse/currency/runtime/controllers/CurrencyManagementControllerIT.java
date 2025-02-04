@@ -11,6 +11,7 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 
 @IntegrationTest
-@TestPropertySource(
-    properties = {
-            "spring.runner.initializer.enabled=false"
-    })
+@TestPropertySource(properties = {"spring.runner.initializer.enabled=false"})
 class CurrencyManagementControllerIT extends AbstractIntegrationTest {
 
   protected static CurrencyTestContext testContext;
@@ -43,10 +41,7 @@ class CurrencyManagementControllerIT extends AbstractIntegrationTest {
 
   @BeforeAll
   static void beforeAll() {
-    testContext =
-        new CurrencyTestContext()
-            .generateScript(tempDir)
-            .insertUsersIntoKeycloak(keycloakContainer);
+    testContext = new CurrencyTestContext(keycloakContainer).generateScript(tempDir);
   }
 
   @BeforeEach
@@ -56,9 +51,9 @@ class CurrencyManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testGetCurrencies() {
-    final String username = testContext.getRandomUser().getUsername();
+    final UUID userId = testContext.getRandomUser().getUserId();
 
-    headers.setBearerAuth(testContext.getAuthenticationToken(username));
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     ResponseEntity<List<CurrencyDto>> response =
         restTemplate.exchange(
             basePath + "/currencies",

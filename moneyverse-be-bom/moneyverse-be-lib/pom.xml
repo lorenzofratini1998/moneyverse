@@ -23,6 +23,7 @@
     <module>moneyverse-proto</module>
     <module>moneyverse-test</module>
     <module>moneyverse-transaction-management</module>
+      <module>moneyverse-user-management</module>
   </modules>
 
   <properties>
@@ -47,6 +48,7 @@
     <grpc-starter.version>3.4.0</grpc-starter.version>
     <grpcmock.version>0.15.0</grpcmock.version>
     <hibernate-jpamodelgen.version>6.6.3.Final</hibernate-jpamodelgen.version>
+    <keycloak.version>25.0.0</keycloak.version>
     <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
     <postgres.version>42.7.4</postgres.version>
     <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
@@ -116,6 +118,11 @@
         <groupId>org.hibernate.orm</groupId>
         <artifactId>hibernate-jpamodelgen</artifactId>
         <version>${hibernate-jpamodelgen.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-admin-client</artifactId>
+        <version>${keycloak.version}</version>
       </dependency>
       <dependency>
         <groupId>org.postgresql</groupId>

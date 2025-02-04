@@ -8,21 +8,12 @@ import it.moneyverse.core.utils.JsonUtils;
 import java.util.Optional;
 
 public class BudgetCriteria {
-
-  private String username;
+  
   private BoundCriteria amount;
   private BoundCriteria budgetLimit;
   private String currency;
   private PageCriteria page;
   private SortCriteria<BudgetSortAttributeEnum> sort;
-
-  public Optional<String> getUsername() {
-    return Optional.ofNullable(username);
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
 
   public Optional<BoundCriteria> getAmount() {
     return Optional.ofNullable(amount);

@@ -2,6 +2,7 @@ package it.moneyverse.currency.utils;
 
 import it.moneyverse.currency.model.CurrencyFactory;
 import it.moneyverse.currency.model.entities.Currency;
+import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
@@ -14,6 +15,12 @@ public class CurrencyTestContext extends TestContext<CurrencyTestContext> {
   private static CurrencyTestContext currentInstance;
 
   private final List<Currency> currencies;
+
+  public CurrencyTestContext(KeycloakContainer keycloakContainer) {
+    super(keycloakContainer);
+    currencies = CurrencyFactory.createCurrencies();
+    setCurrentInstance(this);
+  }
 
   public CurrencyTestContext() {
     super();

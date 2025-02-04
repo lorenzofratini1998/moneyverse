@@ -11,6 +11,7 @@ import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.model.entities.AccountFactory;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
@@ -18,6 +19,7 @@ import it.moneyverse.test.services.SQLScriptService;
 import it.moneyverse.test.utils.RandomUtils;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Sort;
 
 public class AccountTestContext extends TestContext<AccountTestContext> {
@@ -26,6 +28,13 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
 
   private final List<AccountCategory> categories;
   private final List<Account> accounts;
+
+  public AccountTestContext(KeycloakContainer keycloakContainer) {
+    super(keycloakContainer);
+    categories = AccountFactory.createAccountCategories();
+    accounts = AccountFactory.createAccounts(getUsers(), categories);
+    setCurrentInstance(this);
+  }
 
   public AccountTestContext() {
     super();
@@ -55,7 +64,7 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
 
   private static AccountRequestDto toAccountRequest(Account account) {
     return new AccountRequestDto(
-        account.getUsername(),
+        account.getUserId(),
         account.getAccountName(),
         account.getBalance(),
         account.getBalanceTarget(),
@@ -64,9 +73,9 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
         account.getCurrency());
   }
 
-  public Account getRandomAccount(String username) {
+  public Account getRandomAccount(UUID userId) {
     List<Account> userAccounts =
-        accounts.stream().filter(account -> account.getUsername().equals(username)).toList();
+        accounts.stream().filter(account -> account.getUserId().equals(userId)).toList();
     return userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
   }
 
@@ -74,13 +83,13 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
     return categories.get(RandomUtils.randomInteger(0, categories.size() - 1));
   }
 
-  public AccountRequestDto createAccountForUser(String username) {
+  public AccountRequestDto createAccountForUser(UUID userId) {
     AccountCategory category = getRandomAccountCategory();
-    return toAccountRequest(AccountFactory.fakeAccount(username, category, accounts.size()));
+    return toAccountRequest(AccountFactory.fakeAccount(userId, category, accounts.size()));
   }
 
   public AccountDto getExpectedAccountDto(AccountRequestDto request) {
-    if (getUserAccounts(request.username()).stream().anyMatch(Account::isDefault)) {
+    if (getUserAccounts(request.userId()).stream().anyMatch(Account::isDefault)) {
       return toAccountDto(request, Boolean.FALSE);
     }
     return toAccountDto(request, Boolean.TRUE);
@@ -88,7 +97,7 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
 
   private AccountDto toAccountDto(AccountRequestDto request, Boolean isDefault) {
     return AccountDto.builder()
-        .withUsername(request.username())
+        .withUserId(request.userId())
         .withAccountName(request.accountName())
         .withAccountCategory(request.accountCategory())
         .withAccountDescription(request.accountDescription())
@@ -103,14 +112,9 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
     return new AccountCriteriaRandomGenerator(getCurrentInstance()).generate();
   }
 
-  public List<Account> filterAccounts(AccountCriteria criteria) {
+  public List<Account> filterAccounts(UUID userId, AccountCriteria criteria) {
     return accounts.stream()
-        .filter(
-            account ->
-                criteria
-                    .getUsername()
-                    .map(username -> username.equals(account.getUsername()))
-                    .orElse(true))
+        .filter(account -> userId.equals(account.getUserId()))
         .filter(
             account ->
                 criteria
@@ -169,7 +173,6 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
               a.getAccountCategory().getName().compareTo(b.getAccountCategory().getName());
           case BALANCE -> a.getBalance().compareTo(b.getBalance());
           case BALANCE_TARGET -> a.getBalanceTarget().compareTo(b.getBalanceTarget());
-          case USERNAME -> a.getUsername().compareTo(b.getUsername());
           default -> 0;
         };
 
@@ -180,8 +183,8 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
     return accounts.size();
   }
 
-  public List<Account> getUserAccounts(String username) {
-    return accounts.stream().filter(account -> username.equals(account.getUsername())).toList();
+  public List<Account> getUserAccounts(UUID userId) {
+    return accounts.stream().filter(account -> userId.equals(account.getUserId())).toList();
   }
 
   @Override

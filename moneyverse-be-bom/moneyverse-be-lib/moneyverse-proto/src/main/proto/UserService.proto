@@ -12,7 +12,7 @@ service UserService {
 }
 
 message UserRequest {
-  string username = 1;
+  string userId = 1;
 }
 
 message UserResponse {

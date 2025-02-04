@@ -1,3 +1,5 @@
 package it.moneyverse.core.model.events;
 
-public record UserCreationEvent(String username, String currency) {}
+import java.util.UUID;
+
+public record UserCreationEvent(UUID userId, String currency) {}

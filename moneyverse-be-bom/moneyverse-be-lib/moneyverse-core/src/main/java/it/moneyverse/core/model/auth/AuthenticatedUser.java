@@ -2,11 +2,12 @@ package it.moneyverse.core.model.auth;
 
 import java.security.Principal;
 import java.util.Collection;
+import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 
 public class AuthenticatedUser implements Principal {
 
-  private final String id;
+  private final UUID id;
   private final String fullName;
   private final String username;
   private final String email;
@@ -26,7 +27,7 @@ public class AuthenticatedUser implements Principal {
     return new Builder();
   }
 
-  public String getId() {
+  public UUID getId() {
     return id;
   }
 
@@ -57,7 +58,7 @@ public class AuthenticatedUser implements Principal {
 
   public static class Builder {
 
-    private String id;
+    private UUID id;
     private String name;
     private String surname;
     private String username;
@@ -65,7 +66,7 @@ public class AuthenticatedUser implements Principal {
     private Boolean isEmailVerified;
     private Collection<GrantedAuthority> authorities;
 
-    public Builder withId(String id) {
+    public Builder withId(UUID id) {
       this.id = id;
       return this;
     }

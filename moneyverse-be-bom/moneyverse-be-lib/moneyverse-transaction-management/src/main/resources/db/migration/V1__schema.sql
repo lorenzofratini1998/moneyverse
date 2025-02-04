@@ -1,7 +1,7 @@
 CREATE TABLE tags
 (
     tag_id      UUID         NOT NULL,
-    username    VARCHAR(255) NOT NULL,
+    user_id UUID NOT NULL,
     tag_name    VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     CONSTRAINT pk_tags PRIMARY KEY (tag_id)
@@ -12,7 +12,7 @@ CREATE SEQUENCE transactions_transaction_id_seq START 1;
 CREATE TABLE transactions
 (
     transaction_id UUID           NOT NULL,
-    username       VARCHAR(255)   NOT NULL,
+    user_id UUID NOT NULL,
     account_id     UUID           NOT NULL,
     budget_id      UUID,
     date           DATE           NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE transactions_tags
 );
 
 ALTER TABLE tags
-    ADD CONSTRAINT uc_79f55a49b4e1619821dc22dcf UNIQUE (username, tag_name);
+    ADD CONSTRAINT uc_79f55a49b4e1619821dc22dcf UNIQUE (user_id, tag_name);
 
 ALTER TABLE transactions_tags
     ADD CONSTRAINT fk_tratag_on_tag FOREIGN KEY (tag_id) REFERENCES tags (tag_id);

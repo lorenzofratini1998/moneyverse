@@ -14,7 +14,7 @@ import java.util.UUID;
 public class BudgetDto implements Serializable {
 
   private final UUID budgetId;
-  private final String username;
+  private final UUID userId;
   private final String budgetName;
   private final String description;
   private final BigDecimal budgetLimit;
@@ -23,7 +23,7 @@ public class BudgetDto implements Serializable {
 
   public BudgetDto(Builder builder) {
     this.budgetId = builder.budgetId;
-    this.username = builder.username;
+    this.userId = builder.userId;
     this.budgetName = builder.budgetName;
     this.description = builder.description;
     this.budgetLimit = builder.budgetLimit;
@@ -35,8 +35,8 @@ public class BudgetDto implements Serializable {
     return budgetId;
   }
 
-  public String getUsername() {
-    return username;
+  public UUID getUserId() {
+    return userId;
   }
 
   public String getBudgetName() {
@@ -61,7 +61,7 @@ public class BudgetDto implements Serializable {
 
   public static class Builder {
     private UUID budgetId;
-    private String username;
+    private UUID userId;
     private String budgetName;
     private String description;
     private BigDecimal budgetLimit;
@@ -73,8 +73,8 @@ public class BudgetDto implements Serializable {
       return this;
     }
 
-    public Builder withUsername(String username) {
-      this.username = username;
+    public Builder withUserId(UUID userId) {
+      this.userId = userId;
       return this;
     }
 

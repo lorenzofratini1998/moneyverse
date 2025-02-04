@@ -11,11 +11,11 @@ import org.springframework.util.ReflectionUtils;
 public class AccountDeletionEvent implements MessageEvent<UUID, String> {
 
   private final UUID accountId;
-  private final String username;
+  private final UUID userId;
 
-  public AccountDeletionEvent(UUID accountId, String username) {
+  public AccountDeletionEvent(UUID accountId, UUID userId) {
     this.accountId = accountId;
-    this.username = username;
+    this.userId = userId;
   }
 
   @Override
@@ -33,7 +33,7 @@ public class AccountDeletionEvent implements MessageEvent<UUID, String> {
     return JsonUtils.toJson(payload);
   }
 
-  public String getUsername() {
-    return username;
+  public UUID getUserId() {
+    return userId;
   }
 }

@@ -73,9 +73,9 @@ class AccountConsumerTest {
   @Test
   void testOnMessage_Success() {
     final UserModel userModel = testContext.getRandomUser();
-    final List<Account> userAccounts = testContext.getUserAccounts(userModel.getUsername());
+    final List<Account> userAccounts = testContext.getUserAccounts(userModel.getUserId());
     final long initialSize = accountRepository.count();
-    String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUsername()));
+    String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUserId()));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 

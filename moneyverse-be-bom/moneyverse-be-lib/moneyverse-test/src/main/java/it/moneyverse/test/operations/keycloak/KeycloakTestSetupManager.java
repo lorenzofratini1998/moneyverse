@@ -1,6 +1,6 @@
 package it.moneyverse.test.operations.keycloak;
 
-import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_FRONTEND_CLIENT;
+import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_CLIENT;
 import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_REALM;
 
 import it.moneyverse.core.model.entities.UserModel;
@@ -15,7 +15,7 @@ public class KeycloakTestSetupManager {
 
   private final KeycloakContainer keycloakContainer;
   private final KeycloakTestSetupContext keycloakContext;
-  private final List<String> keycloakClients = List.of(TEST_FRONTEND_CLIENT);
+  private final List<String> keycloakClients = List.of(TEST_CLIENT);
   private final List<UserModel> users;
 
   public KeycloakTestSetupManager(KeycloakContainer keycloakContainer, List<UserModel> users) {
@@ -23,7 +23,6 @@ public class KeycloakTestSetupManager {
     this.users = users;
     this.keycloakContext =
         new KeycloakTestSetupContext()
-            .addStrategy(new CreateTestRealmStrategy())
             .addStrategy(new CreateTestUserRolesStrategy())
             .addStrategy(new CreateTestUsersStrategy())
             .addStrategy(new CreateTestClientsStrategy(keycloakClients));
@@ -46,8 +45,8 @@ public class KeycloakTestSetupManager {
             .username(userCredential.username())
             .password(userCredential.password())
             .grantType(OAuth2Constants.PASSWORD)
-            .clientId(TEST_FRONTEND_CLIENT)
-            .clientSecret(TEST_FRONTEND_CLIENT)
+            .clientId(TEST_CLIENT)
+            .clientSecret(TEST_CLIENT)
             .build()) {
       return keycloakClient.tokenManager().getAccessTokenString();
     } catch (Exception e) {

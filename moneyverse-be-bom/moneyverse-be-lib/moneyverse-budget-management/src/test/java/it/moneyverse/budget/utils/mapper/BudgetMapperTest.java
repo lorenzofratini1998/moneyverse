@@ -25,7 +25,7 @@ class BudgetMapperTest {
   void testToBudgetEntity_ValidBudgetRequest() {
     BudgetRequestDto request =
         new BudgetRequestDto(
-            RandomUtils.randomString(15),
+            RandomUtils.randomUUID(),
             RandomUtils.randomString(15),
             RandomUtils.randomString(15),
             RandomUtils.randomBigDecimal(),
@@ -34,7 +34,7 @@ class BudgetMapperTest {
 
     Budget budget = BudgetMapper.toBudget(request);
 
-    assertEquals(request.username(), budget.getUsername());
+    assertEquals(request.userId(), budget.getUserId());
     assertEquals(request.budgetName(), budget.getBudgetName());
     assertEquals(request.description(), budget.getDescription());
     assertEquals(request.budgetLimit(), budget.getBudgetLimit());
@@ -53,7 +53,7 @@ class BudgetMapperTest {
     BudgetDto dto = BudgetMapper.toBudgetDto(budget);
 
     assertEquals(budget.getBudgetId(), dto.getBudgetId());
-    assertEquals(budget.getUsername(), dto.getUsername());
+    assertEquals(budget.getUserId(), dto.getUserId());
     assertEquals(budget.getBudgetName(), dto.getBudgetName());
     assertEquals(budget.getDescription(), dto.getDescription());
     assertEquals(budget.getBudgetLimit(), dto.getBudgetLimit());
@@ -80,7 +80,7 @@ class BudgetMapperTest {
       BudgetDto budgetDto = budgetDtos.get(i);
 
       assertEquals(budget.getBudgetId(), budgetDto.getBudgetId());
-      assertEquals(budget.getUsername(), budgetDto.getUsername());
+      assertEquals(budget.getUserId(), budgetDto.getUserId());
       assertEquals(budget.getBudgetName(), budgetDto.getBudgetName());
       assertEquals(budget.getDescription(), budgetDto.getDescription());
       assertEquals(budget.getBudgetLimit(), budgetDto.getBudgetLimit());
@@ -110,7 +110,7 @@ class BudgetMapperTest {
   private Budget createBudget() {
     Budget budget = new Budget();
     budget.setBudgetId(RandomUtils.randomUUID());
-    budget.setUsername(RandomUtils.randomString(15));
+    budget.setUserId(RandomUtils.randomUUID());
     budget.setBudgetName(RandomUtils.randomString(15));
     budget.setDescription(RandomUtils.randomString(15));
     budget.setBudgetLimit(RandomUtils.randomBigDecimal());

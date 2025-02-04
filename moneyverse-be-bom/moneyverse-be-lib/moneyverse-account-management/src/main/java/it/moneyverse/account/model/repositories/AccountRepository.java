@@ -10,14 +10,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, UUID>, AccountCustomRepository {
 
-  @Query("SELECT a FROM Account a WHERE a.username = :username AND a.isDefault = TRUE")
-  List<Account> findDefaultAccountsByUser(String username);
+  @Query("SELECT a FROM Account a WHERE a.userId = :userId AND a.isDefault = TRUE")
+  List<Account> findDefaultAccountsByUserId(UUID userId);
 
-  Boolean existsByUsernameAndAccountName(String username, String accountName);
+  Boolean existsByUserIdAndAccountName(UUID userId, String accountName);
 
-  boolean existsByUsernameAndAccountId(String username, UUID accountId);
+  boolean existsByUserIdAndAccountId(UUID userId, UUID accountId);
 
-  List<Account> findAccountByUsername(String username);
+  List<Account> findAccountByUserId(UUID userId);
 
   boolean existsByAccountId(UUID accountId);
 }

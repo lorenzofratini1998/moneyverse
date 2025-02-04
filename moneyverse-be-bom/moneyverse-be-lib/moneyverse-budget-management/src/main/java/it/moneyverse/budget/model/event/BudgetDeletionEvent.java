@@ -2,21 +2,20 @@ package it.moneyverse.budget.model.event;
 
 import it.moneyverse.core.model.events.MessageEvent;
 import it.moneyverse.core.utils.JsonUtils;
-import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.util.ReflectionUtils;
 
 public class BudgetDeletionEvent implements MessageEvent<UUID, String> {
 
     private final UUID budgetId;
-    private final String username;
+  private final UUID userId;
 
-    public BudgetDeletionEvent(UUID budgetId, String username) {
+  public BudgetDeletionEvent(UUID budgetId, UUID userId) {
         this.budgetId = budgetId;
-        this.username = username;
+    this.userId = userId;
     }
 
     @Override
@@ -34,7 +33,7 @@ public class BudgetDeletionEvent implements MessageEvent<UUID, String> {
         return JsonUtils.toJson(payload);
     }
 
-    public String getUsername() {
-        return username;
+  public UUID getUserId() {
+    return userId;
     }
 }

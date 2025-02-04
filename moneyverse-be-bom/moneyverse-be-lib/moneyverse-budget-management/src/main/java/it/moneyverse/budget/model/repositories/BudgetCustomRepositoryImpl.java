@@ -7,10 +7,10 @@ import it.moneyverse.core.model.dto.SortCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class BudgetCustomRepositoryImpl implements BudgetCustomRepository {
@@ -23,11 +23,11 @@ public class BudgetCustomRepositoryImpl implements BudgetCustomRepository {
         this.cb = em.getCriteriaBuilder();
     }
 
-    @Override
-    public List<Budget> findBudgets(BudgetCriteria param) {
+  @Override
+  public List<Budget> findBudgets(UUID userId, BudgetCriteria param) {
         CriteriaQuery<Budget> cq = cb.createQuery(Budget.class);
         Root<Budget> root = cq.from(Budget.class);
-        Predicate predicate = new BudgetPredicateBuilder(cb, root).build(param);
+    Predicate predicate = new BudgetPredicateBuilder(cb, root).build(userId, param);
         cq.where(predicate);
         if (param.getSort() != null) {
             cq.orderBy(getOrder(param.getSort(), root));

@@ -56,8 +56,8 @@ class TransactionManagementControllerTest {
 
   @Test
   void testCreateAccount_Success(@Mock TransactionDto response) throws Exception {
-    String username = RandomUtils.randomString(15);
-    TransactionRequestDto request = createTransactionRequest(username);
+    UUID userId = RandomUtils.randomUUID();
+    TransactionRequestDto request = createTransactionRequest(userId);
 
     when(transactionService.createTransaction(request)).thenReturn(response);
 
@@ -66,13 +66,13 @@ class TransactionManagementControllerTest {
             MockMvcRequestBuilders.post(basePath + "/transactions")
                 .content(request.toString())
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(MockUserRequestPostProcessor.mockUser(username)))
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
         .andExpect(status().isCreated());
   }
 
   @Test
   void testCreateAccount_Forbidden() throws Exception {
-    TransactionRequestDto request = createTransactionRequest(RandomUtils.randomString(15));
+    TransactionRequestDto request = createTransactionRequest(RandomUtils.randomUUID());
 
     mockMvc
         .perform(
@@ -98,14 +98,14 @@ class TransactionManagementControllerTest {
 
   private static Stream<Supplier<TransactionRequestDto>> invalidTransactionRequestProvider() {
     return Stream.of(
-        TransactionManagementControllerTest::createRequestWithNullUsername,
+        TransactionManagementControllerTest::createRequestWithNullUserId,
         TransactionManagementControllerTest::createRequestWithNullAccountId,
         TransactionManagementControllerTest::createRequestWithNullDate,
         TransactionManagementControllerTest::createRequestWithNullAmount,
         TransactionManagementControllerTest::createRequestWithNullCurrency);
   }
 
-  private static TransactionRequestDto createRequestWithNullUsername() {
+  private static TransactionRequestDto createRequestWithNullUserId() {
     return new TransactionRequestDto(
         null,
         RandomUtils.randomUUID(),
@@ -119,7 +119,7 @@ class TransactionManagementControllerTest {
 
   private static TransactionRequestDto createRequestWithNullAccountId() {
     return new TransactionRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         null,
         RandomUtils.randomUUID(),
         RandomUtils.randomLocalDate(2024, 2025),
@@ -131,7 +131,7 @@ class TransactionManagementControllerTest {
 
   private static TransactionRequestDto createRequestWithNullDate() {
     return new TransactionRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         null,
@@ -143,7 +143,7 @@ class TransactionManagementControllerTest {
 
   private static TransactionRequestDto createRequestWithNullAmount() {
     return new TransactionRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomLocalDate(2024, 2025),
@@ -155,7 +155,7 @@ class TransactionManagementControllerTest {
 
   private static TransactionRequestDto createRequestWithNullCurrency() {
     return new TransactionRequestDto(
-        RandomUtils.randomString(15),
+        RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomLocalDate(2024, 2025),
@@ -168,11 +168,12 @@ class TransactionManagementControllerTest {
   @Test
   void testGetTransactions_Success(
       @Mock TransactionCriteria criteria, @Mock List<TransactionDto> response) throws Exception {
-    when(transactionService.getTransactions(criteria)).thenReturn(response);
+    UUID userId = RandomUtils.randomUUID();
+    when(transactionService.getTransactions(userId, criteria)).thenReturn(response);
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get(basePath + "/transactions")
+            MockMvcRequestBuilders.get(basePath + "/transactions/users/" + userId)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isOk());
   }
@@ -275,31 +276,33 @@ class TransactionManagementControllerTest {
 
     mockMvc
         .perform(
-          MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
-                  .with(MockAdminRequestPostProcessor.mockAdmin()))
+            MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNoContent());
   }
 
   @Test
   void testDeleteTransaction_NotFound() throws Exception {
     UUID transactionId = RandomUtils.randomUUID();
-    Mockito.doThrow(ResourceNotFoundException.class).when(transactionService).deleteTransaction(transactionId);
+    Mockito.doThrow(ResourceNotFoundException.class)
+        .when(transactionService)
+        .deleteTransaction(transactionId);
 
     mockMvc
         .perform(
-          MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
-                  .with(MockAdminRequestPostProcessor.mockAdmin()))
+            MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
+                .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void testDeleteTransaction_Forbidden() throws Exception {
-      UUID transactionId = RandomUtils.randomUUID();
+    UUID transactionId = RandomUtils.randomUUID();
 
-      mockMvc
+    mockMvc
         .perform(
-          MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
-                  .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+            MockMvcRequestBuilders.delete(basePath + "/transactions/" + transactionId)
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
         .andExpect(status().isForbidden());
   }
 
@@ -315,10 +318,10 @@ class TransactionManagementControllerTest {
         Collections.singleton(tagId));
   }
 
-  private TransactionRequestDto createTransactionRequest(String username) {
+  private TransactionRequestDto createTransactionRequest(UUID userId) {
     UUID tagId = RandomUtils.randomUUID();
     return new TransactionRequestDto(
-        username,
+        userId,
         RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomLocalDate(2024, 2025),

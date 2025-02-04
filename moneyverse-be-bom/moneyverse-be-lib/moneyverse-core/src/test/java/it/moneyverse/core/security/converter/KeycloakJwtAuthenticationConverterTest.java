@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import it.moneyverse.core.model.auth.AuthenticatedUser;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -34,7 +35,8 @@ class KeycloakJwtAuthenticationConverterTest {
     KeycloakJwtAuthenticationConverter converter =
         new KeycloakJwtAuthenticationConverter(authoritiesConverter);
 
-    when(jwt.getSubject()).thenReturn("user123");
+    final String subject = UUID.randomUUID().toString();
+    when(jwt.getSubject()).thenReturn(subject);
     when(jwt.getClaimAsString(CLAIM_GIVEN_NAME)).thenReturn("John");
     when(jwt.getClaimAsString(CLAIM_FAMILY_NAME)).thenReturn("Doe");
     when(jwt.getClaimAsString(CLAIM_PREFERRED_USERNAME)).thenReturn("johndoe");
@@ -51,7 +53,7 @@ class KeycloakJwtAuthenticationConverterTest {
     assertNull(token.getCredentials());
 
     AuthenticatedUser principal = (AuthenticatedUser) token.getPrincipal();
-    assertEquals("user123", principal.getId());
+    assertEquals(UUID.fromString(subject), principal.getId());
     assertEquals("johndoe", principal.getName());
     assertEquals("John Doe", principal.getFullName());
     assertEquals("johndoe", principal.getUsername());
@@ -66,7 +68,8 @@ class KeycloakJwtAuthenticationConverterTest {
     KeycloakJwtAuthenticationConverter converter =
         new KeycloakJwtAuthenticationConverter(authoritiesConverter);
 
-    when(jwt.getSubject()).thenReturn("user123");
+    final String subject = UUID.randomUUID().toString();
+    when(jwt.getSubject()).thenReturn(subject);
     when(jwt.getClaimAsString(CLAIM_GIVEN_NAME)).thenReturn("John");
     when(jwt.getClaimAsString(CLAIM_FAMILY_NAME)).thenReturn("Doe");
     when(jwt.getClaimAsString(CLAIM_PREFERRED_USERNAME)).thenReturn("johndoe");
@@ -83,7 +86,7 @@ class KeycloakJwtAuthenticationConverterTest {
     assertNull(token.getCredentials());
 
     AuthenticatedUser principal = (AuthenticatedUser) token.getPrincipal();
-    assertEquals("user123", principal.getId());
+    assertEquals(UUID.fromString(subject), principal.getId());
     assertEquals("johndoe", principal.getName());
     assertEquals("John Doe", principal.getFullName());
     assertEquals("johndoe", principal.getUsername());
