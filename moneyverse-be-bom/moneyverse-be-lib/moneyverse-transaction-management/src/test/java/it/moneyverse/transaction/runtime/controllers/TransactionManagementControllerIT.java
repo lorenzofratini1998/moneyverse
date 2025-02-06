@@ -73,7 +73,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final TransactionRequestDto request = testContext.createTransactionRequest(userId);
     mockServer.mockExistentAccount();
-    mockServer.mockExistentBudget();
+    mockServer.mockExistentCategory();
     mockServer.mockExistentCurrency();
     TransactionDto expected = testContext.getExpectedTransactionDto(request);
 

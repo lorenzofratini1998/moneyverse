@@ -6,15 +6,15 @@ import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
-@Table(name = "DEFAULT_BUDGET_TEMPLATES")
-public class DefaultBudgetTemplate implements Serializable {
+@Table(name = "DEFAULT_CATEGORIES")
+public class DefaultCategory implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "DEFAULT_BUDGET_TEMPLATE_ID")
+  @Column(name = "DEFAULT_CATEGORY_ID")
   private UUID id;
 
     @Column(name = "NAME", nullable = false, unique = true)

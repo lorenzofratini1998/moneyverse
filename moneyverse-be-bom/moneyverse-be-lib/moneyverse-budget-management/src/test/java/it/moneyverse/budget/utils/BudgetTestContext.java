@@ -1,15 +1,15 @@
 package it.moneyverse.budget.utils;
 
-import static it.moneyverse.budget.enums.BudgetSortAttributeEnum.*;
+import static it.moneyverse.budget.enums.BudgetSortAttributeEnum.AMOUNT;
+import static it.moneyverse.budget.enums.BudgetSortAttributeEnum.BUDGET_LIMIT;
 
 import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
-import it.moneyverse.budget.model.dto.BudgetDto;
-import it.moneyverse.budget.model.dto.BudgetRequestDto;
-import it.moneyverse.budget.model.entities.Budget;
-import it.moneyverse.budget.model.entities.BudgetFactory;
-import it.moneyverse.budget.model.entities.DefaultBudgetTemplate;
+import it.moneyverse.budget.model.dto.CategoryDto;
+import it.moneyverse.budget.model.dto.CategoryRequestDto;
+import it.moneyverse.budget.model.entities.*;
 import it.moneyverse.core.enums.SortAttribute;
+import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.model.TestContext;
@@ -26,20 +26,23 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
 
   private static BudgetTestContext currentInstance;
 
+  private final List<Category> categories;
+  private final List<DefaultCategory> defaultCategories;
   private final List<Budget> budgets;
-  private final List<DefaultBudgetTemplate> defaultBudgetTemplates;
 
   public BudgetTestContext(KeycloakContainer keycloakContainer) {
     super(keycloakContainer);
-    budgets = BudgetFactory.createBudgets(getUsers());
-    defaultBudgetTemplates = BudgetFactory.createDefaultBudgetTemplates();
+    categories = CategoryFactory.createCategories(getUsers());
+    defaultCategories = CategoryFactory.createDefaultCategories();
+    budgets = BudgetFactory.createBudgets(categories);
     setCurrentInstance(this);
   }
 
   public BudgetTestContext() {
     super();
-    budgets = BudgetFactory.createBudgets(getUsers());
-    defaultBudgetTemplates = BudgetFactory.createDefaultBudgetTemplates();
+    categories = CategoryFactory.createCategories(getUsers());
+    defaultCategories = CategoryFactory.createDefaultCategories();
+    budgets = BudgetFactory.createBudgets(categories);
     setCurrentInstance(this);
   }
 
@@ -54,56 +57,66 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
     return currentInstance;
   }
 
+  public List<Category> getCategories() {
+    return categories;
+  }
+
   public List<Budget> getBudgets() {
     return budgets;
   }
 
-  public List<Budget> getBudgets(UUID userId) {
-    return budgets.stream().filter(budget -> userId.equals(budget.getUserId())).toList();
+  public List<Category> getCategories(UUID userId) {
+    return categories.stream().filter(budget -> userId.equals(budget.getUserId())).toList();
   }
 
-  public List<DefaultBudgetTemplate> getDefaultBudgetTemplates() {
-    return defaultBudgetTemplates;
+  public Category getRandomCategoryByUserId(UUID userId) {
+    List<Category> userCategories =
+        categories.stream().filter(category -> category.getUserId().equals(userId)).toList();
+    return userCategories.get(RandomUtils.randomInteger(0, userCategories.size() - 1));
   }
 
-  public Budget getRandomBudget(UUID userId) {
+  public Budget getRandomBudgetByUserId(UUID userId) {
     List<Budget> userBudgets =
-        budgets.stream().filter(budget -> budget.getUserId().equals(userId)).toList();
+        budgets.stream().filter(budget -> userId.equals(budget.getCategory().getUserId())).toList();
     return userBudgets.get(RandomUtils.randomInteger(0, userBudgets.size() - 1));
   }
 
-  public BudgetRequestDto createBudgetForUser(UUID userId) {
-    return toBudgetRequest(BudgetFactory.fakeBudget(userId, budgets.size()));
+  public List<DefaultCategory> getDefaultCategories() {
+    return defaultCategories;
   }
 
-  private BudgetRequestDto toBudgetRequest(Budget budget) {
-    return new BudgetRequestDto(
-        budget.getUserId(),
-        budget.getBudgetName(),
-        budget.getDescription(),
-        budget.getBudgetLimit(),
-        budget.getAmount(),
-        budget.getCurrency());
+  public CategoryRequestDto createCategoryForUser(UUID userId) {
+    return toCategoryRequest(CategoryFactory.fakeCategory(userId, categories.size()));
   }
 
-  public BudgetDto getExpectedBudgetDto(BudgetRequestDto request) {
-    return BudgetDto.builder()
+  private CategoryRequestDto toCategoryRequest(Category category) {
+    return new CategoryRequestDto(
+        category.getUserId(), category.getCategoryName(), category.getDescription());
+  }
+
+  public CategoryDto getExpectedCategoryDto(CategoryRequestDto request) {
+    return CategoryDto.builder()
         .withUserId(request.userId())
-        .withBudgetName(request.budgetName())
+        .withCategoryName(request.categoryName())
         .withDescription(request.description())
-        .withBudgetLimit(request.budgetLimit())
-        .withAmount(request.amount())
-        .withCurrency(request.currency())
         .build();
   }
 
-  public int getBudgetsCount() {
-    return budgets.size();
+  public int getCategoriesCount() {
+    return categories.size();
+  }
+
+  public List<Category> getCategoriesByUser(UUID userId, PageCriteria pageCriteria) {
+    return categories.stream()
+        .filter(category -> category.getUserId().equals(userId))
+        .skip(pageCriteria.getOffset())
+        .limit(pageCriteria.getLimit())
+        .toList();
   }
 
   public List<Budget> filterBudgets(UUID userId, BudgetCriteria criteria) {
     return budgets.stream()
-        .filter(budget -> userId.equals(budget.getUserId()))
+        .filter(budget -> userId.equals(budget.getCategory().getUserId()))
         .filter(
             budget ->
                 criteria
@@ -128,6 +141,9 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
                     .getCurrency()
                     .map(currency -> currency.equals(budget.getCurrency()))
                     .orElse(true))
+        .filter(
+            budget ->
+                criteria.getDate().map(date -> date.matches(budget.getStartDate())).orElse(true))
         .sorted((a, b) -> sortByCriteria(a, b, criteria.getSort()))
         .skip(criteria.getPage().getOffset())
         .limit(criteria.getPage().getLimit())
@@ -145,7 +161,6 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
 
     int comparison =
         switch (attribute) {
-          case BUDGET_NAME -> a.getBudgetName().compareTo(b.getBudgetName());
           case AMOUNT -> a.getAmount().compareTo(b.getAmount());
           case BUDGET_LIMIT -> a.getBudgetLimit().compareTo(b.getBudgetLimit());
           default -> 0;
@@ -166,7 +181,7 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
   @Override
   public BudgetTestContext generateScript(Path dir) {
     new EntityScriptGenerator(
-            new ScriptMetadata(dir, budgets, defaultBudgetTemplates), new SQLScriptService())
+            new ScriptMetadata(dir, categories, defaultCategories, budgets), new SQLScriptService())
         .execute();
     return self();
   }

@@ -1,55 +1,49 @@
 package it.moneyverse.budget.model.entities;
 
 import static it.moneyverse.test.utils.FakeUtils.*;
+import static it.moneyverse.test.utils.FakeUtils.FAKE_USER;
 
-import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BudgetFactory {
-  private static final Logger LOGGER = LoggerFactory.getLogger(BudgetFactory.class);
 
-  public static List<Budget> createBudgets(List<UserModel> users) {
+  public static List<Budget> createBudgets(List<Category> categories) {
     List<Budget> budgets = new ArrayList<>();
-    for (UserModel user : users) {
-      int numBudgetsPerUser = RandomUtils.randomInteger(MIN_BUDGETS_PER_USER, MAX_BUDGETS_PER_USER);
-      for (int i = 0; i < numBudgetsPerUser; i++) {
-        budgets.add(BudgetFactory.fakeBudget(user.getUserId(), i));
+    for (Category category : categories) {
+      for (int i = 0;
+          i < RandomUtils.randomInteger(MIN_BUDGETS_PER_CATEGORY, MAX_BUDGETS_PER_CATEGORY);
+          i++) {
+        budgets.add(createBudget(category, budgets));
       }
     }
-    LOGGER.info("Created {} random budgets for testing", budgets.size());
     return budgets;
   }
 
-  public static List<DefaultBudgetTemplate> createDefaultBudgetTemplates() {
-    List<DefaultBudgetTemplate> defaultBudgetTemplates = new ArrayList<>();
-    for (int i = 0; i < DEFAULT_BUDGETS_PER_USER; i++) {
-      defaultBudgetTemplates.add(BudgetFactory.fakeDefaultBudgetTemplate(i));
+  private static Budget createBudget(Category category, List<Budget> budgets) {
+    Budget fakeBudget = fakeBudget(category);
+    if (budgets.stream()
+        .anyMatch(
+            b ->
+                b.getCategory().getCategoryId().equals(fakeBudget.getCategory().getCategoryId())
+                    && b.getStartDate().equals(fakeBudget.getStartDate())
+                    && b.getEndDate().equals(fakeBudget.getEndDate()))) {
+      return createBudget(category, budgets);
     }
-    LOGGER.info("Created {} random budget template for testing", defaultBudgetTemplates.size());
-    return defaultBudgetTemplates;
+    return fakeBudget;
   }
 
-  public static Budget fakeBudget(UUID userId, Integer counter) {
-    counter = counter + 1;
+  private static Budget fakeBudget(Category category) {
     Budget budget = new Budget();
     budget.setBudgetId(RandomUtils.randomUUID());
-    budget.setUserId(userId);
-    budget.setBudgetName("Budget %s".formatted(counter));
-    budget.setDescription(RandomUtils.randomString(30));
-    budget.setBudgetLimit(
-        (int) (Math.random() * 100) % 2 == 0
-            ? RandomUtils.randomDecimal(0.0, Math.random() * 2000)
-                .setScale(2, RoundingMode.HALF_EVEN)
-            : null);
-    budget.setAmount(RandomUtils.randomBigDecimal().setScale(2, RoundingMode.HALF_EVEN));
-    budget.setCurrency(RandomUtils.randomString(3).toUpperCase());
+    budget.setCategory(category);
+    budget.setStartDate(RandomUtils.randomLocalDate(2025, 2025));
+    budget.setEndDate(budget.getStartDate().plusMonths(RandomUtils.randomInteger(1, 3)));
+    budget.setAmount(RandomUtils.randomBigDecimal());
+    budget.setBudgetLimit(RandomUtils.randomBigDecimal());
+    budget.setCurrency(RandomUtils.randomString(3));
     budget.setCreatedBy(FAKE_USER);
     budget.setCreatedAt(LocalDateTime.now());
     budget.setUpdatedBy(FAKE_USER);
@@ -57,12 +51,5 @@ public class BudgetFactory {
     return budget;
   }
 
-  public static DefaultBudgetTemplate fakeDefaultBudgetTemplate(Integer counter) {
-    counter = counter + 1;
-    DefaultBudgetTemplate defaultBudgetTemplate = new DefaultBudgetTemplate();
-    defaultBudgetTemplate.setId(RandomUtils.randomUUID());
-    defaultBudgetTemplate.setName("Default Budget %s".formatted(counter));
-    defaultBudgetTemplate.setDescription(RandomUtils.randomString(30));
-    return defaultBudgetTemplate;
-  }
+  private BudgetFactory() {}
 }

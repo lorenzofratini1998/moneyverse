@@ -28,10 +28,10 @@ public class GrpcMockServer extends GrpcMockExtension {
             .willReturn(AccountResponse.newBuilder().setExists(true).build()));
   }
 
-  public void mockExistentBudget() {
+  public void mockExistentCategory() {
     stubFor(
-        unaryMethod(BudgetServiceGrpc.getCheckIfBudgetExistsMethod())
-            .willReturn(BudgetResponse.newBuilder().setExists(true).build()));
+        unaryMethod(BudgetServiceGrpc.getCheckIfCategoryExistsMethod())
+            .willReturn(CategoryResponse.newBuilder().setExists(true).build()));
   }
 
   public void mockExistentCurrency() {

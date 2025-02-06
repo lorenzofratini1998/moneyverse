@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
-import it.moneyverse.core.model.beans.BudgetDeletionTopic;
+import it.moneyverse.core.model.beans.CategoryDeletionTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.AccountDeletionEvent;
 import it.moneyverse.core.model.events.BudgetDeletionEvent;
@@ -132,9 +132,9 @@ class TransactionConsumerTest {
     final List<Transaction> budgetTransactions = testContext.getTransactionsByAccountId(budgetId);
     String event = JsonUtils.toJson(new BudgetDeletionEvent(budgetId));
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(BudgetDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
+        new ProducerRecord<>(CategoryDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockServer.mockExistentBudget();
+    mockServer.mockExistentCategory();
 
     kafkaTemplate.send(producerRecord);
 

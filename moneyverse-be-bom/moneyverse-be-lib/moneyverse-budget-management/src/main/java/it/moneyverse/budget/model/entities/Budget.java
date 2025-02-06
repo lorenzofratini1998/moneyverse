@@ -5,13 +5,16 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(
     name = "BUDGETS",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"USER_ID", "BUDGET_NAME"})})
+    uniqueConstraints = {
+      @UniqueConstraint(columnNames = {"CATEGORY_ID", "START_DATE", "END_DATE"})
+    })
 public class Budget extends Auditable implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
@@ -21,21 +24,22 @@ public class Budget extends Auditable implements Serializable {
   @Column(name = "BUDGET_ID")
   private UUID budgetId;
 
-  @Column(name = "USER_ID", nullable = false)
-  private UUID userId;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "CATEGORY_ID", nullable = false)
+  private Category category;
 
-  @Column(name = "BUDGET_NAME", nullable = false)
-  private String budgetName;
+  @Column(name = "START_DATE", nullable = false)
+  private LocalDate startDate;
 
-  @Column(name = "BUDGET_DESCRIPTION")
-  private String description;
-
-  @Column(name = "BUDGET_LIMIT")
-  private BigDecimal budgetLimit;
+  @Column(name = "END_DATE", nullable = false)
+  private LocalDate endDate;
 
   @Column(name = "AMOUNT", nullable = false)
   @ColumnDefault(value = "0.0")
-  private BigDecimal amount;
+  private BigDecimal amount = BigDecimal.ZERO;
+
+  @Column(name = "BUDGET_LIMIT", nullable = false)
+  private BigDecimal budgetLimit;
 
   @Column(name = "CURRENCY", nullable = false, length = 3)
   private String currency;
@@ -48,36 +52,28 @@ public class Budget extends Auditable implements Serializable {
     this.budgetId = budgetId;
   }
 
-  public UUID getUserId() {
-    return userId;
+  public Category getCategory() {
+    return category;
   }
 
-  public void setUserId(UUID userId) {
-    this.userId = userId;
+  public void setCategory(Category category) {
+    this.category = category;
   }
 
-  public String getBudgetName() {
-    return budgetName;
+  public LocalDate getStartDate() {
+    return startDate;
   }
 
-  public void setBudgetName(String budgetName) {
-    this.budgetName = budgetName;
+  public void setStartDate(LocalDate startDate) {
+    this.startDate = startDate;
   }
 
-  public String getDescription() {
-    return description;
+  public LocalDate getEndDate() {
+    return endDate;
   }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public BigDecimal getBudgetLimit() {
-    return budgetLimit;
-  }
-
-  public void setBudgetLimit(BigDecimal budgetLimit) {
-    this.budgetLimit = budgetLimit;
+  public void setEndDate(LocalDate endDate) {
+    this.endDate = endDate;
   }
 
   public BigDecimal getAmount() {
@@ -86,6 +82,14 @@ public class Budget extends Auditable implements Serializable {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+  public BigDecimal getBudgetLimit() {
+    return budgetLimit;
+  }
+
+  public void setBudgetLimit(BigDecimal budgetLimit) {
+    this.budgetLimit = budgetLimit;
   }
 
   public String getCurrency() {
