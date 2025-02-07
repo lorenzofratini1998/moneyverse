@@ -30,6 +30,13 @@ public class Category extends Auditable implements Serializable {
   @Column(name = "CATEGORY_DESCRIPTION")
   private String description;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "PARENT_ID")
+  private Category parentCategory;
+
+  @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Category> subCategories = new ArrayList<>();
+
   @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Budget> budgets = new ArrayList<>();
 
@@ -63,6 +70,22 @@ public class Category extends Auditable implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public Category getParentCategory() {
+    return parentCategory;
+  }
+
+  public void setParentCategory(Category parentCategory) {
+    this.parentCategory = parentCategory;
+  }
+
+  public List<Category> getSubCategories() {
+    return subCategories;
+  }
+
+  public void setSubCategories(List<Category> subCategories) {
+    this.subCategories = subCategories;
   }
 
   public List<Budget> getBudgets() {

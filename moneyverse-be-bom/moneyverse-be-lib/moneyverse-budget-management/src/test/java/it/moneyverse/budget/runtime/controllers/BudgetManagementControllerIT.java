@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -130,7 +131,13 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final UserModel user = testContext.getRandomAdminOrUser();
     final UUID categoryId = testContext.getRandomCategoryByUserId(user.getUserId()).getCategoryId();
     CategoryUpdateRequestDto request =
-        new CategoryUpdateRequestDto(null, RandomUtils.randomString(25));
+        new CategoryUpdateRequestDto(
+            null,
+            RandomUtils.randomString(25),
+            JsonNullable.of(
+                testContext
+                    .getRandomCategoryByUserIdAndCategoryId(user.getUserId(), categoryId)
+                    .getCategoryId()));
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
 
     ResponseEntity<CategoryDto> response =
@@ -144,6 +151,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     assertNotNull(response.getBody());
     assertEquals(categoryId, response.getBody().getCategoryId());
     assertEquals(request.description(), response.getBody().getDescription());
+    assertEquals(request.parentId().get(), response.getBody().getParentCategory().getCategoryId());
   }
 
   @Test
@@ -277,5 +285,20 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(testContext.getDefaultCategories().size(), response.getBody().size());
+  }
+
+  @Test
+  void testGetCategoryTree() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+
+    ResponseEntity<List<CategoryDto>> response =
+        restTemplate.exchange(
+            basePath + "/categories/users/%s/tree".formatted(userId),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 }

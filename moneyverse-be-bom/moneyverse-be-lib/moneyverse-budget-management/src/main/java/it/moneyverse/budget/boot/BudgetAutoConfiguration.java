@@ -1,6 +1,9 @@
 package it.moneyverse.budget.boot;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.moneyverse.core.model.beans.*;
+import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -40,5 +43,12 @@ public class BudgetAutoConfiguration {
   @Bean
   public TransactionDeletionTopic transactionDeletionTopic() {
     return new TransactionDeletionTopic();
+  }
+
+  @Bean
+  public ObjectMapper objectMapper() {
+    return new ObjectMapper()
+        .registerModule(new JavaTimeModule())
+        .registerModule(new JsonNullableModule());
   }
 }

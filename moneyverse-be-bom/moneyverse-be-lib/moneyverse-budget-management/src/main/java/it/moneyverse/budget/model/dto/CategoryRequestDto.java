@@ -11,6 +11,7 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CategoryRequestDto(
     @NotNull(message = "'User ID' must not be null") UUID userId,
+    UUID parentId,
     @NotEmpty(message = "'Category name' must not be empty or null") String categoryName,
     String description) {
   @Override

@@ -15,6 +15,8 @@ public interface CategoryService {
 
   List<CategoryDto> getCategoriesByUserId(UUID userId, PageCriteria pageCriteria);
 
+  List<CategoryDto> getCategoryTreeByUserId(UUID userId);
+
   CategoryDto getCategory(UUID categoryId);
 
   CategoryDto updateCategory(UUID categoryId, CategoryUpdateRequestDto request);

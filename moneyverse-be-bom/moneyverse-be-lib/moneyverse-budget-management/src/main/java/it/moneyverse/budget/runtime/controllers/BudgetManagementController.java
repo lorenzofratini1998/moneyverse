@@ -79,6 +79,14 @@ public class BudgetManagementController implements CategoryOperations, BudgetOpe
   }
 
   @Override
+  @GetMapping("/categories/users/{userId}/tree")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
+  public List<CategoryDto> getCategoryTreeByUserId(@PathVariable UUID userId) {
+    return categoryService.getCategoryTreeByUserId(userId);
+  }
+
+  @Override
   @PostMapping("/budgets")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize(

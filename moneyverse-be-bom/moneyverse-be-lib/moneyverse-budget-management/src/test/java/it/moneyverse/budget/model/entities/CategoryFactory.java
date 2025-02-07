@@ -17,10 +17,20 @@ public class CategoryFactory {
   public static List<Category> createCategories(List<UserModel> users) {
     List<Category> categories = new ArrayList<>();
     for (UserModel user : users) {
+      List<Category> userCategories = new ArrayList<>();
       int numBudgetsPerUser =
           RandomUtils.randomInteger(MIN_CATEGORIES_PER_USER, MAX_CATEGORIES_PER_USER);
       for (int i = 0; i < numBudgetsPerUser; i++) {
-        categories.add(CategoryFactory.fakeCategory(user.getUserId(), i));
+        boolean isChild = !userCategories.isEmpty() && Math.random() < 0.5;
+        Category newCategory;
+        if (isChild) {
+          int parentIndex = RandomUtils.randomInteger(0, userCategories.size() - 1);
+          newCategory = fakeCategory(user.getUserId(), i, userCategories.get(parentIndex));
+        } else {
+          newCategory = fakeCategory(user.getUserId(), i);
+        }
+        categories.add(newCategory);
+        userCategories.add(newCategory);
       }
     }
     LOGGER.info("Created {} random categories for testing", categories.size());
@@ -48,6 +58,12 @@ public class CategoryFactory {
     category.setUpdatedBy(FAKE_USER);
     category.setUpdatedAt(LocalDateTime.now());
     return category;
+  }
+
+  public static Category fakeCategory(UUID userId, Integer counter, Category parentCategory) {
+    Category fakeCategory = fakeCategory(userId, counter);
+    fakeCategory.setParentCategory(parentCategory);
+    return fakeCategory;
   }
 
   public static DefaultCategory fakeDefaultCategory(Integer counter) {

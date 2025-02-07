@@ -75,6 +75,14 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
     return userCategories.get(RandomUtils.randomInteger(0, userCategories.size() - 1));
   }
 
+  public Category getRandomCategoryByUserIdAndCategoryId(UUID userId, UUID categoryId) {
+    Category category = getRandomCategoryByUserId(userId);
+    if (category.getCategoryId().equals(categoryId)) {
+      getRandomCategoryByUserIdAndCategoryId(userId, categoryId);
+    }
+    return category;
+  }
+
   public Budget getRandomBudgetByUserId(UUID userId) {
     List<Budget> userBudgets =
         budgets.stream().filter(budget -> userId.equals(budget.getCategory().getUserId())).toList();
@@ -91,7 +99,7 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
 
   private CategoryRequestDto toCategoryRequest(Category category) {
     return new CategoryRequestDto(
-        category.getUserId(), category.getCategoryName(), category.getDescription());
+        category.getUserId(), null, category.getCategoryName(), category.getDescription());
   }
 
   public CategoryDto getExpectedCategoryDto(CategoryRequestDto request) {

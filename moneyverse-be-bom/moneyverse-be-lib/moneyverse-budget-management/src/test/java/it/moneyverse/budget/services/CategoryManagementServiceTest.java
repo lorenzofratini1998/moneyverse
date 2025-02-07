@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.kafka.support.SendResult;
 
 /** Unit test for {@link CategoryManagementService} */
@@ -113,7 +114,7 @@ class CategoryManagementServiceTest {
 
   private CategoryRequestDto createCategoryRequest(UUID userId) {
     return new CategoryRequestDto(
-        userId, RandomUtils.randomString(15), RandomUtils.randomString(15));
+        userId, null, RandomUtils.randomString(15), RandomUtils.randomString(15));
   }
 
   @Test
@@ -218,7 +219,8 @@ class CategoryManagementServiceTest {
   }
 
   private CategoryUpdateRequestDto createCategoryUpdateRequest() {
-    return new CategoryUpdateRequestDto(RandomUtils.randomString(15), RandomUtils.randomString(15));
+    return new CategoryUpdateRequestDto(
+        RandomUtils.randomString(15), RandomUtils.randomString(15), JsonNullable.undefined());
   }
 
   @Test

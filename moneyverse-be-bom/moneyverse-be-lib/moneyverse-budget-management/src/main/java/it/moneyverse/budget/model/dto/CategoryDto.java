@@ -19,12 +19,14 @@ public class CategoryDto implements Serializable {
   private final UUID userId;
   private final String categoryName;
   private final String description;
+  private final CategoryDto parentCategory;
 
   public CategoryDto(Builder builder) {
     this.categoryId = builder.categoryId;
     this.userId = builder.userId;
     this.categoryName = builder.categoryName;
     this.description = builder.description;
+    this.parentCategory = builder.parentCategory;
   }
 
   public UUID getCategoryId() {
@@ -43,11 +45,16 @@ public class CategoryDto implements Serializable {
     return description;
   }
 
+  public CategoryDto getParentCategory() {
+    return parentCategory;
+  }
+
   public static class Builder {
     private UUID categoryId;
     private UUID userId;
     private String categoryName;
     private String description;
+    private CategoryDto parentCategory;
 
     public Builder withCategoryId(UUID categoryId) {
       this.categoryId = categoryId;
@@ -66,6 +73,11 @@ public class CategoryDto implements Serializable {
 
     public Builder withDescription(String description) {
       this.description = description;
+      return this;
+    }
+
+    public Builder withParentCategory(CategoryDto parentCategory) {
+      this.parentCategory = parentCategory;
       return this;
     }
 

@@ -51,8 +51,15 @@ public class CategoryManagementService implements CategoryService {
   public CategoryDto createCategory(CategoryRequestDto request) {
     checkIfUserExists(request.userId());
     checkIfCategoryAlreadyExists(request.userId(), request.categoryName());
+    Category parentCategory = null;
+    if (request.parentId() != null) {
+      parentCategory = findCategoryById(request.parentId());
+    }
     LOGGER.info("Creating category '{}' for user '{}'", request.categoryName(), request.userId());
-    Category category = CategoryMapper.toCategory(request);
+    Category category =
+        parentCategory == null
+            ? CategoryMapper.toCategory(request)
+            : CategoryMapper.toCategory(request, parentCategory);
     CategoryDto result = CategoryMapper.toCategoryDto(categoryRepository.save(category));
     LOGGER.info("Created category '{}' for user '{}'", result, request.userId());
     return result;
@@ -79,6 +86,13 @@ public class CategoryManagementService implements CategoryService {
 
   @Override
   @Transactional(readOnly = true)
+  public List<CategoryDto> getCategoryTreeByUserId(UUID userId) {
+    LOGGER.info("Fetching category tree for user: '{}'", userId);
+    return CategoryMapper.toCategoryDto(categoryRepository.findCategoryTreeByUserId(userId));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public CategoryDto getCategory(UUID categoryId) {
     return CategoryMapper.toCategoryDto(findCategoryById(categoryId));
   }
@@ -90,10 +104,25 @@ public class CategoryManagementService implements CategoryService {
     if (request.categoryName() != null) {
       checkIfCategoryAlreadyExists(category.getUserId(), request.categoryName());
     }
-    category = CategoryMapper.partialUpdate(category, request);
+    category =
+        request.parentId().isPresent()
+            ? updateCategoryWithParent(category, request)
+            : CategoryMapper.partialUpdate(category, request);
     CategoryDto result = CategoryMapper.toCategoryDto(categoryRepository.save(category));
     LOGGER.info("Updated category '{}' for user '{}'", categoryId, category.getUserId());
     return result;
+  }
+
+  private Category updateCategoryWithParent(Category category, CategoryUpdateRequestDto request) {
+    if (!request.parentId().isPresent()) {
+      return CategoryMapper.partialUpdate(category, request, null);
+    }
+    UUID parentId = request.parentId().get();
+    if (category.getCategoryId().equals(parentId)) {
+      throw new IllegalArgumentException("Category cannot be its own parent");
+    }
+    Category parentCategory = findCategoryById(parentId);
+    return CategoryMapper.partialUpdate(category, request, parentCategory);
   }
 
   private void checkIfCategoryAlreadyExists(UUID userId, String categoryName) {

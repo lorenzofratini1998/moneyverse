@@ -11,6 +11,10 @@ import java.util.List;
 public class CategoryMapper {
 
   public static Category toCategory(CategoryRequestDto request) {
+    return toCategory(request, null);
+  }
+
+  public static Category toCategory(CategoryRequestDto request, Category parentCategory) {
     if (request == null) {
       return null;
     }
@@ -18,6 +22,7 @@ public class CategoryMapper {
     category.setUserId(request.userId());
     category.setCategoryName(request.categoryName());
     category.setDescription(request.description());
+    category.setParentCategory(parentCategory);
     return category;
   }
 
@@ -25,12 +30,15 @@ public class CategoryMapper {
     if (category == null) {
       return null;
     }
-
     return CategoryDto.builder()
         .withCategoryId(category.getCategoryId())
         .withUserId(category.getUserId())
         .withCategoryName(category.getCategoryName())
         .withDescription(category.getDescription())
+        .withParentCategory(
+            category.getParentCategory() != null
+                ? toCategoryDto(category.getParentCategory())
+                : null)
         .build();
   }
 
@@ -61,13 +69,22 @@ public class CategoryMapper {
 
   public static Category partialUpdate(Category category, CategoryUpdateRequestDto request) {
     if (request == null) {
-      return null;
+      return category;
     }
     if (request.categoryName() != null) {
       category.setCategoryName(request.categoryName());
     }
     if (request.description() != null) {
       category.setDescription(request.description());
+    }
+    return category;
+  }
+
+  public static Category partialUpdate(
+      Category category, CategoryUpdateRequestDto request, Category parentCategory) {
+    category = partialUpdate(category, request);
+    if (request.parentId().isPresent()) {
+      category.setParentCategory(parentCategory);
     }
     return category;
   }

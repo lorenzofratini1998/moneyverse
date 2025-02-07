@@ -20,4 +20,6 @@ public interface CategoryOperations {
   CategoryDto updateCategory(UUID categoryId, @Valid CategoryUpdateRequestDto request);
 
   void deleteCategory(UUID categoryId);
+
+  List<CategoryDto> getCategoryTreeByUserId(UUID userId);
 }
