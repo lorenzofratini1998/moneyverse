@@ -3,7 +3,7 @@ package it.moneyverse.transaction.runtime.messages;
 import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
 
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
-import it.moneyverse.core.model.beans.BudgetDeletionTopic;
+import it.moneyverse.core.model.beans.CategoryDeletionTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.AccountDeletionEvent;
 import it.moneyverse.core.model.events.BudgetDeletionEvent;
@@ -55,7 +55,7 @@ public class TransactionConsumer {
 
   @RetryableTopic
   @KafkaListener(
-      topics = BudgetDeletionTopic.TOPIC,
+      topics = CategoryDeletionTopic.TOPIC,
       autoStartup = "true",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")

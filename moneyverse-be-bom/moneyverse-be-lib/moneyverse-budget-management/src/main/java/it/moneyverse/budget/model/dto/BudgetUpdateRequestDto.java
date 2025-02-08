@@ -1,16 +1,13 @@
 package it.moneyverse.budget.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record BudgetUpdateRequestDto(
-    String budgetName,
-    String description,
+    LocalDate startDate,
+    LocalDate endDate,
     BigDecimal amount,
     BigDecimal budgetLimit,
     String currency)

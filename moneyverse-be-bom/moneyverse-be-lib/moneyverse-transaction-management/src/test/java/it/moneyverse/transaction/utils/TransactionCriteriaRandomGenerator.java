@@ -69,7 +69,7 @@ public class TransactionCriteriaRandomGenerator
       for (int i = 0;
           i
               < RandomUtils.randomInteger(
-                  FakeUtils.MIN_BUDGETS_PER_USER, FakeUtils.MAX_BUDGETS_PER_USER);
+                  FakeUtils.MIN_CATEGORIES_PER_USER, FakeUtils.MAX_CATEGORIES_PER_USER);
           i++) {
         randomBudgets.add(budgets.get(RandomUtils.randomInteger(0, budgets.size() - 1)));
       }

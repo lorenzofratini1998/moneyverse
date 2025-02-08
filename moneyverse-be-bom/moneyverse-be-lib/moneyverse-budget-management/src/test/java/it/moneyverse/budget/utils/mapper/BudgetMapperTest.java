@@ -7,38 +7,33 @@ import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
-import it.moneyverse.test.utils.RandomUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import it.moneyverse.budget.model.entities.Category;
+import it.moneyverse.budget.utils.BudgetTestUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-/** Unit test for {@link BudgetMapper} */
+@ExtendWith(MockitoExtension.class)
 class BudgetMapperTest {
+
+  @Mock Category category;
 
   @Test
   void testToBudgetEntity_NullBudgetRequest() {
-    assertNull(BudgetMapper.toBudget(null));
+    assertNull(BudgetMapper.toBudget(null, category));
   }
 
   @Test
-  void testToBudgetEntity_ValidBudgetRequest() {
-    BudgetRequestDto request =
-        new BudgetRequestDto(
-            RandomUtils.randomUUID(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(3).toUpperCase());
+  void testToBudgetEntity() {
+    BudgetRequestDto request = BudgetTestUtils.createBudgetRequest();
+    Budget budget = BudgetMapper.toBudget(request, category);
 
-    Budget budget = BudgetMapper.toBudget(request);
-
-    assertEquals(request.userId(), budget.getUserId());
-    assertEquals(request.budgetName(), budget.getBudgetName());
-    assertEquals(request.description(), budget.getDescription());
     assertEquals(request.budgetLimit(), budget.getBudgetLimit());
-    assertEquals(request.amount(), budget.getAmount());
+    assertEquals(request.currency(), budget.getCurrency());
+    assertEquals(request.startDate(), budget.getStartDate());
+    assertEquals(request.endDate(), budget.getEndDate());
+    assertEquals(category, budget.getCategory());
   }
 
   @Test
@@ -47,74 +42,33 @@ class BudgetMapperTest {
   }
 
   @Test
-  void testToBudgetDto_ValidBudgetEntity() {
-    Budget budget = createBudget();
-
+  void testToBudgetDto() {
+    Budget budget = BudgetTestUtils.createBudget(category);
     BudgetDto dto = BudgetMapper.toBudgetDto(budget);
 
     assertEquals(budget.getBudgetId(), dto.getBudgetId());
-    assertEquals(budget.getUserId(), dto.getUserId());
-    assertEquals(budget.getBudgetName(), dto.getBudgetName());
-    assertEquals(budget.getDescription(), dto.getDescription());
+    assertEquals(budget.getStartDate(), dto.getStartDate());
+    assertEquals(budget.getEndDate(), dto.getEndDate());
     assertEquals(budget.getBudgetLimit(), dto.getBudgetLimit());
-    assertEquals(budget.getAmount(), dto.getAmount());
+    assertEquals(budget.getCurrency(), dto.getCurrency());
   }
 
   @Test
-  void testToBudgetDto_EmptyEntityList() {
-    assertEquals(Collections.emptyList(), BudgetMapper.toBudgetDto(new ArrayList<>()));
-  }
-
-  @Test
-  void testToBudgetDto_NonEmptyEntityList() {
-    int entitiesCount = RandomUtils.randomInteger(0, 10);
-    List<Budget> budgets = new ArrayList<>(entitiesCount);
-    for (int i = 0; i < entitiesCount; i++) {
-      budgets.add(createBudget());
-    }
-
-    List<BudgetDto> budgetDtos = BudgetMapper.toBudgetDto(budgets);
-
-    for (int i = 0; i < entitiesCount; i++) {
-      Budget budget = budgets.get(i);
-      BudgetDto budgetDto = budgetDtos.get(i);
-
-      assertEquals(budget.getBudgetId(), budgetDto.getBudgetId());
-      assertEquals(budget.getUserId(), budgetDto.getUserId());
-      assertEquals(budget.getBudgetName(), budgetDto.getBudgetName());
-      assertEquals(budget.getDescription(), budgetDto.getDescription());
-      assertEquals(budget.getBudgetLimit(), budgetDto.getBudgetLimit());
-      assertEquals(budget.getAmount(), budgetDto.getAmount());
-    }
+  void testToBudget_PartialUpdate_NullRequest() {
+    assertNull(BudgetMapper.partialUpdate(null, null));
   }
 
   @Test
   void testToBudget_PartialUpdate() {
-    Budget budget = createBudget();
-    BudgetUpdateRequestDto request =
-        new BudgetUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(3).toUpperCase());
-
+    Budget budget = BudgetTestUtils.createBudget(category);
+    BudgetUpdateRequestDto request = BudgetTestUtils.createBudgetUpdateRequest();
     Budget result = BudgetMapper.partialUpdate(budget, request);
 
-    assertEquals(request.budgetName(), result.getBudgetName());
-    assertEquals(request.description(), result.getDescription());
-    assertEquals(request.budgetLimit(), result.getBudgetLimit());
+    assertEquals(budget.getBudgetId(), result.getBudgetId());
     assertEquals(request.amount(), result.getAmount());
-  }
-
-  private Budget createBudget() {
-    Budget budget = new Budget();
-    budget.setBudgetId(RandomUtils.randomUUID());
-    budget.setUserId(RandomUtils.randomUUID());
-    budget.setBudgetName(RandomUtils.randomString(15));
-    budget.setDescription(RandomUtils.randomString(15));
-    budget.setBudgetLimit(RandomUtils.randomBigDecimal());
-    budget.setAmount(RandomUtils.randomBigDecimal());
-    return budget;
+    assertEquals(request.budgetLimit(), result.getBudgetLimit());
+    assertEquals(request.currency(), result.getCurrency());
+    assertEquals(request.startDate(), result.getStartDate());
+    assertEquals(request.endDate(), result.getEndDate());
   }
 }

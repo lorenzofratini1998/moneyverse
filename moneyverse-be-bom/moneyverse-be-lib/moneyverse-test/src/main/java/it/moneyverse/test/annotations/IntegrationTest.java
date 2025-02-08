@@ -17,5 +17,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @CleanDatabaseAfterEachTest
-@TestPropertySource(properties = {"logging.level.org.grpcmock.GrpcMock=WARN"})
+@TestPropertySource(
+    properties = {
+      "logging.level.org.grpcmock.GrpcMock=WARN",
+      "logging.level.org.apache.kafka.clients.NetworkClient=ERROR"
+    })
 public @interface IntegrationTest {}

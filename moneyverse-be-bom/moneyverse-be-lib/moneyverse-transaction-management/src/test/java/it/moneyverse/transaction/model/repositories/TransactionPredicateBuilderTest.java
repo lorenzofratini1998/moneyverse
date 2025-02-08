@@ -1,11 +1,11 @@
 package it.moneyverse.transaction.model.repositories;
 
+import static it.moneyverse.test.utils.FakeUtils.randomBoundCriteria;
+import static it.moneyverse.test.utils.FakeUtils.randomDateCriteria;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import it.moneyverse.core.model.dto.BoundCriteria;
-import it.moneyverse.core.model.dto.DateCriteria;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.entities.Tag;
@@ -66,18 +66,4 @@ class TransactionPredicateBuilderTest {
     verify(cb, times(2)).or(any(Predicate[].class));
   }
 
-  private BoundCriteria randomBoundCriteria() {
-    BoundCriteria bound = new BoundCriteria();
-    bound.setUpper(RandomUtils.randomBigDecimal());
-    bound.setLower(RandomUtils.randomBigDecimal());
-    return bound;
-  }
-
-  private DateCriteria randomDateCriteria() {
-    DateCriteria date = new DateCriteria();
-    LocalDate lower = RandomUtils.randomLocalDate(2024, 2025);
-    date.setStart(lower);
-    date.setEnd(lower.plusMonths(3));
-    return date;
-  }
 }

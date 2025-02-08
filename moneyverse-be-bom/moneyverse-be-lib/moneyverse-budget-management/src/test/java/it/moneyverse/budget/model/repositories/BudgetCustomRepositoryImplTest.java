@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
+import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.utils.BudgetCriteriaRandomGenerator;
 import it.moneyverse.budget.utils.BudgetTestContext;
 import it.moneyverse.core.boot.*;
-import it.moneyverse.test.utils.RandomUtils;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
@@ -47,11 +47,17 @@ class BudgetCustomRepositoryImplTest {
   @BeforeAll
   public static void beforeAll() {
     testContext = new BudgetTestContext();
+    testContext.getCategories().forEach(budget -> budget.setCategoryId(null));
     testContext.getBudgets().forEach(budget -> budget.setBudgetId(null));
   }
 
   @BeforeEach
   public void setup() {
+    for (Category category : testContext.getCategories()) {
+      entityManager.persist(category);
+    }
+    entityManager.flush();
+
     for (Budget budget : testContext.getBudgets()) {
       entityManager.persist(budget);
     }
@@ -61,10 +67,10 @@ class BudgetCustomRepositoryImplTest {
   @Test
   void givenCriteria_thenReturnFilteredBudgets() {
     BudgetCriteria criteria = new BudgetCriteriaRandomGenerator(testContext).generate();
-    UUID userId = RandomUtils.randomUUID();
+    UUID userId = testContext.getRandomUser().getUserId();
     List<Budget> expected = testContext.filterBudgets(userId, criteria);
 
-    List<Budget> actual = customRepository.findBudgets(userId, criteria);
+    List<Budget> actual = customRepository.filterBudgets(userId, criteria);
 
     assertEquals(expected.size(), actual.size());
   }

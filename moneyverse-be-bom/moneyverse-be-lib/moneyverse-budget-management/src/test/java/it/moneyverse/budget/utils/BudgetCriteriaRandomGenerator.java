@@ -3,10 +3,12 @@ package it.moneyverse.budget.utils;
 import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
+import it.moneyverse.core.model.dto.DateCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.CriteriaRandomGenerator;
 import it.moneyverse.test.utils.RandomUtils;
+import java.time.LocalDate;
 import org.springframework.data.domain.Sort;
 
 public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<BudgetCriteria> {
@@ -24,6 +26,7 @@ public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<Budge
     withRandomAmount();
     withRandomBudgetLimit();
     withRandomCurrency();
+    withRandomDate();
     withPage();
     withSort();
     return criteria;
@@ -48,11 +51,23 @@ public class BudgetCriteriaRandomGenerator extends CriteriaRandomGenerator<Budge
     criteria.setCurrency(Math.random() < 0.5 ? RandomUtils.randomString(3).toUpperCase() : null);
   }
 
+  private void withRandomDate() {
+    criteria.setDate(Math.random() < 0.5 ? randomDateCriteria() : null);
+  }
+
+  private DateCriteria randomDateCriteria() {
+    DateCriteria dateCriteria = new DateCriteria();
+    LocalDate start = RandomUtils.randomLocalDate(2025, 2025);
+    dateCriteria.setStart(start);
+    dateCriteria.setEnd(start.plusMonths(RandomUtils.randomInteger(1, 12)));
+    return dateCriteria;
+  }
+
   private void withPage() {
     criteria.setPage(new PageCriteria());
   }
 
   private void withSort() {
-    criteria.setSort(new SortCriteria<>(BudgetSortAttributeEnum.BUDGET_NAME, Sort.Direction.ASC));
+    criteria.setSort(new SortCriteria<>(BudgetSortAttributeEnum.AMOUNT, Sort.Direction.ASC));
   }
 }

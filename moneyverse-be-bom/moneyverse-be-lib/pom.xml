@@ -48,6 +48,7 @@
     <grpc-starter.version>3.4.0</grpc-starter.version>
     <grpcmock.version>0.15.0</grpcmock.version>
     <hibernate-jpamodelgen.version>6.6.3.Final</hibernate-jpamodelgen.version>
+    <jackson.databind.nullable-version>0.2.6</jackson.databind.nullable-version>
     <keycloak.version>25.0.0</keycloak.version>
     <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
     <postgres.version>42.7.4</postgres.version>
@@ -123,6 +124,11 @@
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-admin-client</artifactId>
         <version>${keycloak.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openapitools</groupId>
+        <artifactId>jackson-databind-nullable</artifactId>
+        <version>${jackson.databind.nullable-version}</version>
       </dependency>
       <dependency>
         <groupId>org.postgresql</groupId>
