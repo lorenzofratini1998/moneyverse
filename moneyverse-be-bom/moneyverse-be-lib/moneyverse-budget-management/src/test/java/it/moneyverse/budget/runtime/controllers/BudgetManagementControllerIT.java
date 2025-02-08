@@ -109,6 +109,24 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
+  void testCreateUserDefaultCategories() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/categories/users/" + userId + "/default",
+            HttpMethod.POST,
+            new HttpEntity<>(headers),
+            Void.class);
+
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(
+        testContext.getCategoriesCount() + testContext.getDefaultCategories().size(),
+        categoryRepository.findAll().size());
+  }
+
+  @Test
   void testGetCategory() {
     final UserModel user = testContext.getRandomAdminOrUser();
     final UUID categoryId = testContext.getRandomCategoryByUserId(user.getUserId()).getCategoryId();

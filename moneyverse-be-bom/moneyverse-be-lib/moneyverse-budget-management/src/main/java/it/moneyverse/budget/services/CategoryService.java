@@ -15,6 +15,8 @@ public interface CategoryService {
 
   List<CategoryDto> getCategoriesByUserId(UUID userId, PageCriteria pageCriteria);
 
+  void createUserDefaultCategories(UUID userId);
+
   List<CategoryDto> getCategoryTreeByUserId(UUID userId);
 
   CategoryDto getCategory(UUID categoryId);

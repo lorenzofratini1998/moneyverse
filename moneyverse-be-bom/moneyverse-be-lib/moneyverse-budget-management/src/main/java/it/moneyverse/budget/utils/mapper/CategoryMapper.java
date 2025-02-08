@@ -7,8 +7,20 @@ import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.DefaultCategory;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class CategoryMapper {
+
+  public static Category toCategory(UUID userId, DefaultCategory defaultCategory) {
+    if (defaultCategory == null) {
+      return null;
+    }
+    Category category = new Category();
+    category.setUserId(userId);
+    category.setCategoryName(defaultCategory.getName());
+    category.setDescription(defaultCategory.getDescription());
+    return category;
+  }
 
   public static Category toCategory(CategoryRequestDto request) {
     return toCategory(request, null);

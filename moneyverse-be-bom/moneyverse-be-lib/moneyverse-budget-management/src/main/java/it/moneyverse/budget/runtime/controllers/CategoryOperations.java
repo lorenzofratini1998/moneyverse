@@ -15,6 +15,8 @@ public interface CategoryOperations {
 
   List<CategoryDto> getCategoriesByUser(UUID userId, PageCriteria pageCriteria);
 
+  void createUserDefaultCategories(UUID userId);
+
   CategoryDto getCategory(UUID categoryId);
 
   CategoryDto updateCategory(UUID categoryId, @Valid CategoryUpdateRequestDto request);

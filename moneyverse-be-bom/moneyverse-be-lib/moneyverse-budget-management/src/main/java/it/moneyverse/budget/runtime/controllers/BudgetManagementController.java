@@ -51,6 +51,14 @@ public class BudgetManagementController implements CategoryOperations, BudgetOpe
   }
 
   @Override
+  @PostMapping("/categories/users/{userId}/default")
+  @ResponseStatus(HttpStatus.CREATED)
+  @PreAuthorize("(@securityService.isAuthenticatedUserOwner(#userId))")
+  public void createUserDefaultCategories(@PathVariable UUID userId) {
+    categoryService.createUserDefaultCategories(userId);
+  }
+
+  @Override
   @GetMapping("/categories/{categoryId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(

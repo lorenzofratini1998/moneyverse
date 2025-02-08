@@ -85,6 +85,17 @@ public class CategoryManagementService implements CategoryService {
   }
 
   @Override
+  @Transactional
+  public void createUserDefaultCategories(UUID userId) {
+    LOGGER.info("Creating default categories for user: '{}'", userId);
+    categoryRepository.saveAll(
+        defaultCategoryRepository.findAll().stream()
+            .map(defaultCategory -> CategoryMapper.toCategory(userId, defaultCategory))
+            .toList());
+    LOGGER.info("Created default categories for user: '{}'", userId);
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public List<CategoryDto> getCategoryTreeByUserId(UUID userId) {
     LOGGER.info("Fetching category tree for user: '{}'", userId);
