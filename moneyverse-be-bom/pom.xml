@@ -17,7 +17,7 @@
 
   <properties>
     <moneyverse-account-management.version>1.0.0-SNAPSHOT</moneyverse-account-management.version>
-    <moneyverse-budget-management.version>1.0.0-SNAPSHOT</moneyverse-budget-management.version>
+    <moneyverse-category-management.version>1.0.0-SNAPSHOT</moneyverse-category-management.version>
     <moneyverse-core.version>1.0.0-SNAPSHOT</moneyverse-core.version>
     <moneyverse-currency-management.version>1.0.0-SNAPSHOT</moneyverse-currency-management.version>
     <moneyverse-proto.version>1.0.0-SNAPSHOT</moneyverse-proto.version>
@@ -35,8 +35,8 @@
       </dependency>
       <dependency>
         <groupId>it.moneyverse</groupId>
-        <artifactId>moneyverse-budget-management</artifactId>
-        <version>${moneyverse-budget-management.version}</version>
+        <artifactId>moneyverse-category-management</artifactId>
+        <version>${moneyverse-category-management.version}</version>
       </dependency>
       <dependency>
         <groupId>it.moneyverse</groupId>

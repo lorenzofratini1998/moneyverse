@@ -51,7 +51,7 @@ public class TransactionFactory {
   private static List<UUID> randomBudgets() {
     List<UUID> budgets = new ArrayList<>();
     for (int i = 0;
-        i < RandomUtils.randomInteger(MIN_BUDGETS_PER_USER, MAX_BUDGETS_PER_USER);
+        i < RandomUtils.randomInteger(MIN_CATEGORIES_PER_USER, MAX_CATEGORIES_PER_USER);
         i++) {
       budgets.add(RandomUtils.randomUUID());
     }

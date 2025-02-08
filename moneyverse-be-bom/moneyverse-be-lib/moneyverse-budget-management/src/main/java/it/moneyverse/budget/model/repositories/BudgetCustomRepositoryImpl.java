@@ -24,7 +24,7 @@ public class BudgetCustomRepositoryImpl implements BudgetCustomRepository {
     }
 
   @Override
-  public List<Budget> findBudgets(UUID userId, BudgetCriteria param) {
+  public List<Budget> filterBudgets(UUID userId, BudgetCriteria param) {
         CriteriaQuery<Budget> cq = cb.createQuery(Budget.class);
         Root<Budget> root = cq.from(Budget.class);
     Predicate predicate = new BudgetPredicateBuilder(cb, root).build(userId, param);

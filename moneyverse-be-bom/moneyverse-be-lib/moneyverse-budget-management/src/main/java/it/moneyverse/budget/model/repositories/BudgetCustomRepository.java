@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface BudgetCustomRepository {
-  List<Budget> findBudgets(UUID userId, BudgetCriteria param);
+  List<Budget> filterBudgets(UUID userId, BudgetCriteria param);
 }

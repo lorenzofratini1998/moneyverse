@@ -1,18 +1,14 @@
 package it.moneyverse.budget.model.repositories;
 
 import it.moneyverse.budget.model.entities.Budget;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public interface BudgetRepository extends JpaRepository<Budget, UUID>, BudgetCustomRepository {
-  Boolean existsByUserIdAndBudgetName(UUID userId, String budgetName);
 
-  boolean existsByUserIdAndBudgetId(UUID userId, UUID budgetId);
+  boolean existsByCategory_UserIdAndBudgetId(UUID categoryUserId, UUID budgetId);
 
-  List<Budget> findBudgetByUserId(UUID userId);
-
-  boolean existsByBudgetId(UUID budgetId);
+  boolean existsByCategory_CategoryIdAndStartDateAndEndDate(
+      UUID categoryCategoryId, LocalDate startDate, LocalDate endDate);
 }

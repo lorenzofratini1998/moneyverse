@@ -1,33 +1,36 @@
 package it.moneyverse.budget.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonDeserialize(builder = BudgetDto.Builder.class)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "budgetId")
 public class BudgetDto implements Serializable {
 
   private final UUID budgetId;
-  private final UUID userId;
-  private final String budgetName;
-  private final String description;
-  private final BigDecimal budgetLimit;
+  private final CategoryDto category;
+  private final LocalDate startDate;
+  private final LocalDate endDate;
   private final BigDecimal amount;
+  private final BigDecimal budgetLimit;
   private final String currency;
 
   public BudgetDto(Builder builder) {
     this.budgetId = builder.budgetId;
-    this.userId = builder.userId;
-    this.budgetName = builder.budgetName;
-    this.description = builder.description;
-    this.budgetLimit = builder.budgetLimit;
+    this.category = builder.category;
+    this.startDate = builder.startDate;
+    this.endDate = builder.endDate;
     this.amount = builder.amount;
+    this.budgetLimit = builder.budgetLimit;
     this.currency = builder.currency;
   }
 
@@ -35,24 +38,24 @@ public class BudgetDto implements Serializable {
     return budgetId;
   }
 
-  public UUID getUserId() {
-    return userId;
+  public CategoryDto getCategory() {
+    return category;
   }
 
-  public String getBudgetName() {
-    return budgetName;
+  public LocalDate getStartDate() {
+    return startDate;
   }
 
-  public String getDescription() {
-    return description;
-  }
-
-  public BigDecimal getBudgetLimit() {
-    return budgetLimit;
+  public LocalDate getEndDate() {
+    return endDate;
   }
 
   public BigDecimal getAmount() {
     return amount;
+  }
+
+  public BigDecimal getBudgetLimit() {
+    return budgetLimit;
   }
 
   public String getCurrency() {
@@ -61,11 +64,11 @@ public class BudgetDto implements Serializable {
 
   public static class Builder {
     private UUID budgetId;
-    private UUID userId;
-    private String budgetName;
-    private String description;
-    private BigDecimal budgetLimit;
+    private CategoryDto category;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private BigDecimal amount;
+    private BigDecimal budgetLimit;
     private String currency;
 
     public Builder withBudgetId(UUID budgetId) {
@@ -73,28 +76,28 @@ public class BudgetDto implements Serializable {
       return this;
     }
 
-    public Builder withUserId(UUID userId) {
-      this.userId = userId;
+    public Builder withCategory(CategoryDto category) {
+      this.category = category;
       return this;
     }
 
-    public Builder withBudgetName(String budgetName) {
-      this.budgetName = budgetName;
+    public Builder withStartDate(LocalDate startDate) {
+      this.startDate = startDate;
       return this;
     }
 
-    public Builder withDescription(String description) {
-      this.description = description;
-      return this;
-    }
-
-    public Builder withBudgetLimit(BigDecimal budgetLimit) {
-      this.budgetLimit = budgetLimit;
+    public Builder withEndDate(LocalDate endDate) {
+      this.endDate = endDate;
       return this;
     }
 
     public Builder withAmount(BigDecimal amount) {
       this.amount = amount;
+      return this;
+    }
+
+    public Builder withBudgetLimit(BigDecimal budgetLimit) {
+      this.budgetLimit = budgetLimit;
       return this;
     }
 
@@ -110,10 +113,5 @@ public class BudgetDto implements Serializable {
 
   public static Builder builder() {
     return new Builder();
-  }
-
-  @Override
-  public String toString() {
-    return JsonUtils.toJson(this);
   }
 }

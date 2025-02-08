@@ -3,9 +3,8 @@ package it.moneyverse.budget.model.repositories;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.entities.Budget_;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import it.moneyverse.budget.model.entities.Category_;
+import jakarta.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,10 +22,11 @@ public class BudgetPredicateBuilder {
   }
 
   public Predicate build(UUID userId, BudgetCriteria param) {
-    predicates.add(cb.equal(root.get(Budget_.USER_ID), userId));
+    predicates.add(cb.equal(root.join(Budget_.CATEGORY).get(Category_.USER_ID), userId));
     withAmount(param);
     withBudgetLimit(param);
     withCurrency(param);
+    withDate(param);
     return cb.and(predicates.toArray(new Predicate[0]));
   }
 
@@ -66,5 +66,21 @@ public class BudgetPredicateBuilder {
     param
         .getCurrency()
         .ifPresent(currency -> predicates.add(cb.equal(root.get(Budget_.CURRENCY), currency)));
+  }
+
+  private void withDate(BudgetCriteria param) {
+    param
+        .getDate()
+        .ifPresent(
+            date -> {
+              date.getStart()
+                  .ifPresent(
+                      min ->
+                          predicates.add(
+                              cb.greaterThanOrEqualTo(root.get(Budget_.START_DATE), min)));
+              date.getEnd()
+                  .ifPresent(
+                      max -> predicates.add(cb.lessThanOrEqualTo(root.get(Budget_.END_DATE), max)));
+            });
   }
 }

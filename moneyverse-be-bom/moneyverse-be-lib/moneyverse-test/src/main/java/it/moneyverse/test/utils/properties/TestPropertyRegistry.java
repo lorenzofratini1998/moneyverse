@@ -6,6 +6,7 @@ import it.moneyverse.core.utils.properties.*;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.utils.RandomUtils;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
 public class TestPropertyRegistry {
@@ -58,7 +59,9 @@ public class TestPropertyRegistry {
   public TestPropertyRegistry withKafkaContainer(KafkaContainer container) {
     registry.add(
         KafkaProperties.KafkaAdminProperties.BOOTSTRAP_SERVERS, container::getBootstrapServers);
-    registry.add(KafkaProperties.KafkaConsumerProperties.GROUP_ID, () -> "test-group");
+    registry.add(
+        KafkaProperties.KafkaConsumerProperties.GROUP_ID,
+        () -> RandomUtils.randomUUID().toString());
     return this;
   }
 }

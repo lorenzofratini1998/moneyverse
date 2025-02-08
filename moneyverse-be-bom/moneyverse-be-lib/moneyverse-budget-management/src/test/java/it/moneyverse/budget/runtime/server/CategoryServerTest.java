@@ -8,10 +8,10 @@ import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import it.moneyverse.budget.model.repositories.BudgetRepository;
-import it.moneyverse.grpc.lib.BudgetRequest;
-import it.moneyverse.grpc.lib.BudgetResponse;
+import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.grpc.lib.BudgetServiceGrpc;
+import it.moneyverse.grpc.lib.CategoryRequest;
+import it.moneyverse.grpc.lib.CategoryResponse;
 import it.moneyverse.test.utils.RandomUtils;
 import java.io.IOException;
 import java.util.UUID;
@@ -23,25 +23,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class BudgetServerTest {
+class CategoryServerTest {
 
   private BudgetServiceGrpc.BudgetServiceBlockingStub stub;
   private ManagedChannel channel;
   private BudgetServer budgetServer;
-  @Mock private BudgetRepository budgetRepository;
+  @Mock private CategoryRepository categoryRepository;
 
   @BeforeEach
   void setup() throws IOException {
     String serverName = InProcessServerBuilder.generateName();
     Server server =
         InProcessServerBuilder.forName(serverName)
-            .addService(new BudgetServer.BudgetGrpcService(budgetRepository))
+            .addService(new BudgetManagementGrpcService(categoryRepository))
             .directExecutor()
             .build()
             .start();
     channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     stub = BudgetServiceGrpc.newBlockingStub(channel);
-    budgetServer = new BudgetServer(RandomUtils.randomBigDecimal().intValue(), budgetRepository);
+    budgetServer = new BudgetServer(RandomUtils.randomBigDecimal().intValue(), categoryRepository);
     budgetServer.start();
   }
 
@@ -54,26 +54,28 @@ public class BudgetServerTest {
   }
 
   @Test
-  void checkIfBudgetExists_shouldReturnTrueForExistingBudget() {
-    UUID budgetId = RandomUtils.randomUUID();
-    BudgetRequest request = BudgetRequest.newBuilder().setBudgetId(budgetId.toString()).build();
-    when(budgetRepository.existsByBudgetId(budgetId)).thenReturn(true);
+  void checkIfCategoryExists_shouldReturnTrueForExistingCategory() {
+    UUID categoryId = RandomUtils.randomUUID();
+    CategoryRequest request =
+        CategoryRequest.newBuilder().setCategoryId(categoryId.toString()).build();
+    when(categoryRepository.existsByCategoryId(categoryId)).thenReturn(true);
 
-    BudgetResponse response = stub.checkIfBudgetExists(request);
+    CategoryResponse response = stub.checkIfCategoryExists(request);
 
     assertTrue(response.getExists());
-    verify(budgetRepository, times(1)).existsByBudgetId(budgetId);
+    verify(categoryRepository, times(1)).existsByCategoryId(categoryId);
   }
 
   @Test
-  void checkIfBudgetExists_shouldReturnFalseForNonExistingBudget() {
-    UUID budgetId = RandomUtils.randomUUID();
-    BudgetRequest request = BudgetRequest.newBuilder().setBudgetId(budgetId.toString()).build();
-    when(budgetRepository.existsByBudgetId(budgetId)).thenReturn(false);
+  void checkIfCategoryExists_shouldReturnFalseForNonExistingCategory() {
+    UUID categoryId = RandomUtils.randomUUID();
+    CategoryRequest request =
+        CategoryRequest.newBuilder().setCategoryId(categoryId.toString()).build();
+    when(categoryRepository.existsByCategoryId(categoryId)).thenReturn(false);
 
-    BudgetResponse response = stub.checkIfBudgetExists(request);
+    CategoryResponse response = stub.checkIfCategoryExists(request);
 
     assertFalse(response.getExists());
-    verify(budgetRepository, times(1)).existsByBudgetId(budgetId);
+    verify(categoryRepository, times(1)).existsByCategoryId(categoryId);
   }
 }
