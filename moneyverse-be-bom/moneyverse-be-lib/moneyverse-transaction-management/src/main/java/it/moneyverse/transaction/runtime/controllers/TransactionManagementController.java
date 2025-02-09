@@ -27,8 +27,8 @@ public class TransactionManagementController implements TransactionOperations {
   @PostMapping("/transactions")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
-  public TransactionDto createTransaction(@RequestBody TransactionRequestDto request) {
-    return transactionService.createTransaction(request);
+  public List<TransactionDto> createTransaction(@RequestBody TransactionRequestDto request) {
+    return transactionService.createTransactions(request);
   }
 
   @Override
@@ -67,6 +67,4 @@ public class TransactionManagementController implements TransactionOperations {
   public void deleteTransaction(@PathVariable UUID transactionId) {
     transactionService.deleteTransaction(transactionId);
   }
-
-
 }

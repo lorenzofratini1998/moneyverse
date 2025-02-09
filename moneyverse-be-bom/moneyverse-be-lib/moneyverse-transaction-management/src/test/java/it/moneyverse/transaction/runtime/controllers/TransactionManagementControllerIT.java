@@ -77,21 +77,25 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     mockServer.mockExistentCurrency();
     TransactionDto expected = testContext.getExpectedTransactionDto(request);
 
-    ResponseEntity<TransactionDto> response =
-        restTemplate.postForEntity(
-            basePath + "/transactions", new HttpEntity<>(request, headers), TransactionDto.class);
+    ResponseEntity<List<TransactionDto>> response =
+        restTemplate.exchange(
+            basePath + "/transactions",
+            HttpMethod.POST,
+            new HttpEntity<>(request, headers),
+            new ParameterizedTypeReference<>() {});
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(testContext.getTransactions().size() + 1, transactionRepository.findAll().size());
     assertNotNull(response.getBody());
-    assertEquals(expected.getUserId(), response.getBody().getUserId());
-    assertEquals(expected.getAccountId(), response.getBody().getAccountId());
-    assertEquals(expected.getBudgetId(), response.getBody().getBudgetId());
-    assertEquals(expected.getDate(), response.getBody().getDate());
-    assertEquals(expected.getDescription(), response.getBody().getDescription());
-    assertEquals(expected.getAmount(), response.getBody().getAmount());
-    assertEquals(expected.getCurrency(), response.getBody().getCurrency());
-    assertEquals(Collections.emptySet(), response.getBody().getTags());
+    TransactionDto actual = response.getBody().getFirst();
+    assertEquals(expected.getUserId(), actual.getUserId());
+    assertEquals(expected.getAccountId(), actual.getAccountId());
+    assertEquals(expected.getBudgetId(), actual.getBudgetId());
+    assertEquals(expected.getDate(), actual.getDate());
+    assertEquals(expected.getDescription(), actual.getDescription());
+    assertEquals(expected.getAmount(), actual.getAmount());
+    assertEquals(expected.getCurrency(), actual.getCurrency());
+    assertEquals(Collections.emptySet(), actual.getTags());
   }
 
   @Test

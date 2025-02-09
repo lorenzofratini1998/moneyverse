@@ -15,6 +15,7 @@ import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.TagFactory;
 import it.moneyverse.transaction.model.entities.Transaction;
@@ -82,24 +83,27 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     Transaction transaction = TransactionFactory.fakeTransaction(userId);
     return new TransactionRequestDto(
         transaction.getUserId(),
-        transaction.getAccountId(),
-        transaction.getBudgetId(),
-        transaction.getDate(),
-        transaction.getDescription(),
-        transaction.getAmount(),
-        transaction.getCurrency(),
-        null);
+        List.of(
+            new TransactionRequestItemDto(
+                transaction.getAccountId(),
+                transaction.getBudgetId(),
+                transaction.getDate(),
+                transaction.getDescription(),
+                transaction.getAmount(),
+                transaction.getCurrency(),
+                null)));
   }
 
   public TransactionDto getExpectedTransactionDto(TransactionRequestDto request) {
+    TransactionRequestItemDto item = request.transactions().getFirst();
     return TransactionDto.builder()
         .withUserId(request.userId())
-        .withAccountId(request.accountId())
-        .withBudgetId(request.budgetId())
-        .withDescription(request.description())
-        .withAmount(request.amount())
-        .withCurrency(request.currency())
-        .withDate(request.date())
+        .withAccountId(item.accountId())
+        .withBudgetId(item.categoryId())
+        .withDescription(item.description())
+        .withAmount(item.amount())
+        .withCurrency(item.currency())
+        .withDate(item.date())
         .build();
   }
 

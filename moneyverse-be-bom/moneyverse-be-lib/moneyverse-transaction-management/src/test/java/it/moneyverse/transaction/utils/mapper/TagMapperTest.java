@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.utils.mapper;
 
+import static it.moneyverse.transaction.utils.TransactionTestUtils.createTag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -20,7 +21,7 @@ class TagMapperTest {
 
   @Test
   void testToTagDto_ValidTag() {
-    Tag tag = createTag();
+    Tag tag = createTag(RandomUtils.randomUUID());
 
     TagDto tagDto = TagMapper.toTagDto(tag);
 
@@ -40,7 +41,7 @@ class TagMapperTest {
     int entitiesCount = RandomUtils.randomInteger(0, 10);
     Set<Tag> tags = new HashSet<>(entitiesCount);
     for (int i = 0; i < entitiesCount; i++) {
-      tags.add(createTag());
+      tags.add(createTag(RandomUtils.randomUUID()));
     }
 
     Set<TagDto> tagDtos = TagMapper.toTagDto(tags);
@@ -58,14 +59,5 @@ class TagMapperTest {
       assertEquals(tag.getTagName(), tagDto.getTagName());
       assertEquals(tag.getDescription(), tagDto.getDescription());
     }
-  }
-
-  static Tag createTag() {
-    Tag tag = new Tag();
-    tag.setTagId(RandomUtils.randomUUID());
-    tag.setUserId(RandomUtils.randomUUID());
-    tag.setTagName(RandomUtils.randomString(15));
-    tag.setDescription(RandomUtils.randomString(15));
-    return tag;
   }
 }

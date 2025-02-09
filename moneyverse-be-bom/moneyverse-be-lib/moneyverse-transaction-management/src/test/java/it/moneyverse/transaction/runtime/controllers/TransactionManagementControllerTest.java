@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.runtime.controllers;
 
+import static it.moneyverse.transaction.utils.TransactionTestUtils.createTransactionRequest;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -10,10 +11,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.transaction.model.dto.TransactionCriteria;
-import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.services.TransactionManagementService;
 import java.util.Collections;
 import java.util.List;
@@ -55,11 +53,11 @@ class TransactionManagementControllerTest {
   @MockitoBean private TransactionManagementService transactionService;
 
   @Test
-  void testCreateAccount_Success(@Mock TransactionDto response) throws Exception {
+  void testCreateAccount_Success(@Mock TransactionDto transactionDto) throws Exception {
     UUID userId = RandomUtils.randomUUID();
     TransactionRequestDto request = createTransactionRequest(userId);
 
-    when(transactionService.createTransaction(request)).thenReturn(response);
+    when(transactionService.createTransactions(request)).thenReturn(List.of(transactionDto));
 
     mockMvc
         .perform(
@@ -108,61 +106,71 @@ class TransactionManagementControllerTest {
   private static TransactionRequestDto createRequestWithNullUserId() {
     return new TransactionRequestDto(
         null,
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2025),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        null);
+        List.of(
+            new TransactionRequestItemDto(
+                RandomUtils.randomUUID(),
+                RandomUtils.randomUUID(),
+                RandomUtils.randomLocalDate(2024, 2025),
+                RandomUtils.randomString(15),
+                RandomUtils.randomBigDecimal(),
+                RandomUtils.randomString(3).toUpperCase(),
+                null)));
   }
 
   private static TransactionRequestDto createRequestWithNullAccountId() {
     return new TransactionRequestDto(
         RandomUtils.randomUUID(),
-        null,
-        RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2025),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        null);
+        List.of(
+            new TransactionRequestItemDto(
+                null,
+                RandomUtils.randomUUID(),
+                RandomUtils.randomLocalDate(2024, 2025),
+                RandomUtils.randomString(15),
+                RandomUtils.randomBigDecimal(),
+                RandomUtils.randomString(3).toUpperCase(),
+                null)));
   }
 
   private static TransactionRequestDto createRequestWithNullDate() {
     return new TransactionRequestDto(
         RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        null,
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        null);
+        List.of(
+            new TransactionRequestItemDto(
+                RandomUtils.randomUUID(),
+                RandomUtils.randomUUID(),
+                null,
+                RandomUtils.randomString(15),
+                RandomUtils.randomBigDecimal(),
+                RandomUtils.randomString(3).toUpperCase(),
+                null)));
   }
 
   private static TransactionRequestDto createRequestWithNullAmount() {
     return new TransactionRequestDto(
         RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2025),
-        RandomUtils.randomString(15),
-        null,
-        RandomUtils.randomString(3).toUpperCase(),
-        null);
+        List.of(
+            new TransactionRequestItemDto(
+                RandomUtils.randomUUID(),
+                RandomUtils.randomUUID(),
+                RandomUtils.randomLocalDate(2024, 2025),
+                RandomUtils.randomString(15),
+                null,
+                RandomUtils.randomString(3).toUpperCase(),
+                null)));
   }
 
   private static TransactionRequestDto createRequestWithNullCurrency() {
     return new TransactionRequestDto(
         RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2025),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        null,
-        null);
+        List.of(
+            new TransactionRequestItemDto(
+                RandomUtils.randomUUID(),
+                RandomUtils.randomUUID(),
+                RandomUtils.randomLocalDate(2024, 2025),
+                RandomUtils.randomString(15),
+                RandomUtils.randomBigDecimal(),
+                null,
+                null)));
   }
 
   @Test
@@ -313,19 +321,6 @@ class TransactionManagementControllerTest {
         RandomUtils.randomUUID(),
         RandomUtils.randomLocalDate(2024, 2024),
         RandomUtils.randomString(30),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        Collections.singleton(tagId));
-  }
-
-  private TransactionRequestDto createTransactionRequest(UUID userId) {
-    UUID tagId = RandomUtils.randomUUID();
-    return new TransactionRequestDto(
-        userId,
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2025),
-        RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(3).toUpperCase(),
         Collections.singleton(tagId));

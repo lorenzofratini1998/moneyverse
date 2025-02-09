@@ -1,43 +1,36 @@
 package it.moneyverse.transaction.utils.mapper;
 
-import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
+import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
 import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
-import it.moneyverse.transaction.model.repositories.TagRepository;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.UUID;
 
 public class TransactionMapper {
 
   public static Transaction toTransaction(
-      TransactionRequestDto request, TagRepository tagRepository) {
+      UUID userId, TransactionRequestItemDto request, Set<Tag> tags) {
+    Transaction transaction = toTransaction(userId, request);
+    transaction.setTags(tags);
+    return transaction;
+  }
+
+  public static Transaction toTransaction(UUID userId, TransactionRequestItemDto request) {
     if (request == null) {
       return null;
     }
     Transaction transaction = new Transaction();
-    transaction.setUserId(request.userId());
+    transaction.setUserId(userId);
     transaction.setAccountId(request.accountId());
-    transaction.setBudgetId(request.budgetId());
+    transaction.setBudgetId(request.categoryId());
     transaction.setDate(request.date());
     transaction.setDescription(request.description());
     transaction.setAmount(request.amount());
     transaction.setCurrency(request.currency());
-
-    if (request.tags() != null && !request.tags().isEmpty()) {
-      request.tags().stream()
-          .map(
-              tagId ->
-                  tagRepository
-                      .findById(tagId)
-                      .orElseThrow(
-                          () ->
-                              new ResourceNotFoundException(
-                                  "Tag %s does not exist".formatted(tagId))))
-          .forEach(transaction::addTag);
-    }
     return transaction;
   }
 
@@ -66,7 +59,16 @@ public class TransactionMapper {
   }
 
   public static Transaction partialUpdate(
-      Transaction transaction, TransactionUpdateRequestDto request, TagRepository tagRepository) {
+      Transaction transaction, TransactionUpdateRequestDto request, Set<Tag> tags) {
+    transaction = partialUpdate(transaction, request);
+    if (request.tags() != null && !request.tags().isEmpty()) {
+      transaction.setTags(tags);
+    }
+    return transaction;
+  }
+
+  public static Transaction partialUpdate(
+      Transaction transaction, TransactionUpdateRequestDto request) {
     if (request == null) {
       return null;
     }
@@ -87,19 +89,6 @@ public class TransactionMapper {
     }
     if (request.amount() != null) {
       transaction.setAmount(request.amount());
-    }
-    if (request.tags() != null && !request.tags().isEmpty()) {
-      transaction.setTags(
-          request.tags().stream()
-              .map(
-                  tagId ->
-                      tagRepository
-                          .findById(tagId)
-                          .orElseThrow(
-                              () ->
-                                  new ResourceNotFoundException(
-                                      "Tag %s does not exist".formatted(tagId))))
-              .collect(Collectors.toSet()));
     }
     return transaction;
   }

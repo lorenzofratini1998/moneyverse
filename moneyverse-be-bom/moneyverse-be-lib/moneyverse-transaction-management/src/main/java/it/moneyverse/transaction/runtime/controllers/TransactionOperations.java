@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface TransactionOperations {
 
-  TransactionDto createTransaction(@Valid TransactionRequestDto request);
+  List<TransactionDto> createTransaction(@Valid TransactionRequestDto request);
 
   List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
 

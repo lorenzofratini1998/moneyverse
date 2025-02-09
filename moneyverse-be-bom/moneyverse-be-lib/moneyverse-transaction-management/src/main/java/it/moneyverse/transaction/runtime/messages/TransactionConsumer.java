@@ -63,6 +63,6 @@ public class TransactionConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     BudgetDeletionEvent event = JsonUtils.fromJson(record.value(), BudgetDeletionEvent.class);
-    transactionService.removeBudgetFromTransactions(event.budgetId());
+    transactionService.removeBudgetFromTransactions(event.getBudgetId());
   }
 }

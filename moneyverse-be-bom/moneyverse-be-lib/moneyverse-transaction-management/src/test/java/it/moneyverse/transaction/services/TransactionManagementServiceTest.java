@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.services;
 
+import static it.moneyverse.transaction.utils.TransactionTestUtils.createTransactionRequest;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -8,18 +9,13 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.transaction.model.dto.TransactionCriteria;
-import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,88 +49,90 @@ class TransactionManagementServiceTest {
   }
 
   @Test
-  void givenTransactionRequest_WhenCreateTransaction_ThenAccountNotFound() {
-    TransactionRequestDto request = createTransactionRequest();
-    when(accountServiceClient.checkIfAccountExists(request.accountId())).thenReturn(false);
+  void givenTransactionRequest_WhenCreateTransactions_ThenAccountNotFound() {
+    UUID userId = RandomUtils.randomUUID();
+    TransactionRequestDto request = createTransactionRequest(userId);
+    TransactionRequestItemDto item = request.transactions().getFirst();
+    when(accountServiceClient.checkIfAccountExists(item.accountId())).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> transactionManagementService.createTransaction(request));
+        () -> transactionManagementService.createTransactions(request));
 
-    verify(accountServiceClient, times(1)).checkIfAccountExists(request.accountId());
-    verify(budgetServiceClient, never()).checkIfBudgetExists(any(UUID.class));
-    transactionMapper.verify(
-        () -> TransactionMapper.toTransaction(request, tagRepository), never());
-    verify(transactionRepository, never()).save(any(Transaction.class));
-    transactionMapper.verify(
-        () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, never()).checkIfCategoryExists(any(UUID.class));
+    transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), never());
+    verify(transactionRepository, never()).saveAll(any(List.class));
+    transactionMapper.verify(() -> TransactionMapper.toTransactionDto(any(List.class)), never());
   }
 
   @Test
-  void givenTransactionRequest_WhenCreateTransaction_ThenBudgetNotFound() {
-    TransactionRequestDto request = createTransactionRequest();
-    when(accountServiceClient.checkIfAccountExists(request.accountId())).thenReturn(true);
-    when(budgetServiceClient.checkIfBudgetExists(request.budgetId())).thenReturn(false);
+  void givenTransactionRequest_WhenCreateTransactions_ThenBudgetNotFound() {
+    UUID userId = RandomUtils.randomUUID();
+    TransactionRequestDto request = createTransactionRequest(userId);
+    TransactionRequestItemDto item = request.transactions().getFirst();
+    when(accountServiceClient.checkIfAccountExists(item.accountId())).thenReturn(true);
+    when(budgetServiceClient.checkIfCategoryExists(item.categoryId())).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> transactionManagementService.createTransaction(request));
+        () -> transactionManagementService.createTransactions(request));
 
-    verify(accountServiceClient, times(1)).checkIfAccountExists(request.accountId());
-    verify(budgetServiceClient, times(1)).checkIfBudgetExists(request.budgetId());
-    transactionMapper.verify(
-        () -> TransactionMapper.toTransaction(request, tagRepository), never());
-    verify(transactionRepository, never()).save(any(Transaction.class));
-    transactionMapper.verify(
-        () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
+    transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), never());
+    verify(transactionRepository, never()).saveAll(any(List.class));
+    transactionMapper.verify(() -> TransactionMapper.toTransactionDto(any(List.class)), never());
   }
 
   @Test
-  void givenTransactionRequest_WhenCreateTransaction_ThenCurrencyNotFound() {
-    TransactionRequestDto request = createTransactionRequest();
-    when(accountServiceClient.checkIfAccountExists(request.accountId())).thenReturn(true);
-    when(budgetServiceClient.checkIfBudgetExists(request.budgetId())).thenReturn(true);
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
+  void givenTransactionRequest_WhenCreateTransactions_ThenCurrencyNotFound() {
+    UUID userId = RandomUtils.randomUUID();
+    TransactionRequestDto request = createTransactionRequest(userId);
+    TransactionRequestItemDto item = request.transactions().getFirst();
+    when(accountServiceClient.checkIfAccountExists(item.accountId())).thenReturn(true);
+    when(budgetServiceClient.checkIfCategoryExists(item.categoryId())).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(item.currency())).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> transactionManagementService.createTransaction(request));
+        () -> transactionManagementService.createTransactions(request));
 
-    verify(accountServiceClient, times(1)).checkIfAccountExists(request.accountId());
-    verify(budgetServiceClient, times(1)).checkIfBudgetExists(request.budgetId());
-    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
-    transactionMapper.verify(
-        () -> TransactionMapper.toTransaction(request, tagRepository), never());
-    verify(transactionRepository, never()).save(any(Transaction.class));
-    transactionMapper.verify(
-        () -> TransactionMapper.toTransactionDto(any(Transaction.class)), never());
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(item.currency());
+    transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), never());
+    verify(transactionRepository, never()).saveAll(any(List.class));
+    transactionMapper.verify(() -> TransactionMapper.toTransactionDto(any(List.class)), never());
   }
 
   @Test
-  void givenTransactionRequest_WhenCreateTransaction_ThenReturnCreatedTransaction(
+  void givenTransactionRequest_WhenCreateTransaction_ThenReturnCreatedTransactions(
       @Mock Transaction transaction, @Mock TransactionDto transactionDto) {
-    TransactionRequestDto request = createTransactionRequest();
-    when(accountServiceClient.checkIfAccountExists(request.accountId())).thenReturn(true);
-    when(budgetServiceClient.checkIfBudgetExists(request.budgetId())).thenReturn(true);
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+    UUID userId = RandomUtils.randomUUID();
+    TransactionRequestDto request = createTransactionRequest(userId);
+    TransactionRequestItemDto item = request.transactions().getFirst();
+    when(accountServiceClient.checkIfAccountExists(item.accountId())).thenReturn(true);
+    when(budgetServiceClient.checkIfCategoryExists(item.categoryId())).thenReturn(true);
+    when(currencyServiceClient.checkIfCurrencyExists(item.currency())).thenReturn(true);
     transactionMapper
-        .when(() -> TransactionMapper.toTransaction(request, tagRepository))
+        .when(() -> TransactionMapper.toTransaction(userId, item))
         .thenReturn(transaction);
-    when(transactionRepository.save(transaction)).thenReturn(transaction);
+    when(transactionRepository.saveAll(List.of(transaction))).thenReturn(List.of(transaction));
     transactionMapper
-        .when(() -> TransactionMapper.toTransactionDto(transaction))
-        .thenReturn(transactionDto);
+        .when(() -> TransactionMapper.toTransactionDto(List.of(transaction)))
+        .thenReturn(List.of(transactionDto));
 
-    TransactionDto result = transactionManagementService.createTransaction(request);
+    List<TransactionDto> result = transactionManagementService.createTransactions(request);
 
     assertNotNull(result);
-    verify(accountServiceClient, times(1)).checkIfAccountExists(request.accountId());
-    verify(budgetServiceClient, times(1)).checkIfBudgetExists(request.budgetId());
-    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(item.currency());
+    transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), times(1));
+    verify(transactionRepository, times(1)).saveAll(List.of(transaction));
     transactionMapper.verify(
-        () -> TransactionMapper.toTransaction(request, tagRepository), times(1));
-    verify(transactionRepository, times(1)).save(transaction);
-    transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
+        () -> TransactionMapper.toTransactionDto(List.of(transaction)), times(1));
   }
 
   @Test
@@ -184,14 +182,15 @@ class TransactionManagementServiceTest {
 
   @Test
   void givenTransactionId_WhenUpdateTransaction_ThenReturnTransactionDto(
-      @Mock Transaction transaction, @Mock TransactionDto transactionDto) {
+      @Mock Transaction transaction, @Mock TransactionDto transactionDto, @Mock Tag tag) {
     UUID transactionId = RandomUtils.randomUUID();
-    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+    TransactionUpdateRequestDto request = createTransactionsUpdateRequest();
 
     when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
     when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+    when(tagRepository.findById(any(UUID.class))).thenReturn(Optional.of(tag));
     transactionMapper
-        .when(() -> TransactionMapper.partialUpdate(transaction, request, tagRepository))
+        .when(() -> TransactionMapper.partialUpdate(transaction, request, Set.of(tag)))
         .thenReturn(transaction);
     when(transactionRepository.save(transaction)).thenReturn(transaction);
     transactionMapper
@@ -211,7 +210,7 @@ class TransactionManagementServiceTest {
   @Test
   void givenTransactionId_WhenUpdateTransaction_ThenReturnNotFound() {
     UUID transactionId = RandomUtils.randomUUID();
-    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+    TransactionUpdateRequestDto request = createTransactionsUpdateRequest();
 
     when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
 
@@ -223,9 +222,7 @@ class TransactionManagementServiceTest {
     transactionMapper.verify(
         () ->
             TransactionMapper.partialUpdate(
-                any(Transaction.class),
-                any(TransactionUpdateRequestDto.class),
-                any(TagRepository.class)),
+                any(Transaction.class), any(TransactionUpdateRequestDto.class)),
         never());
     verify(transactionRepository, never()).save(any(Transaction.class));
     transactionMapper.verify(
@@ -234,8 +231,7 @@ class TransactionManagementServiceTest {
 
   @Test
   void givenTransactionId_WhenDeleteTransaction_ThenDeleteTransaction(
-          @Mock Transaction transaction
-  ) {
+      @Mock Transaction transaction) {
     UUID transactionId = RandomUtils.randomUUID();
     when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
 
@@ -252,33 +248,19 @@ class TransactionManagementServiceTest {
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> transactionManagementService.deleteTransaction(transactionId)
-    );
+        () -> transactionManagementService.deleteTransaction(transactionId));
 
     verify(transactionRepository, times(1)).findById(transactionId);
     verify(transactionRepository, never()).delete(any(Transaction.class));
   }
 
-  private TransactionUpdateRequestDto createTransactionUpdateRequest() {
+  private TransactionUpdateRequestDto createTransactionsUpdateRequest() {
     UUID tagId = RandomUtils.randomUUID();
     return new TransactionUpdateRequestDto(
         RandomUtils.randomUUID(),
         RandomUtils.randomUUID(),
         RandomUtils.randomLocalDate(2024, 2024),
         RandomUtils.randomString(30),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        Collections.singleton(tagId));
-  }
-
-  private TransactionRequestDto createTransactionRequest() {
-    UUID tagId = RandomUtils.randomUUID();
-    return new TransactionRequestDto(
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2025),
-        RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(3).toUpperCase(),
         Collections.singleton(tagId));
@@ -321,7 +303,8 @@ class TransactionManagementServiceTest {
     transactionManagementService.deleteAllTransactionsByAccountId(accountId);
 
     verify(accountServiceClient, times(1)).checkIfAccountExists(accountId);
-    verify(transactionRepository, times(1)).deleteAll(transactionRepository.findTransactionByAccountId(accountId));
+    verify(transactionRepository, times(1))
+        .deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
 
   @Test
@@ -330,22 +313,26 @@ class TransactionManagementServiceTest {
 
     when(accountServiceClient.checkIfAccountExists(accountId)).thenReturn(false);
 
-    assertThrows(ResourceNotFoundException.class, () -> transactionManagementService.deleteAllTransactionsByAccountId(accountId));
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> transactionManagementService.deleteAllTransactionsByAccountId(accountId));
 
     verify(accountServiceClient, times(1)).checkIfAccountExists(accountId);
-    verify(transactionRepository, times(0)).deleteAll(transactionRepository.findTransactionByAccountId(accountId));
+    verify(transactionRepository, times(0))
+        .deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
 
   @Test
-  void givenBudgetId_RemoveBudgetFromTransactions_ThenRemoveBudgets(@Mock List<Transaction> transactions) {
+  void givenBudgetId_RemoveBudgetFromTransactions_ThenRemoveBudgets(
+      @Mock List<Transaction> transactions) {
     UUID budgetId = RandomUtils.randomUUID();
 
-    when(budgetServiceClient.checkIfBudgetExists(budgetId)).thenReturn(true);
+    when(budgetServiceClient.checkIfCategoryExists(budgetId)).thenReturn(true);
     when(transactionRepository.findTransactionByBudgetId(budgetId)).thenReturn(transactions);
 
     transactionManagementService.removeBudgetFromTransactions(budgetId);
 
-    verify(budgetServiceClient, times(1)).checkIfBudgetExists(budgetId);
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(budgetId);
     verify(transactionRepository, times(1)).saveAll(transactions);
   }
 
@@ -353,11 +340,13 @@ class TransactionManagementServiceTest {
   void givenBudgetId_RemoveBudgetFromTransactions_ThenBudgetNotFound() {
     UUID budgetId = RandomUtils.randomUUID();
 
-    when(budgetServiceClient.checkIfBudgetExists(budgetId)).thenReturn(false);
+    when(budgetServiceClient.checkIfCategoryExists(budgetId)).thenReturn(false);
 
-    assertThrows(ResourceNotFoundException.class, () -> transactionManagementService.removeBudgetFromTransactions(budgetId));
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> transactionManagementService.removeBudgetFromTransactions(budgetId));
 
-    verify(budgetServiceClient, times(1)).checkIfBudgetExists(budgetId);
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(budgetId);
     verify(transactionRepository, never()).saveAll(any(List.class));
   }
 }
