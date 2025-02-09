@@ -1,9 +1,6 @@
 package it.moneyverse.transaction.services;
 
-import it.moneyverse.transaction.model.dto.TransactionCriteria;
-import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.dto.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,5 +19,6 @@ public interface TransactionService {
   void deleteAllTransactionsByUserId(UUID userId);
 
   void deleteAllTransactionsByAccountId(UUID accountId);
-  void removeBudgetFromTransactions(UUID budgetId);
+
+  void removeBudgetFromTransactions(UUID categoryId);
 }

@@ -4,8 +4,6 @@ import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
-import it.moneyverse.core.services.CurrencyServiceClient;
-import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Tag;
@@ -17,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,26 +27,17 @@ public class TransactionManagementService implements TransactionService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TransactionManagementService.class);
 
-  private final AccountServiceClient accountServiceClient;
-  private final BudgetServiceClient budgetServiceClient;
-  private final UserServiceClient userServiceClient;
-  private final CurrencyServiceClient currencyServiceClient;
   private final TransactionRepository transactionRepository;
   private final TagRepository tagRepository;
+  private final TransactionServiceHelper transactionServiceHelper;
 
   public TransactionManagementService(
-      AccountServiceClient accountServiceClient,
-      BudgetServiceClient budgetServiceClient,
-      UserServiceClient userServiceClient,
-      CurrencyServiceClient currencyServiceClient,
       TransactionRepository transactionRepository,
-      TagRepository tagRepository) {
-    this.accountServiceClient = accountServiceClient;
-    this.budgetServiceClient = budgetServiceClient;
-    this.userServiceClient = userServiceClient;
-    this.currencyServiceClient = currencyServiceClient;
+      TagRepository tagRepository,
+      TransactionServiceHelper transactionServiceHelper) {
     this.transactionRepository = transactionRepository;
     this.tagRepository = tagRepository;
+    this.transactionServiceHelper = transactionServiceHelper;
   }
 
   @Override
@@ -64,11 +52,9 @@ public class TransactionManagementService implements TransactionService {
   }
 
   private Transaction createTransaction(UUID userId, TransactionRequestItemDto request) {
-    checkIfResourceExists(
-        request.accountId(), accountServiceClient::checkIfAccountExists, "Account");
-    checkIfResourceExists(
-        request.categoryId(), budgetServiceClient::checkIfCategoryExists, "Category");
-    checkIfCurrencyExists(request.currency());
+    transactionServiceHelper.checkIfAccountExists(request.accountId());
+    transactionServiceHelper.checkIfCategoryExists(request.categoryId());
+    transactionServiceHelper.checkIfCurrencyExists(request.currency());
     Set<Tag> tags = getTransactionTags(request.tags());
     if (request.tags() != null && !request.tags().isEmpty()) {
       getTransactionTags(request.tags());
@@ -80,15 +66,6 @@ public class TransactionManagementService implements TransactionService {
     return tags.isEmpty()
         ? TransactionMapper.toTransaction(userId, request)
         : TransactionMapper.toTransaction(userId, request, tags);
-  }
-
-  private void checkIfResourceExists(
-      UUID resourceId, Function<UUID, Boolean> checker, String resourceName) {
-    if (Boolean.FALSE.equals(checker.apply(resourceId))) {
-      throw new ResourceNotFoundException(
-          "The requested %s with ID %s does not exist. Please check your input and try again."
-              .formatted(resourceName, resourceId));
-    }
   }
 
   @Override
@@ -127,7 +104,7 @@ public class TransactionManagementService implements TransactionService {
   public TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request) {
     Transaction transaction = findTransactionById(transactionId);
     if (request.currency() != null) {
-      checkIfCurrencyExists(request.currency());
+      transactionServiceHelper.checkIfCurrencyExists(request.currency());
     }
     Set<Tag> tags = getTransactionTags(request.tags());
     transaction = TransactionMapper.partialUpdate(transaction, request, tags);
@@ -154,12 +131,6 @@ public class TransactionManagementService implements TransactionService {
         .collect(Collectors.toSet());
   }
 
-  private void checkIfCurrencyExists(String currency) {
-    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
-      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
-    }
-  }
-
   @Override
   @Transactional
   public void deleteTransaction(UUID transactionId) {
@@ -173,25 +144,23 @@ public class TransactionManagementService implements TransactionService {
 
   @Override
   public void deleteAllTransactionsByUserId(UUID userId) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
-    }
+    transactionServiceHelper.checkIfUserExists(userId);
     LOGGER.info("Deleting transactions by userId {}", userId);
     transactionRepository.deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 
   @Override
   public void deleteAllTransactionsByAccountId(UUID accountId) {
-    checkIfResourceExists(accountId, accountServiceClient::checkIfAccountExists, "Account");
+    transactionServiceHelper.checkIfAccountExists(accountId);
     LOGGER.info("Deleting transactions by account id {}", accountId);
     transactionRepository.deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
 
   @Override
-  public void removeBudgetFromTransactions(UUID budgetId) {
-    checkIfResourceExists(budgetId, budgetServiceClient::checkIfCategoryExists, "Budget");
-    LOGGER.info("Removing budget {} from transactions", budgetId);
-    List<Transaction> transactions = transactionRepository.findTransactionByBudgetId(budgetId);
+  public void removeBudgetFromTransactions(UUID categoryId) {
+    transactionServiceHelper.checkIfCategoryExists(categoryId);
+    LOGGER.info("Removing category {} from transactions", categoryId);
+    List<Transaction> transactions = transactionRepository.findTransactionByBudgetId(categoryId);
     transactions.forEach(transaction -> transaction.setBudgetId(null));
     transactionRepository.saveAll(transactions);
   }

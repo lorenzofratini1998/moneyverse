@@ -42,6 +42,10 @@ public class Transaction extends Auditable implements Serializable {
   @Column(name = "CURRENCY", nullable = false, length = 3)
   private String currency;
 
+  @ManyToOne
+  @JoinColumn(name = "TRANSFER_ID")
+  private Transfer transfer;
+
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JoinTable(
       name = "TRANSACTIONS_TAGS",
@@ -121,6 +125,14 @@ public class Transaction extends Auditable implements Serializable {
 
   public void setCurrency(String currency) {
     this.currency = currency;
+  }
+
+  public Transfer getTransfer() {
+    return transfer;
+  }
+
+  public void setTransfer(Transfer transfer) {
+    this.transfer = transfer;
   }
 
   public Set<Tag> getTags() {

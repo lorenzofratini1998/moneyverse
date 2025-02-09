@@ -11,10 +11,7 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
-import it.moneyverse.transaction.model.dto.TransactionCriteria;
-import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
@@ -186,5 +183,26 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertEquals(testContext.getTransactions().size() - 1, transactionRepository.findAll().size());
+  }
+
+  @Test
+  void testCreateTransfer() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final TransferRequestDto request = testContext.createTransferRequest(userId);
+    mockServer.mockExistentAccount();
+    mockServer.mockExistentCurrency();
+    mockServer.mockExistentUser();
+
+    ResponseEntity<List<TransactionDto>> response =
+        restTemplate.exchange(
+            basePath + "/transactions/transfer",
+            HttpMethod.POST,
+            new HttpEntity<>(request, headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(testContext.getTransactions().size() + 2, transactionRepository.findAll().size());
+    assertNotNull(response.getBody());
   }
 }

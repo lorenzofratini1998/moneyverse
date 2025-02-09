@@ -1,5 +1,6 @@
 package it.moneyverse.core.model.events;
 
+import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.utils.JsonUtils;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class TransactionEvent implements MessageEvent<UUID, String> {
   private BigDecimal amount;
   private BigDecimal previousAmount;
   private LocalDate date;
+  private EventTypeEnum eventType;
 
   public UUID getTransactionId() {
     return transactionId;
@@ -74,6 +76,14 @@ public class TransactionEvent implements MessageEvent<UUID, String> {
     this.date = date;
   }
 
+  public EventTypeEnum getEventType() {
+    return eventType;
+  }
+
+  public void setEventType(EventTypeEnum eventType) {
+    this.eventType = eventType;
+  }
+
   @Override
   public UUID key() {
     return transactionId;
@@ -87,5 +97,10 @@ public class TransactionEvent implements MessageEvent<UUID, String> {
       payload.put(field.getName(), ReflectionUtils.getField(field, this));
     }
     return JsonUtils.toJson(payload);
+  }
+
+  @Override
+  public String toString() {
+    return JsonUtils.toJson(this);
   }
 }

@@ -1,10 +1,8 @@
 package it.moneyverse.transaction.runtime.controllers;
 
-import it.moneyverse.transaction.model.dto.TransactionCriteria;
-import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.services.TransactionService;
+import it.moneyverse.transaction.services.TransferService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -18,9 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class TransactionManagementController implements TransactionOperations {
 
   private final TransactionService transactionService;
+  private final TransferService transferService;
 
-  public TransactionManagementController(TransactionService transactionService) {
+  public TransactionManagementController(
+      TransactionService transactionService, TransferService transferService) {
     this.transactionService = transactionService;
+    this.transferService = transferService;
   }
 
   @Override
@@ -29,6 +30,14 @@ public class TransactionManagementController implements TransactionOperations {
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
   public List<TransactionDto> createTransaction(@RequestBody TransactionRequestDto request) {
     return transactionService.createTransactions(request);
+  }
+
+  @Override
+  @PostMapping("/transactions/transfer")
+  @ResponseStatus(HttpStatus.CREATED)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
+  public List<TransactionDto> createTransfer(@RequestBody TransferRequestDto request) {
+    return transferService.createTransfer(request);
   }
 
   @Override

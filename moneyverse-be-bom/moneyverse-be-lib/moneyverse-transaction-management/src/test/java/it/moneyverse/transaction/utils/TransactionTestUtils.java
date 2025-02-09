@@ -3,6 +3,7 @@ package it.moneyverse.transaction.utils;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
+import it.moneyverse.transaction.model.dto.TransferRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import java.util.HashSet;
@@ -71,6 +72,16 @@ public class TransactionTestUtils {
       tags.add(createTag(userId));
     }
     return tags;
+  }
+
+  public static TransferRequestDto createTransferRequest(UUID userId) {
+    return new TransferRequestDto(
+        userId,
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomLocalDate(2024, 2025),
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   private TransactionTestUtils() {}

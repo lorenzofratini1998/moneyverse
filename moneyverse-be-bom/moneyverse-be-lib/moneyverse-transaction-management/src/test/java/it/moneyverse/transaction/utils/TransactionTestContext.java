@@ -12,10 +12,7 @@ import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
-import it.moneyverse.transaction.model.dto.TransactionCriteria;
-import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
+import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.TagFactory;
 import it.moneyverse.transaction.model.entities.Transaction;
@@ -92,6 +89,23 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
                 transaction.getAmount(),
                 transaction.getCurrency(),
                 null)));
+  }
+
+  public TransferRequestDto createTransferRequest(UUID userId) {
+    List<UUID> userAccounts =
+        transactions.stream()
+            .filter(t -> t.getUserId().equals(userId))
+            .map(Transaction::getAccountId)
+            .toList();
+    UUID fromAccount = userAccounts.get(0);
+    UUID toAccount = userAccounts.get(1);
+    return new TransferRequestDto(
+        userId,
+        fromAccount,
+        toAccount,
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomLocalDate(2025, 2025),
+        RandomUtils.randomString(3).toUpperCase());
   }
 
   public TransactionDto getExpectedTransactionDto(TransactionRequestDto request) {
