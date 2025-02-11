@@ -49,7 +49,13 @@ public class TransactionCustomRepositoryImplTest {
   public static void beforeAll() {
     testContext = new TransactionTestContext();
     testContext.getTags().forEach(tag -> tag.setTagId(null));
-    testContext.getTransactions().forEach(transaction -> transaction.setTransactionId(null));
+    testContext
+        .getTransactions()
+        .forEach(
+            transaction -> {
+              transaction.setTransactionId(null);
+              transaction.setTransfer(null);
+            });
   }
 
   @BeforeEach
@@ -65,7 +71,7 @@ public class TransactionCustomRepositoryImplTest {
   }
 
   @Test
-  void givenCriteria_TheReturnFilteredBudgets() {
+  void givenCriteria_TheReturnFilteredCategories() {
     UUID userId = testContext.getRandomUser().getUserId();
     TransactionCriteria criteria = testContext.createTransactionCriteria(userId);
     List<Transaction> expected = testContext.filterTransactions(userId, criteria);

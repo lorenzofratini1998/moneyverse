@@ -14,7 +14,7 @@ CREATE TABLE transactions
     transaction_id UUID           NOT NULL,
     user_id     UUID NOT NULL,
     account_id     UUID           NOT NULL,
-    budget_id      UUID,
+    category_id UUID,
     date           DATE           NOT NULL,
     description    VARCHAR(255)   NOT NULL,
     amount         DECIMAL(18, 2) NOT NULL,

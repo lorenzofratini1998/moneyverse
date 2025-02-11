@@ -37,7 +37,7 @@ class TransactionPredicateBuilderTest {
       @Mock Path<Object> object) {
     UUID userId = RandomUtils.randomUUID();
     when(criteria.getAccounts()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
-    when(criteria.getBudgets()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
+    when(criteria.getCategories()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
     when(criteria.getAmount()).thenReturn(Optional.of(randomBoundCriteria()));
     when(criteria.getDate()).thenReturn(Optional.of(randomDateCriteria()));
     when(criteria.getTags()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));

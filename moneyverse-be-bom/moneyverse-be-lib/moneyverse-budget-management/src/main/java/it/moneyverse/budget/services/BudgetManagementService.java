@@ -11,7 +11,7 @@ import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.events.BudgetDeletionEvent;
+import it.moneyverse.core.model.events.CategoryDeletionEvent;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -104,7 +104,7 @@ public class BudgetManagementService implements BudgetService {
   public void deleteBudget(UUID budgetId) {
     Budget budget = findBudgetById(budgetId);
     budgetRepository.delete(budget);
-    eventPublisher.publishEvent(new BudgetDeletionEvent(budgetId));
+    eventPublisher.publishEvent(new CategoryDeletionEvent(budgetId));
     LOGGER.info("Deleted budget {} for user {}", budgetId, budget.getCategory().getUserId());
   }
 

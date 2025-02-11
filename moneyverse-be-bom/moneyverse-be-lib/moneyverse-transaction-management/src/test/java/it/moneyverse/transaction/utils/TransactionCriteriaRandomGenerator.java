@@ -30,7 +30,7 @@ public class TransactionCriteriaRandomGenerator
   @Override
   public TransactionCriteria generate() {
     withRandomAccounts();
-    withRandomBudgets();
+    withRandomCategories();
     withRandomDate();
     withRandomAmount();
     withRandomTags();
@@ -58,22 +58,22 @@ public class TransactionCriteriaRandomGenerator
     }
   }
 
-  private void withRandomBudgets() {
+  private void withRandomCategories() {
     if (Math.random() < 0.5) {
-      List<UUID> budgets =
+      List<UUID> categories =
           testContext.getTransactions().stream()
               .filter(transaction -> transaction.getUserId().equals(userId))
-              .map(Transaction::getBudgetId)
+              .map(Transaction::getCategoryId)
               .toList();
-      List<UUID> randomBudgets = new ArrayList<>();
+      List<UUID> randomCategories = new ArrayList<>();
       for (int i = 0;
           i
               < RandomUtils.randomInteger(
                   FakeUtils.MIN_CATEGORIES_PER_USER, FakeUtils.MAX_CATEGORIES_PER_USER);
           i++) {
-        randomBudgets.add(budgets.get(RandomUtils.randomInteger(0, budgets.size() - 1)));
+        randomCategories.add(categories.get(RandomUtils.randomInteger(0, categories.size() - 1)));
       }
-      criteria.setBudgets(randomBudgets);
+      criteria.setCategories(randomCategories);
     }
   }
 

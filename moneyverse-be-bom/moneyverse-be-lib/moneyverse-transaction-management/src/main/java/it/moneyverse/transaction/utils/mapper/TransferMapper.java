@@ -2,6 +2,7 @@ package it.moneyverse.transaction.utils.mapper;
 
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
+import it.moneyverse.transaction.model.dto.TransferUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
 import java.math.BigDecimal;
@@ -51,6 +52,34 @@ public class TransferMapper {
     }
     return TransactionMapper.toTransactionDto(
         List.of(transfer.getTransactionFrom(), transfer.getTransactionTo()));
+  }
+
+  public static Transfer partialUpdate(Transfer transfer, TransferUpdateRequestDto request) {
+    if (request == null) {
+      return transfer;
+    }
+    if (request.date() != null) {
+      transfer.setDate(request.date());
+      transfer.getTransactionFrom().setDate(request.date());
+      transfer.getTransactionTo().setDate(request.date());
+    }
+    if (request.amount() != null) {
+      transfer.setAmount(request.amount());
+      transfer.getTransactionFrom().setAmount(request.amount().multiply(BigDecimal.valueOf(-1)));
+      transfer.getTransactionTo().setAmount(request.amount());
+    }
+    if (request.currency() != null) {
+      transfer.setCurrency(request.currency());
+      transfer.getTransactionFrom().setCurrency(request.currency());
+      transfer.getTransactionTo().setCurrency(request.currency());
+    }
+    if (request.fromAccount() != null) {
+      transfer.getTransactionFrom().setAccountId(request.fromAccount());
+    }
+    if (request.toAccount() != null) {
+      transfer.getTransactionTo().setAccountId(request.toAccount());
+    }
+    return transfer;
   }
 
   private TransferMapper() {}

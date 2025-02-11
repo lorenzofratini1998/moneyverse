@@ -28,7 +28,7 @@ public class TransactionPredicateBuilder {
   public Predicate build(UUID userId, TransactionCriteria param) {
     predicates.add(cb.equal(root.get(Transaction_.USER_ID), userId));
     withAccounts(param);
-    withBudgets(param);
+    withCategories(param);
     withDate(param);
     withAmount(param);
     withTags(param);
@@ -48,16 +48,16 @@ public class TransactionPredicateBuilder {
             });
   }
 
-  private void withBudgets(TransactionCriteria param) {
+  private void withCategories(TransactionCriteria param) {
     param
-        .getBudgets()
+        .getCategories()
         .ifPresent(
-            budgets -> {
-              Predicate[] budgetPredicates =
-                  budgets.stream()
-                      .map(budget -> cb.equal(root.get(Transaction_.BUDGET_ID), budget))
+            categories -> {
+              Predicate[] categoryPredicates =
+                  categories.stream()
+                      .map(category -> cb.equal(root.get(Transaction_.CATEGORY_ID), category))
                       .toArray(Predicate[]::new);
-              predicates.add(cb.or(budgetPredicates));
+              predicates.add(cb.or(categoryPredicates));
             });
   }
 

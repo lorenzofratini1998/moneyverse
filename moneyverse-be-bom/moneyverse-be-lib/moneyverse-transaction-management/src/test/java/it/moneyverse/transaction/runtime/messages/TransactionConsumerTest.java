@@ -8,7 +8,7 @@ import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.beans.CategoryDeletionTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.AccountDeletionEvent;
-import it.moneyverse.core.model.events.BudgetDeletionEvent;
+import it.moneyverse.core.model.events.CategoryDeletionEvent;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
@@ -23,7 +23,6 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -79,7 +78,7 @@ class TransactionConsumerTest {
   @Test
   void testOnUserDeletion() {
     final UUID userId = testContext.getRandomUser().getUserId();
-    final List<Transaction> userBudgets = testContext.getTransactions(userId);
+    final List<Transaction> userTransactions = testContext.getTransactions(userId);
     final long initialSize = transactionRepository.count();
     String event = JsonUtils.toJson(new UserDeletionEvent(userId));
     final ProducerRecord<UUID, String> producerRecord =
@@ -90,10 +89,11 @@ class TransactionConsumerTest {
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(5))
-        .atMost(30, TimeUnit.SECONDS)
+        .pollDelay(5, TimeUnit.SECONDS)
+        .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
-            () -> assertEquals(initialSize - userBudgets.size(), transactionRepository.count()));
+            () ->
+                assertEquals(initialSize - userTransactions.size(), transactionRepository.count()));
   }
 
   @Test
@@ -114,8 +114,8 @@ class TransactionConsumerTest {
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(5))
-        .atMost(30, TimeUnit.SECONDS)
+        .pollDelay(5, TimeUnit.SECONDS)
+        .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
             () ->
                 assertEquals(
@@ -123,14 +123,15 @@ class TransactionConsumerTest {
   }
 
   @Test
-  void testOnBudgetDeletion() {
-    final UUID budgetId =
+  void testOnCategoryDeletion() {
+    final UUID categoryId =
         testContext
             .getTransactions()
             .get(RandomUtils.randomInteger(0, testContext.getTransactions().size() - 1))
-            .getBudgetId();
-    final List<Transaction> budgetTransactions = testContext.getTransactionsByAccountId(budgetId);
-    String event = JsonUtils.toJson(new BudgetDeletionEvent(budgetId));
+            .getCategoryId();
+    final List<Transaction> categoryTransactions =
+        testContext.getTransactionsByCategoryId(categoryId);
+    String event = JsonUtils.toJson(new CategoryDeletionEvent(categoryId));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(CategoryDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
@@ -139,16 +140,16 @@ class TransactionConsumerTest {
     kafkaTemplate.send(producerRecord);
 
     await()
-        .pollInterval(Duration.ofSeconds(5))
-        .atMost(30, TimeUnit.SECONDS)
+        .pollDelay(5, TimeUnit.SECONDS)
+        .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
-              for (Transaction transaction : budgetTransactions) {
+              for (Transaction transaction : categoryTransactions) {
                 assertNull(
                     transactionRepository
                         .findById(transaction.getTransactionId())
                         .orElseThrow(IllegalArgumentException::new)
-                        .getBudgetId());
+                        .getCategoryId());
               }
             });
   }

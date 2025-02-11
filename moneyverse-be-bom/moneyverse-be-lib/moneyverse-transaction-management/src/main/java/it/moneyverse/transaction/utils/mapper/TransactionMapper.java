@@ -26,7 +26,7 @@ public class TransactionMapper {
     Transaction transaction = new Transaction();
     transaction.setUserId(userId);
     transaction.setAccountId(request.accountId());
-    transaction.setBudgetId(request.categoryId());
+    transaction.setCategoryId(request.categoryId());
     transaction.setDate(request.date());
     transaction.setDescription(request.description());
     transaction.setAmount(request.amount());
@@ -42,12 +42,14 @@ public class TransactionMapper {
         .withTransactionId(transaction.getTransactionId())
         .withUserId(transaction.getUserId())
         .withAccountId(transaction.getAccountId())
-        .withBudgetId(transaction.getBudgetId())
+        .withCategoryId(transaction.getCategoryId())
         .withDate(transaction.getDate())
         .withDescription(transaction.getDescription())
         .withAmount(transaction.getAmount())
         .withCurrency(transaction.getCurrency())
         .withTags(TagMapper.toTagDto(transaction.getTags()))
+        .withTransferId(
+            transaction.getTransfer() != null ? transaction.getTransfer().getTransferId() : null)
         .build();
   }
 
@@ -75,8 +77,8 @@ public class TransactionMapper {
     if (request.accountId() != null) {
       transaction.setAccountId(request.accountId());
     }
-    if (request.budgetId() != null) {
-      transaction.setBudgetId(request.budgetId());
+    if (request.categoryId() != null) {
+      transaction.setCategoryId(request.categoryId());
     }
     if (request.date() != null) {
       transaction.setDate(request.date());

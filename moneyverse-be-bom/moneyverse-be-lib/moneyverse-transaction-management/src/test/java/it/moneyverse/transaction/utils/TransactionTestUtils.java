@@ -4,8 +4,10 @@ import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
+import it.moneyverse.transaction.model.dto.TransferUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.model.entities.Transfer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +59,7 @@ public class TransactionTestUtils {
     transaction.setTransactionId(RandomUtils.randomUUID());
     transaction.setUserId(userId);
     transaction.setAccountId(RandomUtils.randomUUID());
-    transaction.setBudgetId(RandomUtils.randomUUID());
+    transaction.setCategoryId(RandomUtils.randomUUID());
     transaction.setDate(RandomUtils.randomLocalDate(2024, 2025));
     transaction.setDescription(RandomUtils.randomString(15));
     transaction.setAmount(RandomUtils.randomBigDecimal());
@@ -82,6 +84,26 @@ public class TransactionTestUtils {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomLocalDate(2024, 2025),
         RandomUtils.randomString(3).toUpperCase());
+  }
+
+  public static TransferUpdateRequestDto createTransferUpdateRequest() {
+    return new TransferUpdateRequestDto(
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomLocalDate(2025, 2025),
+        RandomUtils.randomString(3).toUpperCase());
+  }
+
+  public static Transfer createTransfer(UUID userId) {
+    Transfer transfer = new Transfer();
+    transfer.setTransferId(RandomUtils.randomUUID());
+    transfer.setTransactionFrom(createTransaction(userId));
+    transfer.setTransactionTo(createTransaction(userId));
+    transfer.setDate(RandomUtils.randomLocalDate(2024, 2025));
+    transfer.setAmount(RandomUtils.randomBigDecimal());
+    transfer.setCurrency(RandomUtils.randomString(3).toUpperCase());
+    return transfer;
   }
 
   private TransactionTestUtils() {}

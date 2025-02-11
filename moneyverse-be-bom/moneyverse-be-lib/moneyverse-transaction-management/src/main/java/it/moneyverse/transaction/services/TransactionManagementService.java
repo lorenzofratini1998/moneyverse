@@ -10,6 +10,7 @@ import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
+import it.moneyverse.transaction.model.repositories.TransferRepository;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
 import java.util.Collections;
 import java.util.List;
@@ -29,15 +30,18 @@ public class TransactionManagementService implements TransactionService {
 
   private final TransactionRepository transactionRepository;
   private final TagRepository tagRepository;
-  private final TransactionServiceHelper transactionServiceHelper;
+  private final TransactionServiceClient transactionServiceClient;
+  private final TransferRepository transferRepository;
 
   public TransactionManagementService(
       TransactionRepository transactionRepository,
       TagRepository tagRepository,
-      TransactionServiceHelper transactionServiceHelper) {
+      TransactionServiceClient transactionServiceClient,
+      TransferRepository transferRepository) {
     this.transactionRepository = transactionRepository;
     this.tagRepository = tagRepository;
-    this.transactionServiceHelper = transactionServiceHelper;
+    this.transactionServiceClient = transactionServiceClient;
+    this.transferRepository = transferRepository;
   }
 
   @Override
@@ -52,9 +56,9 @@ public class TransactionManagementService implements TransactionService {
   }
 
   private Transaction createTransaction(UUID userId, TransactionRequestItemDto request) {
-    transactionServiceHelper.checkIfAccountExists(request.accountId());
-    transactionServiceHelper.checkIfCategoryExists(request.categoryId());
-    transactionServiceHelper.checkIfCurrencyExists(request.currency());
+    transactionServiceClient.checkIfAccountExists(request.accountId());
+    transactionServiceClient.checkIfCategoryExists(request.categoryId());
+    transactionServiceClient.checkIfCurrencyExists(request.currency());
     Set<Tag> tags = getTransactionTags(request.tags());
     if (request.tags() != null && !request.tags().isEmpty()) {
       getTransactionTags(request.tags());
@@ -104,7 +108,7 @@ public class TransactionManagementService implements TransactionService {
   public TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request) {
     Transaction transaction = findTransactionById(transactionId);
     if (request.currency() != null) {
-      transactionServiceHelper.checkIfCurrencyExists(request.currency());
+      transactionServiceClient.checkIfCurrencyExists(request.currency());
     }
     Set<Tag> tags = getTransactionTags(request.tags());
     transaction = TransactionMapper.partialUpdate(transaction, request, tags);
@@ -143,25 +147,30 @@ public class TransactionManagementService implements TransactionService {
   }
 
   @Override
+  @Transactional
   public void deleteAllTransactionsByUserId(UUID userId) {
-    transactionServiceHelper.checkIfUserExists(userId);
+    transactionServiceClient.checkIfUserExists(userId);
     LOGGER.info("Deleting transactions by userId {}", userId);
+    transferRepository.deleteAll(transferRepository.findTransferByUserId(userId));
     transactionRepository.deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 
   @Override
+  @Transactional
   public void deleteAllTransactionsByAccountId(UUID accountId) {
-    transactionServiceHelper.checkIfAccountExists(accountId);
+    transactionServiceClient.checkIfAccountExists(accountId);
     LOGGER.info("Deleting transactions by account id {}", accountId);
+    transferRepository.deleteAll(transferRepository.findTransferByAccountId(accountId));
     transactionRepository.deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
 
   @Override
-  public void removeBudgetFromTransactions(UUID categoryId) {
-    transactionServiceHelper.checkIfCategoryExists(categoryId);
+  @Transactional
+  public void removeCategoryFromTransactions(UUID categoryId) {
+    transactionServiceClient.checkIfCategoryExists(categoryId);
     LOGGER.info("Removing category {} from transactions", categoryId);
-    List<Transaction> transactions = transactionRepository.findTransactionByBudgetId(categoryId);
-    transactions.forEach(transaction -> transaction.setBudgetId(null));
+    List<Transaction> transactions = transactionRepository.findTransactionByCategoryId(categoryId);
+    transactions.forEach(transaction -> transaction.setCategoryId(null));
     transactionRepository.saveAll(transactions);
   }
 }

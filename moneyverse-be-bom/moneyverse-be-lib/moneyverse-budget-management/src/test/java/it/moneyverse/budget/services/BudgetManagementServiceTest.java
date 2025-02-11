@@ -16,7 +16,7 @@ import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.events.BudgetDeletionEvent;
+import it.moneyverse.core.model.events.CategoryDeletionEvent;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
 import java.math.BigDecimal;
@@ -177,7 +177,7 @@ class BudgetManagementServiceTest {
 
     verify(budgetRepository, times(1)).findById(budgetId);
     verify(budgetRepository, times(1)).delete(budget);
-    verify(publisher, times(1)).publishEvent(any(BudgetDeletionEvent.class));
+    verify(publisher, times(1)).publishEvent(any(CategoryDeletionEvent.class));
   }
 
   @Test
@@ -191,7 +191,7 @@ class BudgetManagementServiceTest {
 
     verify(budgetRepository, times(1)).findById(budgetId);
     verify(budgetRepository, never()).delete(any(Budget.class));
-    verify(publisher, never()).publishEvent(any(BudgetDeletionEvent.class));
+    verify(publisher, never()).publishEvent(any(CategoryDeletionEvent.class));
   }
 
   @Test

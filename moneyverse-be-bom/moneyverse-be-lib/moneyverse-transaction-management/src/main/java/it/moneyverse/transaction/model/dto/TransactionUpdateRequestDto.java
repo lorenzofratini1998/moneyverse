@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record TransactionUpdateRequestDto(
     UUID accountId,
-    UUID budgetId,
+    UUID categoryId,
     LocalDate date,
     String description,
     BigDecimal amount,

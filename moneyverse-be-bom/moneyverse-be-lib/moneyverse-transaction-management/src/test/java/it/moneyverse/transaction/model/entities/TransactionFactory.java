@@ -16,7 +16,7 @@ public class TransactionFactory {
     List<Transaction> transactions = new ArrayList<>();
     for (UserModel user : users) {
       List<UUID> accounts = randomAccounts();
-      List<UUID> budgets = randomBudgets();
+      List<UUID> categories = randomCategories();
       int numTransactionsPerUser =
           RandomUtils.randomInteger(MIN_TRANSACTION_PER_USER, MAX_TRANSACTION_PER_USER);
       for (int i = 0; i < numTransactionsPerUser; i++) {
@@ -28,9 +28,9 @@ public class TransactionFactory {
           for (int j = 0; j < tagsPerUser; j++) {
             randomTags.add(userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1)));
           }
-          transactions.add(fakeTransaction(user.getUserId(), randomTags, accounts, budgets));
+          transactions.add(fakeTransaction(user.getUserId(), randomTags, accounts, categories));
         } else {
-          transactions.add(fakeTransaction(user.getUserId(), accounts, budgets));
+          transactions.add(fakeTransaction(user.getUserId(), accounts, categories));
         }
       }
     }
@@ -48,34 +48,35 @@ public class TransactionFactory {
     return accounts;
   }
 
-  private static List<UUID> randomBudgets() {
-    List<UUID> budgets = new ArrayList<>();
+  private static List<UUID> randomCategories() {
+    List<UUID> categories = new ArrayList<>();
     for (int i = 0;
         i < RandomUtils.randomInteger(MIN_CATEGORIES_PER_USER, MAX_CATEGORIES_PER_USER);
         i++) {
-      budgets.add(RandomUtils.randomUUID());
+      categories.add(RandomUtils.randomUUID());
     }
-    return budgets;
+    return categories;
   }
 
   public static Transaction fakeTransaction(
-      UUID userId, Set<Tag> tags, List<UUID> accounts, List<UUID> budgets) {
-    Transaction transaction = fakeTransaction(userId, accounts, budgets);
+      UUID userId, Set<Tag> tags, List<UUID> accounts, List<UUID> categories) {
+    Transaction transaction = fakeTransaction(userId, accounts, categories);
     transaction.setTags(tags);
     return transaction;
   }
 
-  public static Transaction fakeTransaction(UUID userId, List<UUID> accounts, List<UUID> budgets) {
+  public static Transaction fakeTransaction(
+      UUID userId, List<UUID> accounts, List<UUID> categories) {
     Transaction transaction = createTransaction(userId);
     transaction.setAccountId(accounts.get(RandomUtils.randomInteger(0, accounts.size() - 1)));
-    transaction.setBudgetId(budgets.get(RandomUtils.randomInteger(0, budgets.size() - 1)));
+    transaction.setCategoryId(categories.get(RandomUtils.randomInteger(0, categories.size() - 1)));
     return transaction;
   }
 
   public static Transaction fakeTransaction(UUID userId) {
     Transaction transaction = createTransaction(userId);
     transaction.setAccountId(RandomUtils.randomUUID());
-    transaction.setBudgetId(RandomUtils.randomUUID());
+    transaction.setCategoryId(RandomUtils.randomUUID());
     return transaction;
   }
 

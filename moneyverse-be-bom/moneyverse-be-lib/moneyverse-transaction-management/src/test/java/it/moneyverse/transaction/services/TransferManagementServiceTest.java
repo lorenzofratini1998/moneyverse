@@ -28,11 +28,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
-public class TransferManagementServiceTest {
+class TransferManagementServiceTest {
 
   @InjectMocks private TransferManagementService transferManagementService;
 
-  @Mock private TransactionServiceHelper transactionServiceHelper;
+  @Mock private TransactionServiceClient transactionServiceClient;
   @Mock private TransferRepository transferRepository;
   @Mock private ApplicationEventPublisher eventPublisher;
   private MockedStatic<TransferMapper> transferMapper;
@@ -53,10 +53,10 @@ public class TransferManagementServiceTest {
     UUID userId = RandomUtils.randomUUID();
     TransferRequestDto request = createTransferRequest(userId);
 
-    Mockito.doNothing().when(transactionServiceHelper).checkIfUserExists(userId);
-    Mockito.doNothing().when(transactionServiceHelper).checkIfAccountExists(request.fromAccount());
-    Mockito.doNothing().when(transactionServiceHelper).checkIfAccountExists(request.toAccount());
-    Mockito.doNothing().when(transactionServiceHelper).checkIfCurrencyExists(request.currency());
+    Mockito.doNothing().when(transactionServiceClient).checkIfUserExists(userId);
+    Mockito.doNothing().when(transactionServiceClient).checkIfAccountExists(request.fromAccount());
+    Mockito.doNothing().when(transactionServiceClient).checkIfAccountExists(request.toAccount());
+    Mockito.doNothing().when(transactionServiceClient).checkIfCurrencyExists(request.currency());
     transferMapper.when(() -> TransferMapper.toTransfer(request)).thenReturn(transfer);
     when(transferRepository.save(transfer)).thenReturn(transfer);
     when(transfer.getTransactionFrom()).thenReturn(transaction);
@@ -77,16 +77,16 @@ public class TransferManagementServiceTest {
     TransferRequestDto request = createTransferRequest(userId);
 
     Mockito.doThrow(ResourceNotFoundException.class)
-        .when(transactionServiceHelper)
+        .when(transactionServiceClient)
         .checkIfUserExists(userId);
 
     assertThrows(
         ResourceNotFoundException.class, () -> transferManagementService.createTransfer(request));
 
-    verify(transactionServiceHelper, times(1)).checkIfUserExists(userId);
-    verify(transactionServiceHelper, never()).checkIfAccountExists(request.fromAccount());
-    verify(transactionServiceHelper, never()).checkIfAccountExists(request.toAccount());
-    verify(transactionServiceHelper, never()).checkIfCurrencyExists(request.currency());
+    verify(transactionServiceClient, times(1)).checkIfUserExists(userId);
+    verify(transactionServiceClient, never()).checkIfAccountExists(request.fromAccount());
+    verify(transactionServiceClient, never()).checkIfAccountExists(request.toAccount());
+    verify(transactionServiceClient, never()).checkIfCurrencyExists(request.currency());
     verify(transferRepository, never()).save(any(Transfer.class));
   }
 
@@ -100,10 +100,10 @@ public class TransferManagementServiceTest {
     assertThrows(
         AccountTransferException.class, () -> transferManagementService.createTransfer(request));
 
-    verify(transactionServiceHelper, never()).checkIfUserExists(any(UUID.class));
-    verify(transactionServiceHelper, never()).checkIfAccountExists(any(UUID.class));
-    verify(transactionServiceHelper, never()).checkIfAccountExists(any(UUID.class));
-    verify(transactionServiceHelper, never()).checkIfCurrencyExists(any(String.class));
+    verify(transactionServiceClient, never()).checkIfUserExists(any(UUID.class));
+    verify(transactionServiceClient, never()).checkIfAccountExists(any(UUID.class));
+    verify(transactionServiceClient, never()).checkIfAccountExists(any(UUID.class));
+    verify(transactionServiceClient, never()).checkIfCurrencyExists(any(String.class));
     verify(transferRepository, never()).save(any(Transfer.class));
   }
 }

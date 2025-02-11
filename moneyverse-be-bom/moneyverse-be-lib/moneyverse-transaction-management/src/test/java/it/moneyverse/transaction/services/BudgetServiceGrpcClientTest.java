@@ -21,12 +21,12 @@ class BudgetServiceGrpcClientTest {
   @InjectMocks private BudgetServiceGrpcClient budgetServiceClient;
 
   @Test
-  void givenBudgetId_WhenCheckIfCategoryExists_ThenReturnTrue() {
-    UUID budgetId = UUID.randomUUID();
+  void givenCategoryId_WhenCheckIfCategoryExists_ThenReturnTrue() {
+    UUID categoryId = UUID.randomUUID();
     CategoryResponse response = CategoryResponse.newBuilder().setExists(true).build();
     when(stub.checkIfCategoryExists(any(CategoryRequest.class))).thenReturn(response);
 
-    Boolean exists = budgetServiceClient.checkIfCategoryExists(budgetId);
+    Boolean exists = budgetServiceClient.checkIfCategoryExists(categoryId);
 
     assertTrue(exists);
     verify(stub, times(1)).checkIfCategoryExists(any(CategoryRequest.class));
@@ -34,10 +34,10 @@ class BudgetServiceGrpcClientTest {
 
   @Test
   void givenCircuitBreaker_WhenCheckIfCategoryExists_ThenFallbackMethodIsTriggered() {
-    UUID budgetId = UUID.randomUUID();
+    UUID categoryId = UUID.randomUUID();
     Throwable throwable = mock(CallNotPermittedException.class);
 
-    Boolean exists = budgetServiceClient.fallbackCheckIfCategoryExists(budgetId, throwable);
+    Boolean exists = budgetServiceClient.fallbackCheckIfCategoryExists(categoryId, throwable);
 
     assertFalse(exists);
   }

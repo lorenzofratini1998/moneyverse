@@ -27,8 +27,8 @@ public class Transaction extends Auditable implements Serializable {
   @Column(name = "ACCOUNT_ID", nullable = false)
   private UUID accountId;
 
-  @Column(name = "BUDGET_ID")
-  private UUID budgetId;
+  @Column(name = "CATEGORY_ID")
+  private UUID categoryId;
 
   @Column(name = "DATE", nullable = false)
   private LocalDate date;
@@ -87,12 +87,12 @@ public class Transaction extends Auditable implements Serializable {
     this.accountId = accountId;
   }
 
-  public UUID getBudgetId() {
-    return budgetId;
+  public UUID getCategoryId() {
+    return categoryId;
   }
 
-  public void setBudgetId(UUID budgetId) {
-    this.budgetId = budgetId;
+  public void setCategoryId(UUID categoryId) {
+    this.categoryId = categoryId;
   }
 
   public LocalDate getDate() {

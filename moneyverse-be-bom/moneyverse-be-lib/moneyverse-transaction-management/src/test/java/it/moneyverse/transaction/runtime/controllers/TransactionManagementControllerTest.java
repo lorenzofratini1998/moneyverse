@@ -13,6 +13,7 @@ import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.services.TransactionManagementService;
+import it.moneyverse.transaction.services.TransferManagementService;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +52,7 @@ class TransactionManagementControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @MockitoBean private TransactionManagementService transactionService;
+  @MockitoBean private TransferManagementService transferService;
 
   @Test
   void testCreateAccount_Success(@Mock TransactionDto transactionDto) throws Exception {

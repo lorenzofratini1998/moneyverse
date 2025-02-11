@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
 @Validated
-public class TransactionManagementController implements TransactionOperations {
+public class TransactionManagementController implements TransactionOperations, TransferOperations {
 
   private final TransactionService transactionService;
   private final TransferService transferService;
@@ -30,14 +30,6 @@ public class TransactionManagementController implements TransactionOperations {
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
   public List<TransactionDto> createTransaction(@RequestBody TransactionRequestDto request) {
     return transactionService.createTransactions(request);
-  }
-
-  @Override
-  @PostMapping("/transactions/transfer")
-  @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
-  public List<TransactionDto> createTransfer(@RequestBody TransferRequestDto request) {
-    return transferService.createTransfer(request);
   }
 
   @Override
@@ -75,5 +67,41 @@ public class TransactionManagementController implements TransactionOperations {
       "@transactionRepository.existsByUserIdAndTransactionId(@securityService.getAuthenticatedUserId(), #transactionId)")
   public void deleteTransaction(@PathVariable UUID transactionId) {
     transactionService.deleteTransaction(transactionId);
+  }
+
+  @Override
+  @PostMapping("/transfer")
+  @ResponseStatus(HttpStatus.CREATED)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
+  public List<TransactionDto> createTransfer(@RequestBody TransferRequestDto request) {
+    return transferService.createTransfer(request);
+  }
+
+  @Override
+  @PutMapping("/transfer/{transferId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
+  public List<TransactionDto> updateTransfer(
+      @PathVariable UUID transferId, @RequestBody TransferUpdateRequestDto request) {
+    return transferService.updateTransfer(transferId, request);
+  }
+
+  @Override
+  @DeleteMapping("/transfer/{transferId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+      "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
+  public void deleteTransfer(@PathVariable UUID transferId) {
+    transferService.deleteTransfer(transferId);
+  }
+
+  @Override
+  @GetMapping("/transfer/{transferId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
+  public List<TransactionDto> getTransactionsByTransferId(@PathVariable UUID transferId) {
+    return transferService.getTransactionsByTransferId(transferId);
   }
 }

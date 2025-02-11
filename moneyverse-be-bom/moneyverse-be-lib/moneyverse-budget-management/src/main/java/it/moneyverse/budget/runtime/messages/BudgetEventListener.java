@@ -1,7 +1,7 @@
 package it.moneyverse.budget.runtime.messages;
 
 import it.moneyverse.core.model.beans.BudgetDeletionTopic;
-import it.moneyverse.core.model.events.BudgetDeletionEvent;
+import it.moneyverse.core.model.events.CategoryDeletionEvent;
 import it.moneyverse.core.services.MessageProducer;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ public class BudgetEventListener {
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-  public void handleBudgetDeletion(BudgetDeletionEvent event) {
+  public void handleBudgetDeletion(CategoryDeletionEvent event) {
     messageProducer.send(event, BudgetDeletionTopic.TOPIC);
   }
 }

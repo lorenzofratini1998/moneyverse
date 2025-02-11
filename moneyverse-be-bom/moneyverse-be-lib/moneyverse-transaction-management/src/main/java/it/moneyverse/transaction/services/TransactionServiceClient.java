@@ -7,14 +7,14 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TransactionServiceHelper {
+public class TransactionServiceClient {
 
   private final AccountServiceClient accountServiceClient;
   private final BudgetServiceClient budgetServiceClient;
   private final UserServiceClient userServiceClient;
   private final CurrencyServiceClient currencyServiceClient;
 
-  public TransactionServiceHelper(
+  public TransactionServiceClient(
       AccountServiceClient accountServiceClient,
       BudgetServiceClient budgetServiceClient,
       UserServiceClient userServiceClient,

@@ -31,7 +31,7 @@ class TransactionMapperTest {
 
     assertEquals(request.userId(), result.getUserId());
     assertEquals(transactionRequestItemDto.accountId(), result.getAccountId());
-    assertEquals(transactionRequestItemDto.categoryId(), result.getBudgetId());
+    assertEquals(transactionRequestItemDto.categoryId(), result.getCategoryId());
     assertEquals(transactionRequestItemDto.date(), result.getDate());
     assertEquals(transactionRequestItemDto.description(), result.getDescription());
     assertEquals(transactionRequestItemDto.currency(), result.getCurrency());
@@ -49,7 +49,7 @@ class TransactionMapperTest {
 
     assertEquals(request.userId(), result.getUserId());
     assertEquals(transactionRequestItemDto.accountId(), result.getAccountId());
-    assertEquals(transactionRequestItemDto.categoryId(), result.getBudgetId());
+    assertEquals(transactionRequestItemDto.categoryId(), result.getCategoryId());
     assertEquals(transactionRequestItemDto.date(), result.getDate());
     assertEquals(transactionRequestItemDto.description(), result.getDescription());
     assertEquals(transactionRequestItemDto.currency(), result.getCurrency());
@@ -69,7 +69,7 @@ class TransactionMapperTest {
 
     assertEquals(transaction.getTransactionId(), result.getTransactionId());
     assertEquals(transaction.getAccountId(), result.getAccountId());
-    assertEquals(transaction.getBudgetId(), result.getBudgetId());
+    assertEquals(transaction.getCategoryId(), result.getCategoryId());
     assertEquals(transaction.getDate(), result.getDate());
     assertEquals(transaction.getDescription(), result.getDescription());
     assertEquals(transaction.getAmount(), result.getAmount());
@@ -99,7 +99,7 @@ class TransactionMapperTest {
       assertEquals(transaction.getTransactionId(), transactionDto.getTransactionId());
       assertEquals(transaction.getUserId(), transactionDto.getUserId());
       assertEquals(transaction.getAccountId(), transactionDto.getAccountId());
-      assertEquals(transaction.getBudgetId(), transactionDto.getBudgetId());
+      assertEquals(transaction.getCategoryId(), transactionDto.getCategoryId());
       assertEquals(transaction.getDate(), transactionDto.getDate());
       assertEquals(transaction.getDescription(), transactionDto.getDescription());
       assertEquals(transaction.getAmount(), transactionDto.getAmount());
@@ -126,7 +126,7 @@ class TransactionMapperTest {
     Transaction result = TransactionMapper.partialUpdate(transaction, request, tags);
 
     assertEquals(request.accountId(), result.getAccountId());
-    assertEquals(request.budgetId(), result.getBudgetId());
+    assertEquals(request.categoryId(), result.getCategoryId());
     assertEquals(request.date(), result.getDate());
     assertEquals(request.description(), result.getDescription());
     assertEquals(request.currency(), result.getCurrency());

@@ -17,27 +17,24 @@ public class EntityScriptGenerator {
   private final ScriptMetadata metadata;
   private final ScriptService scriptService;
 
-  private String script;
-
   public EntityScriptGenerator(ScriptMetadata metadata, ScriptService scriptService) {
     this.metadata = metadata;
     this.scriptService = scriptService;
   }
 
-  public void execute() {
-    script = generateScript();
-    saveFile();
-  }
-
-  private String generateScript() {
+  public StringBuilder generateScript() {
     StringBuilder script = new StringBuilder();
     for (List<?> entities : metadata.getEntities()) {
       script.append(scriptService.createInsertScript(entities));
     }
-    return script.toString();
+    return script;
   }
 
-  private void saveFile() {
+  public void save(StringBuilder script) {
+    saveFile(script.toString());
+  }
+
+  private void saveFile(String script) {
     Path sqlFile = metadata.getDirectory().resolve(SQL_SCRIPT_FILE_NAME);
     try {
       Files.write(sqlFile, script.getBytes());

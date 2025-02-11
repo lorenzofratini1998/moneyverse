@@ -13,6 +13,7 @@ import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.model.entities.Transfer;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
 import java.util.Collections;
@@ -87,7 +88,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     TransactionDto actual = response.getBody().getFirst();
     assertEquals(expected.getUserId(), actual.getUserId());
     assertEquals(expected.getAccountId(), actual.getAccountId());
-    assertEquals(expected.getBudgetId(), actual.getBudgetId());
+    assertEquals(expected.getCategoryId(), actual.getCategoryId());
     assertEquals(expected.getDate(), actual.getDate());
     assertEquals(expected.getDescription(), actual.getDescription());
     assertEquals(expected.getAmount(), actual.getAmount());
@@ -158,7 +159,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertNotNull(response.getBody());
     assertEquals(transactionId, response.getBody().getTransactionId());
     assertEquals(request.accountId(), response.getBody().getAccountId());
-    assertEquals(request.budgetId(), response.getBody().getBudgetId());
+    assertEquals(request.categoryId(), response.getBody().getCategoryId());
     assertEquals(request.date(), response.getBody().getDate());
     assertEquals(request.description(), response.getBody().getDescription());
     assertEquals(request.amount(), response.getBody().getAmount());
@@ -196,7 +197,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     ResponseEntity<List<TransactionDto>> response =
         restTemplate.exchange(
-            basePath + "/transactions/transfer",
+            basePath + "/transfer",
             HttpMethod.POST,
             new HttpEntity<>(request, headers),
             new ParameterizedTypeReference<>() {});
@@ -204,5 +205,61 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(testContext.getTransactions().size() + 2, transactionRepository.findAll().size());
     assertNotNull(response.getBody());
+  }
+
+  @Test
+  void testUpdateTransfer() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    UUID transferId = testContext.getRandomTransferByUser(userId).getTransferId();
+    TransferUpdateRequestDto request = testContext.createTransferUpdateRequest(userId);
+    mockServer.mockExistentAccount();
+    mockServer.mockExistentCurrency();
+
+    ResponseEntity<List<TransactionDto>> response =
+        restTemplate.exchange(
+            basePath + "/transfer/%s".formatted(transferId),
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(testContext.getTransactions().size(), transactionRepository.findAll().size());
+  }
+
+  @Test
+  void testDeleteTransfer() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    UUID transferId = testContext.getRandomTransferByUser(userId).getTransferId();
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/transfer/%s".formatted(transferId),
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class);
+
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertEquals(testContext.getTransactions().size() - 2, transactionRepository.findAll().size());
+  }
+
+  @Test
+  void testGetTransfer() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    Transfer transfer = testContext.getRandomTransferByUser(userId);
+
+    ResponseEntity<List<TransactionDto>> response =
+        restTemplate.exchange(
+            basePath + "/transfer/%s".formatted(transfer.getTransferId()),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(2, response.getBody().size());
   }
 }

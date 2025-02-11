@@ -9,8 +9,6 @@ public interface TransactionOperations {
 
   List<TransactionDto> createTransaction(@Valid TransactionRequestDto request);
 
-  List<TransactionDto> createTransfer(@Valid TransferRequestDto request);
-
   List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
 
   TransactionDto getTransaction(UUID transactionId);

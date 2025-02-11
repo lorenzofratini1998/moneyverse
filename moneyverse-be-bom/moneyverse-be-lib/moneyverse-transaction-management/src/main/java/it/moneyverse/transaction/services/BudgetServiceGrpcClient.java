@@ -25,17 +25,17 @@ public class BudgetServiceGrpcClient implements BudgetServiceClient {
   @CircuitBreaker(
       name = BudgetServiceGrpcCircuitBreakerProperties.BUDGET_SERVICE_GRPC,
       fallbackMethod = "fallbackCheckIfCategoryExists")
-  public Boolean checkIfCategoryExists(UUID budgetId) {
+  public Boolean checkIfCategoryExists(UUID categoryId) {
     final CategoryResponse response =
         stub.checkIfCategoryExists(
-            CategoryRequest.newBuilder().setCategoryId(budgetId.toString()).build());
+            CategoryRequest.newBuilder().setCategoryId(categoryId.toString()).build());
     return response.getExists();
   }
 
-  Boolean fallbackCheckIfCategoryExists(UUID budgetId, Throwable throwable) {
+  Boolean fallbackCheckIfCategoryExists(UUID categoryId, Throwable throwable) {
     LOGGER.error(
-        "Impossible to contact the BudgetService to check whether the budget {} exists. Returning FALSE as fallback: {}",
-        budgetId,
+        "Impossible to contact the BudgetService to check whether the category {} exists. Returning FALSE as fallback: {}",
+        categoryId,
         throwable.getMessage());
     return false;
   }

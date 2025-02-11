@@ -13,15 +13,9 @@ import it.moneyverse.test.services.SQLScriptService;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.*;
-import it.moneyverse.transaction.model.entities.Tag;
-import it.moneyverse.transaction.model.entities.TagFactory;
-import it.moneyverse.transaction.model.entities.Transaction;
-import it.moneyverse.transaction.model.entities.TransactionFactory;
+import it.moneyverse.transaction.model.entities.*;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import org.springframework.data.domain.Sort;
 
 public class TransactionTestContext extends TestContext<TransactionTestContext> {
@@ -30,11 +24,13 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   @TestModelEntity private final List<Tag> tags;
   @TestModelEntity private final List<Transaction> transactions;
+  @TestModelEntity private final List<Transfer> transfers;
 
   public TransactionTestContext(KeycloakContainer keycloakContainer) {
     super(keycloakContainer);
     this.tags = TagFactory.createTags(getUsers());
     this.transactions = TransactionFactory.createTransactions(getUsers(), tags);
+    this.transfers = TransferFactory.createTransfers(getUsers(), transactions);
     setCurrentInstance(this);
   }
 
@@ -42,6 +38,7 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     super();
     this.tags = TagFactory.createTags(getUsers());
     this.transactions = TransactionFactory.createTransactions(getUsers(), tags);
+    this.transfers = TransferFactory.createTransfers(getUsers(), transactions);
     setCurrentInstance(this);
   }
 
@@ -64,6 +61,10 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return transactions;
   }
 
+  public List<Transfer> getTransfers() {
+    return transfers;
+  }
+
   public List<Transaction> getTransactions(UUID userId) {
     return transactions.stream().filter(t -> t.getUserId().equals(userId)).toList();
   }
@@ -72,8 +73,10 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return transactions.stream().filter(t -> t.getAccountId().equals(accountId)).toList();
   }
 
-  public List<Transaction> getTransactionsByBudgetId(UUID budgetId) {
-    return transactions.stream().filter(t -> t.getAccountId().equals(budgetId)).toList();
+  public List<Transaction> getTransactionsByCategoryId(UUID categoryId) {
+    return transactions.stream()
+        .filter(t -> t.getCategoryId() != null && t.getCategoryId().equals(categoryId))
+        .toList();
   }
 
   public TransactionRequestDto createTransactionRequest(UUID userId) {
@@ -83,7 +86,7 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
         List.of(
             new TransactionRequestItemDto(
                 transaction.getAccountId(),
-                transaction.getBudgetId(),
+                transaction.getCategoryId(),
                 transaction.getDate(),
                 transaction.getDescription(),
                 transaction.getAmount(),
@@ -108,12 +111,28 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
         RandomUtils.randomString(3).toUpperCase());
   }
 
+  public TransferUpdateRequestDto createTransferUpdateRequest(UUID userId) {
+    List<UUID> userAccounts =
+        transactions.stream()
+            .filter(t -> t.getUserId().equals(userId))
+            .map(Transaction::getAccountId)
+            .toList();
+    UUID fromAccount = userAccounts.get(0);
+    UUID toAccount = userAccounts.get(1);
+    return new TransferUpdateRequestDto(
+        fromAccount,
+        toAccount,
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomLocalDate(2025, 2025),
+        RandomUtils.randomString(3).toUpperCase());
+  }
+
   public TransactionDto getExpectedTransactionDto(TransactionRequestDto request) {
     TransactionRequestItemDto item = request.transactions().getFirst();
     return TransactionDto.builder()
         .withUserId(request.userId())
         .withAccountId(item.accountId())
-        .withBudgetId(item.categoryId())
+        .withCategoryId(item.categoryId())
         .withDescription(item.description())
         .withAmount(item.amount())
         .withCurrency(item.currency())
@@ -130,8 +149,8 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
                     || criteria.getAccounts().get().contains(transaction.getAccountId()))
         .filter(
             transaction ->
-                criteria.getBudgets().isEmpty()
-                    || criteria.getBudgets().get().contains(transaction.getBudgetId()))
+                criteria.getCategories().isEmpty()
+                    || criteria.getCategories().get().contains(transaction.getCategoryId()))
         .filter(
             transaction ->
                 criteria.getDate().map(date -> date.matches(transaction.getDate())).orElse(true))
@@ -142,9 +161,15 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
                     .map(amount -> amount.matches(transaction.getAmount()))
                     .orElse(true))
         .filter(
-            transaction ->
-                criteria.getTags().isEmpty()
-                    || transaction.getTags().stream().anyMatch(criteria.getTags().get()::contains))
+            transaction -> {
+              List<UUID> criteriaTagIds = criteria.getTags().orElse(Collections.emptyList());
+              if (criteriaTagIds.isEmpty()) {
+                return true;
+              }
+              List<UUID> transactionTagIds =
+                  transaction.getTags().stream().map(Tag::getTagId).toList();
+              return transactionTagIds.containsAll(criteriaTagIds);
+            })
         .sorted((a, b) -> sortByCriteria(a, b, criteria.getSort()))
         .skip(criteria.getPage().getOffset())
         .limit(criteria.getPage().getLimit())
@@ -188,6 +213,18 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
             userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1)).getTagId());
   }
 
+  public Transfer getRandomTransferByUser(UUID userId) {
+    List<Transaction> userTransactions =
+        transactions.stream()
+            .filter(transaction -> transaction.getUserId().equals(userId))
+            .toList();
+    List<Transfer> userTransfer =
+        transfers.stream()
+            .filter(transfer -> userTransactions.contains(transfer.getTransactionFrom()))
+            .toList();
+    return userTransfer.get(RandomUtils.randomInteger(0, userTransfer.size() - 1));
+  }
+
   @Override
   public TransactionTestContext self() {
     return this;
@@ -195,8 +232,32 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   @Override
   public TransactionTestContext generateScript(Path dir) {
-    new EntityScriptGenerator(new ScriptMetadata(dir, tags, transactions), new SQLScriptService())
-        .execute();
+    List<Transaction> transactionsNoTransfer = new ArrayList<>(this.transactions);
+    transactionsNoTransfer.forEach(t -> t.setTransfer(null));
+    EntityScriptGenerator scriptGenerator =
+        new EntityScriptGenerator(
+            new ScriptMetadata(dir, tags, transactionsNoTransfer, transfers),
+            new SQLScriptService());
+    StringBuilder script = scriptGenerator.generateScript();
+    for (Transfer transfer : this.transfers) {
+      Transaction transactionFrom = transfer.getTransactionFrom();
+      Transaction transactionTo = transfer.getTransactionTo();
+
+      script
+          .append("\nUPDATE TRANSACTIONS SET TRANSFER_ID = '")
+          .append(transfer.getTransferId())
+          .append("' WHERE TRANSACTION_ID = '")
+          .append(transactionFrom.getTransactionId())
+          .append("';");
+
+      script
+          .append("\nUPDATE TRANSACTIONS SET TRANSFER_ID = '")
+          .append(transfer.getTransferId())
+          .append("' WHERE TRANSACTION_ID = '")
+          .append(transactionTo.getTransactionId())
+          .append("';");
+    }
+    scriptGenerator.save(script);
     return self();
   }
 }
