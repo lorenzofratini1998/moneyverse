@@ -1,5 +1,7 @@
 package it.moneyverse.transaction.runtime.controllers;
 
+import static it.moneyverse.transaction.utils.TransactionTestUtils.createTagRequest;
+import static it.moneyverse.transaction.utils.TransactionTestUtils.createTagUpdateRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -13,8 +15,10 @@ import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
+import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
 import java.util.Collections;
@@ -43,6 +47,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired private TransactionRepository transactionRepository;
+  @Autowired private TagRepository tagRepository;
   private HttpHeaders headers;
 
   @DynamicPropertySource
@@ -263,5 +268,108 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(2, response.getBody().getTransactions().size());
+  }
+
+  @Test
+  void testCreateTag() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final TagRequestDto request = createTagRequest(userId);
+
+    ResponseEntity<TagDto> response =
+        restTemplate.exchange(
+            basePath + "/tags",
+            HttpMethod.POST,
+            new HttpEntity<>(request, headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(testContext.getTags().size() + 1, tagRepository.findAll().size());
+    assertEquals(request.tagName(), response.getBody().getTagName());
+    assertEquals(userId, response.getBody().getUserId());
+    assertEquals(request.description(), response.getBody().getDescription());
+  }
+
+  @Test
+  void testUserTags() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+
+    ResponseEntity<List<TagDto>> response =
+        restTemplate.exchange(
+            basePath + "/tags/users/" + userId,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(testContext.getUserTags(userId).size(), response.getBody().size());
+  }
+
+  @Test
+  void testGetTag() {
+    UUID userId = testContext.getRandomUser().getUserId();
+    while (testContext.getUserTags(userId).isEmpty()) {
+      userId = testContext.getRandomUser().getUserId();
+    }
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    Tag tag = testContext.getRandomUserTag(userId);
+
+    ResponseEntity<TagDto> response =
+        restTemplate.exchange(
+            basePath + "/tags/" + tag.getTagId(),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(tag.getTagId(), response.getBody().getTagId());
+  }
+
+  @Test
+  void testUpdateTag() {
+    UUID userId = testContext.getRandomUser().getUserId();
+    while (testContext.getUserTags(userId).isEmpty()) {
+      userId = testContext.getRandomUser().getUserId();
+    }
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    Tag tag = testContext.getRandomUserTag(userId);
+    TagUpdateRequestDto request = createTagUpdateRequest();
+
+    ResponseEntity<TagDto> response =
+        restTemplate.exchange(
+            basePath + "/tags/" + tag.getTagId(),
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(tag.getTagId(), response.getBody().getTagId());
+    assertEquals(request.tagName(), response.getBody().getTagName());
+    assertEquals(request.description(), response.getBody().getDescription());
+  }
+
+  @Test
+  void testDeleteTag() {
+    UUID userId = testContext.getRandomUser().getUserId();
+    while (testContext.getUserTags(userId).isEmpty()) {
+      userId = testContext.getRandomUser().getUserId();
+    }
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    Tag tag = testContext.getRandomUserTag(userId);
+
+    ResponseEntity<Void> response =
+        restTemplate.exchange(
+            basePath + "/tags/" + tag.getTagId(),
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            Void.class);
+
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertEquals(testContext.getTags().size() - 1, tagRepository.findAll().size());
   }
 }

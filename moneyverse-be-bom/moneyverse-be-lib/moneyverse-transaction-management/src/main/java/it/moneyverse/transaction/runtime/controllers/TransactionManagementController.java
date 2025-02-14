@@ -1,6 +1,7 @@
 package it.moneyverse.transaction.runtime.controllers;
 
 import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.services.TagService;
 import it.moneyverse.transaction.services.TransactionService;
 import it.moneyverse.transaction.services.TransferService;
 import java.util.List;
@@ -13,15 +14,20 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
 @Validated
-public class TransactionManagementController implements TransactionOperations, TransferOperations {
+public class TransactionManagementController
+    implements TransactionOperations, TransferOperations, TagOperations {
 
   private final TransactionService transactionService;
   private final TransferService transferService;
+  private final TagService tagService;
 
   public TransactionManagementController(
-      TransactionService transactionService, TransferService transferService) {
+      TransactionService transactionService,
+      TransferService transferService,
+      TagService tagService) {
     this.transactionService = transactionService;
     this.transferService = transferService;
+    this.tagService = tagService;
   }
 
   @Override
@@ -103,5 +109,48 @@ public class TransactionManagementController implements TransactionOperations, T
       "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
   public TransferDto getTransactionsByTransferId(@PathVariable UUID transferId) {
     return transferService.getTransactionsByTransferId(transferId);
+  }
+
+  @Override
+  @PostMapping("/tags")
+  @ResponseStatus(HttpStatus.CREATED)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
+  public TagDto createTag(@RequestBody TagRequestDto request) {
+    return tagService.createTag(request);
+  }
+
+  @Override
+  @GetMapping("/tags/users/{userId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
+  public List<TagDto> getUserTags(@PathVariable UUID userId) {
+    return tagService.getUserTags(userId);
+  }
+
+  @Override
+  @GetMapping("/tags/{tagId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "@tagRepository.existsByTagIdAndUserId(#tagId, @securityService.getAuthenticatedUserId())")
+  public TagDto getTag(@PathVariable UUID tagId) {
+    return tagService.getTagById(tagId);
+  }
+
+  @Override
+  @PutMapping("/tags/{tagId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "@tagRepository.existsByTagIdAndUserId(#tagId, @securityService.getAuthenticatedUserId())")
+  public TagDto updateTag(@PathVariable UUID tagId, @RequestBody TagUpdateRequestDto request) {
+    return tagService.updateTag(tagId, request);
+  }
+
+  @Override
+  @DeleteMapping("/tags/{tagId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+      "@tagRepository.existsByTagIdAndUserId(#tagId, @securityService.getAuthenticatedUserId())")
+  public void deleteTag(@PathVariable UUID tagId) {
+    tagService.deleteTag(tagId);
   }
 }

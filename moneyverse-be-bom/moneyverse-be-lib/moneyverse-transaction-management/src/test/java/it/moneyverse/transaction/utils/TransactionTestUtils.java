@@ -1,10 +1,7 @@
 package it.moneyverse.transaction.utils;
 
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
-import it.moneyverse.transaction.model.dto.TransferRequestDto;
-import it.moneyverse.transaction.model.dto.TransferUpdateRequestDto;
+import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
@@ -104,6 +101,14 @@ public class TransactionTestUtils {
     transfer.setAmount(RandomUtils.randomBigDecimal());
     transfer.setCurrency(RandomUtils.randomString(3).toUpperCase());
     return transfer;
+  }
+
+  public static TagRequestDto createTagRequest(UUID userId) {
+    return new TagRequestDto(userId, RandomUtils.randomString(15), RandomUtils.randomString(15));
+  }
+
+  public static TagUpdateRequestDto createTagUpdateRequest() {
+    return new TagUpdateRequestDto(RandomUtils.randomString(15), RandomUtils.randomString(15));
   }
 
   private TransactionTestUtils() {}

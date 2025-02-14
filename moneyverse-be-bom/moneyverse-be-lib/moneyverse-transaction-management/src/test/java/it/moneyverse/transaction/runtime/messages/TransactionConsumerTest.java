@@ -19,7 +19,9 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
 import java.nio.file.Path;
@@ -54,6 +56,7 @@ class TransactionConsumerTest {
 
   @Autowired private KafkaTemplate<UUID, String> kafkaTemplate;
   @Autowired private TransactionRepository transactionRepository;
+  @Autowired private TagRepository tagRepository;
 
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
@@ -79,7 +82,9 @@ class TransactionConsumerTest {
   void testOnUserDeletion() {
     final UUID userId = testContext.getRandomUser().getUserId();
     final List<Transaction> userTransactions = testContext.getTransactions(userId);
+    final List<Tag> userTags = testContext.getUserTags(userId);
     final long initialSize = transactionRepository.count();
+    final long initialTagSize = tagRepository.count();
     String event = JsonUtils.toJson(new UserDeletionEvent(userId));
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
@@ -92,8 +97,10 @@ class TransactionConsumerTest {
         .pollDelay(5, TimeUnit.SECONDS)
         .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
-            () ->
-                assertEquals(initialSize - userTransactions.size(), transactionRepository.count()));
+            () -> {
+              assertEquals(initialSize - userTransactions.size(), transactionRepository.count());
+              assertEquals(initialTagSize - userTags.size(), tagRepository.count());
+            });
   }
 
   @Test

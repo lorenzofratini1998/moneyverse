@@ -163,6 +163,16 @@ public class TransactionManagementService implements TransactionService {
     userServiceClient.checkIfUserStillExist(userId);
     LOGGER.info("Deleting transactions by userId {}", userId);
     transferRepository.deleteAll(transferRepository.findTransferByUserId(userId));
+    List<Tag> tags = tagRepository.findByUserId(userId);
+    for (Tag tag : tags) {
+      tag.getTransactions()
+          .forEach(
+              transaction -> {
+                transaction.getTags().remove(tag);
+                transactionRepository.save(transaction);
+              });
+    }
+    tagRepository.deleteAll(tagRepository.findByUserId(userId));
     transactionRepository.deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 

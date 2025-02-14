@@ -57,6 +57,15 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return tags;
   }
 
+  public List<Tag> getUserTags(UUID userId) {
+    return tags.stream().filter(tag -> tag.getUserId().equals(userId)).toList();
+  }
+
+  public Tag getRandomUserTag(UUID userId) {
+    List<Tag> userTags = getUserTags(userId);
+    return userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1));
+  }
+
   public List<Transaction> getTransactions() {
     return transactions;
   }
