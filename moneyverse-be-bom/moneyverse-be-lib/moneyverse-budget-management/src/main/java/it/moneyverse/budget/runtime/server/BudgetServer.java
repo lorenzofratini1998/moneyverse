@@ -23,6 +23,7 @@ public class BudgetServer extends GrpcServer {
             .build();
   }
 
+  @Override
   @PostConstruct
   public void start() throws IOException {
     super.start();

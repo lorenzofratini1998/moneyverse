@@ -12,6 +12,7 @@ import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.utils.BudgetCriteriaRandomGenerator;
 import it.moneyverse.budget.utils.BudgetTestContext;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
@@ -19,6 +20,7 @@ import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
@@ -44,6 +46,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
+  @Container static RedisContainer redisContainer = new RedisContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired private CategoryRepository categoryRepository;
   @Autowired private BudgetRepository budgetRepository;
@@ -53,6 +56,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
+        .withRedis(redisContainer)
         .withKeycloak(keycloakContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
@@ -74,7 +78,6 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final UUID userId = testContext.getRandomUser().getUserId();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final CategoryRequestDto request = testContext.createCategoryForUser(userId);
-    mockServer.mockExistentUser();
     CategoryDto expected = testContext.getExpectedCategoryDto(request);
 
     ResponseEntity<CategoryDto> response =
@@ -195,7 +198,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final Category randomUserCategory = testContext.getRandomCategoryByUserId(userId);
     final BudgetRequestDto request = createBudgetRequest(randomUserCategory.getCategoryId());
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(request.currency());
 
     ResponseEntity<BudgetDto> response =
         restTemplate.exchange(
@@ -250,7 +253,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final UUID budgetId = testContext.getRandomBudgetByUserId(userId).getBudgetId();
     final BudgetUpdateRequestDto request = createBudgetUpdateRequest();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(request.currency());
 
     ResponseEntity<BudgetDto> response =
         restTemplate.exchange(

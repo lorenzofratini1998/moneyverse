@@ -4,6 +4,8 @@ import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Tag;
@@ -30,18 +32,27 @@ public class TransactionManagementService implements TransactionService {
 
   private final TransactionRepository transactionRepository;
   private final TagRepository tagRepository;
-  private final TransactionServiceClient transactionServiceClient;
   private final TransferRepository transferRepository;
+  private final CurrencyServiceClient currencyServiceClient;
+  private final AccountServiceClient accountServiceClient;
+  private final UserServiceClient userServiceClient;
+  private final BudgetServiceClient budgetServiceClient;
 
   public TransactionManagementService(
       TransactionRepository transactionRepository,
       TagRepository tagRepository,
-      TransactionServiceClient transactionServiceClient,
-      TransferRepository transferRepository) {
+      TransferRepository transferRepository,
+      CurrencyServiceClient currencyServiceClient,
+      AccountServiceClient accountServiceClient,
+      UserServiceClient userServiceGrpcClient,
+      BudgetServiceClient budgetServiceClient) {
     this.transactionRepository = transactionRepository;
     this.tagRepository = tagRepository;
-    this.transactionServiceClient = transactionServiceClient;
     this.transferRepository = transferRepository;
+    this.currencyServiceClient = currencyServiceClient;
+    this.accountServiceClient = accountServiceClient;
+    this.userServiceClient = userServiceGrpcClient;
+    this.budgetServiceClient = budgetServiceClient;
   }
 
   @Override
@@ -56,9 +67,9 @@ public class TransactionManagementService implements TransactionService {
   }
 
   private Transaction createTransaction(UUID userId, TransactionRequestItemDto request) {
-    transactionServiceClient.checkIfAccountExists(request.accountId());
-    transactionServiceClient.checkIfCategoryExists(request.categoryId());
-    transactionServiceClient.checkIfCurrencyExists(request.currency());
+    accountServiceClient.checkIfAccountExists(request.accountId());
+    budgetServiceClient.checkIfCategoryExists(request.categoryId());
+    currencyServiceClient.checkIfCurrencyExists(request.currency());
     Set<Tag> tags = getTransactionTags(request.tags());
     if (request.tags() != null && !request.tags().isEmpty()) {
       getTransactionTags(request.tags());
@@ -108,7 +119,7 @@ public class TransactionManagementService implements TransactionService {
   public TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request) {
     Transaction transaction = findTransactionById(transactionId);
     if (request.currency() != null) {
-      transactionServiceClient.checkIfCurrencyExists(request.currency());
+      currencyServiceClient.checkIfCurrencyExists(request.currency());
     }
     Set<Tag> tags = getTransactionTags(request.tags());
     transaction = TransactionMapper.partialUpdate(transaction, request, tags);
@@ -149,7 +160,7 @@ public class TransactionManagementService implements TransactionService {
   @Override
   @Transactional
   public void deleteAllTransactionsByUserId(UUID userId) {
-    transactionServiceClient.checkIfUserExists(userId);
+    userServiceClient.checkIfUserStillExist(userId);
     LOGGER.info("Deleting transactions by userId {}", userId);
     transferRepository.deleteAll(transferRepository.findTransferByUserId(userId));
     transactionRepository.deleteAll(transactionRepository.findTransactionByUserId(userId));
@@ -158,7 +169,7 @@ public class TransactionManagementService implements TransactionService {
   @Override
   @Transactional
   public void deleteAllTransactionsByAccountId(UUID accountId) {
-    transactionServiceClient.checkIfAccountExists(accountId);
+    accountServiceClient.checkIfAccountStillExists(accountId);
     LOGGER.info("Deleting transactions by account id {}", accountId);
     transferRepository.deleteAll(transferRepository.findTransferByAccountId(accountId));
     transactionRepository.deleteAll(transactionRepository.findTransactionByAccountId(accountId));
@@ -167,7 +178,7 @@ public class TransactionManagementService implements TransactionService {
   @Override
   @Transactional
   public void removeCategoryFromTransactions(UUID categoryId) {
-    transactionServiceClient.checkIfCategoryExists(categoryId);
+    budgetServiceClient.checkIfCategoryStillExists(categoryId);
     LOGGER.info("Removing category {} from transactions", categoryId);
     List<Transaction> transactions = transactionRepository.findTransactionByCategoryId(categoryId);
     transactions.forEach(transaction -> transaction.setCategoryId(null));

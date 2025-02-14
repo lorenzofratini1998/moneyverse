@@ -161,15 +161,23 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
                     .map(amount -> amount.matches(transaction.getAmount()))
                     .orElse(true))
         .filter(
-            transaction -> {
-              List<UUID> criteriaTagIds = criteria.getTags().orElse(Collections.emptyList());
-              if (criteriaTagIds.isEmpty()) {
-                return true;
-              }
-              List<UUID> transactionTagIds =
-                  transaction.getTags().stream().map(Tag::getTagId).toList();
-              return transactionTagIds.containsAll(criteriaTagIds);
-            })
+            transaction ->
+                criteria
+                    .getTags()
+                    .map(
+                        tagIds -> {
+                          if (tagIds.isEmpty()) {
+                            return true;
+                          }
+                          long distinctCount = tagIds.stream().distinct().count();
+                          if (distinctCount > 1) {
+                            return false;
+                          }
+                          Object requiredTag = tagIds.stream().findFirst().get();
+                          return transaction.getTags().stream()
+                              .anyMatch(tag -> tag.getTagId().equals(requiredTag));
+                        })
+                    .orElse(true))
         .sorted((a, b) -> sortByCriteria(a, b, criteria.getSort()))
         .skip(criteria.getPage().getOffset())
         .limit(criteria.getPage().getLimit())
@@ -201,7 +209,9 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   public Transaction getRandomTransaction(UUID userId) {
     List<Transaction> userTransactions =
-        transactions.stream().filter(t -> t.getUserId().equals(userId)).toList();
+        transactions.stream()
+            .filter(t -> t.getUserId().equals(userId) && t.getTransfer() == null)
+            .toList();
     return userTransactions.get(RandomUtils.randomInteger(0, userTransactions.size() - 1));
   }
 

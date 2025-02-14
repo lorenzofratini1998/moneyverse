@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import it.moneyverse.account.model.dto.AccountCategoryDto;
-import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;

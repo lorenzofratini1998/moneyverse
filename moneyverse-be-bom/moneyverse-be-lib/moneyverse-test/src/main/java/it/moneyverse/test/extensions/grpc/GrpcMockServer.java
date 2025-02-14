@@ -3,7 +3,9 @@ package it.moneyverse.test.extensions.grpc;
 import static org.grpcmock.GrpcMock.stubFor;
 import static org.grpcmock.GrpcMock.unaryMethod;
 
+import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.grpc.lib.*;
+import it.moneyverse.test.utils.RandomUtils;
 import org.grpcmock.junit5.GrpcMockExtension;
 
 public class GrpcMockServer extends GrpcMockExtension {
@@ -16,28 +18,72 @@ public class GrpcMockServer extends GrpcMockExtension {
     port = super.getPort();
   }
 
-  public void mockExistentUser() {
+  public void mockExistentUser(UserModel user) {
     stubFor(
-        unaryMethod(UserServiceGrpc.getCheckIfUserExistsMethod())
-            .willReturn(UserResponse.newBuilder().setExists(true).build()));
+        unaryMethod(UserServiceGrpc.getGetUserByIdMethod())
+            .willReturn(
+                UserResponse.newBuilder()
+                    .setUserId(user.getUserId().toString())
+                    .setEmail(user.getEmail())
+                    .setFirstName(user.getName())
+                    .setLastName(user.getSurname())
+                    .build()));
+  }
+
+  public void mockNonExistentUser() {
+    stubFor(
+        unaryMethod(UserServiceGrpc.getGetUserByIdMethod())
+            .willReturn(UserResponse.getDefaultInstance()));
   }
 
   public void mockExistentAccount() {
     stubFor(
-        unaryMethod(AccountServiceGrpc.getCheckIfAccountExistsMethod())
-            .willReturn(AccountResponse.newBuilder().setExists(true).build()));
+        unaryMethod(AccountServiceGrpc.getGetAccountByIdMethod())
+            .willReturn(
+                AccountResponse.newBuilder()
+                    .setAccountId(RandomUtils.randomUUID().toString())
+                    .setUserId(RandomUtils.randomUUID().toString())
+                    .setAccountName(RandomUtils.randomString(30))
+                    .setBalance(RandomUtils.randomBigDecimal().doubleValue())
+                    .setBalanceTarget(RandomUtils.randomBigDecimal().doubleValue())
+                    .setAccountCategory(RandomUtils.randomString(15))
+                    .setAccountDescription(RandomUtils.randomString(30))
+                    .setCurrency(RandomUtils.randomString(3).toUpperCase())
+                    .build()));
+  }
+
+  public void mockNonExistentAccount() {
+    stubFor(
+        unaryMethod(AccountServiceGrpc.getGetAccountByIdMethod())
+            .willReturn(AccountResponse.getDefaultInstance()));
   }
 
   public void mockExistentCategory() {
     stubFor(
-        unaryMethod(BudgetServiceGrpc.getCheckIfCategoryExistsMethod())
-            .willReturn(CategoryResponse.newBuilder().setExists(true).build()));
+        unaryMethod(BudgetServiceGrpc.getGetCategoryByIdMethod())
+            .willReturn(
+                CategoryResponse.newBuilder()
+                    .setCategoryId(RandomUtils.randomUUID().toString())
+                    .setUserId(RandomUtils.randomUUID().toString())
+                    .setDescription(RandomUtils.randomString(30))
+                    .setCategoryName(RandomUtils.randomString(30))
+                    .build()));
   }
 
-  public void mockExistentCurrency() {
+  public void mockNonExistentCategory() {
     stubFor(
-        unaryMethod(CurrencyServiceGrpc.getCheckIfCurrencyExistsMethod())
-            .willReturn(CurrencyResponse.newBuilder().setExists(true).build()));
+        unaryMethod(BudgetServiceGrpc.getGetCategoryByIdMethod())
+            .willReturn(CategoryResponse.getDefaultInstance()));
+  }
+
+  public void mockExistentCurrency(String isoCode) {
+    stubFor(
+        unaryMethod(CurrencyServiceGrpc.getGetCurrencyByCodeMethod())
+            .willReturn(
+                CurrencyResponse.newBuilder()
+                    .setCurrencyId(RandomUtils.randomUUID().toString())
+                    .setIsoCode(isoCode)
+                    .build()));
   }
 
   public int getPort() {

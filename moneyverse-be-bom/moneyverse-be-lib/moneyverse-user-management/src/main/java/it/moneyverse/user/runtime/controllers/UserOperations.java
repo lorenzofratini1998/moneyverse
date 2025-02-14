@@ -1,6 +1,6 @@
 package it.moneyverse.user.runtime.controllers;
 
-import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import java.util.UUID;
 

@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
@@ -15,6 +14,7 @@ import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.utils.mapper.CategoryMapper;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
@@ -59,7 +59,6 @@ class CategoryManagementServiceTest {
     final UUID userId = RandomUtils.randomUUID();
     CategoryRequestDto request = createCategoryRequest(userId);
 
-    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(categoryRepository.existsByUserIdAndCategoryName(userId, request.categoryName()))
         .thenReturn(false);
     mapper.when(() -> CategoryMapper.toCategory(request)).thenReturn(category);
@@ -69,7 +68,6 @@ class CategoryManagementServiceTest {
     categoryDto = categoryManagementService.createCategory(request);
 
     assertNotNull(categoryDto);
-    verify(userServiceClient, times(1)).checkIfUserExists(userId);
     verify(categoryRepository, times(1))
         .existsByUserIdAndCategoryName(userId, request.categoryName());
     mapper.verify(() -> CategoryMapper.toCategory(request), times(1));
@@ -78,27 +76,10 @@ class CategoryManagementServiceTest {
   }
 
   @Test
-  void givenCategoryRequest_WhenCreateCategory_ThenUserNotFound() {
-    final UUID userId = RandomUtils.randomUUID();
-    CategoryRequestDto request = createCategoryRequest(userId);
-
-    when(userServiceClient.checkIfUserExists(userId)).thenReturn(false);
-
-    assertThrows(
-        ResourceNotFoundException.class, () -> categoryManagementService.createCategory(request));
-
-    verify(categoryRepository, never()).save(any(Category.class));
-    verify(categoryRepository, never())
-        .existsByUserIdAndCategoryName(userId, request.categoryName());
-    verify(userServiceClient, times(1)).checkIfUserExists(userId);
-  }
-
-  @Test
   void givenCategoryRequest_WhenCreateCategory_ThenCategoryAlreadyExists() {
     final UUID userId = RandomUtils.randomUUID();
     CategoryRequestDto request = createCategoryRequest(userId);
 
-    when(userServiceClient.checkIfUserExists(userId)).thenReturn(true);
     when(categoryRepository.existsByUserIdAndCategoryName(userId, request.categoryName()))
         .thenReturn(true);
 
@@ -107,7 +88,6 @@ class CategoryManagementServiceTest {
         () -> categoryManagementService.createCategory(request));
 
     verify(categoryRepository, never()).save(any(Category.class));
-    verify(userServiceClient, times(1)).checkIfUserExists(userId);
     verify(categoryRepository, times(1))
         .existsByUserIdAndCategoryName(userId, request.categoryName());
   }

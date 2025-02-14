@@ -1,4 +1,4 @@
-package it.moneyverse.currency.model.dto;
+package it.moneyverse.core.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

@@ -7,7 +7,7 @@ option java_package = "it.moneyverse.grpc.lib";
 option java_outer_classname = "BudgetServiceProto";
 
 service BudgetService {
-  rpc CheckIfCategoryExists (CategoryRequest) returns (CategoryResponse) {
+  rpc GetCategoryById (CategoryRequest) returns (CategoryResponse) {
   }
 }
 
@@ -16,5 +16,8 @@ message CategoryRequest {
 }
 
 message CategoryResponse {
-  bool exists = 1;
+  string categoryId = 1;
+  string userId = 2;
+  string categoryName = 3;
+  string description = 4;
 }

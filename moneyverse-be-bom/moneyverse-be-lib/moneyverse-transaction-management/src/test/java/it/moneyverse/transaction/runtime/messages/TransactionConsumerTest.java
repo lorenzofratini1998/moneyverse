@@ -40,7 +40,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
-      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration",
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
       "logging.level.org.grpcmock.GrpcMock=WARN"
     })
 @Testcontainers
@@ -84,7 +84,7 @@ class TransactionConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockServer.mockExistentUser();
+    mockServer.mockNonExistentUser();
 
     kafkaTemplate.send(producerRecord);
 
@@ -109,7 +109,7 @@ class TransactionConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(AccountDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockServer.mockExistentAccount();
+    mockServer.mockNonExistentAccount();
 
     kafkaTemplate.send(producerRecord);
 
@@ -135,7 +135,7 @@ class TransactionConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(CategoryDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockServer.mockExistentCategory();
+    mockServer.mockNonExistentCategory();
 
     kafkaTemplate.send(producerRecord);
 

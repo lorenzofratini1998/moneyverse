@@ -3,7 +3,7 @@ package it.moneyverse.currency.runtime.controllers;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import it.moneyverse.currency.model.dto.CurrencyDto;
+import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.services.CurrencyManagementService;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import java.util.List;

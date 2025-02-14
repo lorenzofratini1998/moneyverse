@@ -4,7 +4,7 @@ import static it.moneyverse.user.utils.UserTestUtils.createUser;
 import static it.moneyverse.user.utils.UserTestUtils.createUserUpdateRequest;
 import static org.junit.jupiter.api.Assertions.*;
 
-import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import org.junit.jupiter.api.Test;
 import org.keycloak.representations.idm.UserRepresentation;

@@ -38,7 +38,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
-      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration",
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
       "logging.level.org.grpcmock.GrpcMock=WARN",
       "logging.level.org.apache.kafka.clients.NetworkClient=ERROR"
     })
@@ -82,7 +82,7 @@ class CategoryConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
-    mockServer.mockExistentUser();
+    mockServer.mockNonExistentUser();
 
     kafkaTemplate.send(producerRecord);
 

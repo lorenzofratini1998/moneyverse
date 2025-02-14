@@ -4,12 +4,12 @@ import static it.moneyverse.account.enums.AccountSortAttributeEnum.*;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.AccountCriteria;
-import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.model.entities.AccountFactory;
 import it.moneyverse.core.enums.SortAttribute;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.model.TestContext;
@@ -194,8 +194,11 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
 
   @Override
   public AccountTestContext generateScript(Path dir) {
-    new EntityScriptGenerator(new ScriptMetadata(dir, categories, accounts), new SQLScriptService())
-        .execute();
+    EntityScriptGenerator scriptGenerator =
+        new EntityScriptGenerator(
+            new ScriptMetadata(dir, categories, accounts), new SQLScriptService());
+    StringBuilder script = scriptGenerator.generateScript();
+    scriptGenerator.save(script);
     return self();
   }
 }

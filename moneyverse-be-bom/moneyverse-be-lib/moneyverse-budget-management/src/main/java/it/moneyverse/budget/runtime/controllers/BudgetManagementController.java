@@ -3,6 +3,7 @@ package it.moneyverse.budget.runtime.controllers;
 import it.moneyverse.budget.model.dto.*;
 import it.moneyverse.budget.services.BudgetService;
 import it.moneyverse.budget.services.CategoryService;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import java.util.List;
 import java.util.UUID;

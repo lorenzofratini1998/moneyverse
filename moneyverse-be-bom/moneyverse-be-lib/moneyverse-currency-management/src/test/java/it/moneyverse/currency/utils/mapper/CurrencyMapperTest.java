@@ -3,7 +3,7 @@ package it.moneyverse.currency.utils.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import it.moneyverse.currency.model.dto.CurrencyDto;
+import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.model.entities.Currency;
 import it.moneyverse.currency.utils.CurrencyMapper;
 import it.moneyverse.test.utils.RandomUtils;

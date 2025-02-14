@@ -3,7 +3,7 @@ package it.moneyverse.currency.runtime.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import it.moneyverse.currency.model.dto.CurrencyDto;
+import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.utils.CurrencyTestContext;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;

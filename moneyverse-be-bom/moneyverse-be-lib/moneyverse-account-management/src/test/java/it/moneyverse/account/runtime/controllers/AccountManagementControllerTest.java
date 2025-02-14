@@ -12,6 +12,7 @@ import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.List;

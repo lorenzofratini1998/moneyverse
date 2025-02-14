@@ -1,8 +1,8 @@
 package it.moneyverse.budget.services;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import java.util.List;
 import java.util.UUID;

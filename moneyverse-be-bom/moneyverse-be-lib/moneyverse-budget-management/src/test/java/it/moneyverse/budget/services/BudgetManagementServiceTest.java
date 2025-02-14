@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -60,7 +61,8 @@ class BudgetManagementServiceTest {
       @Mock Category category, @Mock Budget budget, @Mock BudgetDto budgetDto) {
     BudgetRequestDto request = createBudgetRequest();
     when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.of(category));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(budgetRepository.existsByCategory_CategoryIdAndStartDateAndEndDate(
             request.categoryId(), request.startDate(), request.endDate()))
         .thenReturn(false);
@@ -99,7 +101,9 @@ class BudgetManagementServiceTest {
   void givenBudgetRequest_WhenCreateBudget_ThenReturnCurrencyNotFound(@Mock Category category) {
     BudgetRequestDto request = createBudgetRequest();
     when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.of(category));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
+    Mockito.doThrow(ResourceNotFoundException.class)
+        .when(currencyServiceClient)
+        .checkIfCurrencyExists(request.currency());
 
     assertThrows(
         ResourceNotFoundException.class, () -> budgetManagementService.createBudget(request));
@@ -113,7 +117,7 @@ class BudgetManagementServiceTest {
   void givenBudgetRequest_WhenCreateBudget_ThenReturnBudgetAlreadyExists(@Mock Category category) {
     BudgetRequestDto request = createBudgetRequest();
     when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.of(category));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(budgetRepository.existsByCategory_CategoryIdAndStartDateAndEndDate(
             request.categoryId(), request.startDate(), request.endDate()))
         .thenReturn(true);
@@ -149,7 +153,7 @@ class BudgetManagementServiceTest {
     BudgetUpdateRequestDto request = createBudgetUpdateRequest();
 
     when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     mapper.when(() -> BudgetMapper.partialUpdate(budget, request)).thenReturn(budget);
     when(budgetRepository.save(budget)).thenReturn(budget);
     mapper.when(() -> BudgetMapper.toBudgetDto(budget)).thenReturn(budgetDto);

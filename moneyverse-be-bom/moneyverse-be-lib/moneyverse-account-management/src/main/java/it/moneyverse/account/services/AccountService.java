@@ -1,6 +1,7 @@
 package it.moneyverse.account.services;
 
 import it.moneyverse.account.model.dto.*;
+import it.moneyverse.core.model.dto.AccountDto;
 import java.util.List;
 import java.util.UUID;
 

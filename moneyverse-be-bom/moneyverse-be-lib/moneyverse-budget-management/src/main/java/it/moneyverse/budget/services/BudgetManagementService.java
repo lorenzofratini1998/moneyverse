@@ -48,7 +48,7 @@ public class BudgetManagementService implements BudgetService {
   @Transactional
   public BudgetDto createBudget(BudgetRequestDto request) {
     Category category = findCategoryById(request.categoryId());
-    checkIfCurrencyExists(request.currency());
+    currencyServiceClient.checkIfCurrencyExists(request.currency());
     checkIfBudgetAlreadyExists(request.categoryId(), request.startDate(), request.endDate());
     LOGGER.info("Creating budget for category '{}'", request.categoryId());
     Budget budget = BudgetMapper.toBudget(request, category);
@@ -90,7 +90,7 @@ public class BudgetManagementService implements BudgetService {
   public BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto request) {
     Budget budget = findBudgetById(budgetId);
     if (request.currency() != null) {
-      checkIfCurrencyExists(request.currency());
+      currencyServiceClient.checkIfCurrencyExists(request.currency());
     }
     budget = BudgetMapper.partialUpdate(budget, request);
     BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
@@ -131,11 +131,5 @@ public class BudgetManagementService implements BudgetService {
         .findById(budgetId)
         .orElseThrow(
             () -> new ResourceNotFoundException("Budget with id %s not found".formatted(budgetId)));
-  }
-
-  private void checkIfCurrencyExists(String currency) {
-    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
-      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
-    }
   }
 }

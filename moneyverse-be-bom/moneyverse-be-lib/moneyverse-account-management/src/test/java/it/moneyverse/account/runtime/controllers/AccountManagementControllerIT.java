@@ -8,12 +8,14 @@ import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.utils.AccountTestContext;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.annotations.IntegrationTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
@@ -42,6 +44,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
+  @Container static RedisContainer redisContainer = new RedisContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired protected AccountRepository accountRepository;
   private HttpHeaders headers;
@@ -50,6 +53,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
+        .withRedis(redisContainer)
         .withKeycloak(keycloakContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
@@ -71,8 +75,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     final UUID userId = testContext.getRandomUser().getUserId();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final AccountRequestDto request = testContext.createAccountForUser(userId);
-    mockServer.mockExistentUser();
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(request.currency());
     AccountDto expected = testContext.getExpectedAccountDto(request);
 
     ResponseEntity<AccountDto> response =
@@ -135,7 +138,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             RandomUtils.randomBoolean());
 
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(request.currency());
 
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(

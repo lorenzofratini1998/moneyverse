@@ -1,7 +1,6 @@
 package it.moneyverse.account.runtime.messages;
 
 import it.moneyverse.account.services.AccountService;
-import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.services.UserServiceClient;
@@ -34,17 +33,10 @@ public class AccountConsumer {
       autoStartup = "true",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
-  public void onMessage(
+  public void onUserDeletion(
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     LOGGER.info("Received event: {} from topic: {}", record.value(), topic);
     UserDeletionEvent event = JsonUtils.fromJson(record.value(), UserDeletionEvent.class);
-    checkIfUserExists(event.key());
     accountService.deleteAccountsByUserId(event.key());
-  }
-
-  private void checkIfUserExists(UUID userId) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
-    }
   }
 }

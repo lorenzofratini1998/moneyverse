@@ -4,11 +4,11 @@ import static it.moneyverse.budget.utils.BudgetTestUtils.createDefaultCategory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.DefaultCategory;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;

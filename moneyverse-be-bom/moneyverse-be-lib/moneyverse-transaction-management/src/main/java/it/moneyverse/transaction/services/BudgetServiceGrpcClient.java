@@ -1,42 +1,38 @@
 package it.moneyverse.transaction.services;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import it.moneyverse.core.utils.properties.BudgetServiceGrpcCircuitBreakerProperties;
-import it.moneyverse.grpc.lib.BudgetServiceGrpc;
-import it.moneyverse.grpc.lib.CategoryRequest;
-import it.moneyverse.grpc.lib.CategoryResponse;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.CategoryDto;
+import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BudgetServiceGrpcClient implements BudgetServiceClient {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BudgetServiceGrpcClient.class);
+  private final BudgetGrpcService budgetGrpcService;
 
-  private final BudgetServiceGrpc.BudgetServiceBlockingStub stub;
-
-  public BudgetServiceGrpcClient(BudgetServiceGrpc.BudgetServiceBlockingStub stub) {
-    this.stub = stub;
+  public BudgetServiceGrpcClient(BudgetGrpcService budgetGrpcService) {
+    this.budgetGrpcService = budgetGrpcService;
   }
 
   @Override
-  @CircuitBreaker(
-      name = BudgetServiceGrpcCircuitBreakerProperties.BUDGET_SERVICE_GRPC,
-      fallbackMethod = "fallbackCheckIfCategoryExists")
-  public Boolean checkIfCategoryExists(UUID categoryId) {
-    final CategoryResponse response =
-        stub.checkIfCategoryExists(
-            CategoryRequest.newBuilder().setCategoryId(categoryId.toString()).build());
-    return response.getExists();
+  public Optional<CategoryDto> getCategoryById(UUID categoryId) {
+    return budgetGrpcService.getCategoryById(categoryId);
   }
 
-  Boolean fallbackCheckIfCategoryExists(UUID categoryId, Throwable throwable) {
-    LOGGER.error(
-        "Impossible to contact the BudgetService to check whether the category {} exists. Returning FALSE as fallback: {}",
-        categoryId,
-        throwable.getMessage());
-    return false;
+  @Override
+  public void checkIfCategoryExists(UUID categoryId) {
+    if (budgetGrpcService.getCategoryById(categoryId).isEmpty()) {
+      throw new ResourceNotFoundException("Category %s does not exists".formatted(categoryId));
+    }
+  }
+
+  @Override
+  public void checkIfCategoryStillExists(UUID categoryId) {
+    if (budgetGrpcService.getCategoryById(categoryId).isPresent()) {
+      throw new ResourceStillExistsException(
+          "Category %s still exists in the system".formatted(categoryId));
+    }
   }
 }

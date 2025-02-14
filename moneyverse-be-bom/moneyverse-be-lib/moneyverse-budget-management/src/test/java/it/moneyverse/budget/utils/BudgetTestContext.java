@@ -5,10 +5,10 @@ import static it.moneyverse.budget.enums.BudgetSortAttributeEnum.BUDGET_LIMIT;
 
 import it.moneyverse.budget.enums.BudgetSortAttributeEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.entities.*;
 import it.moneyverse.core.enums.SortAttribute;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
@@ -151,7 +151,21 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
                     .orElse(true))
         .filter(
             budget ->
-                criteria.getDate().map(date -> date.matches(budget.getStartDate())).orElse(true))
+                criteria
+                    .getDate()
+                    .map(
+                        date -> {
+                          boolean matchesStart =
+                              date.getStart()
+                                  .map(min -> !budget.getStartDate().isBefore(min))
+                                  .orElse(true);
+                          boolean matchesEnd =
+                              date.getEnd()
+                                  .map(max -> !budget.getEndDate().isAfter(max))
+                                  .orElse(true);
+                          return matchesStart && matchesEnd;
+                        })
+                    .orElse(true))
         .sorted((a, b) -> sortByCriteria(a, b, criteria.getSort()))
         .skip(criteria.getPage().getOffset())
         .limit(criteria.getPage().getLimit())
@@ -188,9 +202,12 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
 
   @Override
   public BudgetTestContext generateScript(Path dir) {
-    new EntityScriptGenerator(
-            new ScriptMetadata(dir, categories, defaultCategories, budgets), new SQLScriptService())
-        .execute();
+    EntityScriptGenerator scriptGenerator =
+        new EntityScriptGenerator(
+            new ScriptMetadata(dir, categories, defaultCategories, budgets),
+            new SQLScriptService());
+    StringBuilder script = scriptGenerator.generateScript();
+    scriptGenerator.save(script);
     return self();
   }
 }

@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Tag;
@@ -30,7 +33,10 @@ class TransactionManagementServiceTest {
 
   @InjectMocks private TransactionManagementService transactionManagementService;
 
-  @Mock private TransactionServiceClient transactionServiceClient;
+  @Mock private CurrencyServiceClient currencyServiceClient;
+  @Mock private AccountServiceClient accountServiceClient;
+  @Mock private UserServiceClient userServiceClient;
+  @Mock private BudgetServiceClient budgetServiceClient;
   @Mock private TransactionRepository transactionRepository;
   @Mock private TransferRepository transferRepository;
   @Mock private TagRepository tagRepository;
@@ -52,15 +58,15 @@ class TransactionManagementServiceTest {
     TransactionRequestDto request = createTransactionRequest(userId);
     TransactionRequestItemDto item = request.transactions().getFirst();
     Mockito.doThrow(ResourceNotFoundException.class)
-        .when(transactionServiceClient)
+        .when(accountServiceClient)
         .checkIfAccountExists(item.accountId());
 
     assertThrows(
         ResourceNotFoundException.class,
         () -> transactionManagementService.createTransactions(request));
 
-    verify(transactionServiceClient, times(1)).checkIfAccountExists(item.accountId());
-    verify(transactionServiceClient, never()).checkIfCategoryExists(any(UUID.class));
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, never()).checkIfCategoryExists(any(UUID.class));
     transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), never());
     verify(transactionRepository, never()).saveAll(any(List.class));
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(any(List.class)), never());
@@ -71,17 +77,17 @@ class TransactionManagementServiceTest {
     UUID userId = RandomUtils.randomUUID();
     TransactionRequestDto request = createTransactionRequest(userId);
     TransactionRequestItemDto item = request.transactions().getFirst();
-    Mockito.doNothing().when(transactionServiceClient).checkIfAccountExists(item.accountId());
+    Mockito.doNothing().when(accountServiceClient).checkIfAccountExists(item.accountId());
     Mockito.doThrow(ResourceNotFoundException.class)
-        .when(transactionServiceClient)
+        .when(budgetServiceClient)
         .checkIfCategoryExists(item.categoryId());
 
     assertThrows(
         ResourceNotFoundException.class,
         () -> transactionManagementService.createTransactions(request));
 
-    verify(transactionServiceClient, times(1)).checkIfAccountExists(item.accountId());
-    verify(transactionServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
     transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), never());
     verify(transactionRepository, never()).saveAll(any(List.class));
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(any(List.class)), never());
@@ -92,19 +98,19 @@ class TransactionManagementServiceTest {
     UUID userId = RandomUtils.randomUUID();
     TransactionRequestDto request = createTransactionRequest(userId);
     TransactionRequestItemDto item = request.transactions().getFirst();
-    Mockito.doNothing().when(transactionServiceClient).checkIfAccountExists(item.accountId());
-    Mockito.doNothing().when(transactionServiceClient).checkIfCategoryExists(item.categoryId());
+    Mockito.doNothing().when(accountServiceClient).checkIfAccountExists(item.accountId());
+    Mockito.doNothing().when(budgetServiceClient).checkIfCategoryExists(item.categoryId());
     Mockito.doThrow(ResourceNotFoundException.class)
-        .when(transactionServiceClient)
+        .when(currencyServiceClient)
         .checkIfCurrencyExists(item.currency());
 
     assertThrows(
         ResourceNotFoundException.class,
         () -> transactionManagementService.createTransactions(request));
 
-    verify(transactionServiceClient, times(1)).checkIfAccountExists(item.accountId());
-    verify(transactionServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
-    verify(transactionServiceClient, times(1)).checkIfCurrencyExists(item.currency());
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(item.currency());
     transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), never());
     verify(transactionRepository, never()).saveAll(any(List.class));
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(any(List.class)), never());
@@ -116,9 +122,9 @@ class TransactionManagementServiceTest {
     UUID userId = RandomUtils.randomUUID();
     TransactionRequestDto request = createTransactionRequest(userId);
     TransactionRequestItemDto item = request.transactions().getFirst();
-    Mockito.doNothing().when(transactionServiceClient).checkIfAccountExists(item.accountId());
-    Mockito.doNothing().when(transactionServiceClient).checkIfCategoryExists(item.categoryId());
-    Mockito.doNothing().when(transactionServiceClient).checkIfCurrencyExists(item.currency());
+    Mockito.doNothing().when(accountServiceClient).checkIfAccountExists(item.accountId());
+    Mockito.doNothing().when(budgetServiceClient).checkIfCategoryExists(item.categoryId());
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(item.currency());
 
     transactionMapper
         .when(() -> TransactionMapper.toTransaction(userId, item))
@@ -131,9 +137,9 @@ class TransactionManagementServiceTest {
     List<TransactionDto> result = transactionManagementService.createTransactions(request);
 
     assertNotNull(result);
-    verify(transactionServiceClient, times(1)).checkIfAccountExists(item.accountId());
-    verify(transactionServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
-    verify(transactionServiceClient, times(1)).checkIfCurrencyExists(item.currency());
+    verify(accountServiceClient, times(1)).checkIfAccountExists(item.accountId());
+    verify(budgetServiceClient, times(1)).checkIfCategoryExists(item.categoryId());
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(item.currency());
     transactionMapper.verify(() -> TransactionMapper.toTransaction(userId, item), times(1));
     verify(transactionRepository, times(1)).saveAll(List.of(transaction));
     transactionMapper.verify(
@@ -192,7 +198,7 @@ class TransactionManagementServiceTest {
     TransactionUpdateRequestDto request = createTransactionsUpdateRequest();
 
     when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
-    Mockito.doNothing().when(transactionServiceClient).checkIfCurrencyExists(request.currency());
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(tagRepository.findById(any(UUID.class))).thenReturn(Optional.of(tag));
     transactionMapper
         .when(() -> TransactionMapper.partialUpdate(transaction, request, Set.of(tag)))
@@ -206,7 +212,7 @@ class TransactionManagementServiceTest {
 
     assertNotNull(transactionDto);
     verify(transactionRepository, times(1)).findById(transactionId);
-    verify(transactionServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
     verify(transactionRepository, times(1)).save(transaction);
     transactionMapper.verify(() -> TransactionMapper.toTransactionDto(transaction), times(1));
@@ -275,28 +281,28 @@ class TransactionManagementServiceTest {
   void givenUsername_WhenDeleteAllTransactions_ThenDeleteAllTransactions() {
     UUID userId = RandomUtils.randomUUID();
 
-    Mockito.doNothing().when(transactionServiceClient).checkIfUserExists(userId);
+    Mockito.doNothing().when(userServiceClient).checkIfUserStillExist(userId);
 
     transactionManagementService.deleteAllTransactionsByUserId(userId);
 
-    verify(transactionServiceClient, times(1)).checkIfUserExists(userId);
+    verify(userServiceClient, times(1)).checkIfUserStillExist(userId);
     verify(transactionRepository, times(1))
         .deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 
   @Test
-  void givenUsername_WhenDeleteAllTransactions_ThenUserNotFound() {
+  void givenUsername_WhenDeleteAllTransactions_ThenUserStillExist() {
     UUID userId = RandomUtils.randomUUID();
 
-    Mockito.doThrow(ResourceNotFoundException.class)
-        .when(transactionServiceClient)
-        .checkIfUserExists(userId);
+    doThrow(ResourceStillExistsException.class)
+        .when(userServiceClient)
+        .checkIfUserStillExist(userId);
 
     assertThrows(
-        ResourceNotFoundException.class,
+        ResourceStillExistsException.class,
         () -> transactionManagementService.deleteAllTransactionsByUserId(userId));
 
-    verify(transactionServiceClient, times(1)).checkIfUserExists(userId);
+    verify(userServiceClient, times(1)).checkIfUserStillExist(userId);
     verify(transactionRepository, times(0))
         .deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
@@ -305,28 +311,28 @@ class TransactionManagementServiceTest {
   void givenAccountId_WhenDeleteAllTransactions_ThenDeleteAllTransactions() {
     UUID accountId = RandomUtils.randomUUID();
 
-    Mockito.doNothing().when(transactionServiceClient).checkIfAccountExists(accountId);
+    Mockito.doNothing().when(accountServiceClient).checkIfAccountStillExists(accountId);
 
     transactionManagementService.deleteAllTransactionsByAccountId(accountId);
 
-    verify(transactionServiceClient, times(1)).checkIfAccountExists(accountId);
+    verify(accountServiceClient, times(1)).checkIfAccountStillExists(accountId);
     verify(transactionRepository, times(1))
         .deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
 
   @Test
-  void givenAccountId_WhenDeleteAllTransactions_ThenAccountNotFound() {
+  void givenAccountId_WhenDeleteAllTransactions_ThenAccountStillExists() {
     UUID accountId = RandomUtils.randomUUID();
 
-    Mockito.doThrow(ResourceNotFoundException.class)
-        .when(transactionServiceClient)
-        .checkIfAccountExists(accountId);
+    doThrow(ResourceStillExistsException.class)
+        .when(accountServiceClient)
+        .checkIfAccountStillExists(accountId);
 
     assertThrows(
-        ResourceNotFoundException.class,
+        ResourceStillExistsException.class,
         () -> transactionManagementService.deleteAllTransactionsByAccountId(accountId));
 
-    verify(transactionServiceClient, times(1)).checkIfAccountExists(accountId);
+    verify(accountServiceClient, times(1)).checkIfAccountStillExists(accountId);
     verify(transactionRepository, times(0))
         .deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
@@ -336,12 +342,12 @@ class TransactionManagementServiceTest {
       @Mock List<Transaction> transactions) {
     UUID categoryId = RandomUtils.randomUUID();
 
-    Mockito.doNothing().when(transactionServiceClient).checkIfCategoryExists(categoryId);
+    Mockito.doNothing().when(budgetServiceClient).checkIfCategoryStillExists(categoryId);
     when(transactionRepository.findTransactionByCategoryId(categoryId)).thenReturn(transactions);
 
     transactionManagementService.removeCategoryFromTransactions(categoryId);
 
-    verify(transactionServiceClient, times(1)).checkIfCategoryExists(categoryId);
+    verify(budgetServiceClient, times(1)).checkIfCategoryStillExists(categoryId);
     verify(transactionRepository, times(1)).saveAll(transactions);
   }
 
@@ -349,15 +355,15 @@ class TransactionManagementServiceTest {
   void givenCategoryId_RemoveCategoryFromTransactions_ThenCategoryNotFound() {
     UUID categoryId = RandomUtils.randomUUID();
 
-    Mockito.doThrow(ResourceNotFoundException.class)
-        .when(transactionServiceClient)
-        .checkIfCategoryExists(categoryId);
+    doThrow(ResourceStillExistsException.class)
+        .when(budgetServiceClient)
+        .checkIfCategoryStillExists(categoryId);
 
     assertThrows(
-        ResourceNotFoundException.class,
+        ResourceStillExistsException.class,
         () -> transactionManagementService.removeCategoryFromTransactions(categoryId));
 
-    verify(transactionServiceClient, times(1)).checkIfCategoryExists(categoryId);
+    verify(budgetServiceClient, times(1)).checkIfCategoryStillExists(categoryId);
     verify(transactionRepository, never()).saveAll(any(List.class));
   }
 }

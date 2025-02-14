@@ -1,12 +1,16 @@
 package it.moneyverse.user.services;
 
+import static it.moneyverse.core.utils.constants.CacheConstants.USERS_CACHE;
+
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.services.MessageProducer;
-import it.moneyverse.user.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import java.util.UUID;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,16 +34,19 @@ public class UserManagementService implements UserService {
   }
 
   @Override
+  @CachePut(value = USERS_CACHE, key = "#userId", unless = "#result == null")
   public UserDto updateUser(UUID userId, UserUpdateRequestDto request) {
     return keycloakService.updateUser(userId, request);
   }
 
   @Override
+  @CacheEvict(value = USERS_CACHE, key = "#userId")
   public void disableUser(UUID userId) {
     keycloakService.disableUser(userId);
   }
 
   @Override
+  @CacheEvict(value = USERS_CACHE, key = "#userId")
   public void deleteUser(UUID userId) {
     keycloakService.deleteUser(userId);
     messageProducer.send(new UserDeletionEvent(userId), UserDeletionTopic.TOPIC);

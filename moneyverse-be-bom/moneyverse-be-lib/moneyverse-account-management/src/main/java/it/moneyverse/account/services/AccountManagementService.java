@@ -12,12 +12,10 @@ import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
-import it.moneyverse.core.services.CurrencyServiceClient;
-import it.moneyverse.core.services.MessageProducer;
-import it.moneyverse.core.services.UserServiceClient;
-import it.moneyverse.core.services.UserServiceGrpcClient;
+import it.moneyverse.core.services.*;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -32,28 +30,27 @@ public class AccountManagementService implements AccountService {
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountManagementService.class);
   private final AccountRepository accountRepository;
   private final AccountCategoryRepository accountCategoryRepository;
-  private final UserServiceClient userServiceClient;
   private final CurrencyServiceClient currencyServiceClient;
   private final MessageProducer<UUID, String> messageProducer;
+  private final UserServiceClient userServiceClient;
 
   public AccountManagementService(
       AccountRepository accountRepository,
       AccountCategoryRepository accountCategoryRepository,
-      UserServiceGrpcClient userServiceClient,
       CurrencyServiceClient currencyServiceClient,
-      MessageProducer<UUID, String> messageProducer) {
+      MessageProducer<UUID, String> messageProducer,
+      UserServiceClient userServiceClient) {
     this.accountRepository = accountRepository;
     this.accountCategoryRepository = accountCategoryRepository;
-    this.userServiceClient = userServiceClient;
     this.currencyServiceClient = currencyServiceClient;
     this.messageProducer = messageProducer;
+    this.userServiceClient = userServiceClient;
   }
 
   @Override
   @Transactional
   public AccountDto createAccount(AccountRequestDto request) {
-    checkIfUserExists(request.userId());
-    checkIfCurrencyExists(request.currency());
+    currencyServiceClient.checkIfCurrencyExists(request.currency());
     checkIfAccountAlreadyExists(request.userId(), request.accountName());
     AccountCategory category = findAccountCategory(request.accountCategory());
     LOGGER.info("Creating account {} for user {}", request.accountName(), request.userId());
@@ -67,18 +64,6 @@ public class AccountManagementService implements AccountService {
     AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
     LOGGER.info("Saved account {} for user {}", result.getAccountId(), request.userId());
     return result;
-  }
-
-  private void checkIfUserExists(UUID userId) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
-    }
-  }
-
-  private void checkIfCurrencyExists(String currency) {
-    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
-      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
-    }
   }
 
   private void checkIfAccountAlreadyExists(UUID userId, String accountName) {
@@ -117,7 +102,7 @@ public class AccountManagementService implements AccountService {
     AccountCategory category =
         request.accountCategory() != null ? findAccountCategory(request.accountCategory()) : null;
     if (request.currency() != null) {
-      checkIfCurrencyExists(request.currency());
+      currencyServiceClient.checkIfCurrencyExists(request.currency());
     }
     account = AccountMapper.partialUpdate(account, request, category);
     if (Boolean.TRUE.equals(request.isDefault())) {
@@ -153,6 +138,7 @@ public class AccountManagementService implements AccountService {
   @Transactional
   @Override
   public void deleteAccountsByUserId(UUID userId) {
+    userServiceClient.checkIfUserStillExist(userId);
     LOGGER.info("Deleting accounts by user ID {}", userId);
     accountRepository.deleteAll(accountRepository.findAccountByUserId(userId));
   }

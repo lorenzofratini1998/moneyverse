@@ -1,18 +1,17 @@
 package it.moneyverse.transaction.services;
 
-import it.moneyverse.transaction.model.dto.TransactionDto;
+import it.moneyverse.transaction.model.dto.TransferDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
 import it.moneyverse.transaction.model.dto.TransferUpdateRequestDto;
-import java.util.List;
 import java.util.UUID;
 
 public interface TransferService {
 
-  List<TransactionDto> createTransfer(TransferRequestDto request);
+  TransferDto createTransfer(TransferRequestDto request);
 
-  List<TransactionDto> updateTransfer(UUID transferId, TransferUpdateRequestDto request);
+  TransferDto updateTransfer(UUID transferId, TransferUpdateRequestDto request);
 
   void deleteTransfer(UUID transferId);
 
-  List<TransactionDto> getTransactionsByTransferId(UUID transferId);
+  TransferDto getTransactionsByTransferId(UUID transferId);
 }

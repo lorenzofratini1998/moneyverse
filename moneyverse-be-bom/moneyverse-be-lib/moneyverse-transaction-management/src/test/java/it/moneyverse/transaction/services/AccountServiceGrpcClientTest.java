@@ -1,14 +1,13 @@
 package it.moneyverse.transaction.services;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import it.moneyverse.grpc.lib.AccountRequest;
-import it.moneyverse.grpc.lib.AccountResponse;
-import it.moneyverse.grpc.lib.AccountServiceGrpc;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.AccountDto;
+import it.moneyverse.test.utils.RandomUtils;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,28 +18,60 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AccountServiceGrpcClientTest {
 
-  @Mock private AccountServiceGrpc.AccountServiceBlockingStub stub;
-  @InjectMocks private AccountServiceGrpcClient accountServiceClient;
+  @InjectMocks AccountServiceGrpcClient accountServiceGrpcClient;
+  @Mock AccountGrpcService accountGrpcService;
 
   @Test
-  void givenAccountId_WhenCheckIfAccountExists_ThenReturnTrue() {
-    UUID accountId = UUID.randomUUID();
-    AccountResponse response = AccountResponse.newBuilder().setExists(true).build();
-    when(stub.checkIfAccountExists(any(AccountRequest.class))).thenReturn(response);
+  void testGetByAccountId(@Mock AccountDto accountDto) {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountGrpcService.getAccountById(accountId)).thenReturn(Optional.of(accountDto));
 
-    Boolean exists = accountServiceClient.checkIfAccountExists(accountId);
+    Optional<AccountDto> response = accountServiceGrpcClient.getAccountById(accountId);
 
-    assertTrue(exists);
-    verify(stub, times(1)).checkIfAccountExists(any(AccountRequest.class));
+    assertNotNull(response);
+    assertTrue(response.isPresent());
+    verify(accountGrpcService, times(1)).getAccountById(accountId);
   }
 
   @Test
-  void givenCircuitBreaker_WhenCheckIfAccountExists_ThenFallbackMethodIsTriggered() {
-    UUID accountId = UUID.randomUUID();
-    Throwable throwable = mock(CallNotPermittedException.class);
+  void testCheckIfAccountExists(@Mock AccountDto accountDto) {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountGrpcService.getAccountById(accountId)).thenReturn(Optional.of(accountDto));
 
-    Boolean exists = accountServiceClient.fallbackCheckIfAccountExists(accountId, throwable);
+    assertDoesNotThrow(() -> accountServiceGrpcClient.checkIfAccountExists(accountId));
 
-    assertFalse(exists);
+    verify(accountGrpcService, times(1)).getAccountById(accountId);
+  }
+
+  @Test
+  void testCheckIfAccountExists_Exception() {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountGrpcService.getAccountById(accountId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> accountServiceGrpcClient.checkIfAccountExists(accountId));
+    verify(accountGrpcService, times(1)).getAccountById(accountId);
+  }
+
+  @Test
+  void testCheckIfAccountStillExists() {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountGrpcService.getAccountById(accountId)).thenReturn(Optional.empty());
+
+    assertDoesNotThrow(() -> accountServiceGrpcClient.checkIfAccountStillExists(accountId));
+
+    verify(accountGrpcService, times(1)).getAccountById(accountId);
+  }
+
+  @Test
+  void testCheckIfAccountStillExists_Exception(@Mock AccountDto accountDto) {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountGrpcService.getAccountById(accountId)).thenReturn(Optional.of(accountDto));
+
+    assertThrows(
+        ResourceStillExistsException.class,
+        () -> accountServiceGrpcClient.checkIfAccountStillExists(accountId));
+    verify(accountGrpcService, times(1)).getAccountById(accountId);
   }
 }

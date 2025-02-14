@@ -1,8 +1,12 @@
 package it.moneyverse.core.services;
 
+import it.moneyverse.core.model.dto.UserDto;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserServiceClient {
 
-  Boolean checkIfUserExists(UUID userId);
+  Optional<UserDto> getUserById(UUID userId);
+
+  void checkIfUserStillExist(UUID userId);
 }

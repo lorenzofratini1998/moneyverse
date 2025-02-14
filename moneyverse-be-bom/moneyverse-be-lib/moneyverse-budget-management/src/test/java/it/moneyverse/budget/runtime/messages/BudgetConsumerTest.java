@@ -41,7 +41,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
-      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration",
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
       "logging.level.org.grpcmock.GrpcMock=WARN",
       "logging.level.org.apache.kafka.clients=ERROR",
       "logging.level.org.springframework.kafka.listener=ERROR"

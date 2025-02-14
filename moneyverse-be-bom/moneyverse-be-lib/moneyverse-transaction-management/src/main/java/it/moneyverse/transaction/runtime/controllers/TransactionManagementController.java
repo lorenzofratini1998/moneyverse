@@ -73,7 +73,7 @@ public class TransactionManagementController implements TransactionOperations, T
   @PostMapping("/transfer")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
-  public List<TransactionDto> createTransfer(@RequestBody TransferRequestDto request) {
+  public TransferDto createTransfer(@RequestBody TransferRequestDto request) {
     return transferService.createTransfer(request);
   }
 
@@ -82,7 +82,7 @@ public class TransactionManagementController implements TransactionOperations, T
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
       "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
-  public List<TransactionDto> updateTransfer(
+  public TransferDto updateTransfer(
       @PathVariable UUID transferId, @RequestBody TransferUpdateRequestDto request) {
     return transferService.updateTransfer(transferId, request);
   }
@@ -101,7 +101,7 @@ public class TransactionManagementController implements TransactionOperations, T
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
       "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
-  public List<TransactionDto> getTransactionsByTransferId(@PathVariable UUID transferId) {
+  public TransferDto getTransactionsByTransferId(@PathVariable UUID transferId) {
     return transferService.getTransactionsByTransferId(transferId);
   }
 }

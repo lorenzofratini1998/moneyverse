@@ -55,6 +55,7 @@
     <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
     <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
     <testcontainers-kafka.version>1.20.4</testcontainers-kafka.version>
+    <testcontainers-redis.version>2.2.3</testcontainers-redis.version>
     <!-- Sonar Settings -->
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.organization>lorenzofratini1998</sonar.organization>
@@ -144,6 +145,11 @@
         <groupId>org.testcontainers</groupId>
         <artifactId>kafka</artifactId>
         <version>${testcontainers-kafka.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.redis</groupId>
+        <artifactId>testcontainers-redis</artifactId>
+        <version>${testcontainers-redis.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -1,6 +1,5 @@
 package it.moneyverse.budget.services;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
@@ -12,6 +11,7 @@ import it.moneyverse.budget.utils.mapper.CategoryMapper;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.CategoryDeletionTopic;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
@@ -49,7 +49,6 @@ public class CategoryManagementService implements CategoryService {
   @Override
   @Transactional
   public CategoryDto createCategory(CategoryRequestDto request) {
-    checkIfUserExists(request.userId());
     checkIfCategoryAlreadyExists(request.userId(), request.categoryName());
     Category parentCategory = null;
     if (request.parentId() != null) {
@@ -158,15 +157,9 @@ public class CategoryManagementService implements CategoryService {
   @Override
   @Transactional
   public void deleteCategoriesByUserId(UUID userId) {
-    checkIfUserExists(userId);
+    userServiceClient.checkIfUserStillExist(userId);
     LOGGER.info("Deleting categories related to user '{}'", userId);
     categoryRepository.deleteAll(categoryRepository.findCategoriesByUserId(userId));
-  }
-
-  private void checkIfUserExists(UUID userId) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
-    }
   }
 
   private Category findCategoryById(UUID categoryId) {

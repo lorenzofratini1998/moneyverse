@@ -3,15 +3,15 @@ package it.moneyverse.transaction.services;
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.events.TransactionEvent;
+import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.transaction.exceptions.AccountTransferException;
-import it.moneyverse.transaction.model.dto.TransactionDto;
+import it.moneyverse.transaction.model.dto.TransferDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
 import it.moneyverse.transaction.model.dto.TransferUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
 import it.moneyverse.transaction.model.repositories.TransferRepository;
 import it.moneyverse.transaction.utils.mapper.TransferMapper;
-import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,50 +26,52 @@ public class TransferManagementService implements TransferService {
 
   private final ApplicationEventPublisher eventPublisher;
   private final TransferRepository transferRepository;
-  private final TransactionServiceClient transactionServiceClient;
+  private final CurrencyServiceClient currencyServiceClient;
+  private final AccountServiceClient accountServiceClient;
 
   public TransferManagementService(
       ApplicationEventPublisher eventPublisher,
       TransferRepository transferRepository,
-      TransactionServiceClient transactionServiceClient) {
+      CurrencyServiceClient currencyServiceClient,
+      AccountServiceClient accountServiceClient) {
     this.eventPublisher = eventPublisher;
     this.transferRepository = transferRepository;
-    this.transactionServiceClient = transactionServiceClient;
+    this.currencyServiceClient = currencyServiceClient;
+    this.accountServiceClient = accountServiceClient;
   }
 
   @Override
   @Transactional
-  public List<TransactionDto> createTransfer(TransferRequestDto request) {
+  public TransferDto createTransfer(TransferRequestDto request) {
     checkSourceAndDestinationAccounts(request.fromAccount(), request.toAccount());
-    transactionServiceClient.checkIfUserExists(request.userId());
-    transactionServiceClient.checkIfAccountExists(request.fromAccount());
-    transactionServiceClient.checkIfAccountExists(request.toAccount());
-    transactionServiceClient.checkIfCurrencyExists(request.currency());
+    accountServiceClient.checkIfAccountExists(request.fromAccount());
+    accountServiceClient.checkIfAccountExists(request.toAccount());
+    currencyServiceClient.checkIfCurrencyExists(request.currency());
     LOGGER.info(
         "Creating transfer from account {} to account {}",
         request.fromAccount(),
         request.toAccount());
     Transfer transfer = transferRepository.save(TransferMapper.toTransfer(request));
     publishEvent(transfer, EventTypeEnum.CREATE);
-    return TransferMapper.toTransactionDto(transfer);
+    return new TransferDto(TransferMapper.toTransactionDto(transfer));
   }
 
   @Override
   @Transactional
-  public List<TransactionDto> updateTransfer(UUID transferId, TransferUpdateRequestDto request) {
+  public TransferDto updateTransfer(UUID transferId, TransferUpdateRequestDto request) {
     if (request.fromAccount() != null && request.toAccount() != null) {
       checkSourceAndDestinationAccounts(request.fromAccount(), request.toAccount());
-      transactionServiceClient.checkIfAccountExists(request.fromAccount());
-      transactionServiceClient.checkIfAccountExists(request.toAccount());
+      accountServiceClient.checkIfAccountExists(request.fromAccount());
+      accountServiceClient.checkIfAccountExists(request.toAccount());
     }
     if (request.currency() != null) {
-      transactionServiceClient.checkIfCurrencyExists(request.currency());
+      currencyServiceClient.checkIfCurrencyExists(request.currency());
     }
     Transfer transfer = findTransfer(transferId);
     LOGGER.info("Updating transfer {}", transferId);
     transfer = transferRepository.save(TransferMapper.partialUpdate(transfer, request));
     publishEvent(transfer, EventTypeEnum.UPDATE);
-    return TransferMapper.toTransactionDto(transfer);
+    return new TransferDto(TransferMapper.toTransactionDto(transfer));
   }
 
   @Override
@@ -83,10 +85,10 @@ public class TransferManagementService implements TransferService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TransactionDto> getTransactionsByTransferId(UUID transferId) {
+  public TransferDto getTransactionsByTransferId(UUID transferId) {
     Transfer transfer = findTransfer(transferId);
     LOGGER.info("Getting transactions by transfer {}", transferId);
-    return TransferMapper.toTransactionDto(transfer);
+    return new TransferDto(TransferMapper.toTransactionDto(transfer));
   }
 
   private void publishEvent(Transfer transfer, EventTypeEnum eventType) {

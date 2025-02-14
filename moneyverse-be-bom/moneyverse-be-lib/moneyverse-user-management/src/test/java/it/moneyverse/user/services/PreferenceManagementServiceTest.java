@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.entities.Preference;

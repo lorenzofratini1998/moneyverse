@@ -8,9 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import it.moneyverse.core.boot.CurrencyServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;

@@ -1,6 +1,6 @@
 package it.moneyverse.user.utils.mapper;
 
-import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import java.util.UUID;
 import org.keycloak.representations.idm.UserRepresentation;

@@ -1,10 +1,10 @@
 package it.moneyverse.budget.utils.mapper;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.DefaultCategory;
+import it.moneyverse.core.model.dto.CategoryDto;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;

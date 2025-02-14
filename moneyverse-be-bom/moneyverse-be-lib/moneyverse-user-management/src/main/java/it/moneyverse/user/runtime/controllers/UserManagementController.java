@@ -1,5 +1,6 @@
 package it.moneyverse.user.runtime.controllers;
 
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.user.model.dto.*;
 import it.moneyverse.user.services.PreferenceService;
 import it.moneyverse.user.services.UserService;

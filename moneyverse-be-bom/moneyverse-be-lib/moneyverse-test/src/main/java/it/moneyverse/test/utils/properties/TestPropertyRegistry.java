@@ -6,6 +6,7 @@ import it.moneyverse.core.utils.properties.*;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.RandomUtils;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
@@ -22,6 +23,13 @@ public class TestPropertyRegistry {
     registry.add(DatasourceProperties.URL, container::getJdbcUrl);
     registry.add(DatasourceProperties.USERNAME, container::getUsername);
     registry.add(DatasourceProperties.PASSWORD, container::getPassword);
+    return this;
+  }
+
+  public TestPropertyRegistry withRedis(RedisContainer container) {
+    registry.add(RedisProperties.HOST, container::getRedisHost);
+    registry.add(RedisProperties.PORT, container::getRedisPort);
+    registry.add(RedisProperties.PASSWORD, container::getPassword);
     return this;
   }
 

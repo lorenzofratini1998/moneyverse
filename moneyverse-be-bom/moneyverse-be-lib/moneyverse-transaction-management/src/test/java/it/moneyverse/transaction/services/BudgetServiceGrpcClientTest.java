@@ -1,12 +1,13 @@
 package it.moneyverse.transaction.services;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import it.moneyverse.grpc.lib.*;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.CategoryDto;
+import it.moneyverse.test.utils.RandomUtils;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,28 +18,54 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BudgetServiceGrpcClientTest {
 
-  @Mock private BudgetServiceGrpc.BudgetServiceBlockingStub stub;
-  @InjectMocks private BudgetServiceGrpcClient budgetServiceClient;
+  @InjectMocks private BudgetServiceGrpcClient budgetServiceGrpcClient;
+  @Mock private BudgetGrpcService budgetGrpcService;
 
   @Test
-  void givenCategoryId_WhenCheckIfCategoryExists_ThenReturnTrue() {
+  void testGetCategoryById(@Mock CategoryDto categoryDto) {
     UUID categoryId = UUID.randomUUID();
-    CategoryResponse response = CategoryResponse.newBuilder().setExists(true).build();
-    when(stub.checkIfCategoryExists(any(CategoryRequest.class))).thenReturn(response);
+    when(budgetGrpcService.getCategoryById(categoryId)).thenReturn(Optional.of(categoryDto));
 
-    Boolean exists = budgetServiceClient.checkIfCategoryExists(categoryId);
-
-    assertTrue(exists);
-    verify(stub, times(1)).checkIfCategoryExists(any(CategoryRequest.class));
+    Optional<CategoryDto> response = budgetServiceGrpcClient.getCategoryById(categoryId);
+    assertTrue(response.isPresent());
+    verify(budgetGrpcService, times(1)).getCategoryById(categoryId);
   }
 
   @Test
-  void givenCircuitBreaker_WhenCheckIfCategoryExists_ThenFallbackMethodIsTriggered() {
-    UUID categoryId = UUID.randomUUID();
-    Throwable throwable = mock(CallNotPermittedException.class);
+  void testCheckIfCategoryExists(@Mock CategoryDto categoryDto) {
+    UUID categoryId = RandomUtils.randomUUID();
+    when(budgetGrpcService.getCategoryById(categoryId)).thenReturn(Optional.of(categoryDto));
 
-    Boolean exists = budgetServiceClient.fallbackCheckIfCategoryExists(categoryId, throwable);
+    assertDoesNotThrow(() -> budgetServiceGrpcClient.checkIfCategoryExists(categoryId));
+    verify(budgetGrpcService, times(1)).getCategoryById(categoryId);
+  }
 
-    assertFalse(exists);
+  @Test
+  void testCheckIfCategoryExists_Exception() {
+    UUID categoryId = RandomUtils.randomUUID();
+    when(budgetGrpcService.getCategoryById(categoryId)).thenReturn(Optional.empty());
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> budgetServiceGrpcClient.checkIfCategoryExists(categoryId));
+    verify(budgetGrpcService, times(1)).getCategoryById(categoryId);
+  }
+
+  @Test
+  void testCheckIfCategoryStillExists() {
+    UUID categoryId = RandomUtils.randomUUID();
+    when(budgetGrpcService.getCategoryById(categoryId)).thenReturn(Optional.empty());
+
+    assertDoesNotThrow(() -> budgetServiceGrpcClient.checkIfCategoryStillExists(categoryId));
+    verify(budgetGrpcService, times(1)).getCategoryById(categoryId);
+  }
+
+  @Test
+  void testCheckIfCategoryStillExists_Exception(@Mock CategoryDto categoryDto) {
+    UUID categoryId = RandomUtils.randomUUID();
+    when(budgetGrpcService.getCategoryById(categoryId)).thenReturn(Optional.of(categoryDto));
+    assertThrows(
+        ResourceStillExistsException.class,
+        () -> budgetServiceGrpcClient.checkIfCategoryStillExists(categoryId));
+    verify(budgetGrpcService, times(1)).getCategoryById(categoryId);
   }
 }

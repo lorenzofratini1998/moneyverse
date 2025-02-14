@@ -7,7 +7,7 @@ option java_package = "it.moneyverse.grpc.lib";
 option java_outer_classname = "AccountServiceProto";
 
 service AccountService {
-  rpc CheckIfAccountExists (AccountRequest) returns (AccountResponse) {
+  rpc GetAccountById (AccountRequest) returns (AccountResponse) {
   }
 }
 
@@ -16,5 +16,13 @@ message AccountRequest {
 }
 
 message AccountResponse {
-  bool exists = 1;
+  string accountId = 1;
+  string userId = 2;
+  string accountName = 3;
+  double balance = 4;
+  double balanceTarget = 5;
+  string accountCategory = 6;
+  string accountDescription = 7;
+  bool isDefault = 8;
+  string currency = 9;
 }

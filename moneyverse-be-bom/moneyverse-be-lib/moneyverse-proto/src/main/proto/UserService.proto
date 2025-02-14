@@ -7,7 +7,7 @@ option java_package = "it.moneyverse.grpc.lib";
 option java_outer_classname = "UserServiceProto";
 
 service UserService {
-  rpc CheckIfUserExists (UserRequest) returns (UserResponse) {
+  rpc GetUserById (UserRequest) returns (UserResponse) {
   }
 }
 
@@ -16,5 +16,8 @@ message UserRequest {
 }
 
 message UserResponse {
-  bool exists = 1;
+  string userId = 1;
+  string email = 2;
+  string firstName = 3;
+  string lastName = 4;
 }

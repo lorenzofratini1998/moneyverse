@@ -1,11 +1,11 @@
 package it.moneyverse.account.utils.mapper;
 
 import it.moneyverse.account.model.dto.AccountCategoryDto;
-import it.moneyverse.account.model.dto.AccountDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
+import it.moneyverse.core.model.dto.AccountDto;
 import java.util.Collections;
 import java.util.List;
 

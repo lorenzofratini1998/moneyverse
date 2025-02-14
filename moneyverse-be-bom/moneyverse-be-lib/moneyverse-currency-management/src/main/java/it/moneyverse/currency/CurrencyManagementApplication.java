@@ -10,7 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
       BudgetServiceGrpcClientAutoConfiguration.class,
       UserServiceGrpcClientAutoConfiguration.class,
       CurrencyServiceGrpcClientAutoConfiguration.class,
-      KafkaAutoConfiguration.class
+      KafkaAutoConfiguration.class,
+      RedisAutoConfiguration.class
     })
 public class CurrencyManagementApplication {
 

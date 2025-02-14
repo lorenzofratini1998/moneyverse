@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.moneyverse.core.model.dto.CategoryDto;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;

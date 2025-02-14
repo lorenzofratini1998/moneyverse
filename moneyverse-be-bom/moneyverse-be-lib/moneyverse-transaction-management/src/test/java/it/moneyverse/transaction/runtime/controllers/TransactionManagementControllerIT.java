@@ -8,6 +8,7 @@ import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
@@ -38,6 +39,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
+  @Container static RedisContainer redisContainer = new RedisContainer();
 
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired private TransactionRepository transactionRepository;
@@ -47,6 +49,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
+        .withRedis(redisContainer)
         .withKeycloak(keycloakContainer)
         .withGrpcAccountService(mockServer.getHost(), mockServer.getPort())
         .withGrpcBudgetService(mockServer.getHost(), mockServer.getPort())
@@ -72,7 +75,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     final TransactionRequestDto request = testContext.createTransactionRequest(userId);
     mockServer.mockExistentAccount();
     mockServer.mockExistentCategory();
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(request.transactions().getFirst().currency());
     TransactionDto expected = testContext.getExpectedTransactionDto(request);
 
     ResponseEntity<List<TransactionDto>> response =
@@ -146,7 +149,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
             RandomUtils.randomString(3).toUpperCase(),
             testContext.getRandomTag(userId));
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(request.currency());
 
     ResponseEntity<TransactionDto> response =
         restTemplate.exchange(
@@ -164,7 +167,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.description(), response.getBody().getDescription());
     assertEquals(request.amount(), response.getBody().getAmount());
     assertEquals(request.currency(), response.getBody().getCurrency());
-    if (!request.tags().isEmpty()) {
+    if (request.tags() != null && !request.tags().isEmpty()) {
       assertEquals(request.tags().size(), response.getBody().getTags().size());
     }
   }
@@ -192,10 +195,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final TransferRequestDto request = testContext.createTransferRequest(userId);
     mockServer.mockExistentAccount();
-    mockServer.mockExistentCurrency();
-    mockServer.mockExistentUser();
+    mockServer.mockExistentCurrency(request.currency());
 
-    ResponseEntity<List<TransactionDto>> response =
+    ResponseEntity<TransferDto> response =
         restTemplate.exchange(
             basePath + "/transfer",
             HttpMethod.POST,
@@ -214,9 +216,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     UUID transferId = testContext.getRandomTransferByUser(userId).getTransferId();
     TransferUpdateRequestDto request = testContext.createTransferUpdateRequest(userId);
     mockServer.mockExistentAccount();
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(request.currency());
 
-    ResponseEntity<List<TransactionDto>> response =
+    ResponseEntity<TransferDto> response =
         restTemplate.exchange(
             basePath + "/transfer/%s".formatted(transferId),
             HttpMethod.PUT,
@@ -251,7 +253,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     Transfer transfer = testContext.getRandomTransferByUser(userId);
 
-    ResponseEntity<List<TransactionDto>> response =
+    ResponseEntity<TransferDto> response =
         restTemplate.exchange(
             basePath + "/transfer/%s".formatted(transfer.getTransferId()),
             HttpMethod.GET,
@@ -260,6 +262,6 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(2, response.getBody().size());
+    assertEquals(2, response.getBody().getTransactions().size());
   }
 }

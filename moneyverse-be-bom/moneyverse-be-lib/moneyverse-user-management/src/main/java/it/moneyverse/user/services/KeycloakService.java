@@ -1,9 +1,9 @@
 package it.moneyverse.user.services;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.core.utils.properties.KeycloakProperties;
 import it.moneyverse.user.exceptions.UserServiceException;
-import it.moneyverse.user.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import it.moneyverse.user.utils.mapper.UserMapper;
 import jakarta.ws.rs.NotFoundException;

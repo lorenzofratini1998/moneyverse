@@ -2,6 +2,7 @@ package it.moneyverse.user.runtime.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.utils.properties.KeycloakAdminProperties;
 import it.moneyverse.test.annotations.IntegrationTest;
@@ -89,7 +90,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
     final List<UserPreferenceRequest> request =
         Collections.singletonList(
             UserTestUtils.createUserPreferenceRequest(preference.getPreferenceId()));
-    mockServer.mockExistentCurrency();
+    mockServer.mockExistentCurrency(RandomUtils.randomString(3).toUpperCase());
     int initialSize = userPreferenceRepository.findAll().size();
 
     ResponseEntity<UserPreferenceDto> response =

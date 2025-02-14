@@ -1,42 +1,38 @@
 package it.moneyverse.transaction.services;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import it.moneyverse.core.utils.properties.AccountServiceGrpcCircuitBreakerProperties;
-import it.moneyverse.grpc.lib.AccountRequest;
-import it.moneyverse.grpc.lib.AccountResponse;
-import it.moneyverse.grpc.lib.AccountServiceGrpc;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.AccountDto;
+import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccountServiceGrpcClient implements AccountServiceClient {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AccountServiceGrpcClient.class);
+  private final AccountGrpcService accountGrpcService;
 
-  private final AccountServiceGrpc.AccountServiceBlockingStub stub;
-
-  public AccountServiceGrpcClient(AccountServiceGrpc.AccountServiceBlockingStub stub) {
-    this.stub = stub;
+  public AccountServiceGrpcClient(AccountGrpcService accountGrpcService) {
+    this.accountGrpcService = accountGrpcService;
   }
 
   @Override
-  @CircuitBreaker(
-      name = AccountServiceGrpcCircuitBreakerProperties.ACCOUNT_SERVICE_GRPC,
-      fallbackMethod = "fallbackCheckIfAccountExists")
-  public Boolean checkIfAccountExists(UUID accountId) {
-    final AccountResponse response =
-        stub.checkIfAccountExists(
-            AccountRequest.newBuilder().setAccountId(accountId.toString()).build());
-    return response.getExists();
+  public Optional<AccountDto> getAccountById(UUID accountId) {
+    return accountGrpcService.getAccountById(accountId);
   }
 
-  Boolean fallbackCheckIfAccountExists(UUID accountId, Throwable throwable) {
-    LOGGER.error(
-        "Impossible to contact the AccountService to check whether the account {} exists. Returning FALSE as fallback: {}",
-        accountId,
-        throwable.getMessage());
-    return false;
+  @Override
+  public void checkIfAccountExists(UUID accountId) {
+    if (accountGrpcService.getAccountById(accountId).isEmpty()) {
+      throw new ResourceNotFoundException("Account %s does not exists".formatted(accountId));
+    }
+  }
+
+  @Override
+  public void checkIfAccountStillExists(UUID accountId) {
+    if (accountGrpcService.getAccountById(accountId).isPresent()) {
+      throw new ResourceStillExistsException(
+          "Account %s still exists in the system".formatted(accountId));
+    }
   }
 }

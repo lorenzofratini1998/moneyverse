@@ -5,6 +5,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import it.moneyverse.core.services.CurrencyGrpcService;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.CurrencyServiceGrpcClient;
 import it.moneyverse.core.utils.properties.CurrencyServiceGrpcCircuitBreakerProperties;
@@ -66,8 +67,13 @@ public class CurrencyServiceGrpcClientAutoConfiguration {
   }
 
   @Bean
-  public CurrencyServiceClient currencyServiceClient(
-      CurrencyServiceGrpc.CurrencyServiceBlockingStub currencyServiceBlockingStub) {
-    return new CurrencyServiceGrpcClient(currencyServiceBlockingStub);
+  public CurrencyGrpcService currencyGrpcService(
+      CurrencyServiceGrpc.CurrencyServiceBlockingStub stub) {
+    return new CurrencyGrpcService(stub);
+  }
+
+  @Bean
+  public CurrencyServiceClient currencyServiceClient(CurrencyGrpcService currencyGrpcService) {
+    return new CurrencyServiceGrpcClient(currencyGrpcService);
   }
 }

@@ -1,18 +1,17 @@
 package it.moneyverse.transaction.runtime.controllers;
 
-import it.moneyverse.transaction.model.dto.TransactionDto;
+import it.moneyverse.transaction.model.dto.TransferDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
 import it.moneyverse.transaction.model.dto.TransferUpdateRequestDto;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 public interface TransferOperations {
-  List<TransactionDto> createTransfer(@Valid TransferRequestDto request);
+  TransferDto createTransfer(@Valid TransferRequestDto request);
 
-  List<TransactionDto> updateTransfer(UUID transferId, @Valid TransferUpdateRequestDto request);
+  TransferDto updateTransfer(UUID transferId, @Valid TransferUpdateRequestDto request);
 
   void deleteTransfer(UUID transferId);
 
-  List<TransactionDto> getTransactionsByTransferId(UUID transferId);
+  TransferDto getTransactionsByTransferId(UUID transferId);
 }

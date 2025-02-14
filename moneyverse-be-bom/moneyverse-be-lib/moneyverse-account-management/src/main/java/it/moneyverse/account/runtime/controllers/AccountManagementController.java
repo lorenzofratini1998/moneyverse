@@ -2,6 +2,7 @@ package it.moneyverse.account.runtime.controllers;
 
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.services.AccountService;
+import it.moneyverse.core.model.dto.AccountDto;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;

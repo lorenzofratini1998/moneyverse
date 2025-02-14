@@ -1,39 +1,28 @@
 package it.moneyverse.core.services;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import it.moneyverse.core.utils.properties.CurrencyServiceGrpcCircuitBreakerProperties;
-import it.moneyverse.grpc.lib.CurrencyRequest;
-import it.moneyverse.grpc.lib.CurrencyResponse;
-import it.moneyverse.grpc.lib.CurrencyServiceGrpc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.CurrencyDto;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CurrencyServiceGrpcClient implements CurrencyServiceClient {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyServiceGrpcClient.class);
-  private final CurrencyServiceGrpc.CurrencyServiceBlockingStub stub;
+  private final CurrencyGrpcService currencyGrpcService;
 
-  public CurrencyServiceGrpcClient(CurrencyServiceGrpc.CurrencyServiceBlockingStub stub) {
-    this.stub = stub;
+  public CurrencyServiceGrpcClient(CurrencyGrpcService currencyGrpcService) {
+    this.currencyGrpcService = currencyGrpcService;
   }
 
   @Override
-  @CircuitBreaker(
-      name = CurrencyServiceGrpcCircuitBreakerProperties.CURRENCY_SERVICE_GRPC,
-      fallbackMethod = "fallbackCheckIfCurrencyExists")
-  public Boolean checkIfCurrencyExists(String code) {
-    final CurrencyResponse response =
-        stub.checkIfCurrencyExists(CurrencyRequest.newBuilder().setCode(code).build());
-    return response.getExists();
+  public Optional<CurrencyDto> getCurrencyByCode(String code) {
+    return currencyGrpcService.getCurrencyByCode(code);
   }
 
-  protected Boolean fallbackCheckIfCurrencyExists(String code, Throwable throwable) {
-    LOGGER.error(
-        "Impossible to contact the CurrencyService to check whether the currency {} exists. Returning FALSE as fallback: {}",
-        code,
-        throwable.getMessage());
-    return false;
+  @Override
+  public void checkIfCurrencyExists(String currency) {
+    if (currencyGrpcService.getCurrencyByCode(currency).isEmpty()) {
+      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
+    }
   }
 }
