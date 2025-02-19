@@ -15,6 +15,7 @@ import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.*;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.*;
 import org.springframework.data.domain.Sort;
 
@@ -25,12 +26,14 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
   @TestModelEntity private final List<Tag> tags;
   @TestModelEntity private final List<Transaction> transactions;
   @TestModelEntity private final List<Transfer> transfers;
+  @TestModelEntity private final List<Subscription> subscriptions;
 
   public TransactionTestContext(KeycloakContainer keycloakContainer) {
     super(keycloakContainer);
     this.tags = TagFactory.createTags(getUsers());
     this.transactions = TransactionFactory.createTransactions(getUsers(), tags);
     this.transfers = TransferFactory.createTransfers(getUsers(), transactions);
+    this.subscriptions = SubscriptionFactory.createSubscriptions(getUsers(), transactions);
     setCurrentInstance(this);
   }
 
@@ -39,6 +42,7 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     this.tags = TagFactory.createTags(getUsers());
     this.transactions = TransactionFactory.createTransactions(getUsers(), tags);
     this.transfers = TransferFactory.createTransfers(getUsers(), transactions);
+    this.subscriptions = SubscriptionFactory.createSubscriptions(getUsers(), transactions);
     setCurrentInstance(this);
   }
 
@@ -72,6 +76,10 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   public List<Transfer> getTransfers() {
     return transfers;
+  }
+
+  public List<Subscription> getSubscriptions() {
+    return subscriptions;
   }
 
   public List<Transaction> getTransactions(UUID userId) {
@@ -118,6 +126,30 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomLocalDate(2025, 2025),
         RandomUtils.randomString(3).toUpperCase());
+  }
+
+  public SubscriptionRequestDto createSubscriptionRequest(UUID userId) {
+    List<UUID> userAccounts =
+        transactions.stream()
+            .filter(t -> t.getUserId().equals(userId))
+            .map(Transaction::getAccountId)
+            .toList();
+    List<UUID> categoryAccounts =
+        transactions.stream()
+            .filter(t -> t.getUserId().equals(userId))
+            .map(Transaction::getCategoryId)
+            .toList();
+    LocalDate startDate = RandomUtils.randomLocalDate(2024, 2025);
+    LocalDate endDate =
+        Math.random() < 0.5 ? null : startDate.plusMonths(RandomUtils.randomInteger(3, 24));
+    return new SubscriptionRequestDto(
+        userId,
+        userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1)),
+        categoryAccounts.get(RandomUtils.randomInteger(0, categoryAccounts.size() - 1)),
+        RandomUtils.randomString(25),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomString(3).toUpperCase(),
+        new RecurrenceDto("FREQ=MONTHLY", startDate, endDate));
   }
 
   public TransferUpdateRequestDto createTransferUpdateRequest(UUID userId) {
@@ -251,11 +283,15 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
 
   @Override
   public TransactionTestContext generateScript(Path dir) {
-    List<Transaction> transactionsNoTransfer = new ArrayList<>(this.transactions);
-    transactionsNoTransfer.forEach(t -> t.setTransfer(null));
+    List<Transaction> transactionsNoRelationship = new ArrayList<>(this.transactions);
+    transactionsNoRelationship.forEach(
+        t -> {
+          t.setTransfer(null);
+          t.setSubscription(null);
+        });
     EntityScriptGenerator scriptGenerator =
         new EntityScriptGenerator(
-            new ScriptMetadata(dir, tags, transactionsNoTransfer, transfers),
+            new ScriptMetadata(dir, tags, transactionsNoRelationship, transfers, subscriptions),
             new SQLScriptService());
     StringBuilder script = scriptGenerator.generateScript();
     for (Transfer transfer : this.transfers) {
@@ -275,6 +311,16 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
           .append("' WHERE TRANSACTION_ID = '")
           .append(transactionTo.getTransactionId())
           .append("';");
+    }
+    for (Subscription subscription : this.subscriptions) {
+      for (Transaction transaction : subscription.getTransactions()) {
+        script
+            .append("\nUPDATE TRANSACTIONS SET SUBSCRIPTION_ID = '")
+            .append(subscription.getSubscriptionId())
+            .append("' WHERE TRANSACTION_ID = '")
+            .append(transaction.getTransactionId())
+            .append("';");
+      }
     }
     scriptGenerator.save(script);
     return self();

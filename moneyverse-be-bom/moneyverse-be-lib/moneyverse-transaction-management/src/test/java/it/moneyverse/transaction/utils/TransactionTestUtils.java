@@ -2,9 +2,11 @@ package it.moneyverse.transaction.utils;
 
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -109,6 +111,36 @@ public class TransactionTestUtils {
 
   public static TagUpdateRequestDto createTagUpdateRequest() {
     return new TagUpdateRequestDto(RandomUtils.randomString(15), RandomUtils.randomString(15));
+  }
+
+  public static SubscriptionRequestDto createSubscriptionRequest(UUID userId, LocalDate startDate) {
+    return new SubscriptionRequestDto(
+        userId,
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomString(3).toUpperCase(),
+        createRecurrenceDto(startDate));
+  }
+
+  public static RecurrenceDto createRecurrenceDto(LocalDate startDate) {
+    return new RecurrenceDto("FREQ=MONTHLY", startDate, null);
+  }
+
+  public static Subscription createSubscription() {
+    Subscription subscription = new Subscription();
+    subscription.setSubscriptionId(RandomUtils.randomUUID());
+    subscription.setUserId(RandomUtils.randomUUID());
+    subscription.setAccountId(RandomUtils.randomUUID());
+    subscription.setCategoryId(RandomUtils.randomUUID());
+    subscription.setSubscriptionName(RandomUtils.randomString(15));
+    subscription.setAmount(RandomUtils.randomBigDecimal());
+    subscription.setCurrency(RandomUtils.randomString(3).toUpperCase());
+    subscription.setRecurrenceRule("FREQ=MONTHLY");
+    subscription.setStartDate(RandomUtils.randomLocalDate(2024, 2025));
+    subscription.setEndDate(null);
+    return subscription;
   }
 
   private TransactionTestUtils() {}

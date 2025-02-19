@@ -29,6 +29,7 @@ public class TransactionDto implements Serializable {
   private final String currency;
   private final Set<TagDto> tags;
   private final UUID transferId;
+  private final UUID subscriptionId;
 
   public TransactionDto(Builder builder) {
     this.transactionId = builder.transactionId;
@@ -41,6 +42,7 @@ public class TransactionDto implements Serializable {
     this.currency = builder.currency;
     this.tags = builder.tags;
     this.transferId = builder.transferId;
+    this.subscriptionId = builder.subscriptionId;
   }
 
   public static Builder builder() {
@@ -58,6 +60,7 @@ public class TransactionDto implements Serializable {
     private String currency;
     private Set<TagDto> tags;
     private UUID transferId;
+    private UUID subscriptionId;
 
     public Builder withTransactionId(UUID transactionId) {
       this.transactionId = transactionId;
@@ -109,6 +112,11 @@ public class TransactionDto implements Serializable {
       return this;
     }
 
+    public Builder withSubscriptionId(UUID subscriptionId) {
+      this.subscriptionId = subscriptionId;
+      return this;
+    }
+
     public TransactionDto build() {
       return new TransactionDto(this);
     }
@@ -152,5 +160,9 @@ public class TransactionDto implements Serializable {
 
   public UUID getTransferId() {
     return transferId;
+  }
+
+  public UUID getSubscriptionId() {
+    return subscriptionId;
   }
 }

@@ -48,6 +48,7 @@
     <grpc-starter.version>3.4.0</grpc-starter.version>
     <grpcmock.version>0.15.0</grpcmock.version>
     <hibernate-jpamodelgen.version>6.6.3.Final</hibernate-jpamodelgen.version>
+    <ical4j.version>4.1.0</ical4j.version>
     <jackson.databind.nullable-version>0.2.6</jackson.databind.nullable-version>
     <keycloak.version>25.0.0</keycloak.version>
     <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
@@ -125,6 +126,11 @@
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-admin-client</artifactId>
         <version>${keycloak.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mnode.ical4j</groupId>
+        <artifactId>ical4j</artifactId>
+        <version>${ical4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.openapitools</groupId>

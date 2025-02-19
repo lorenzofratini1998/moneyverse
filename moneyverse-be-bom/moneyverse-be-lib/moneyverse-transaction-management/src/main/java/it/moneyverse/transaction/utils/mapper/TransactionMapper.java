@@ -50,6 +50,10 @@ public class TransactionMapper {
         .withTags(TagMapper.toTagDto(transaction.getTags()))
         .withTransferId(
             transaction.getTransfer() != null ? transaction.getTransfer().getTransferId() : null)
+        .withSubscriptionId(
+            transaction.getSubscription() != null
+                ? transaction.getSubscription().getSubscriptionId()
+                : null)
         .build();
   }
 

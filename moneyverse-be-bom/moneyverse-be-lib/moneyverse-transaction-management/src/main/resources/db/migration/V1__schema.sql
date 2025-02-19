@@ -7,23 +7,45 @@ CREATE TABLE tags
     CONSTRAINT pk_tags PRIMARY KEY (tag_id)
 );
 
+CREATE TABLE subscriptions
+(
+    subscription_id     UUID         NOT NULL,
+    created_by          VARCHAR(255) NOT NULL,
+    created_at          TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_by          VARCHAR(255),
+    updated_at          TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    user_id             UUID         NOT NULL,
+    account_id          UUID         NOT NULL,
+    category_id         UUID,
+    amount              DECIMAL      NOT NULL,
+    currency            VARCHAR(255) NOT NULL,
+    subscription_name   VARCHAR(255) NOT NULL,
+    recurrence_rule     VARCHAR(255) NOT NULL,
+    start_date          DATE         NOT NULL,
+    end_date            DATE,
+    next_execution_date DATE,
+    is_active           BOOLEAN      NOT NULL       DEFAULT TRUE,
+    CONSTRAINT pk_subscriptions PRIMARY KEY (subscription_id)
+);
+
 CREATE SEQUENCE transactions_transaction_id_seq START 1;
 
 CREATE TABLE transactions
 (
-    transaction_id UUID           NOT NULL,
-    user_id     UUID NOT NULL,
-    account_id     UUID           NOT NULL,
-    category_id UUID,
-    date           DATE           NOT NULL,
-    description    VARCHAR(255)   NOT NULL,
-    amount         DECIMAL(18, 2) NOT NULL,
-    currency       VARCHAR(3)     NOT NULL,
-    created_by     VARCHAR(255)   NOT NULL,
-    created_at     TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_by     VARCHAR(255),
-    updated_at     TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    transfer_id UUID,
+    transaction_id  UUID           NOT NULL,
+    user_id         UUID           NOT NULL,
+    account_id      UUID           NOT NULL,
+    category_id     UUID,
+    date            DATE           NOT NULL,
+    description     VARCHAR(255)   NOT NULL,
+    amount          DECIMAL(18, 2) NOT NULL,
+    currency        VARCHAR(3)     NOT NULL,
+    created_by      VARCHAR(255)   NOT NULL,
+    created_at      TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_by      VARCHAR(255),
+    updated_at      TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    transfer_id     UUID,
+    subscription_id UUID,
     CONSTRAINT pk_transactions PRIMARY KEY (transaction_id)
 );
 
@@ -44,6 +66,9 @@ CREATE TABLE transfers
 
 ALTER TABLE transactions
     ADD CONSTRAINT FK_TRANSACTIONS_ON_TRANSFER FOREIGN KEY (transfer_id) REFERENCES transfers (transfer_id);
+
+ALTER TABLE transactions
+    ADD CONSTRAINT FK_TRANSACTIONS_ON_SUBSCRIPTION FOREIGN KEY (subscription_id) REFERENCES subscriptions (subscription_id);
 
 CREATE TABLE transactions_tags
 (

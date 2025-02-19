@@ -18,9 +18,12 @@ import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
+import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -48,6 +51,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired private TransactionRepository transactionRepository;
   @Autowired private TagRepository tagRepository;
+  @Autowired private SubscriptionRepository subscriptionRepository;
   private HttpHeaders headers;
 
   @DynamicPropertySource
@@ -371,5 +375,41 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertEquals(testContext.getTags().size() - 1, tagRepository.findAll().size());
+  }
+
+  @Test
+  void testCreateSubscription() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final SubscriptionRequestDto request = testContext.createSubscriptionRequest(userId);
+    mockServer.mockExistentAccount();
+    mockServer.mockExistentCategory();
+    mockServer.mockExistentCurrency(request.currency());
+    int expectedCreatedTransactions =
+        request.recurrence().startDate().isBefore(LocalDate.now())
+            ? (int) ChronoUnit.MONTHS.between(request.recurrence().startDate(), LocalDate.now()) + 1
+            : 0;
+
+    ResponseEntity<SubscriptionDto> response =
+        restTemplate.exchange(
+            basePath + "/subscriptions",
+            HttpMethod.POST,
+            new HttpEntity<>(request, headers),
+            SubscriptionDto.class);
+
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(
+        testContext.getSubscriptions().size() + 1, subscriptionRepository.findAll().size());
+    assertEquals(request.userId(), response.getBody().getUserId());
+    assertEquals(request.accountId(), response.getBody().getAccountId());
+    assertEquals(request.categoryId(), response.getBody().getCategoryId());
+    assertEquals(request.recurrence().startDate(), response.getBody().getStartDate());
+    assertEquals(request.subscriptionName(), response.getBody().getSubscriptionName());
+    assertEquals(request.amount(), response.getBody().getAmount());
+    assertEquals(request.currency(), response.getBody().getCurrency());
+    assertEquals(
+        testContext.getTransactions().size() + expectedCreatedTransactions,
+        transactionRepository.findAll().size());
   }
 }

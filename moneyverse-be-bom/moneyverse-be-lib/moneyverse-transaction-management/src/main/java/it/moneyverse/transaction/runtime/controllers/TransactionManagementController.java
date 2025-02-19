@@ -1,6 +1,7 @@
 package it.moneyverse.transaction.runtime.controllers;
 
 import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.services.SubscriptionService;
 import it.moneyverse.transaction.services.TagService;
 import it.moneyverse.transaction.services.TransactionService;
 import it.moneyverse.transaction.services.TransferService;
@@ -15,19 +16,22 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "${spring.security.base-path}")
 @Validated
 public class TransactionManagementController
-    implements TransactionOperations, TransferOperations, TagOperations {
+    implements TransactionOperations, TransferOperations, TagOperations, SubscriptionOperations {
 
   private final TransactionService transactionService;
   private final TransferService transferService;
   private final TagService tagService;
+  private final SubscriptionService subscriptionService;
 
   public TransactionManagementController(
       TransactionService transactionService,
       TransferService transferService,
-      TagService tagService) {
+      TagService tagService,
+      SubscriptionService subscriptionService) {
     this.transactionService = transactionService;
     this.transferService = transferService;
     this.tagService = tagService;
+    this.subscriptionService = subscriptionService;
   }
 
   @Override
@@ -152,5 +156,13 @@ public class TransactionManagementController
       "@tagRepository.existsByTagIdAndUserId(#tagId, @securityService.getAuthenticatedUserId())")
   public void deleteTag(@PathVariable UUID tagId) {
     tagService.deleteTag(tagId);
+  }
+
+  @Override
+  @PostMapping("/subscriptions")
+  @ResponseStatus(HttpStatus.CREATED)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
+  public SubscriptionDto createSubscription(@RequestBody SubscriptionRequestDto request) {
+    return subscriptionService.createSubscription(request);
   }
 }

@@ -26,6 +26,8 @@ public class FakeUtils {
   public static final Integer MAX_PREFERENCES = 10;
   public static final Integer MIN_BUDGETS_PER_CATEGORY = 0;
   public static final Integer MAX_BUDGETS_PER_CATEGORY = 3;
+  public static final Integer MIN_SUBSCRIPTIONS_PER_USER = 0;
+  public static final Integer MAX_SUBSCRIPTIONS_PER_USER = 3;
 
   public static DateCriteria randomDateCriteria() {
     DateCriteria date = new DateCriteria();

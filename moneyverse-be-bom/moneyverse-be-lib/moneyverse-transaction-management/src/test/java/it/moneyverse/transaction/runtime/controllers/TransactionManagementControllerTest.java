@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.runtime.controllers;
 
+import static it.moneyverse.transaction.utils.TransactionTestUtils.createSubscriptionRequest;
 import static it.moneyverse.transaction.utils.TransactionTestUtils.createTransactionRequest;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,9 +13,11 @@ import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.services.SubscriptionService;
 import it.moneyverse.transaction.services.TagManagementService;
 import it.moneyverse.transaction.services.TransactionManagementService;
 import it.moneyverse.transaction.services.TransferManagementService;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -55,6 +58,7 @@ class TransactionManagementControllerTest {
   @MockitoBean private TransactionManagementService transactionService;
   @MockitoBean private TransferManagementService transferService;
   @MockitoBean private TagManagementService tagService;
+  @MockitoBean private SubscriptionService subscriptionService;
 
   @Test
   void testCreateAccount_Success(@Mock TransactionDto transactionDto) throws Exception {
@@ -328,5 +332,65 @@ class TransactionManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(3).toUpperCase(),
         Collections.singleton(tagId));
+  }
+
+  @Test
+  void testCreateSubscription_Success(@Mock SubscriptionDto subscriptionDto) throws Exception {
+    UUID userId = RandomUtils.randomUUID();
+    SubscriptionRequestDto request =
+        createSubscriptionRequest(userId, LocalDate.now().plusMonths(1));
+
+    when(subscriptionService.createSubscription(request)).thenReturn(subscriptionDto);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(basePath + "/subscriptions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request.toString())
+                .with(MockUserRequestPostProcessor.mockUser(userId)))
+        .andExpect(status().isCreated());
+  }
+
+  @ParameterizedTest
+  @MethodSource("invalidRecurrenceDtoProvider")
+  void testCreateSubscription_BadRequest(Supplier<SubscriptionRequestDto> requestSupplier)
+      throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(basePath + "/subscriptions")
+                .content(requestSupplier.get().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(MockUserRequestPostProcessor.mockUser(RandomUtils.randomString(15))))
+        .andExpect(status().isBadRequest());
+  }
+
+  private static Stream<Supplier<SubscriptionRequestDto>> invalidRecurrenceDtoProvider() {
+    return Stream.of(
+        TransactionManagementControllerTest::createRequestWithInvalidRecurrenceRule,
+        TransactionManagementControllerTest::createRequestWithEndDateBeforeStartDate);
+  }
+
+  private static SubscriptionRequestDto createRequestWithInvalidRecurrenceRule() {
+    return new SubscriptionRequestDto(
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomString(3).toUpperCase(),
+        new RecurrenceDto("INVALID", RandomUtils.randomLocalDate(2025, 2025), null));
+  }
+
+  private static SubscriptionRequestDto createRequestWithEndDateBeforeStartDate() {
+    LocalDate startDate = LocalDate.now();
+    LocalDate endDate = startDate.minusMonths(2);
+    return new SubscriptionRequestDto(
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        RandomUtils.randomString(3).toUpperCase(),
+        new RecurrenceDto("FREQ=MONTHLY", startDate, endDate));
   }
 }

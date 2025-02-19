@@ -46,6 +46,10 @@ public class Transaction extends Auditable implements Serializable {
   @JoinColumn(name = "TRANSFER_ID")
   private Transfer transfer;
 
+  @ManyToOne
+  @JoinColumn(name = "SUBSCRIPTION_ID")
+  private Subscription subscription;
+
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JoinTable(
       name = "TRANSACTIONS_TAGS",
@@ -133,6 +137,14 @@ public class Transaction extends Auditable implements Serializable {
 
   public void setTransfer(Transfer transfer) {
     this.transfer = transfer;
+  }
+
+  public Subscription getSubscription() {
+    return subscription;
+  }
+
+  public void setSubscription(Subscription subscription) {
+    this.subscription = subscription;
   }
 
   public Set<Tag> getTags() {
