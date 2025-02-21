@@ -94,17 +94,20 @@ public class SubscriptionManagementService implements SubscriptionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public SubscriptionDto getSubscription(UUID subscriptionId) {
     return SubscriptionMapper.toSubscriptionDto(getSubscriptionById(subscriptionId));
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<SubscriptionDto> getSubscriptionsByUserId(UUID userId) {
     List<Subscription> userSubscriptions = subscriptionRepository.findSubscriptionByUserId(userId);
     return SubscriptionMapper.toSubscriptionDtoWithoutTransactions(userSubscriptions);
   }
 
   @Override
+  @Transactional
   public void deleteSubscription(UUID subscriptionId) {
     Subscription subscription = getSubscriptionById(subscriptionId);
     LOGGER.info("Deleting subscription {}", subscriptionId);

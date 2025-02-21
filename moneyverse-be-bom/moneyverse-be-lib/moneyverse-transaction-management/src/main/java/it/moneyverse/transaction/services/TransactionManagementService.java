@@ -8,8 +8,10 @@ import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.model.repositories.TransferRepository;
@@ -37,6 +39,7 @@ public class TransactionManagementService implements TransactionService {
   private final AccountServiceClient accountServiceClient;
   private final UserServiceClient userServiceClient;
   private final BudgetServiceClient budgetServiceClient;
+  private final SubscriptionRepository subscriptionRepository;
 
   public TransactionManagementService(
       TransactionRepository transactionRepository,
@@ -45,7 +48,8 @@ public class TransactionManagementService implements TransactionService {
       CurrencyServiceClient currencyServiceClient,
       AccountServiceClient accountServiceClient,
       UserServiceClient userServiceGrpcClient,
-      BudgetServiceClient budgetServiceClient) {
+      BudgetServiceClient budgetServiceClient,
+      SubscriptionRepository subscriptionRepository) {
     this.transactionRepository = transactionRepository;
     this.tagRepository = tagRepository;
     this.transferRepository = transferRepository;
@@ -53,6 +57,7 @@ public class TransactionManagementService implements TransactionService {
     this.accountServiceClient = accountServiceClient;
     this.userServiceClient = userServiceGrpcClient;
     this.budgetServiceClient = budgetServiceClient;
+    this.subscriptionRepository = subscriptionRepository;
   }
 
   @Override
@@ -163,6 +168,7 @@ public class TransactionManagementService implements TransactionService {
     userServiceClient.checkIfUserStillExist(userId);
     LOGGER.info("Deleting transactions by userId {}", userId);
     transferRepository.deleteAll(transferRepository.findTransferByUserId(userId));
+    subscriptionRepository.deleteAll(subscriptionRepository.findSubscriptionByUserId(userId));
     List<Tag> tags = tagRepository.findByUserId(userId);
     for (Tag tag : tags) {
       tag.getTransactions()
@@ -182,6 +188,7 @@ public class TransactionManagementService implements TransactionService {
     accountServiceClient.checkIfAccountStillExists(accountId);
     LOGGER.info("Deleting transactions by account id {}", accountId);
     transferRepository.deleteAll(transferRepository.findTransferByAccountId(accountId));
+    subscriptionRepository.deleteAll(subscriptionRepository.findSubscriptionByAccountId(accountId));
     transactionRepository.deleteAll(transactionRepository.findTransactionByAccountId(accountId));
   }
 
@@ -190,6 +197,12 @@ public class TransactionManagementService implements TransactionService {
   public void removeCategoryFromTransactions(UUID categoryId) {
     budgetServiceClient.checkIfCategoryStillExists(categoryId);
     LOGGER.info("Removing category {} from transactions", categoryId);
+    List<Subscription> subscriptions =
+        subscriptionRepository.findSubscriptionByCategoryId(categoryId);
+    if (!subscriptions.isEmpty()) {
+      subscriptions.forEach(subscription -> subscription.setCategoryId(null));
+      subscriptionRepository.saveAll(subscriptions);
+    }
     List<Transaction> transactions = transactionRepository.findTransactionByCategoryId(categoryId);
     transactions.forEach(transaction -> transaction.setCategoryId(null));
     transactionRepository.saveAll(transactions);
