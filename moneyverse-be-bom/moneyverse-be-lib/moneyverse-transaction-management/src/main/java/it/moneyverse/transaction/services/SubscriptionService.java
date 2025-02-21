@@ -11,4 +11,6 @@ public interface SubscriptionService {
   SubscriptionDto getSubscription(UUID subscriptionId);
 
   List<SubscriptionDto> getSubscriptionsByUserId(UUID userId);
+
+  void deleteSubscription(UUID subscriptionId);
 }

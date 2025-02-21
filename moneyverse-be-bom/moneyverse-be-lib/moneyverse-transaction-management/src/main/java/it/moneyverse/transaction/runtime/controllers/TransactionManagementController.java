@@ -182,4 +182,13 @@ public class TransactionManagementController
   public List<SubscriptionDto> getSubscriptions(@PathVariable UUID userId) {
     return subscriptionService.getSubscriptionsByUserId(userId);
   }
+
+  @Override
+  @DeleteMapping("/subscriptions/{subscriptionId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize(
+      "@subscriptionRepository.existsBySubscriptionIdAndUserId(#subscriptionId, @securityService.getAuthenticatedUserId())")
+  public void deleteSubscription(@PathVariable UUID subscriptionId) {
+    subscriptionService.deleteSubscription(subscriptionId);
+  }
 }

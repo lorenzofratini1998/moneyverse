@@ -12,4 +12,6 @@ public interface SubscriptionOperations {
   SubscriptionDto getSubscription(UUID subscriptionId);
 
   List<SubscriptionDto> getSubscriptions(UUID userId);
+
+  void deleteSubscription(UUID subscriptionId);
 }

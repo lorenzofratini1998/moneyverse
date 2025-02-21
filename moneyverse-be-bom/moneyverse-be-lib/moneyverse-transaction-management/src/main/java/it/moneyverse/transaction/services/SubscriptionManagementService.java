@@ -104,6 +104,14 @@ public class SubscriptionManagementService implements SubscriptionService {
     return SubscriptionMapper.toSubscriptionDtoWithoutTransactions(userSubscriptions);
   }
 
+  @Override
+  public void deleteSubscription(UUID subscriptionId) {
+    Subscription subscription = getSubscriptionById(subscriptionId);
+    LOGGER.info("Deleting subscription {}", subscriptionId);
+    subscriptionRepository.delete(subscription);
+    transactionEventPublisher.publishEvent(subscription, EventTypeEnum.DELETE);
+  }
+
   private Subscription getSubscriptionById(UUID subscriptionId) {
     return subscriptionRepository
         .findById(subscriptionId)
