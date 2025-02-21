@@ -174,4 +174,12 @@ public class TransactionManagementController
   public SubscriptionDto getSubscription(@PathVariable UUID subscriptionId) {
     return subscriptionService.getSubscription(subscriptionId);
   }
+
+  @Override
+  @GetMapping("/subscriptions/users/{userId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
+  public List<SubscriptionDto> getSubscriptions(@PathVariable UUID userId) {
+    return subscriptionService.getSubscriptionsByUserId(userId);
+  }
 }

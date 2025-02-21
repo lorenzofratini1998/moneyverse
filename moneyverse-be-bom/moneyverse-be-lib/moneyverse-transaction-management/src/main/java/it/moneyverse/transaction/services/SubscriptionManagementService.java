@@ -98,6 +98,12 @@ public class SubscriptionManagementService implements SubscriptionService {
     return SubscriptionMapper.toSubscriptionDto(getSubscriptionById(subscriptionId));
   }
 
+  @Override
+  public List<SubscriptionDto> getSubscriptionsByUserId(UUID userId) {
+    List<Subscription> userSubscriptions = subscriptionRepository.findSubscriptionByUserId(userId);
+    return SubscriptionMapper.toSubscriptionDtoWithoutTransactions(userSubscriptions);
+  }
+
   private Subscription getSubscriptionById(UUID subscriptionId) {
     return subscriptionRepository
         .findById(subscriptionId)

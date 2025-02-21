@@ -11,4 +11,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
       LocalDate nextExecutionDate, Boolean isActive);
 
   boolean existsBySubscriptionIdAndUserId(UUID subscriptionId, UUID userId);
+
+  List<Subscription> findSubscriptionByUserId(UUID userId);
 }

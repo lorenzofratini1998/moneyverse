@@ -454,4 +454,22 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(
         subscription.getTransactions().size(), response.getBody().getTransactions().size());
   }
+
+  @Test
+  void testGetSubscriptions() {
+    UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final List<Subscription> subscriptions = testContext.getUserSubscription(userId);
+
+    ResponseEntity<List<SubscriptionDto>> response =
+        restTemplate.exchange(
+            basePath + "/subscriptions/users/" + userId,
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(subscriptions.size(), response.getBody().size());
+  }
 }
