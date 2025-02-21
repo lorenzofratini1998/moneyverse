@@ -65,6 +65,12 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
     return tags.stream().filter(tag -> tag.getUserId().equals(userId)).toList();
   }
 
+  public List<Subscription> getUserSubscription(UUID userId) {
+    return subscriptions.stream()
+        .filter(subscription -> subscription.getUserId().equals(userId))
+        .toList();
+  }
+
   public Tag getRandomUserTag(UUID userId) {
     List<Tag> userTags = getUserTags(userId);
     return userTags.get(RandomUtils.randomInteger(0, userTags.size() - 1));
@@ -301,6 +307,14 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
             .filter(transfer -> userTransactions.contains(transfer.getTransactionFrom()))
             .toList();
     return userTransfer.get(RandomUtils.randomInteger(0, userTransfer.size() - 1));
+  }
+
+  public Subscription getRandomSubscriptionByUser(UUID userId) {
+    List<Subscription> userSubscriptions =
+        subscriptions.stream()
+            .filter(subscription -> subscription.getUserId().equals(userId))
+            .toList();
+    return userSubscriptions.get(RandomUtils.randomInteger(0, userSubscriptions.size() - 1));
   }
 
   @Override

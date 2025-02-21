@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
   List<Subscription> findSubscriptionByNextExecutionDateAndIsActive(
       LocalDate nextExecutionDate, Boolean isActive);
+
+  boolean existsBySubscriptionIdAndUserId(UUID subscriptionId, UUID userId);
 }

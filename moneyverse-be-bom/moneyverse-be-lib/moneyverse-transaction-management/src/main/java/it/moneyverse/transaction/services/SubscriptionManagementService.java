@@ -4,6 +4,7 @@ import static it.moneyverse.transaction.utils.SubscriptionUtils.calculateNextExe
 import static it.moneyverse.transaction.utils.SubscriptionUtils.createSubscriptionTransaction;
 
 import it.moneyverse.core.enums.EventTypeEnum;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
@@ -15,6 +16,7 @@ import it.moneyverse.transaction.utils.mapper.SubscriptionMapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import net.fortuna.ical4j.model.Recur;
 import net.fortuna.ical4j.model.property.RRule;
 import org.slf4j.Logger;
@@ -89,5 +91,19 @@ public class SubscriptionManagementService implements SubscriptionService {
       transactions.add(transaction);
     }
     return transactions;
+  }
+
+  @Override
+  public SubscriptionDto getSubscription(UUID subscriptionId) {
+    return SubscriptionMapper.toSubscriptionDto(getSubscriptionById(subscriptionId));
+  }
+
+  private Subscription getSubscriptionById(UUID subscriptionId) {
+    return subscriptionRepository
+        .findById(subscriptionId)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Subscription %s not found".formatted(subscriptionId)));
   }
 }

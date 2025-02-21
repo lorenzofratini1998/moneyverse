@@ -165,4 +165,13 @@ public class TransactionManagementController
   public SubscriptionDto createSubscription(@RequestBody SubscriptionRequestDto request) {
     return subscriptionService.createSubscription(request);
   }
+
+  @Override
+  @GetMapping("/subscriptions/{subscriptionId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "@subscriptionRepository.existsBySubscriptionIdAndUserId(#subscriptionId, @securityService.getAuthenticatedUserId())")
+  public SubscriptionDto getSubscription(@PathVariable UUID subscriptionId) {
+    return subscriptionService.getSubscription(subscriptionId);
+  }
 }

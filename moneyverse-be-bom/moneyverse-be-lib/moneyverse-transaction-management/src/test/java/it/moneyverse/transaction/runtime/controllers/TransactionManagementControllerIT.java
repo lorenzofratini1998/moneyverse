@@ -15,6 +15,7 @@ import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import it.moneyverse.transaction.model.dto.*;
+import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
@@ -419,5 +420,38 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(
         testContext.getTransactions().size() + expectedCreatedTransactions,
         transactionRepository.findAll().size());
+  }
+
+  @Test
+  void testGetSubscription() {
+    UUID userId = testContext.getRandomUser().getUserId();
+    while (testContext.getUserSubscription(userId).isEmpty()) {
+      userId = testContext.getRandomUser().getUserId();
+    }
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final Subscription subscription = testContext.getRandomSubscriptionByUser(userId);
+
+    ResponseEntity<SubscriptionDto> response =
+        restTemplate.exchange(
+            basePath + "/subscriptions/" + subscription.getSubscriptionId(),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            SubscriptionDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(subscription.getSubscriptionId(), response.getBody().getSubscriptionId());
+    assertEquals(subscription.getAccountId(), response.getBody().getAccountId());
+    assertEquals(subscription.getCategoryId(), response.getBody().getCategoryId());
+    assertEquals(subscription.getStartDate(), response.getBody().getStartDate());
+    assertEquals(subscription.getSubscriptionName(), response.getBody().getSubscriptionName());
+    assertEquals(
+        subscription.getAmount().setScale(2, RoundingMode.HALF_UP), response.getBody().getAmount());
+    assertEquals(subscription.getCurrency(), response.getBody().getCurrency());
+    assertEquals(
+        subscription.getTotalAmount().setScale(2, RoundingMode.HALF_UP),
+        response.getBody().getTotalAmount());
+    assertEquals(
+        subscription.getTransactions().size(), response.getBody().getTransactions().size());
   }
 }
