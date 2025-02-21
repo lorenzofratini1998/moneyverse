@@ -22,6 +22,7 @@ public class SubscriptionDto {
   private final UUID accountId;
   private final UUID categoryId;
   private final BigDecimal amount;
+  private final BigDecimal totalAmount;
   private final String currency;
   private final String subscriptionName;
   private final String recurrenceRule;
@@ -37,6 +38,7 @@ public class SubscriptionDto {
     this.accountId = builder.accountId;
     this.categoryId = builder.categoryId;
     this.amount = builder.amount;
+    this.totalAmount = builder.totalAmount;
     this.currency = builder.currency;
     this.subscriptionName = builder.subscriptionName;
     this.recurrenceRule = builder.recurrenceRule;
@@ -65,6 +67,10 @@ public class SubscriptionDto {
 
   public BigDecimal getAmount() {
     return amount;
+  }
+
+  public BigDecimal getTotalAmount() {
+    return totalAmount;
   }
 
   public String getCurrency() {
@@ -105,6 +111,7 @@ public class SubscriptionDto {
     private UUID accountId;
     private UUID categoryId;
     private BigDecimal amount;
+    private BigDecimal totalAmount;
     private String currency;
     private String subscriptionName;
     private String recurrenceRule;
@@ -136,6 +143,11 @@ public class SubscriptionDto {
 
     public Builder withAmount(BigDecimal amount) {
       this.amount = amount;
+      return this;
+    }
+
+    public Builder withTotalAmount(BigDecimal totalAmount) {
+      this.totalAmount = totalAmount;
       return this;
     }
 

@@ -33,6 +33,10 @@ public class Subscription extends Auditable implements Serializable {
   @Column(name = "AMOUNT", nullable = false)
   private BigDecimal amount;
 
+  @Column(name = "TOTAL_AMOUNT", nullable = false)
+  @ColumnDefault(value = "0.0")
+  private BigDecimal totalAmount = BigDecimal.ZERO;
+
   @Column(name = "CURRENCY", nullable = false)
   private String currency;
 
@@ -106,6 +110,14 @@ public class Subscription extends Auditable implements Serializable {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+  public BigDecimal getTotalAmount() {
+    return totalAmount;
+  }
+
+  public void setTotalAmount(BigDecimal totalAmount) {
+    this.totalAmount = totalAmount;
   }
 
   public String getCurrency() {

@@ -24,7 +24,7 @@ public class TransactionEventListener {
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void handleTransactionCreation(TransactionEvent event) {
-    LOGGER.info("Publishing transaction event: {}", event);
+    LOGGER.info("Sending transaction event: {}", event);
     switch (event.getEventType()) {
       case CREATE -> messageProducer.send(event, TransactionCreationTopic.TOPIC);
       case UPDATE -> messageProducer.send(event, TransactionUpdateTopic.TOPIC);

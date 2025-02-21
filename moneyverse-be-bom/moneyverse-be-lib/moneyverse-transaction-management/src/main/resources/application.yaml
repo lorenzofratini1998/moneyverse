@@ -5,6 +5,11 @@ server:
 spring:
   security:
     base-path: /transactionsManagement/api/v1
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 
 management:
   endpoints:

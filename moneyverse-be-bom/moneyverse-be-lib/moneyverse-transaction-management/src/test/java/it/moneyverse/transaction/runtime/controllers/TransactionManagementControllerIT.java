@@ -22,6 +22,8 @@ import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
@@ -408,6 +410,12 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.subscriptionName(), response.getBody().getSubscriptionName());
     assertEquals(request.amount(), response.getBody().getAmount());
     assertEquals(request.currency(), response.getBody().getCurrency());
+    assertEquals(
+        request
+            .amount()
+            .multiply(BigDecimal.valueOf(expectedCreatedTransactions))
+            .setScale(2, RoundingMode.HALF_UP),
+        response.getBody().getTotalAmount().setScale(2, RoundingMode.HALF_UP));
     assertEquals(
         testContext.getTransactions().size() + expectedCreatedTransactions,
         transactionRepository.findAll().size());

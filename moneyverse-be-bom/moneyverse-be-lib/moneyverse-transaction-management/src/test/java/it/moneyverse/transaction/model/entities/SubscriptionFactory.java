@@ -56,7 +56,8 @@ public class SubscriptionFactory {
     subscription.setRecurrenceRule("FREQ=MONTHLY");
     subscription.setStartDate(LocalDate.now().minusMonths(alreadyExecuted));
     subscription.setNextExecutionDate(subscription.getStartDate().plusMonths(alreadyExecuted + 1));
-    subscription.setEndDate(subscription.getStartDate().plusMonths(duration));
+    subscription.setEndDate(
+        Math.random() < 0.5 ? subscription.getStartDate().plusMonths(duration) : null);
     subscription.setTransactions(
         createSubscriptionTransactions(alreadyExecuted, duration, subscription));
     subscription.setCreatedBy(FAKE_USER);

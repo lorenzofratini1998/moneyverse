@@ -194,12 +194,39 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
                     || criteria.getCategories().get().contains(transaction.getCategoryId()))
         .filter(
             transaction ->
-                criteria.getDate().map(date -> date.matches(transaction.getDate())).orElse(true))
+                criteria
+                    .getDate()
+                    .map(
+                        date -> {
+                          boolean matchesStart =
+                              date.getStart()
+                                  .map(min -> !transaction.getDate().isBefore(min))
+                                  .orElse(true);
+                          boolean matchesEnd =
+                              date.getEnd()
+                                  .map(max -> !transaction.getDate().isAfter(max))
+                                  .orElse(true);
+                          return matchesStart && matchesEnd;
+                        })
+                    .orElse(true))
         .filter(
             transaction ->
                 criteria
                     .getAmount()
-                    .map(amount -> amount.matches(transaction.getAmount()))
+                    .map(
+                        amount -> {
+                          boolean matchesLower =
+                              amount
+                                  .getLower()
+                                  .map(lower -> transaction.getAmount().compareTo(lower) >= 0)
+                                  .orElse(true);
+                          boolean matchesUpper =
+                              amount
+                                  .getUpper()
+                                  .map(upper -> transaction.getAmount().compareTo(upper) <= 0)
+                                  .orElse(true);
+                          return matchesLower && matchesUpper;
+                        })
                     .orElse(true))
         .filter(
             transaction ->

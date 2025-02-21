@@ -33,6 +33,7 @@ public class SubscriptionMapper {
         .withUserId(subscription.getUserId())
         .withCategoryId(subscription.getCategoryId())
         .withAmount(subscription.getAmount())
+        .withTotalAmount(subscription.getTotalAmount())
         .withCurrency(subscription.getCurrency())
         .withSubscriptionName(subscription.getSubscriptionName())
         .withRecurrenceRule(subscription.getRecurrenceRule())
