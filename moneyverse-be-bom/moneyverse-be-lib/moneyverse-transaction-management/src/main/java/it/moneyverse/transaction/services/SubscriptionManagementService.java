@@ -8,6 +8,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
+import it.moneyverse.transaction.model.dto.SubscriptionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
@@ -113,6 +114,25 @@ public class SubscriptionManagementService implements SubscriptionService {
     LOGGER.info("Deleting subscription {}", subscriptionId);
     subscriptionRepository.delete(subscription);
     transactionEventPublisher.publishEvent(subscription, EventTypeEnum.DELETE);
+  }
+
+  @Override
+  @Transactional
+  public SubscriptionDto updateSubscription(
+      UUID subscriptionId, SubscriptionUpdateRequestDto request) {
+    Subscription subscription = getSubscriptionById(subscriptionId);
+    if (request.accountId() != null) {
+      accountServiceClient.checkIfAccountExists(request.accountId());
+    }
+    if (request.categoryId() != null) {
+      budgetServiceClient.checkIfCategoryExists(request.categoryId());
+    }
+    if (request.currency() != null) {
+      currencyServiceClient.checkIfCurrencyExists(request.currency());
+    }
+    LOGGER.info("Updating subscription {}", subscriptionId);
+    return SubscriptionMapper.toSubscriptionDto(
+        subscriptionRepository.save(SubscriptionMapper.partialUpdate(subscription, request)));
   }
 
   private Subscription getSubscriptionById(UUID subscriptionId) {

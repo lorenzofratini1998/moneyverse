@@ -143,5 +143,20 @@ public class TransactionTestUtils {
     return subscription;
   }
 
+  public static SubscriptionUpdateRequestDto createSubscriptionUpdateRequest() {
+    return new SubscriptionUpdateRequestDto(
+        RandomUtils.randomUUID(),
+        RandomUtils.randomUUID(),
+        RandomUtils.randomString(15),
+        RandomUtils.randomBigDecimal(),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+  }
+
   private TransactionTestUtils() {}
 }

@@ -2,6 +2,7 @@ package it.moneyverse.transaction.utils.mapper;
 
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
+import it.moneyverse.transaction.model.dto.SubscriptionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Subscription;
 import java.util.Collections;
 import java.util.List;
@@ -66,6 +67,48 @@ public class SubscriptionMapper {
         .withEndDate(subscription.getEndDate())
         .withNextExecutionDate(subscription.getNextExecutionDate())
         .withActive(subscription.isActive());
+  }
+
+  public static Subscription partialUpdate(
+      Subscription subscription, SubscriptionUpdateRequestDto request) {
+    if (request == null) {
+      return subscription;
+    }
+
+    if (request.accountId() != null) {
+      subscription.setAccountId(request.accountId());
+    }
+    if (request.categoryId() != null) {
+      subscription.setCategoryId(request.categoryId());
+    }
+    if (request.subscriptionName() != null) {
+      subscription.setSubscriptionName(request.subscriptionName());
+    }
+    if (request.amount() != null) {
+      subscription.setAmount(request.amount());
+    }
+    if (request.totalAmount() != null) {
+      subscription.setTotalAmount(request.totalAmount());
+    }
+    if (request.currency() != null) {
+      subscription.setCurrency(request.currency());
+    }
+    if (request.recurrenceRule() != null) {
+      subscription.setRecurrenceRule(request.recurrenceRule());
+    }
+    if (request.startDate() != null) {
+      subscription.setStartDate(request.startDate());
+    }
+    if (request.endDate() != null) {
+      subscription.setEndDate(request.endDate());
+    }
+    if (request.nextExecutionDate() != null) {
+      subscription.setNextExecutionDate(request.nextExecutionDate());
+    }
+    if (request.isActive() != null) {
+      subscription.setActive(request.isActive());
+    }
+    return subscription;
   }
 
   private SubscriptionMapper() {}

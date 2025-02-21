@@ -191,4 +191,14 @@ public class TransactionManagementController
   public void deleteSubscription(@PathVariable UUID subscriptionId) {
     subscriptionService.deleteSubscription(subscriptionId);
   }
+
+  @Override
+  @PutMapping("/subscriptions/{subscriptionId}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize(
+      "@subscriptionRepository.existsBySubscriptionIdAndUserId(#subscriptionId, @securityService.getAuthenticatedUserId())")
+  public SubscriptionDto updateSubscription(
+      @PathVariable UUID subscriptionId, @RequestBody SubscriptionUpdateRequestDto request) {
+    return subscriptionService.updateSubscription(subscriptionId, request);
+  }
 }

@@ -1,7 +1,6 @@
 package it.moneyverse.transaction.runtime.controllers;
 
-import static it.moneyverse.transaction.utils.TransactionTestUtils.createTagRequest;
-import static it.moneyverse.transaction.utils.TransactionTestUtils.createTagUpdateRequest;
+import static it.moneyverse.transaction.utils.TransactionTestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -495,5 +494,33 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(
         testContext.getTransactions().size() - subscription.getTransactions().size(),
         transactionRepository.findAll().size());
+  }
+
+  @Test
+  void testUpdateSubscription() {
+    UUID userId = testContext.getRandomUser().getUserId();
+    while (testContext.getUserSubscription(userId).isEmpty()) {
+      userId = testContext.getRandomUser().getUserId();
+    }
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    Subscription subscription = testContext.getRandomSubscriptionByUser(userId);
+    SubscriptionUpdateRequestDto request = createSubscriptionUpdateRequest();
+    mockServer.mockExistentAccount();
+    mockServer.mockExistentCategory();
+
+    ResponseEntity<SubscriptionDto> response =
+        restTemplate.exchange(
+            basePath + "/subscriptions/" + subscription.getSubscriptionId(),
+            HttpMethod.PUT,
+            new HttpEntity<>(request, headers),
+            SubscriptionDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(subscription.getSubscriptionId(), response.getBody().getSubscriptionId());
+    assertEquals(request.accountId(), response.getBody().getAccountId());
+    assertEquals(request.categoryId(), response.getBody().getCategoryId());
+    assertEquals(request.subscriptionName(), response.getBody().getSubscriptionName());
+    assertEquals(request.amount(), response.getBody().getAmount());
   }
 }
