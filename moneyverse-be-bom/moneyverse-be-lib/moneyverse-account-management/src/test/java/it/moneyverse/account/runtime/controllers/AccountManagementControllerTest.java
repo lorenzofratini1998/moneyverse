@@ -246,7 +246,6 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 

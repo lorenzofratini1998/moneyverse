@@ -8,9 +8,9 @@ import static org.mockito.Mockito.*;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
-import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
+import it.moneyverse.account.runtime.messages.AccountEventPublisher;
 import it.moneyverse.account.utils.mapper.AccountMapper;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
@@ -19,10 +19,8 @@ import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.CurrencyServiceGrpcClient;
-import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.support.SendResult;
 
 /** Unit test for {@link AccountManagementService} */
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +40,7 @@ class AccountManagementServiceTest {
   @Mock private AccountCategoryRepository accountCategoryRepository;
   @Mock private AccountRepository accountRepository;
   @Mock private CurrencyServiceGrpcClient currencyServiceClient;
-  @Mock private MessageProducer<UUID, String> messageProducer;
+  @Mock private AccountEventPublisher eventPublisher;
   @Mock private AccountDeletionTopic accountDeletionTopic;
   private MockedStatic<AccountMapper> mapper;
 
@@ -205,7 +202,6 @@ class AccountManagementServiceTest {
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
-    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.save(account)).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
@@ -215,7 +211,6 @@ class AccountManagementServiceTest {
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountCategoryRepository, times(1)).findByName(any(String.class));
-    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
@@ -235,12 +230,10 @@ class AccountManagementServiceTest {
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomString(15),
             RandomUtils.randomString(15),
-            RandomUtils.randomString(3).toUpperCase(),
             Boolean.TRUE);
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
-    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.findDefaultAccountsByUserId(any())).thenReturn(List.of(defaultAccount));
     when(defaultAccount.getAccountId()).thenReturn(RandomUtils.randomUUID());
@@ -253,7 +246,6 @@ class AccountManagementServiceTest {
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountCategoryRepository, times(1)).findByName(any(String.class));
-    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).findDefaultAccountsByUserId(any());
     verify(accountRepository, times(1)).save(defaultAccount);
@@ -308,35 +300,6 @@ class AccountManagementServiceTest {
     mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
   }
 
-  @Test
-  void givenAccountId_WhenUpdateAccount_ThenReturnCurrencyNotFound(
-      @Mock Account account, @Mock AccountCategory category) {
-    UUID accountId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15);
-    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
-
-    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.of(category));
-    Mockito.doThrow(ResourceNotFoundException.class)
-        .when(currencyServiceClient)
-        .checkIfCurrencyExists(request.currency());
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> accountManagementService.updateAccount(accountId, request));
-
-    verify(accountRepository, times(1)).findById(accountId);
-    verify(accountCategoryRepository, times(1)).findByName(categoryName);
-    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
-    mapper.verify(
-        () ->
-            AccountMapper.partialUpdate(
-                any(Account.class), any(AccountUpdateRequestDto.class), any(AccountCategory.class)),
-        never());
-    verify(accountRepository, never()).save(any(Account.class));
-    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
-  }
-
   private AccountUpdateRequestDto createAccountUpdateRequestDto(String categoryName) {
     return new AccountUpdateRequestDto(
         RandomUtils.randomString(15),
@@ -344,23 +307,19 @@ class AccountManagementServiceTest {
         RandomUtils.randomBigDecimal(),
         categoryName,
         RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
   @Test
-  void givenAccountId_WhenDeleteAccount_ThenDeleteAccount(
-      @Mock Account account, @Mock CompletableFuture<SendResult<UUID, String>> future) {
+  void givenAccountId_WhenDeleteAccount_ThenDeleteAccount(@Mock Account account) {
     UUID accountId = RandomUtils.randomUUID();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(messageProducer.send(any(AccountDeletionEvent.class), any(String.class)))
-        .thenReturn(future);
 
     accountManagementService.deleteAccount(accountId);
 
     verify(accountRepository, times(1)).findById(accountId);
-    verify(messageProducer, times(1)).send(any(AccountDeletionEvent.class), any(String.class));
+    verify(eventPublisher, times(1)).publishEvent(any(Account.class));
   }
 
   @Test
@@ -374,7 +333,7 @@ class AccountManagementServiceTest {
 
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountDeletionTopic, never()).name();
-    verify(messageProducer, never()).send(any(AccountDeletionEvent.class), any(String.class));
+    verify(eventPublisher, never()).publishEvent(any(Account.class));
   }
 
   @Test

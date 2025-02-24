@@ -86,9 +86,6 @@ public class AccountMapper {
     if (request.isDefault() != null) {
       account.setDefault(request.isDefault());
     }
-    if (request.currency() != null) {
-      account.setCurrency(request.currency());
-    }
     return account;
   }
 }

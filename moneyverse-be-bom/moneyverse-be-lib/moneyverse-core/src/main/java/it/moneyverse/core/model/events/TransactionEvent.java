@@ -13,7 +13,9 @@ import org.springframework.util.ReflectionUtils;
 public class TransactionEvent implements MessageEvent<UUID, String> {
   private UUID transactionId;
   private UUID accountId;
+  private UUID previousAccountId;
   private UUID categoryId;
+  private UUID previousCategoryId;
   private UUID budgetId;
   private BigDecimal amount;
   private BigDecimal normalizedAmount;
@@ -38,12 +40,28 @@ public class TransactionEvent implements MessageEvent<UUID, String> {
     this.accountId = accountId;
   }
 
+  public UUID getPreviousAccountId() {
+    return previousAccountId;
+  }
+
+  public void setPreviousAccountId(UUID previousAccountId) {
+    this.previousAccountId = previousAccountId;
+  }
+
   public UUID getCategoryId() {
     return categoryId;
   }
 
   public void setCategoryId(UUID categoryId) {
     this.categoryId = categoryId;
+  }
+
+  public UUID getPreviousCategoryId() {
+    return previousCategoryId;
+  }
+
+  public void setPreviousCategoryId(UUID previousCategoryId) {
+    this.previousCategoryId = previousCategoryId;
   }
 
   public UUID getBudgetId() {

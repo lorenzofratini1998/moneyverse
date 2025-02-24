@@ -134,11 +134,9 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
             null,
             null,
             RandomUtils.randomString(25),
-            RandomUtils.randomString(3).toUpperCase(),
             RandomUtils.randomBoolean());
 
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
-    mockServer.mockExistentCurrency(request.currency());
 
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(

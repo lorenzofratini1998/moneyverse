@@ -4,18 +4,18 @@ import it.moneyverse.account.enums.AccountSortAttributeEnum;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
-import it.moneyverse.account.model.event.AccountDeletionEvent;
 import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
+import it.moneyverse.account.runtime.messages.AccountEventPublisher;
 import it.moneyverse.account.utils.mapper.AccountMapper;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.*;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -31,19 +31,20 @@ public class AccountManagementService implements AccountService {
   private final AccountRepository accountRepository;
   private final AccountCategoryRepository accountCategoryRepository;
   private final CurrencyServiceClient currencyServiceClient;
-  private final MessageProducer<UUID, String> messageProducer;
+  private final AccountEventPublisher eventPublisher;
   private final UserServiceClient userServiceClient;
 
   public AccountManagementService(
       AccountRepository accountRepository,
       AccountCategoryRepository accountCategoryRepository,
       CurrencyServiceClient currencyServiceClient,
-      MessageProducer<UUID, String> messageProducer,
+      AccountEventPublisher eventPublisher,
       UserServiceClient userServiceClient) {
     this.accountRepository = accountRepository;
     this.accountCategoryRepository = accountCategoryRepository;
     this.currencyServiceClient = currencyServiceClient;
-    this.messageProducer = messageProducer;
+    this.eventPublisher = eventPublisher;
+
     this.userServiceClient = userServiceClient;
   }
 
@@ -101,9 +102,7 @@ public class AccountManagementService implements AccountService {
     Account account = findAccountById(accountId);
     AccountCategory category =
         request.accountCategory() != null ? findAccountCategory(request.accountCategory()) : null;
-    if (request.currency() != null) {
-      currencyServiceClient.checkIfCurrencyExists(request.currency());
-    }
+
     account = AccountMapper.partialUpdate(account, request, category);
     if (Boolean.TRUE.equals(request.isDefault())) {
       accountRepository.findDefaultAccountsByUserId(account.getUserId()).stream()
@@ -130,8 +129,7 @@ public class AccountManagementService implements AccountService {
   public void deleteAccount(UUID accountId) {
     Account account = findAccountById(accountId);
     accountRepository.delete(account);
-    messageProducer.send(
-        new AccountDeletionEvent(accountId, account.getUserId()), AccountDeletionTopic.TOPIC);
+    eventPublisher.publishEvent(account);
     LOGGER.info("Deleted account {} for user {}", account.getAccountId(), account.getUserId());
   }
 
@@ -149,6 +147,24 @@ public class AccountManagementService implements AccountService {
     return accountCategoryRepository.findAll().stream()
         .map(AccountMapper::toAccountCategoryDto)
         .toList();
+  }
+
+  @Override
+  @Transactional
+  public void incrementAccountBalance(UUID accountId, BigDecimal amount) {
+    Account account = findAccountById(accountId);
+    account.setBalance(account.getBalance().add(amount));
+    accountRepository.save(account);
+    LOGGER.info("Account balance for account {} increased by {}", account.getAccountId(), amount);
+  }
+
+  @Override
+  @Transactional
+  public void decrementAccountBalance(UUID accountId, BigDecimal amount) {
+    Account account = findAccountById(accountId);
+    account.setBalance(account.getBalance().subtract(amount));
+    accountRepository.save(account);
+    LOGGER.info("Account balance for account {} decreased by {}", account.getAccountId(), amount);
   }
 
   private Account findAccountById(UUID accountId) {

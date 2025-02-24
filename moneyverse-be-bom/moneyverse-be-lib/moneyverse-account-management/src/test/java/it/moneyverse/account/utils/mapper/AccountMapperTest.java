@@ -130,7 +130,6 @@ class AccountMapperTest {
             RandomUtils.randomBigDecimal(),
             category.getName(),
             RandomUtils.randomString(25),
-            RandomUtils.randomString(3).toUpperCase(),
             RandomUtils.randomBoolean());
 
     Account result = AccountMapper.partialUpdate(account, request, category);
@@ -140,7 +139,6 @@ class AccountMapperTest {
     assertEquals(request.balanceTarget(), result.getBalanceTarget());
     assertEquals(request.accountCategory(), result.getAccountCategory().getName());
     assertEquals(request.accountDescription(), result.getAccountDescription());
-    assertEquals(request.currency(), result.getCurrency());
     assertEquals(request.isDefault(), result.isDefault());
   }
 
