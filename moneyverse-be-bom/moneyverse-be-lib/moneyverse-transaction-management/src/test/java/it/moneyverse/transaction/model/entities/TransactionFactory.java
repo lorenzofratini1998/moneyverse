@@ -87,6 +87,7 @@ public class TransactionFactory {
     transaction.setDate(RandomUtils.randomLocalDate(2024, 2024));
     transaction.setDescription(RandomUtils.randomString(30));
     transaction.setAmount(RandomUtils.randomBigDecimal());
+    transaction.setNormalizedAmount(transaction.getAmount());
     transaction.setCurrency(RandomUtils.randomString(3).toUpperCase());
     transaction.setCreatedBy(FAKE_USER);
     transaction.setCreatedAt(LocalDateTime.now());

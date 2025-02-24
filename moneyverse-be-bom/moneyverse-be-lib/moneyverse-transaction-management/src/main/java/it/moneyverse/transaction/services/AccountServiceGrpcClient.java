@@ -3,7 +3,6 @@ package it.moneyverse.transaction.services;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.exceptions.ResourceStillExistsException;
 import it.moneyverse.core.model.dto.AccountDto;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +16,16 @@ public class AccountServiceGrpcClient implements AccountServiceClient {
   }
 
   @Override
-  public Optional<AccountDto> getAccountById(UUID accountId) {
-    return accountGrpcService.getAccountById(accountId);
+  public AccountDto getAccountById(UUID accountId) {
+    return accountGrpcService
+        .getAccountById(accountId)
+        .orElseThrow(
+            () -> new ResourceNotFoundException("Account %s does not exists".formatted(accountId)));
   }
 
   @Override
   public void checkIfAccountExists(UUID accountId) {
-    if (accountGrpcService.getAccountById(accountId).isEmpty()) {
-      throw new ResourceNotFoundException("Account %s does not exists".formatted(accountId));
-    }
+    getAccountById(accountId);
   }
 
   @Override

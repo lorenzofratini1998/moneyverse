@@ -2,7 +2,9 @@ package it.moneyverse.user.runtime.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import it.moneyverse.core.model.dto.PreferenceDto;
 import it.moneyverse.core.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.utils.properties.KeycloakAdminProperties;
 import it.moneyverse.test.annotations.IntegrationTest;

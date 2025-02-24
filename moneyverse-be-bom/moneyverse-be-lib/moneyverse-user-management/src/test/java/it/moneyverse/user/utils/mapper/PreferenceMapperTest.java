@@ -4,9 +4,9 @@ import static it.moneyverse.user.utils.UserTestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import it.moneyverse.core.model.dto.PreferenceDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;

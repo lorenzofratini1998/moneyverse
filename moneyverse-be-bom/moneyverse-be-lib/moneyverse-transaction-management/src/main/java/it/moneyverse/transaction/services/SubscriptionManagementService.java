@@ -88,6 +88,12 @@ public class SubscriptionManagementService implements SubscriptionService {
     List<LocalDate> dates = recur.getDates(startDate, endDate);
     for (LocalDate date : dates) {
       Transaction transaction = createSubscriptionTransaction(subscription, date);
+      transaction.setNormalizedAmount(
+          currencyServiceClient.convertCurrencyAmountByUserPreference(
+              subscription.getUserId(),
+              transaction.getAmount(),
+              transaction.getCurrency(),
+              transaction.getDate()));
       subscription.setTotalAmount(subscription.getTotalAmount().add(transaction.getAmount()));
       transactions.add(transaction);
     }
@@ -142,5 +148,40 @@ public class SubscriptionManagementService implements SubscriptionService {
             () ->
                 new ResourceNotFoundException(
                     "Subscription %s not found".formatted(subscriptionId)));
+  }
+
+  @Override
+  @Transactional
+  public void deleteSubscriptionsByUserId(UUID userId) {
+    LOGGER.info("Deleting subscriptions by user id {}", userId);
+    List<Subscription> subscriptions = subscriptionRepository.findSubscriptionByUserId(userId);
+    subscriptionRepository.deleteAll(subscriptions);
+  }
+
+  @Override
+  @Transactional
+  public void deleteSubscriptionsByAccountId(UUID accountId) {
+    LOGGER.info("Deleting subscriptions by account id {}", accountId);
+    List<Subscription> subscriptions =
+        subscriptionRepository.findSubscriptionByAccountId(accountId);
+    subscriptionRepository.deleteAll(subscriptions);
+    for (Subscription subscription : subscriptions) {
+      transactionEventPublisher.publishEvent(subscription, EventTypeEnum.DELETE);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void removeCategoryFromAllSubscriptions(UUID categoryId) {
+    LOGGER.info("Removing category {} from all subscriptions", categoryId);
+    List<Subscription> subscriptions =
+        subscriptionRepository.findSubscriptionByCategoryId(categoryId);
+    if (!subscriptions.isEmpty()) {
+      subscriptions.forEach(subscription -> subscription.setCategoryId(null));
+      subscriptionRepository.saveAll(subscriptions);
+    }
+    for (Subscription subscription : subscriptions) {
+      transactionEventPublisher.publishEvent(subscription, EventTypeEnum.UPDATE);
+    }
   }
 }

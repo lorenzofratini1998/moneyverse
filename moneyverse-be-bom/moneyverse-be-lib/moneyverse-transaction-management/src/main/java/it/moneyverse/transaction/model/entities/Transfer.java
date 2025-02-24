@@ -16,6 +16,9 @@ public class Transfer extends Auditable implements Serializable {
   @Column(name = "TRANSFER_ID")
   private UUID transferId;
 
+  @Column(name = "USER_ID", nullable = false)
+  private UUID userId;
+
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "TRANSACTION_FROM_ID", nullable = false, unique = true)
   private Transaction transactionFrom;
@@ -39,6 +42,14 @@ public class Transfer extends Auditable implements Serializable {
 
   public void setTransferId(UUID transferId) {
     this.transferId = transferId;
+  }
+
+  public UUID getUserId() {
+    return userId;
+  }
+
+  public void setUserId(UUID userId) {
+    this.userId = userId;
   }
 
   public Transaction getTransactionFrom() {

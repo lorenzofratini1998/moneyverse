@@ -87,6 +87,8 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     mockServer.mockExistentAccount();
     mockServer.mockExistentCategory();
     mockServer.mockExistentCurrency(request.transactions().getFirst().currency());
+    BigDecimal exchangeRate = Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
+    mockServer.mockExchangeRate(exchangeRate);
     TransactionDto expected = testContext.getExpectedTransactionDto(request);
 
     ResponseEntity<List<TransactionDto>> response =
@@ -105,7 +107,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(expected.getCategoryId(), actual.getCategoryId());
     assertEquals(expected.getDate(), actual.getDate());
     assertEquals(expected.getDescription(), actual.getDescription());
-    assertEquals(expected.getAmount(), actual.getAmount());
+    assertEquals(
+        expected.getAmount().multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP),
+        actual.getAmount().setScale(2, RoundingMode.HALF_UP));
     assertEquals(expected.getCurrency(), actual.getCurrency());
     assertEquals(Collections.emptySet(), actual.getTags());
   }
@@ -161,6 +165,10 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
             testContext.getRandomTag(userId));
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     mockServer.mockExistentCurrency(request.currency());
+    BigDecimal exchangeRate = Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
+    mockServer.mockExchangeRate(exchangeRate);
+    mockServer.mockExistentAccount();
+    mockServer.mockExistentCategory();
 
     ResponseEntity<TransactionDto> response =
         restTemplate.exchange(
@@ -176,7 +184,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.categoryId(), response.getBody().getCategoryId());
     assertEquals(request.date(), response.getBody().getDate());
     assertEquals(request.description(), response.getBody().getDescription());
-    assertEquals(request.amount(), response.getBody().getAmount());
+    assertEquals(
+        request.amount().multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP),
+        response.getBody().getAmount().setScale(2, RoundingMode.HALF_UP));
     assertEquals(request.currency(), response.getBody().getCurrency());
     if (request.tags() != null && !request.tags().isEmpty()) {
       assertEquals(request.tags().size(), response.getBody().getTags().size());
@@ -207,6 +217,9 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     final TransferRequestDto request = testContext.createTransferRequest(userId);
     mockServer.mockExistentAccount();
     mockServer.mockExistentCurrency(request.currency());
+    mockServer.mockUserPreference(request.currency());
+    BigDecimal exchangeRate = Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
+    mockServer.mockExchangeRate(exchangeRate);
 
     ResponseEntity<TransferDto> response =
         restTemplate.exchange(
@@ -273,7 +286,18 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(2, response.getBody().getTransactions().size());
+    assertEquals(transfer.getTransferId(), response.getBody().getTransferId());
+    assertEquals(transfer.getDate(), response.getBody().getDate());
+    assertEquals(
+        transfer.getAmount().setScale(2, RoundingMode.HALF_UP),
+        response.getBody().getAmount().setScale(2, RoundingMode.HALF_UP));
+    assertEquals(transfer.getCurrency(), response.getBody().getCurrency());
+    assertEquals(
+        transfer.getTransactionFrom().getTransactionId(),
+        response.getBody().getTransactionFrom().getTransactionId());
+    assertEquals(
+        transfer.getTransactionTo().getTransactionId(),
+        response.getBody().getTransactionTo().getTransactionId());
   }
 
   @Test

@@ -7,8 +7,8 @@ import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;

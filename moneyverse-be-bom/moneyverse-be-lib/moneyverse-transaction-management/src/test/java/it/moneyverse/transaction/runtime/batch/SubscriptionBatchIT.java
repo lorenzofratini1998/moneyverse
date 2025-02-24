@@ -6,14 +6,17 @@ import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.TransactionTestContext;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,7 @@ import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -50,6 +54,7 @@ class SubscriptionBatchIT {
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
 
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
+  @Autowired private KafkaTemplate<UUID, String> kafkaTemplate;
   @Autowired private JobLauncherTestUtils jobLauncherTestUtils;
   @Autowired private JobRepositoryTestUtils jobRepositoryTestUtils;
   @Autowired private SubscriptionRepository subscriptionRepository;
@@ -85,6 +90,9 @@ class SubscriptionBatchIT {
         subscriptionRepository.findSubscriptionByNextExecutionDateAndIsActive(
             LocalDate.now(), true);
     int initialSize = transactionRepository.findAll().size();
+    mockServer.mockUserPreference(subscriptions.getFirst().getCurrency());
+    mockServer.mockExchangeRate(
+        Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal());
 
     var jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 

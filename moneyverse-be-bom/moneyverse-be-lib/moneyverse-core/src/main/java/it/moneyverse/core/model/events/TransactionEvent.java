@@ -16,7 +16,9 @@ public class TransactionEvent implements MessageEvent<UUID, String> {
   private UUID categoryId;
   private UUID budgetId;
   private BigDecimal amount;
+  private BigDecimal normalizedAmount;
   private BigDecimal previousAmount;
+  private String currency;
   private LocalDate date;
   private EventTypeEnum eventType;
 
@@ -60,12 +62,28 @@ public class TransactionEvent implements MessageEvent<UUID, String> {
     this.amount = amount;
   }
 
+  public BigDecimal getNormalizedAmount() {
+    return normalizedAmount;
+  }
+
+  public void setNormalizedAmount(BigDecimal normalizedAmount) {
+    this.normalizedAmount = normalizedAmount;
+  }
+
   public BigDecimal getPreviousAmount() {
     return previousAmount;
   }
 
   public void setPreviousAmount(BigDecimal previousAmount) {
     this.previousAmount = previousAmount;
+  }
+
+  public String getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(String currency) {
+    this.currency = currency;
   }
 
   public LocalDate getDate() {

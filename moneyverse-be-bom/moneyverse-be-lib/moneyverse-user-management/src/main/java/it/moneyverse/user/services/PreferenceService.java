@@ -1,7 +1,7 @@
 package it.moneyverse.user.services;
 
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.core.model.dto.PreferenceDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import java.util.List;
 import java.util.UUID;

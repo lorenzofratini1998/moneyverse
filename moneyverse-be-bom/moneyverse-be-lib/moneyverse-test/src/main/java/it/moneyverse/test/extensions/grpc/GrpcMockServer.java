@@ -6,6 +6,7 @@ import static org.grpcmock.GrpcMock.unaryMethod;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.grpc.lib.*;
 import it.moneyverse.test.utils.RandomUtils;
+import java.math.BigDecimal;
 import org.grpcmock.junit5.GrpcMockExtension;
 
 public class GrpcMockServer extends GrpcMockExtension {
@@ -34,6 +35,16 @@ public class GrpcMockServer extends GrpcMockExtension {
     stubFor(
         unaryMethod(UserServiceGrpc.getGetUserByIdMethod())
             .willReturn(UserResponse.getDefaultInstance()));
+  }
+
+  public void mockUserPreference(String currency) {
+    stubFor(
+        unaryMethod(UserServiceGrpc.getGetUserPreferenceMethod())
+            .willReturn(
+                UserPreferenceResponse.newBuilder()
+                    .setPreferenceValue(
+                        Math.random() < 0.5 ? currency : RandomUtils.randomString(3).toUpperCase())
+                    .build()));
   }
 
   public void mockExistentAccount() {
@@ -84,6 +95,13 @@ public class GrpcMockServer extends GrpcMockExtension {
                     .setCurrencyId(RandomUtils.randomUUID().toString())
                     .setIsoCode(isoCode)
                     .build()));
+  }
+
+  public void mockExchangeRate(BigDecimal exchangeRate) {
+    stubFor(
+        unaryMethod(CurrencyServiceGrpc.getGetExchangeRateMethod())
+            .willReturn(
+                ExchangeRateResponse.newBuilder().setRate(exchangeRate.doubleValue()).build()));
   }
 
   public int getPort() {

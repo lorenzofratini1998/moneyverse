@@ -1,25 +1,22 @@
 package it.moneyverse.transaction.services;
 
+import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
 import it.moneyverse.transaction.model.dto.*;
-import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
-import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
-import it.moneyverse.transaction.model.repositories.TransferRepository;
+import it.moneyverse.transaction.runtime.messages.TransactionEventPublisher;
 import it.moneyverse.transaction.utils.mapper.TransactionMapper;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,58 +31,78 @@ public class TransactionManagementService implements TransactionService {
 
   private final TransactionRepository transactionRepository;
   private final TagRepository tagRepository;
-  private final TransferRepository transferRepository;
   private final CurrencyServiceClient currencyServiceClient;
   private final AccountServiceClient accountServiceClient;
   private final UserServiceClient userServiceClient;
   private final BudgetServiceClient budgetServiceClient;
-  private final SubscriptionRepository subscriptionRepository;
+  private final TransactionEventPublisher transactionEventPublisher;
+  private final TransferService transferService;
+  private final SubscriptionService subscriptionService;
+  private final TagService tagService;
 
   public TransactionManagementService(
       TransactionRepository transactionRepository,
       TagRepository tagRepository,
-      TransferRepository transferRepository,
       CurrencyServiceClient currencyServiceClient,
       AccountServiceClient accountServiceClient,
       UserServiceClient userServiceGrpcClient,
       BudgetServiceClient budgetServiceClient,
-      SubscriptionRepository subscriptionRepository) {
+      TransactionEventPublisher transactionEventPublisher,
+      TransferService transferService,
+      SubscriptionService subscriptionService,
+      TagService tagService) {
     this.transactionRepository = transactionRepository;
     this.tagRepository = tagRepository;
-    this.transferRepository = transferRepository;
     this.currencyServiceClient = currencyServiceClient;
     this.accountServiceClient = accountServiceClient;
     this.userServiceClient = userServiceGrpcClient;
     this.budgetServiceClient = budgetServiceClient;
-    this.subscriptionRepository = subscriptionRepository;
+    this.transactionEventPublisher = transactionEventPublisher;
+    this.transferService = transferService;
+    this.subscriptionService = subscriptionService;
+    this.tagService = tagService;
   }
 
   @Override
   @Transactional
   public List<TransactionDto> createTransactions(TransactionRequestDto request) {
     List<Transaction> transactions =
-        request.transactions().stream()
-            .map(transaction -> createTransaction(request.userId(), transaction))
-            .toList();
-
-    return TransactionMapper.toTransactionDto(transactionRepository.saveAll(transactions));
+        transactionRepository.saveAll(
+            request.transactions().stream()
+                .map(transaction -> createTransaction(request.userId(), transaction))
+                .toList());
+    transactions.forEach(
+        transaction -> transactionEventPublisher.publishEvent(transaction, EventTypeEnum.CREATE));
+    return TransactionMapper.toTransactionDto(transactions);
   }
 
   private Transaction createTransaction(UUID userId, TransactionRequestItemDto request) {
-    accountServiceClient.checkIfAccountExists(request.accountId());
-    budgetServiceClient.checkIfCategoryExists(request.categoryId());
+    AccountDto account = accountServiceClient.getAccountById(request.accountId());
+    if (request.categoryId() != null) {
+      budgetServiceClient.checkIfCategoryExists(request.categoryId());
+    }
     currencyServiceClient.checkIfCurrencyExists(request.currency());
     Set<Tag> tags = getTransactionTags(request.tags());
-    if (request.tags() != null && !request.tags().isEmpty()) {
-      getTransactionTags(request.tags());
-    }
     LOGGER.info(
         "Creating transaction for account {} and category {}",
         request.accountId(),
         request.categoryId());
-    return tags.isEmpty()
-        ? TransactionMapper.toTransaction(userId, request)
-        : TransactionMapper.toTransaction(userId, request, tags);
+    Transaction transaction =
+        tags.isEmpty()
+            ? TransactionMapper.toTransaction(userId, request)
+            : TransactionMapper.toTransaction(userId, request, tags);
+    if (transaction == null) {
+      return null;
+    }
+    if (!request.currency().equalsIgnoreCase(account.getCurrency())) {
+      transaction.setAmount(
+          currencyServiceClient.convertAmount(
+              request.amount(), request.currency(), account.getCurrency(), request.date()));
+    }
+    transaction.setNormalizedAmount(
+        currencyServiceClient.convertCurrencyAmountByUserPreference(
+            userId, transaction.getAmount(), account.getCurrency(), request.date()));
+    return transaction;
   }
 
   @Override
@@ -123,16 +140,43 @@ public class TransactionManagementService implements TransactionService {
   @Transactional
   public TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request) {
     Transaction transaction = findTransactionById(transactionId);
+    AccountDto account = null;
+    if (request.accountId() != null) {
+      account = accountServiceClient.getAccountById(request.accountId());
+    }
     if (request.currency() != null) {
       currencyServiceClient.checkIfCurrencyExists(request.currency());
     }
+    if (request.categoryId() != null) {
+      budgetServiceClient.checkIfCategoryExists(request.categoryId());
+    }
     Set<Tag> tags = getTransactionTags(request.tags());
     transaction = TransactionMapper.partialUpdate(transaction, request, tags);
-    TransactionDto result =
-        TransactionMapper.toTransactionDto(transactionRepository.save(transaction));
+
+    if (account != null
+        && request.currency() != null
+        && !request.currency().equalsIgnoreCase(account.getCurrency())) {
+      transaction.setAmount(
+          currencyServiceClient.convertAmount(
+              transaction.getAmount(),
+              request.currency(),
+              account.getCurrency(),
+              transaction.getDate()));
+    }
+
+    transaction.setNormalizedAmount(
+        currencyServiceClient.convertCurrencyAmountByUserPreference(
+            transaction.getUserId(),
+            transaction.getAmount(),
+            request.currency(),
+            transaction.getDate()));
+    transaction = transactionRepository.save(transaction);
     LOGGER.info(
-        "Updated transaction: {} for user {}", result.getTransactionId(), result.getUserId());
-    return result;
+        "Updated transaction: {} for user {}",
+        transaction.getTransactionId(),
+        transaction.getUserId());
+    transactionEventPublisher.publishEvent(transaction, EventTypeEnum.UPDATE);
+    return TransactionMapper.toTransactionDto(transaction);
   }
 
   private Set<Tag> getTransactionTags(Set<UUID> tagIds) {
@@ -160,25 +204,17 @@ public class TransactionManagementService implements TransactionService {
         "Deleted transaction: {} for user {}",
         transaction.getTransactionId(),
         transaction.getUserId());
+    transactionEventPublisher.publishEvent(transaction, EventTypeEnum.DELETE);
   }
 
   @Override
   @Transactional
   public void deleteAllTransactionsByUserId(UUID userId) {
     userServiceClient.checkIfUserStillExist(userId);
+    transferService.deleteAllTransfersByUserId(userId);
+    subscriptionService.deleteSubscriptionsByUserId(userId);
+    tagService.deleteAllTagsByUserId(userId);
     LOGGER.info("Deleting transactions by userId {}", userId);
-    transferRepository.deleteAll(transferRepository.findTransferByUserId(userId));
-    subscriptionRepository.deleteAll(subscriptionRepository.findSubscriptionByUserId(userId));
-    List<Tag> tags = tagRepository.findByUserId(userId);
-    for (Tag tag : tags) {
-      tag.getTransactions()
-          .forEach(
-              transaction -> {
-                transaction.getTags().remove(tag);
-                transactionRepository.save(transaction);
-              });
-    }
-    tagRepository.deleteAll(tagRepository.findByUserId(userId));
     transactionRepository.deleteAll(transactionRepository.findTransactionByUserId(userId));
   }
 
@@ -186,25 +222,27 @@ public class TransactionManagementService implements TransactionService {
   @Transactional
   public void deleteAllTransactionsByAccountId(UUID accountId) {
     accountServiceClient.checkIfAccountStillExists(accountId);
+    transferService.deleteAllTransfersByAccountId(accountId);
+    subscriptionService.deleteSubscriptionsByAccountId(accountId);
     LOGGER.info("Deleting transactions by account id {}", accountId);
-    transferRepository.deleteAll(transferRepository.findTransferByAccountId(accountId));
-    subscriptionRepository.deleteAll(subscriptionRepository.findSubscriptionByAccountId(accountId));
-    transactionRepository.deleteAll(transactionRepository.findTransactionByAccountId(accountId));
+    List<Transaction> transactions = transactionRepository.findTransactionByAccountId(accountId);
+    transactionRepository.deleteAll(transactions);
+    for (Transaction transaction : transactions) {
+      transactionEventPublisher.publishEvent(transaction, EventTypeEnum.DELETE);
+    }
   }
 
   @Override
   @Transactional
   public void removeCategoryFromTransactions(UUID categoryId) {
     budgetServiceClient.checkIfCategoryStillExists(categoryId);
+    subscriptionService.removeCategoryFromAllSubscriptions(categoryId);
     LOGGER.info("Removing category {} from transactions", categoryId);
-    List<Subscription> subscriptions =
-        subscriptionRepository.findSubscriptionByCategoryId(categoryId);
-    if (!subscriptions.isEmpty()) {
-      subscriptions.forEach(subscription -> subscription.setCategoryId(null));
-      subscriptionRepository.saveAll(subscriptions);
-    }
     List<Transaction> transactions = transactionRepository.findTransactionByCategoryId(categoryId);
     transactions.forEach(transaction -> transaction.setCategoryId(null));
     transactionRepository.saveAll(transactions);
+    for (Transaction transaction : transactions) {
+      transactionEventPublisher.publishEvent(transaction, EventTypeEnum.UPDATE);
+    }
   }
 }

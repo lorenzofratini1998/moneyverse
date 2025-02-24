@@ -4,10 +4,11 @@ import static it.moneyverse.core.utils.constants.CacheConstants.CURRENCIES_CACHE
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import it.moneyverse.core.model.dto.CurrencyDto;
+import it.moneyverse.core.model.dto.ExchangeRateDto;
 import it.moneyverse.core.utils.properties.CurrencyServiceGrpcCircuitBreakerProperties;
-import it.moneyverse.grpc.lib.CurrencyRequest;
-import it.moneyverse.grpc.lib.CurrencyResponse;
-import it.moneyverse.grpc.lib.CurrencyServiceGrpc;
+import it.moneyverse.grpc.lib.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -42,14 +43,66 @@ public class CurrencyGrpcService {
             .build());
   }
 
+  @Cacheable(
+      value = CURRENCIES_CACHE,
+      key = "#currencyFrom + '_' + #currencyTo + '_' + #date.toString()",
+      unless = "#result == null")
+  @CircuitBreaker(
+      name = CurrencyServiceGrpcCircuitBreakerProperties.CURRENCY_SERVICE_GRPC,
+      fallbackMethod = "fallbackGetExchangeRate")
+  public Optional<ExchangeRateDto> getExchangeRate(
+      String currencyFrom, String currencyTo, LocalDate date) {
+    if (currencyFrom.equals(currencyTo)) {
+      return Optional.of(
+          ExchangeRateDto.builder()
+              .withCurrencyFrom(currencyFrom)
+              .withCurrencyTo(currencyTo)
+              .withDate(date)
+              .withRate(BigDecimal.ONE)
+              .build());
+    }
+    final ExchangeRateResponse response =
+        stub.getExchangeRate(
+            ExchangeRateRequest.newBuilder()
+                .setFromCurrency(currencyFrom)
+                .setToCurrency(currencyTo)
+                .setDate(date.toString())
+                .build());
+    if (response == null || isEmptyResponse(response)) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        ExchangeRateDto.builder()
+            .withCurrencyFrom(currencyFrom)
+            .withCurrencyTo(currencyTo)
+            .withDate(date)
+            .withRate(BigDecimal.valueOf(response.getRate()))
+            .build());
+  }
+
   private boolean isEmptyResponse(CurrencyResponse response) {
     return response.getCurrencyId().isEmpty() && response.getIsoCode().isEmpty();
   }
 
+  private boolean isEmptyResponse(ExchangeRateResponse response) {
+    return response.getRate() == 0;
+  }
+
   protected Optional<CurrencyDto> fallbackGetCurrencyByCode(String code, Throwable throwable) {
     LOGGER.error(
-        "Impossible to contact the CurrencyService to retrieve whether the currency {}. Returning FALSE as fallback: {}",
+        "Impossible to contact the CurrencyService to retrieve the currency {}. Returning FALSE as fallback: {}",
         code,
+        throwable.getMessage());
+    return Optional.empty();
+  }
+
+  protected Optional<ExchangeRateDto> fallbackGetExchangeRate(
+      String currencyFrom, String currencyTo, LocalDate date, Throwable throwable) {
+    LOGGER.error(
+        "Impossible to contact the CurrencyService to retrieve the exchange rate between {} and {} for the date {}.. Returning FALSE as fallback: {}",
+        currencyFrom,
+        currencyTo,
+        date,
         throwable.getMessage());
     return Optional.empty();
   }

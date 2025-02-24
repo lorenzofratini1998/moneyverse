@@ -2,6 +2,7 @@ package it.moneyverse.transaction.runtime.batch;
 
 import static it.moneyverse.transaction.utils.SubscriptionUtils.*;
 
+import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Transaction;
 import jakarta.annotation.Nonnull;
@@ -14,6 +15,12 @@ import org.springframework.stereotype.Component;
 public class SubscriptionProcessor
     implements ItemProcessor<List<Subscription>, List<Subscription>> {
 
+  private final CurrencyServiceClient currencyServiceClient;
+
+  public SubscriptionProcessor(CurrencyServiceClient currencyServiceClient) {
+    this.currencyServiceClient = currencyServiceClient;
+  }
+
   @Override
   public List<Subscription> process(@Nonnull List<Subscription> subscriptions) {
     for (Subscription subscription : subscriptions) {
@@ -25,6 +32,12 @@ public class SubscriptionProcessor
         subscription.setActive(false);
       }
       Transaction transaction = createSubscriptionTransaction(subscription, LocalDate.now());
+      transaction.setNormalizedAmount(
+          currencyServiceClient.convertCurrencyAmountByUserPreference(
+              subscription.getUserId(),
+              transaction.getAmount(),
+              transaction.getCurrency(),
+              transaction.getDate()));
       transaction.setCreatedBy(BATCH_JOB);
       transaction.setUpdatedBy(BATCH_JOB);
       subscription.addTransaction(transaction);

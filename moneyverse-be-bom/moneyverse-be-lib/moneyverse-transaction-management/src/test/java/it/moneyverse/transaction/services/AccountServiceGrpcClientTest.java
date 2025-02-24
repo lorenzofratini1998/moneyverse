@@ -26,10 +26,9 @@ class AccountServiceGrpcClientTest {
     UUID accountId = RandomUtils.randomUUID();
     when(accountGrpcService.getAccountById(accountId)).thenReturn(Optional.of(accountDto));
 
-    Optional<AccountDto> response = accountServiceGrpcClient.getAccountById(accountId);
+    AccountDto response = accountServiceGrpcClient.getAccountById(accountId);
 
     assertNotNull(response);
-    assertTrue(response.isPresent());
     verify(accountGrpcService, times(1)).getAccountById(accountId);
   }
 

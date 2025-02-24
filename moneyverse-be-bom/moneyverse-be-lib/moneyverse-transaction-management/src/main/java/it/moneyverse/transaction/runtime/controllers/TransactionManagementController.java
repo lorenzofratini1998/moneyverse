@@ -91,7 +91,7 @@ public class TransactionManagementController
   @PutMapping("/transfer/{transferId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
-      "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
+      "@transferRepository.existsByTransferIdAndUserId(#transferId, @securityService.getAuthenticatedUserId())")
   public TransferDto updateTransfer(
       @PathVariable UUID transferId, @RequestBody TransferUpdateRequestDto request) {
     return transferService.updateTransfer(transferId, request);
@@ -101,7 +101,7 @@ public class TransactionManagementController
   @DeleteMapping("/transfer/{transferId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PreAuthorize(
-      "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
+      "@transferRepository.existsByTransferIdAndUserId(#transferId, @securityService.getAuthenticatedUserId())")
   public void deleteTransfer(@PathVariable UUID transferId) {
     transferService.deleteTransfer(transferId);
   }
@@ -110,7 +110,7 @@ public class TransactionManagementController
   @GetMapping("/transfer/{transferId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
-      "@transferRepository.existsByTransactionFrom_UserIdAndTransactionTo_UserIdAndTransferId(@securityService.getAuthenticatedUserId(), @securityService.getAuthenticatedUserId(), #transferId)")
+      "@transferRepository.existsByTransferIdAndUserId(#transferId, @securityService.getAuthenticatedUserId())")
   public TransferDto getTransactionsByTransferId(@PathVariable UUID transferId) {
     return transferService.getTransactionsByTransferId(transferId);
   }

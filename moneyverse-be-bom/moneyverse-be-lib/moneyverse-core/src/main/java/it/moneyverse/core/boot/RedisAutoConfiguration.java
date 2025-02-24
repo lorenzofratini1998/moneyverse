@@ -1,5 +1,10 @@
 package it.moneyverse.core.boot;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.moneyverse.core.utils.properties.RedisProperties;
 import java.time.Duration;
 import java.util.UUID;
@@ -57,6 +62,7 @@ public class RedisAutoConfiguration {
     template.setConnectionFactory(redisConnectionFactory);
     Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer =
         new Jackson2JsonRedisSerializer<>(Object.class);
+
     template.setValueSerializer(jackson2JsonRedisSerializer);
     template.setHashValueSerializer(jackson2JsonRedisSerializer);
     template.setKeySerializer(new StringRedisSerializer());
@@ -65,12 +71,20 @@ public class RedisAutoConfiguration {
 
   @Bean
   public RedisCacheConfiguration defaultCacheConfiguration() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.enable(JsonGenerator.Feature.IGNORE_UNKNOWN);
+    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    objectMapper.activateDefaultTyping(
+        objectMapper.getPolymorphicTypeValidator(),
+        ObjectMapper.DefaultTyping.NON_FINAL,
+        JsonTypeInfo.As.PROPERTY);
     return RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofMinutes(30))
         .disableCachingNullValues()
         .serializeValuesWith(
             RedisSerializationContext.SerializationPair.fromSerializer(
-                new Jackson2JsonRedisSerializer<>(Object.class)));
+                new Jackson2JsonRedisSerializer<>(objectMapper, Object.class)));
   }
 
   @Bean

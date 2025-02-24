@@ -15,6 +15,9 @@ public class TransactionMapper {
   public static Transaction toTransaction(
       UUID userId, TransactionRequestItemDto request, Set<Tag> tags) {
     Transaction transaction = toTransaction(userId, request);
+    if (transaction == null) {
+      return null;
+    }
     transaction.setTags(tags);
     return transaction;
   }

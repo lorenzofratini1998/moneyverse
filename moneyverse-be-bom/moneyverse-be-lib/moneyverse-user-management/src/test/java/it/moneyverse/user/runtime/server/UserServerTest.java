@@ -13,6 +13,7 @@ import it.moneyverse.grpc.lib.UserRequest;
 import it.moneyverse.grpc.lib.UserResponse;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.services.KeycloakService;
 import java.io.IOException;
 import java.util.Optional;
@@ -31,19 +32,22 @@ public class UserServerTest {
   private ManagedChannel channel;
   private UserServer userServer;
   @Mock KeycloakService keycloakService;
+  @Mock UserPreferenceRepository userPreferenceRepository;
 
   @BeforeEach
   void setup() throws IOException {
     String serverName = InProcessServerBuilder.generateName();
     Server server =
         InProcessServerBuilder.forName(serverName)
-            .addService(new UserGrpcService(keycloakService))
+            .addService(new UserGrpcService(keycloakService, userPreferenceRepository))
             .directExecutor()
             .build()
             .start();
     channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     stub = UserServiceGrpc.newBlockingStub(channel);
-    userServer = new UserServer(RandomUtils.randomBigDecimal().intValue(), keycloakService);
+    userServer =
+        new UserServer(
+            RandomUtils.randomBigDecimal().intValue(), keycloakService, userPreferenceRepository);
     userServer.start();
   }
 

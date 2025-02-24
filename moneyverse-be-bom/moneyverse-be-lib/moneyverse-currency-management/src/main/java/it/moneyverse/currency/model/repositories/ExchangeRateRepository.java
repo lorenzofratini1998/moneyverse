@@ -12,4 +12,6 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, UUID
     @Query(value = "SELECT MIN(e.date) FROM ExchangeRate e")
     Optional<LocalDate> findMinDate();
 
+  Optional<ExchangeRate> findExchangeRateByCurrencyFromAndCurrencyToAndDate(
+      String currencyFrom, String currencyTo, LocalDate date);
 }

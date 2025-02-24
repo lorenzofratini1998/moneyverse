@@ -39,6 +39,9 @@ public class Transaction extends Auditable implements Serializable {
   @Column(name = "AMOUNT", nullable = false)
   private BigDecimal amount;
 
+  @Column(name = "NORMALIZED_AMOUNT", nullable = false)
+  private BigDecimal normalizedAmount = amount;
+
   @Column(name = "CURRENCY", nullable = false, length = 3)
   private String currency;
 
@@ -121,6 +124,14 @@ public class Transaction extends Auditable implements Serializable {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+  public BigDecimal getNormalizedAmount() {
+    return normalizedAmount;
+  }
+
+  public void setNormalizedAmount(BigDecimal normalizedAmount) {
+    this.normalizedAmount = normalizedAmount;
   }
 
   public String getCurrency() {

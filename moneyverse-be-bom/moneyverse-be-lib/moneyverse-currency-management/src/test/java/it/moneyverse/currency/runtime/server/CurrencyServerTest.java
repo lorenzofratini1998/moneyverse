@@ -10,6 +10,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import it.moneyverse.core.boot.*;
 import it.moneyverse.currency.model.entities.Currency;
 import it.moneyverse.currency.model.repositories.CurrencyRepository;
+import it.moneyverse.currency.model.repositories.ExchangeRateRepository;
 import it.moneyverse.currency.utils.CurrencyTestContext;
 import it.moneyverse.grpc.lib.CurrencyRequest;
 import it.moneyverse.grpc.lib.CurrencyResponse;
@@ -47,6 +48,7 @@ class CurrencyServerTest {
   private ManagedChannel channel;
   private CurrencyServer currencyServer;
   @Autowired private CurrencyRepository currencyRepository;
+  @Autowired private ExchangeRateRepository exchangeRateRepository;
   @Autowired EntityManager entityManager;
 
   static CurrencyTestContext testContext;
@@ -62,13 +64,15 @@ class CurrencyServerTest {
     channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     Server server =
         InProcessServerBuilder.forName(serverName)
-            .addService(new CurrencyManagementGrpcService(currencyRepository))
+            .addService(
+                new CurrencyManagementGrpcService(currencyRepository, exchangeRateRepository))
             .directExecutor()
             .build()
             .start();
     stub = CurrencyServiceGrpc.newBlockingStub(channel);
     currencyServer =
-        new CurrencyServer(RandomUtils.randomBigDecimal().intValue(), currencyRepository);
+        new CurrencyServer(
+            RandomUtils.randomBigDecimal().intValue(), currencyRepository, exchangeRateRepository);
     currencyServer.start();
     testContext.getCurrencies().forEach(currency -> currency.setCurrencyId(null));
     for (Currency currency : testContext.getCurrencies()) {

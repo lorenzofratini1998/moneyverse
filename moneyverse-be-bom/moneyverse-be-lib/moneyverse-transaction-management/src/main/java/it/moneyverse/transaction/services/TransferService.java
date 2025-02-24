@@ -14,4 +14,8 @@ public interface TransferService {
   void deleteTransfer(UUID transferId);
 
   TransferDto getTransactionsByTransferId(UUID transferId);
+
+  void deleteAllTransfersByUserId(UUID userId);
+
+  void deleteAllTransfersByAccountId(UUID accountId);
 }

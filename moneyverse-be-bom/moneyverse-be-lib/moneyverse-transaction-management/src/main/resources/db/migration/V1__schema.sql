@@ -33,20 +33,21 @@ CREATE SEQUENCE transactions_transaction_id_seq START 1;
 
 CREATE TABLE transactions
 (
-    transaction_id  UUID           NOT NULL,
-    user_id         UUID           NOT NULL,
-    account_id      UUID           NOT NULL,
-    category_id     UUID,
-    date            DATE           NOT NULL,
-    description     VARCHAR(255)   NOT NULL,
-    amount          DECIMAL(18, 2) NOT NULL,
-    currency        VARCHAR(3)     NOT NULL,
-    created_by      VARCHAR(255)   NOT NULL,
-    created_at      TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_by      VARCHAR(255),
-    updated_at      TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    transfer_id     UUID,
-    subscription_id UUID,
+    transaction_id    UUID           NOT NULL,
+    user_id           UUID           NOT NULL,
+    account_id        UUID           NOT NULL,
+    category_id       UUID,
+    date              DATE           NOT NULL,
+    description       VARCHAR(255)   NOT NULL,
+    amount            DECIMAL(18, 2) NOT NULL,
+    normalized_amount DECIMAL(18, 2) NOT NULL,
+    currency          VARCHAR(3)     NOT NULL,
+    created_by        VARCHAR(255)   NOT NULL,
+    created_at        TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_by        VARCHAR(255),
+    updated_at        TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    transfer_id       UUID,
+    subscription_id   UUID,
     CONSTRAINT pk_transactions PRIMARY KEY (transaction_id)
 );
 
@@ -62,6 +63,7 @@ CREATE TABLE transfers
     date                DATE           NOT NULL,
     amount              DECIMAL(18, 2) NOT NULL,
     currency            VARCHAR(3)     NOT NULL,
+    user_id UUID NOT NULL,
     CONSTRAINT pk_transfers PRIMARY KEY (transfer_id)
 );
 

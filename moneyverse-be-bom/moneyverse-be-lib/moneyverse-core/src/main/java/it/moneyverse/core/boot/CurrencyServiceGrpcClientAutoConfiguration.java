@@ -8,6 +8,7 @@ import io.grpc.ManagedChannelBuilder;
 import it.moneyverse.core.services.CurrencyGrpcService;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.CurrencyServiceGrpcClient;
+import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.core.utils.properties.CurrencyServiceGrpcCircuitBreakerProperties;
 import it.moneyverse.core.utils.properties.CurrencyServiceGrpcClientProperties;
 import it.moneyverse.grpc.lib.CurrencyServiceGrpc;
@@ -73,7 +74,8 @@ public class CurrencyServiceGrpcClientAutoConfiguration {
   }
 
   @Bean
-  public CurrencyServiceClient currencyServiceClient(CurrencyGrpcService currencyGrpcService) {
-    return new CurrencyServiceGrpcClient(currencyGrpcService);
+  public CurrencyServiceClient currencyServiceClient(
+      CurrencyGrpcService currencyGrpcService, UserServiceClient userServiceClient) {
+    return new CurrencyServiceGrpcClient(currencyGrpcService, userServiceClient);
   }
 }

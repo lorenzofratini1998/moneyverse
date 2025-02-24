@@ -51,6 +51,7 @@ public class TransferFactory {
     Transaction transaction = createTransaction(request);
     transaction.setAccountId(request.fromAccount());
     transaction.setAmount(request.amount().multiply(BigDecimal.valueOf(-1)));
+    transaction.setNormalizedAmount(transaction.getAmount());
     transaction.setDescription("Transfer to %s".formatted(request.toAccount()));
     return transaction;
   }
@@ -59,6 +60,7 @@ public class TransferFactory {
     Transaction transaction = createTransaction(request);
     transaction.setAccountId(request.toAccount());
     transaction.setAmount(request.amount());
+    transaction.setNormalizedAmount(transaction.getAmount());
     transaction.setDescription("Transfer from %s".formatted(request.fromAccount()));
     return transaction;
   }
@@ -80,6 +82,7 @@ public class TransferFactory {
       Transaction transactionFrom, Transaction transactionTo, TransferRequestDto request) {
     Transfer transfer = new Transfer();
     transfer.setTransferId(RandomUtils.randomUUID());
+    transfer.setUserId(request.userId());
     transfer.setTransactionFrom(transactionFrom);
     transfer.setTransactionTo(transactionTo);
     transfer.setAmount(request.amount());

@@ -80,6 +80,7 @@ public class SubscriptionFactory {
       transaction.setDescription(subscription.getSubscriptionName());
       transaction.setAmount(
           subscription.getAmount().divide(BigDecimal.valueOf(duration), RoundingMode.HALF_DOWN));
+      transaction.setNormalizedAmount(transaction.getAmount());
       transaction.setCurrency(subscription.getCurrency());
       transaction.setCreatedBy(FAKE_USER);
       transaction.setCreatedAt(LocalDateTime.now());

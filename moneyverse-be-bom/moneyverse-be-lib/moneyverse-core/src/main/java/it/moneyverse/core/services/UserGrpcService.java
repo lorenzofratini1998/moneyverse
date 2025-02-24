@@ -1,13 +1,14 @@
 package it.moneyverse.core.services;
 
 import static it.moneyverse.core.utils.constants.CacheConstants.USERS_CACHE;
+import static it.moneyverse.core.utils.constants.CacheConstants.USER_PREFERENCES_CACHE;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import it.moneyverse.core.model.dto.PreferenceDto;
 import it.moneyverse.core.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.core.utils.properties.UserServiceGrpcCircuitBreakerProperties;
-import it.moneyverse.grpc.lib.UserRequest;
-import it.moneyverse.grpc.lib.UserResponse;
-import it.moneyverse.grpc.lib.UserServiceGrpc;
+import it.moneyverse.grpc.lib.*;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -53,7 +54,42 @@ public class UserGrpcService {
 
   protected Optional<UserDto> fallbackGetUserById(UUID userId, Throwable throwable) {
     LOGGER.error(
-        "Impossible to contact the UserService to retrieve the user {}. Returning FALSE as fallback: {}",
+        "Impossible to contact the UserService to retrieve the user {}. Returning EMPTY as fallback: {}",
+        userId,
+        throwable.getMessage());
+    return Optional.empty();
+  }
+
+  @Cacheable(
+      value = USER_PREFERENCES_CACHE,
+      key = "#userId + '_' + #preferenceName",
+      unless = "#result == null")
+  @CircuitBreaker(
+      name = UserServiceGrpcCircuitBreakerProperties.USER_SERVICE_GRPC,
+      fallbackMethod = "fallbackGetUserPreference")
+  public Optional<UserPreferenceDto> getUserPreference(UUID userId, String preferenceName) {
+    final UserPreferenceResponse response =
+        stub.getUserPreference(
+            UserPreferenceRequest.newBuilder()
+                .setUserId(userId.toString())
+                .setPreferenceKey(preferenceName)
+                .build());
+    if (response == null || response.getPreferenceValue().isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        UserPreferenceDto.builder()
+            .withUserId(userId)
+            .withPreference(PreferenceDto.builder().withName(preferenceName).build())
+            .withValue(response.getPreferenceValue())
+            .build());
+  }
+
+  protected Optional<UserPreferenceDto> fallbackGetUserPreference(
+      UUID userId, String preferenceName, Throwable throwable) {
+    LOGGER.error(
+        "Impossible to contact the UserService to retrieve the preference {} for user {}. Returning EMPTY as fallback: {}",
+        preferenceName,
         userId,
         throwable.getMessage());
     return Optional.empty();

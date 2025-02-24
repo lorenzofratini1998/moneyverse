@@ -16,4 +16,10 @@ public interface SubscriptionService {
   void deleteSubscription(UUID subscriptionId);
 
   SubscriptionDto updateSubscription(UUID subscriptionId, SubscriptionUpdateRequestDto request);
+
+  void deleteSubscriptionsByUserId(UUID userId);
+
+  void deleteSubscriptionsByAccountId(UUID accountId);
+
+  void removeCategoryFromAllSubscriptions(UUID categoryId);
 }

@@ -4,6 +4,7 @@ import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.runtime.messages.TransactionEventPublisher;
+import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +32,13 @@ public class SubscriptionWriter implements ItemWriter<List<Subscription>> {
     List<Subscription> entities = chunk.getItems().stream().flatMap(List::stream).toList();
     if (!entities.isEmpty()) {
       entities = subscriptionRepository.saveAll(entities);
-      publishEvent(entities);
-    }
-  }
-
-  private void publishEvent(List<Subscription> entities) {
-    for (Subscription subscription : entities) {
-      transactionEventPublisher.publishEvent(subscription, EventTypeEnum.CREATE);
+      entities.stream()
+          .flatMap(subscription -> subscription.getTransactions().stream())
+          .filter(transaction -> transaction.getDate().equals(LocalDate.now()))
+          .toList()
+          .forEach(
+              transaction ->
+                  transactionEventPublisher.publishEvent(transaction, EventTypeEnum.CREATE));
     }
   }
 }

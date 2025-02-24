@@ -40,18 +40,21 @@ public class TagManagementService implements TagService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<TagDto> getUserTags(UUID userId) {
     LOGGER.info("Getting tags for user {}", userId);
     return TagMapper.toTagDto(tagRepository.findByUserId(userId));
   }
 
   @Override
+  @Transactional(readOnly = true)
   public TagDto getTagById(UUID tagId) {
     LOGGER.info("Getting tag {}", tagId);
     return TagMapper.toTagDto(findTagById(tagId));
   }
 
   @Override
+  @Transactional
   public TagDto updateTag(UUID tagId, TagUpdateRequestDto request) {
     Tag tag = findTagById(tagId);
     if (request.tagName() != null) {
@@ -63,6 +66,7 @@ public class TagManagementService implements TagService {
   }
 
   @Override
+  @Transactional
   public void deleteTag(UUID tagId) {
     Tag tag = findTagById(tagId);
     LOGGER.info("Deleting tag {}", tagId);
@@ -86,5 +90,21 @@ public class TagManagementService implements TagService {
       throw new ResourceAlreadyExistsException(
           "Tag %s already exists for user %s".formatted(tagName, userId));
     }
+  }
+
+  @Override
+  @Transactional
+  public void deleteAllTagsByUserId(UUID userId) {
+    LOGGER.info("Deleting all tags for user {}", userId);
+    List<Tag> tags = tagRepository.findByUserId(userId);
+    for (Tag tag : tags) {
+      tag.getTransactions()
+          .forEach(
+              transaction -> {
+                transaction.getTags().remove(tag);
+                transactionRepository.save(transaction);
+              });
+    }
+    tagRepository.deleteAll(tagRepository.findByUserId(userId));
   }
 }

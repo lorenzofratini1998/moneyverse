@@ -16,4 +16,6 @@ public interface TagService {
   TagDto updateTag(UUID tagId, TagUpdateRequestDto request);
 
   void deleteTag(UUID tagId);
+
+  void deleteAllTagsByUserId(UUID userId);
 }
