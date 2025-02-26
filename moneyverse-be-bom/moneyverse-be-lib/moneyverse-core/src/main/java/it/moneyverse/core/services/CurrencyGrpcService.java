@@ -1,6 +1,7 @@
 package it.moneyverse.core.services;
 
 import static it.moneyverse.core.utils.constants.CacheConstants.CURRENCIES_CACHE;
+import static it.moneyverse.core.utils.constants.CacheConstants.RATES_CACHE;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import it.moneyverse.core.model.dto.CurrencyDto;
@@ -44,7 +45,7 @@ public class CurrencyGrpcService {
   }
 
   @Cacheable(
-      value = CURRENCIES_CACHE,
+      value = RATES_CACHE,
       key = "#currencyFrom + '_' + #currencyTo + '_' + #date.toString()",
       unless = "#result == null")
   @CircuitBreaker(

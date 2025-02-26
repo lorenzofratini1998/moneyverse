@@ -45,15 +45,15 @@ public class FakeUtils {
   }
 
   public static TransactionEvent randomTransactionEvent(UUID budgetId) {
-    TransactionEvent event = new TransactionEvent();
-    event.setTransactionId(RandomUtils.randomUUID());
-    event.setAccountId(RandomUtils.randomUUID());
-    event.setCategoryId(RandomUtils.randomUUID());
-    event.setBudgetId(budgetId);
-    event.setDate(RandomUtils.randomLocalDate(2025, 2025));
-    event.setAmount(RandomUtils.randomBigDecimal());
-    event.setPreviousAmount(RandomUtils.randomBigDecimal());
-    return event;
+    return TransactionEvent.builder()
+        .withTransactionId(RandomUtils.randomUUID())
+        .withAccountId(RandomUtils.randomUUID())
+        .withCategoryId(RandomUtils.randomUUID())
+        .withBudgetId(budgetId)
+        .withDate(RandomUtils.randomLocalDate(2025, 2025))
+        .withAmount(RandomUtils.randomBigDecimal())
+        // .withPreviousAmount(RandomUtils.randomBigDecimal())
+        .build();
   }
 
   private FakeUtils() {}

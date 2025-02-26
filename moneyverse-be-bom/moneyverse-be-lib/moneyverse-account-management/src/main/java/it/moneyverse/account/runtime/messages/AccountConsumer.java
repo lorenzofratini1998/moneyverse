@@ -11,6 +11,7 @@ import it.moneyverse.core.model.events.TransactionEvent;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -55,7 +56,8 @@ public class AccountConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    accountService.incrementAccountBalance(event.getAccountId(), event.getAmount());
+    accountService.incrementAccountBalance(
+        event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
   }
 
   @RetryableTopic
@@ -68,7 +70,8 @@ public class AccountConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    accountService.decrementAccountBalance(event.getAccountId(), event.getAmount());
+    accountService.decrementAccountBalance(
+        event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
   }
 
   @Transactional
@@ -82,32 +85,26 @@ public class AccountConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    BigDecimal previousAmount = event.getPreviousAmount();
-    BigDecimal amount = event.getAmount() != null ? event.getAmount() : BigDecimal.ZERO;
-    boolean isAccountChanged =
-        event.getPreviousAccountId() != null
-            && !event.getPreviousAccountId().equals(event.getAccountId());
-
-    if (isAccountChanged) {
-      if (previousAmount == null) {
-        applyTransaction(event.getPreviousAccountId(), amount.negate());
-        applyTransaction(event.getAccountId(), amount);
-      } else {
-        applyTransaction(event.getPreviousAccountId(), previousAmount.negate());
-        applyTransaction(event.getAccountId(), event.getAmount());
-      }
-    } else {
-      applyTransaction(
-          event.getAccountId(),
-          amount.subtract(previousAmount != null ? previousAmount : BigDecimal.ZERO));
-    }
+    LOGGER.info(
+        "Undoing transaction {} on account {}",
+        event.getPreviousTransaction().getTransactionId(),
+        event.getPreviousTransaction().getAccountId());
+    applyTransaction(
+        event.getPreviousTransaction().getAccountId(),
+        event.getPreviousTransaction().getAmount().negate(),
+        event.getPreviousTransaction().getCurrency(),
+        event.getPreviousTransaction().getDate());
+    LOGGER.info(
+        "Applying transaction {} on account {}", event.getTransactionId(), event.getAccountId());
+    applyTransaction(event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
   }
 
-  private void applyTransaction(UUID accountId, BigDecimal amount) {
+  private void applyTransaction(
+      UUID accountId, BigDecimal amount, String currency, LocalDate date) {
     if (amount.compareTo(BigDecimal.ZERO) > 0) {
-      accountService.incrementAccountBalance(accountId, amount);
+      accountService.incrementAccountBalance(accountId, amount, currency, date);
     } else if (amount.compareTo(BigDecimal.ZERO) < 0) {
-      accountService.decrementAccountBalance(accountId, amount.abs());
+      accountService.decrementAccountBalance(accountId, amount.abs(), currency, date);
     }
   }
 }

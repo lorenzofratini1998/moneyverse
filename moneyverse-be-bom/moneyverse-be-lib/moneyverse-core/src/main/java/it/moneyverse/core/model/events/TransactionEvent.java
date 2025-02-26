@@ -1,123 +1,112 @@
 package it.moneyverse.core.model.events;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import it.moneyverse.core.enums.EventTypeEnum;
-import it.moneyverse.core.utils.JsonUtils;
-import java.lang.reflect.Field;
+import jakarta.json.bind.annotation.JsonbCreator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import org.springframework.util.ReflectionUtils;
 
-public class TransactionEvent implements MessageEvent<UUID, String> {
-  private UUID transactionId;
-  private UUID accountId;
-  private UUID previousAccountId;
-  private UUID categoryId;
-  private UUID previousCategoryId;
-  private UUID budgetId;
-  private BigDecimal amount;
-  private BigDecimal normalizedAmount;
-  private BigDecimal previousAmount;
-  private String currency;
-  private LocalDate date;
-  private EventTypeEnum eventType;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize(builder = TransactionEvent.Builder.class)
+public class TransactionEvent extends AbstractEvent {
+  private final UUID transactionId;
+  private final UUID accountId;
+  private final UUID categoryId;
+  private final UUID budgetId;
+  private final BigDecimal amount;
+  private final BigDecimal normalizedAmount;
+  private final String currency;
+  private final LocalDate date;
+  private final TransactionEvent previousTransaction;
+  private final EventTypeEnum eventType;
 
-  public UUID getTransactionId() {
-    return transactionId;
+  @JsonbCreator
+  public TransactionEvent(Builder builder) {
+    this.transactionId = builder.transactionId;
+    this.accountId = builder.accountId;
+    this.categoryId = builder.categoryId;
+    this.budgetId = builder.budgetId;
+    this.amount = builder.amount;
+    this.normalizedAmount = builder.normalizedAmount;
+    this.currency = builder.currency;
+    this.date = builder.date;
+    this.previousTransaction = builder.previousTransaction;
+    this.eventType = builder.eventType;
   }
 
-  public void setTransactionId(UUID transactionId) {
-    this.transactionId = transactionId;
+  public static class Builder {
+    private UUID transactionId;
+    private UUID accountId;
+    private UUID categoryId;
+    private UUID budgetId;
+    private BigDecimal amount;
+    private BigDecimal normalizedAmount;
+    private String currency;
+    private LocalDate date;
+    private TransactionEvent previousTransaction;
+    private EventTypeEnum eventType;
+
+    public Builder withTransactionId(UUID transactionId) {
+      this.transactionId = transactionId;
+      return this;
+    }
+
+    public Builder withAccountId(UUID accountId) {
+      this.accountId = accountId;
+      return this;
+    }
+
+    public Builder withCategoryId(UUID categoryId) {
+      this.categoryId = categoryId;
+      return this;
+    }
+
+    public Builder withBudgetId(UUID budgetId) {
+      this.budgetId = budgetId;
+      return this;
+    }
+
+    public Builder withAmount(BigDecimal amount) {
+      this.amount = amount;
+      return this;
+    }
+
+    public Builder withNormalizedAmount(BigDecimal normalizedAmount) {
+      this.normalizedAmount = normalizedAmount;
+      return this;
+    }
+
+    public Builder withCurrency(String currency) {
+      this.currency = currency;
+      return this;
+    }
+
+    public Builder withDate(LocalDate date) {
+      this.date = date;
+      return this;
+    }
+
+    public Builder withPreviousTransaction(TransactionEvent previousTransaction) {
+      this.previousTransaction = previousTransaction;
+      return this;
+    }
+
+    public Builder withEventType(EventTypeEnum eventType) {
+      this.eventType = eventType;
+      return this;
+    }
+
+    public TransactionEvent build() {
+      return new TransactionEvent(this);
+    }
   }
 
-  public UUID getAccountId() {
-    return accountId;
-  }
-
-  public void setAccountId(UUID accountId) {
-    this.accountId = accountId;
-  }
-
-  public UUID getPreviousAccountId() {
-    return previousAccountId;
-  }
-
-  public void setPreviousAccountId(UUID previousAccountId) {
-    this.previousAccountId = previousAccountId;
-  }
-
-  public UUID getCategoryId() {
-    return categoryId;
-  }
-
-  public void setCategoryId(UUID categoryId) {
-    this.categoryId = categoryId;
-  }
-
-  public UUID getPreviousCategoryId() {
-    return previousCategoryId;
-  }
-
-  public void setPreviousCategoryId(UUID previousCategoryId) {
-    this.previousCategoryId = previousCategoryId;
-  }
-
-  public UUID getBudgetId() {
-    return budgetId;
-  }
-
-  public void setBudgetId(UUID budgetId) {
-    this.budgetId = budgetId;
-  }
-
-  public BigDecimal getAmount() {
-    return amount;
-  }
-
-  public void setAmount(BigDecimal amount) {
-    this.amount = amount;
-  }
-
-  public BigDecimal getNormalizedAmount() {
-    return normalizedAmount;
-  }
-
-  public void setNormalizedAmount(BigDecimal normalizedAmount) {
-    this.normalizedAmount = normalizedAmount;
-  }
-
-  public BigDecimal getPreviousAmount() {
-    return previousAmount;
-  }
-
-  public void setPreviousAmount(BigDecimal previousAmount) {
-    this.previousAmount = previousAmount;
-  }
-
-  public String getCurrency() {
-    return currency;
-  }
-
-  public void setCurrency(String currency) {
-    this.currency = currency;
-  }
-
-  public LocalDate getDate() {
-    return date;
-  }
-
-  public void setDate(LocalDate date) {
-    this.date = date;
-  }
-
-  public EventTypeEnum getEventType() {
-    return eventType;
-  }
-
-  public void setEventType(EventTypeEnum eventType) {
-    this.eventType = eventType;
+  public static Builder builder() {
+    return new Builder();
   }
 
   @Override
@@ -125,18 +114,43 @@ public class TransactionEvent implements MessageEvent<UUID, String> {
     return transactionId;
   }
 
-  @Override
-  public String value() {
-    Map<String, Object> payload = new HashMap<>();
-    for (Field field : this.getClass().getDeclaredFields()) {
-      ReflectionUtils.makeAccessible(field);
-      payload.put(field.getName(), ReflectionUtils.getField(field, this));
-    }
-    return JsonUtils.toJson(payload);
+  public UUID getTransactionId() {
+    return transactionId;
   }
 
-  @Override
-  public String toString() {
-    return JsonUtils.toJson(this);
+  public UUID getAccountId() {
+    return accountId;
+  }
+
+  public UUID getCategoryId() {
+    return categoryId;
+  }
+
+  public UUID getBudgetId() {
+    return budgetId;
+  }
+
+  public BigDecimal getAmount() {
+    return amount;
+  }
+
+  public BigDecimal getNormalizedAmount() {
+    return normalizedAmount;
+  }
+
+  public String getCurrency() {
+    return currency;
+  }
+
+  public LocalDate getDate() {
+    return date;
+  }
+
+  public TransactionEvent getPreviousTransaction() {
+    return previousTransaction;
+  }
+
+  public EventTypeEnum getEventType() {
+    return eventType;
   }
 }

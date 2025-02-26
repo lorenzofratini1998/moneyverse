@@ -16,8 +16,10 @@ import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BinaryOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
@@ -151,20 +153,33 @@ public class AccountManagementService implements AccountService {
 
   @Override
   @Transactional
-  public void incrementAccountBalance(UUID accountId, BigDecimal amount) {
-    Account account = findAccountById(accountId);
-    account.setBalance(account.getBalance().add(amount));
-    accountRepository.save(account);
-    LOGGER.info("Account balance for account {} increased by {}", account.getAccountId(), amount);
+  public void incrementAccountBalance(
+      UUID accountId, BigDecimal amount, String currency, LocalDate date) {
+    updateAccountBalance(accountId, amount, currency, date, BigDecimal::add);
+    LOGGER.info("Account balance for account {} increased by {}", accountId, amount);
   }
 
   @Override
   @Transactional
-  public void decrementAccountBalance(UUID accountId, BigDecimal amount) {
+  public void decrementAccountBalance(
+      UUID accountId, BigDecimal amount, String currency, LocalDate date) {
+    updateAccountBalance(accountId, amount, currency, date, BigDecimal::subtract);
+    LOGGER.info("Account balance for account {} decreased by {}", accountId, amount);
+  }
+
+  private void updateAccountBalance(
+      UUID accountId,
+      BigDecimal amount,
+      String currency,
+      LocalDate date,
+      BinaryOperator<BigDecimal> operation) {
     Account account = findAccountById(accountId);
-    account.setBalance(account.getBalance().subtract(amount));
+    BigDecimal effectiveAmount =
+        account.getCurrency().equals(currency)
+            ? amount
+            : currencyServiceClient.convertAmount(amount, currency, account.getCurrency(), date);
+    account.setBalance(operation.apply(account.getBalance(), effectiveAmount));
     accountRepository.save(account);
-    LOGGER.info("Account balance for account {} decreased by {}", account.getAccountId(), amount);
   }
 
   private Account findAccountById(UUID accountId) {
