@@ -3,7 +3,7 @@ package it.moneyverse.transaction.services;
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.dto.AccountDto;
+import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.CurrencyServiceClient;
@@ -77,9 +77,12 @@ public class TransactionManagementService implements TransactionService {
   }
 
   private Transaction createTransaction(UUID userId, TransactionRequestItemDto request) {
-    AccountDto account = accountServiceClient.getAccountById(request.accountId());
+    accountServiceClient.checkIfAccountExists(request.accountId());
+    Optional<BudgetDto> budget = Optional.empty();
     if (request.categoryId() != null) {
       budgetServiceClient.checkIfCategoryExists(request.categoryId());
+      budget =
+          budgetServiceClient.getBudgetByCategoryIdAndDate(request.categoryId(), request.date());
     }
     currencyServiceClient.checkIfCurrencyExists(request.currency());
     Set<Tag> tags = getTransactionTags(request.tags());
@@ -94,14 +97,10 @@ public class TransactionManagementService implements TransactionService {
     if (transaction == null) {
       return null;
     }
-    if (!request.currency().equalsIgnoreCase(account.getCurrency())) {
-      transaction.setAmount(
-          currencyServiceClient.convertAmount(
-              request.amount(), request.currency(), account.getCurrency(), request.date()));
-    }
+    transaction.setBudgetId(budget.map(BudgetDto::getBudgetId).orElse(null));
     transaction.setNormalizedAmount(
         currencyServiceClient.convertCurrencyAmountByUserPreference(
-            userId, transaction.getAmount(), account.getCurrency(), request.date()));
+            userId, transaction.getAmount(), request.currency(), request.date()));
     return transaction;
   }
 
@@ -140,42 +139,40 @@ public class TransactionManagementService implements TransactionService {
   @Transactional
   public TransactionDto updateTransaction(UUID transactionId, TransactionUpdateRequestDto request) {
     Transaction transaction = findTransactionById(transactionId);
-    AccountDto account = null;
+    Transaction originalTransaction = new Transaction(transaction);
     if (request.accountId() != null) {
-      account = accountServiceClient.getAccountById(request.accountId());
+      accountServiceClient.checkIfAccountExists(request.accountId());
     }
     if (request.currency() != null) {
       currencyServiceClient.checkIfCurrencyExists(request.currency());
     }
     if (request.categoryId() != null) {
       budgetServiceClient.checkIfCategoryExists(request.categoryId());
+      if (request.date() != null) {
+        transaction.setBudgetId(
+            budgetServiceClient
+                .getBudgetByCategoryIdAndDate(request.categoryId(), request.date())
+                .map(BudgetDto::getBudgetId)
+                .orElse(null));
+      }
     }
     Set<Tag> tags = getTransactionTags(request.tags());
-    transaction = TransactionMapper.partialUpdate(transaction, request, tags);
-
-    if (account != null
-        && request.currency() != null
-        && !request.currency().equalsIgnoreCase(account.getCurrency())) {
-      transaction.setAmount(
-          currencyServiceClient.convertAmount(
+    TransactionMapper.partialUpdate(transaction, request, tags);
+    if (transaction.getAmount().compareTo(originalTransaction.getAmount()) != 0
+        || !transaction.getCurrency().equalsIgnoreCase(originalTransaction.getCurrency())) {
+      transaction.setNormalizedAmount(
+          currencyServiceClient.convertCurrencyAmountByUserPreference(
+              transaction.getUserId(),
               transaction.getAmount(),
-              request.currency(),
-              account.getCurrency(),
+              transaction.getCurrency(),
               transaction.getDate()));
     }
-
-    transaction.setNormalizedAmount(
-        currencyServiceClient.convertCurrencyAmountByUserPreference(
-            transaction.getUserId(),
-            transaction.getAmount(),
-            request.currency(),
-            transaction.getDate()));
     transaction = transactionRepository.save(transaction);
     LOGGER.info(
         "Updated transaction: {} for user {}",
         transaction.getTransactionId(),
         transaction.getUserId());
-    transactionEventPublisher.publishEvent(transaction, EventTypeEnum.UPDATE);
+    transactionEventPublisher.publishEvent(transaction, originalTransaction, EventTypeEnum.UPDATE);
     return TransactionMapper.toTransactionDto(transaction);
   }
 

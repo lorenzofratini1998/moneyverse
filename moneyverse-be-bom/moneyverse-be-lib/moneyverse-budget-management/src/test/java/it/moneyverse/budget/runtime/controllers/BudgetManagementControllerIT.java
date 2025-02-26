@@ -12,6 +12,7 @@ import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.utils.BudgetCriteriaRandomGenerator;
 import it.moneyverse.budget.utils.BudgetTestContext;
+import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.entities.UserModel;

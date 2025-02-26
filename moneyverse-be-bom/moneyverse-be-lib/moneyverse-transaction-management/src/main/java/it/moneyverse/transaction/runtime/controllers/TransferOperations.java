@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface TransferOperations {
   TransferDto createTransfer(@Valid TransferRequestDto request);
 
-  TransferDto updateTransfer(UUID transferId, @Valid TransferUpdateRequestDto request);
+  TransferDto updateTransfer(UUID transferId, TransferUpdateRequestDto request);
 
   void deleteTransfer(UUID transferId);
 

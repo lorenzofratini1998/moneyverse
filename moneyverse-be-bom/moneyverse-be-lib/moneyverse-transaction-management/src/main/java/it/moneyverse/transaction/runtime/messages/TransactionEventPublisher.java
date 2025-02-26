@@ -29,15 +29,31 @@ public class TransactionEventPublisher {
   }
 
   public void publishEvent(Transaction transaction, EventTypeEnum eventType) {
-    TransactionEvent event = new TransactionEvent();
-    event.setTransactionId(transaction.getTransactionId());
-    event.setAccountId(transaction.getAccountId());
-    event.setCategoryId(transaction.getCategoryId());
-    event.setDate(transaction.getDate());
-    event.setAmount(transaction.getAmount());
-    event.setNormalizedAmount(transaction.getNormalizedAmount());
-    event.setCurrency(transaction.getCurrency());
-    event.setEventType(eventType);
+    TransactionEvent event = createTransactionEvent(transaction, eventType).build();
     eventPublisher.publishEvent(event);
+  }
+
+  public void publishEvent(
+      Transaction transaction, Transaction originalTransaction, EventTypeEnum eventType) {
+    TransactionEvent.Builder event = createTransactionEvent(transaction, eventType);
+    event.withPreviousTransaction(createTransactionEvent(originalTransaction).build());
+    eventPublisher.publishEvent(event.build());
+  }
+
+  private TransactionEvent.Builder createTransactionEvent(
+      Transaction transaction, EventTypeEnum eventType) {
+    return createTransactionEvent(transaction).withEventType(eventType);
+  }
+
+  private TransactionEvent.Builder createTransactionEvent(Transaction transaction) {
+    return TransactionEvent.builder()
+        .withTransactionId(transaction.getTransactionId())
+        .withAccountId(transaction.getAccountId())
+        .withCategoryId(transaction.getCategoryId())
+        .withBudgetId(transaction.getBudgetId())
+        .withDate(transaction.getDate())
+        .withAmount(transaction.getAmount())
+        .withNormalizedAmount(transaction.getNormalizedAmount())
+        .withCurrency(transaction.getCurrency());
   }
 }

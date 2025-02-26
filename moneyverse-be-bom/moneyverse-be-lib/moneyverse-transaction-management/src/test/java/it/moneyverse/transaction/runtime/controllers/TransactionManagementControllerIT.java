@@ -86,7 +86,10 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     final TransactionRequestDto request = testContext.createTransactionRequest(userId);
     mockServer.mockExistentAccount();
     mockServer.mockExistentCategory();
+    mockServer.mockExistentBudget(
+        request.transactions().getFirst().categoryId(), request.transactions().getFirst().date());
     mockServer.mockExistentCurrency(request.transactions().getFirst().currency());
+    mockServer.mockUserPreference(request.transactions().getFirst().currency());
     BigDecimal exchangeRate = Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
     mockServer.mockExchangeRate(exchangeRate);
     TransactionDto expected = testContext.getExpectedTransactionDto(request);
@@ -107,9 +110,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(expected.getCategoryId(), actual.getCategoryId());
     assertEquals(expected.getDate(), actual.getDate());
     assertEquals(expected.getDescription(), actual.getDescription());
-    assertEquals(
-        expected.getAmount().multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP),
-        actual.getAmount().setScale(2, RoundingMode.HALF_UP));
+    assertEquals(expected.getAmount(), actual.getAmount());
     assertEquals(expected.getCurrency(), actual.getCurrency());
     assertEquals(Collections.emptySet(), actual.getTags());
   }
@@ -165,6 +166,8 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
             testContext.getRandomTag(userId));
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     mockServer.mockExistentCurrency(request.currency());
+    mockServer.mockExistentBudget(request.categoryId(), request.date());
+    mockServer.mockUserPreference(request.currency());
     BigDecimal exchangeRate = Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
     mockServer.mockExchangeRate(exchangeRate);
     mockServer.mockExistentAccount();
@@ -184,9 +187,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.categoryId(), response.getBody().getCategoryId());
     assertEquals(request.date(), response.getBody().getDate());
     assertEquals(request.description(), response.getBody().getDescription());
-    assertEquals(
-        request.amount().multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP),
-        response.getBody().getAmount().setScale(2, RoundingMode.HALF_UP));
+    assertEquals(request.amount(), response.getBody().getAmount());
     assertEquals(request.currency(), response.getBody().getCurrency());
     if (request.tags() != null && !request.tags().isEmpty()) {
       assertEquals(request.tags().size(), response.getBody().getTags().size());

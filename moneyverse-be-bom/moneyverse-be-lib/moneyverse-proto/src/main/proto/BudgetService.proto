@@ -7,8 +7,8 @@ option java_package = "it.moneyverse.grpc.lib";
 option java_outer_classname = "BudgetServiceProto";
 
 service BudgetService {
-  rpc GetCategoryById (CategoryRequest) returns (CategoryResponse) {
-  }
+  rpc GetCategoryById (CategoryRequest) returns (CategoryResponse) {}
+  rpc GetBudget(BudgetRequest) returns (BudgetResponse) {}
 }
 
 message CategoryRequest {
@@ -20,4 +20,16 @@ message CategoryResponse {
   string userId = 2;
   string categoryName = 3;
   string description = 4;
+}
+
+message BudgetRequest {
+  string categoryId = 1;
+  string date = 2;
+}
+
+message BudgetResponse {
+  string budgetId = 1;
+  string categoryId = 2;
+  string startDate = 3;
+  string endDate = 4;
 }

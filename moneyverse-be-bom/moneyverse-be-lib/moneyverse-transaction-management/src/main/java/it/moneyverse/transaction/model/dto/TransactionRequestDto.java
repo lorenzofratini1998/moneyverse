@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public record TransactionRequestDto(
     @NotNull(message = "'User ID' must not be null") UUID userId,
-    @Valid List<TransactionRequestItemDto> transactions) {
+    List<@Valid TransactionRequestItemDto> transactions) {
   @Override
   public String toString() {
     return JsonUtils.toJson(this);

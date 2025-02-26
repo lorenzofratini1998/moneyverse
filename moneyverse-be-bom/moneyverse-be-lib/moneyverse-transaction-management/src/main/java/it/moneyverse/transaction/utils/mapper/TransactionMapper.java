@@ -69,8 +69,8 @@ public class TransactionMapper {
 
   public static Transaction partialUpdate(
       Transaction transaction, TransactionUpdateRequestDto request, Set<Tag> tags) {
-    transaction = partialUpdate(transaction, request);
-    if (request.tags() != null && !request.tags().isEmpty()) {
+    partialUpdate(transaction, request);
+    if (request != null && request.tags() != null && !request.tags().isEmpty()) {
       transaction.setTags(tags);
     }
     return transaction;
@@ -79,7 +79,7 @@ public class TransactionMapper {
   public static Transaction partialUpdate(
       Transaction transaction, TransactionUpdateRequestDto request) {
     if (request == null) {
-      return null;
+      return transaction;
     }
     if (request.accountId() != null) {
       transaction.setAccountId(request.accountId());

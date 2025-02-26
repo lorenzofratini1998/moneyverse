@@ -7,6 +7,8 @@ import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.grpc.lib.*;
 import it.moneyverse.test.utils.RandomUtils;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 import org.grpcmock.junit5.GrpcMockExtension;
 
 public class GrpcMockServer extends GrpcMockExtension {
@@ -102,6 +104,18 @@ public class GrpcMockServer extends GrpcMockExtension {
         unaryMethod(CurrencyServiceGrpc.getGetExchangeRateMethod())
             .willReturn(
                 ExchangeRateResponse.newBuilder().setRate(exchangeRate.doubleValue()).build()));
+  }
+
+  public void mockExistentBudget(UUID categoryId, LocalDate date) {
+    stubFor(
+        unaryMethod(BudgetServiceGrpc.getGetBudgetMethod())
+            .willReturn(
+                BudgetResponse.newBuilder()
+                    .setBudgetId(RandomUtils.randomUUID().toString())
+                    .setCategoryId(categoryId.toString())
+                    .setStartDate(date.minusMonths(RandomUtils.randomInteger(1, 12)).toString())
+                    .setEndDate(date.plusMonths(RandomUtils.randomInteger(1, 12)).toString())
+                    .build()));
   }
 
   public int getPort() {

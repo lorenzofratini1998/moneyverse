@@ -19,8 +19,7 @@ public record TransactionRequestItemDto(
     String description,
     @NotNull(message = "'Amount' must not be null") BigDecimal amount,
     @NotEmpty(message = "'Currency' must not be null or empty") String currency,
-    Set<UUID> tags /*,
-    @Valid RecurrenceDto recurrence*/) {
+    Set<UUID> tags) {
   @Override
   public String toString() {
     return JsonUtils.toJson(this);

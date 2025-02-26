@@ -11,10 +11,10 @@ import it.moneyverse.core.model.events.AccountDeletionEvent;
 import it.moneyverse.core.model.events.CategoryDeletionEvent;
 import it.moneyverse.core.model.events.UserDeletionEvent;
 import it.moneyverse.core.utils.JsonUtils;
+import it.moneyverse.core.utils.properties.KafkaProperties;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
 import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
-import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
@@ -35,6 +35,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -43,10 +45,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     properties = {
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
-      "logging.level.org.grpcmock.GrpcMock=WARN"
+      "logging.level.org.grpcmock.GrpcMock=WARN",
+      "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
     })
 @Testcontainers
 @CleanDatabaseAfterEachTest
+@EmbeddedKafka(
+    partitions = 1,
+    topics = {UserDeletionTopic.TOPIC, AccountDeletionTopic.TOPIC, CategoryDeletionTopic.TOPIC})
 class TransactionConsumerTest {
 
   private static TransactionTestContext testContext;
@@ -58,7 +64,7 @@ class TransactionConsumerTest {
   @Autowired private TransactionRepository transactionRepository;
   @Autowired private TagRepository tagRepository;
 
-  @Container static KafkaContainer kafkaContainer = new KafkaContainer();
+  @Autowired private EmbeddedKafkaBroker embeddedKafkaBroker;
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
 
@@ -66,11 +72,13 @@ class TransactionConsumerTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
-        .withKafkaContainer(kafkaContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcAccountService(mockServer.getHost(), mockServer.getPort())
         .withGrpcBudgetService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort());
+    registry.add(
+        KafkaProperties.KafkaConsumerProperties.GROUP_ID,
+        () -> RandomUtils.randomUUID().toString());
   }
 
   @BeforeAll

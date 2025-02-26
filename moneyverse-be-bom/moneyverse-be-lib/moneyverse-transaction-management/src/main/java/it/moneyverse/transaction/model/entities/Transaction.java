@@ -30,6 +30,9 @@ public class Transaction extends Auditable implements Serializable {
   @Column(name = "CATEGORY_ID")
   private UUID categoryId;
 
+  @Column(name = "BUDGET_ID")
+  private UUID budgetId;
+
   @Column(name = "DATE", nullable = false)
   private LocalDate date;
 
@@ -59,6 +62,29 @@ public class Transaction extends Auditable implements Serializable {
       joinColumns = @JoinColumn(name = "TRANSACTION_ID"),
       inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
   private Set<Tag> tags = new HashSet<>();
+
+  public Transaction() {}
+
+  public Transaction(Transaction source) {
+    if (source == null) {
+      throw new IllegalArgumentException("Cannot copy a null Transaction");
+    }
+    this.transactionId = source.getTransactionId();
+    this.userId = source.getUserId();
+    this.accountId = source.getAccountId();
+    this.categoryId = source.getCategoryId();
+    this.budgetId = source.getBudgetId();
+    this.date = source.getDate();
+    this.description = source.getDescription();
+    this.amount = source.getAmount();
+    this.normalizedAmount = source.getNormalizedAmount();
+    this.currency = source.getCurrency();
+    this.transfer = source.getTransfer();
+    this.subscription = source.getSubscription();
+    if (source.tags != null) {
+      this.tags = new HashSet<>(source.getTags());
+    }
+  }
 
   public void addTag(Tag tag) {
     tags.add(tag);
@@ -100,6 +126,14 @@ public class Transaction extends Auditable implements Serializable {
 
   public void setCategoryId(UUID categoryId) {
     this.categoryId = categoryId;
+  }
+
+  public UUID getBudgetId() {
+    return budgetId;
+  }
+
+  public void setBudgetId(UUID budgetId) {
+    this.budgetId = budgetId;
   }
 
   public LocalDate getDate() {

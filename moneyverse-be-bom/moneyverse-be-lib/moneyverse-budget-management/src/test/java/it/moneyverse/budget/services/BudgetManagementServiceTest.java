@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.budget.model.dto.BudgetCriteria;
-import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
@@ -16,6 +15,7 @@ import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.events.CategoryDeletionEvent;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
