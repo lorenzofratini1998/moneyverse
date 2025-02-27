@@ -26,7 +26,7 @@ public class RandomUtils {
   }
 
   public static Integer randomInteger(Integer max) {
-    return RANDOM.nextInt(max);
+    return RANDOM.nextInt(0, max);
   }
 
   public static BigDecimal randomDecimal(Double min, Double max) {
@@ -55,11 +55,26 @@ public class RandomUtils {
     return LocalDate.ofYearDay(year, dayOfYear);
   }
 
+  public static LocalDate randomDate() {
+    int currentYear = LocalDate.now().getYear();
+    int maxDays = LocalDate.ofYearDay(currentYear, 1).lengthOfYear();
+    int dayOfYear = RANDOM.nextInt(1, maxDays);
+    return LocalDate.ofYearDay(currentYear, dayOfYear);
+  }
+
   public static Boolean randomBoolean() {
     return RANDOM.nextBoolean();
   }
 
   public static BigDecimal randomBigDecimal() {
     return BigDecimal.valueOf(RANDOM.nextDouble());
+  }
+
+  public static String randomCurrency() {
+    return randomString(3).toUpperCase();
+  }
+
+  public static boolean flipCoin() {
+    return RANDOM.nextInt(2) == 0;
   }
 }

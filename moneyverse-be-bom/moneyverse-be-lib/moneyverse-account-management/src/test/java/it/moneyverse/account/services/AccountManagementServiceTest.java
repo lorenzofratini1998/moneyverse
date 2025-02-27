@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
@@ -59,7 +60,11 @@ class AccountManagementServiceTest {
       @Mock Account account, @Mock AccountCategory category, @Mock AccountDto accountDto) {
     final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withAccountCategory(categoryName)
+            .withUserId(userId)
+            .build();
 
     Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
@@ -87,7 +92,11 @@ class AccountManagementServiceTest {
   void givenAccountRequest_WhenCreateAccount_ThenCurrencyNotFound() {
     final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withAccountCategory(categoryName)
+            .withUserId(userId)
+            .build();
 
     Mockito.doThrow(ResourceNotFoundException.class)
         .when(currencyServiceClient)
@@ -107,7 +116,11 @@ class AccountManagementServiceTest {
   void givenAccountRequest_WhenCreateAccount_ThenAccountAlreadyExists() {
     final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withAccountCategory(categoryName)
+            .withUserId(userId)
+            .build();
 
     Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
@@ -127,7 +140,11 @@ class AccountManagementServiceTest {
   void givenAccountRequest_WhenCreateAccount_ThenCategoryNotFound() {
     final UUID userId = RandomUtils.randomUUID();
     final String categoryName = RandomUtils.randomString(15).toUpperCase();
-    AccountRequestDto request = createAccountRequestDto(userId, categoryName);
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withUserId(userId)
+            .withAccountCategory(categoryName)
+            .build();
 
     Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
@@ -141,17 +158,6 @@ class AccountManagementServiceTest {
     verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
-  }
-
-  private AccountRequestDto createAccountRequestDto(UUID userId, String categoryName) {
-    return new AccountRequestDto(
-        userId,
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        categoryName,
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test
@@ -197,11 +203,16 @@ class AccountManagementServiceTest {
   void givenAccountId_WhenUpdateAccount_ThenReturnAccountDto(
       @Mock Account account, @Mock AccountCategory category, @Mock AccountDto result) {
     UUID accountId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15);
-    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
+    AccountUpdateRequestDto request =
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.builder()
+            .withDefault(Boolean.FALSE)
+            .build();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
+    if (request.accountCategory() != null) {
+      when(accountCategoryRepository.findByName(any(String.class)))
+          .thenReturn(Optional.of(category));
+    }
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.save(account)).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
@@ -210,7 +221,9 @@ class AccountManagementServiceTest {
 
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
-    verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+    if (request.accountCategory() != null) {
+      verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+    }
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
@@ -224,13 +237,9 @@ class AccountManagementServiceTest {
       @Mock AccountDto result) {
     UUID accountId = RandomUtils.randomUUID();
     AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            Boolean.TRUE);
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.builder()
+            .withDefault(Boolean.TRUE)
+            .build();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
@@ -256,8 +265,8 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountId_WhenUpdateAccount_ThenReturnAccountNotFound() {
     UUID accountId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15);
-    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
+    AccountUpdateRequestDto request =
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.builder().build();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
@@ -279,18 +288,18 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountId_WhenUpdateAccount_ThenReturnCategoryNotFound(@Mock Account account) {
     UUID accountId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15);
-    AccountUpdateRequestDto request = createAccountUpdateRequestDto(categoryName);
+    AccountUpdateRequestDto request =
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.defaultInstance();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.empty());
+    when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.empty());
 
     assertThrows(
         ResourceNotFoundException.class,
         () -> accountManagementService.updateAccount(accountId, request));
 
     verify(accountRepository, times(1)).findById(accountId);
-    verify(accountCategoryRepository, times(1)).findByName(categoryName);
+    verify(accountCategoryRepository, times(1)).findByName(any(String.class));
     mapper.verify(
         () ->
             AccountMapper.partialUpdate(
@@ -298,16 +307,6 @@ class AccountManagementServiceTest {
         never());
     verify(accountRepository, never()).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
-  }
-
-  private AccountUpdateRequestDto createAccountUpdateRequestDto(String categoryName) {
-    return new AccountUpdateRequestDto(
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        categoryName,
-        RandomUtils.randomString(15),
-        null);
   }
 
   @Test

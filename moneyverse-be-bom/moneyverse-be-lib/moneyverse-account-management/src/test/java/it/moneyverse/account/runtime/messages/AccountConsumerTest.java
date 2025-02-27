@@ -3,22 +3,21 @@ package it.moneyverse.account.runtime.messages;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import it.moneyverse.account.model.AccountTestContext;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.repositories.AccountRepository;
-import it.moneyverse.account.utils.AccountTestContext;
 import it.moneyverse.core.model.beans.TransactionCreationTopic;
 import it.moneyverse.core.model.beans.TransactionDeletionTopic;
 import it.moneyverse.core.model.beans.TransactionUpdateTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.model.events.TransactionEvent;
-import it.moneyverse.core.model.events.UserDeletionEvent;
-import it.moneyverse.core.utils.JsonUtils;
+import it.moneyverse.core.utils.properties.KafkaProperties;
 import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
 import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
-import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.model.entities.TestFactory;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
@@ -38,6 +37,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -46,10 +46,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     properties = {
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
-      "logging.level.org.grpcmock.GrpcMock=WARN"
+      "logging.level.org.grpcmock.GrpcMock=WARN",
+      "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
     })
 @Testcontainers
 @CleanDatabaseAfterEachTest
+@EmbeddedKafka(
+    partitions = 1,
+    topics = {
+      UserDeletionTopic.TOPIC,
+      TransactionCreationTopic.TOPIC,
+      TransactionDeletionTopic.TOPIC,
+      TransactionUpdateTopic.TOPIC
+    })
 class AccountConsumerTest {
 
   protected static AccountTestContext testContext;
@@ -62,7 +71,6 @@ class AccountConsumerTest {
   @Autowired private KafkaTemplate<UUID, String> kafkaTemplate;
   @Autowired private AccountRepository accountRepository;
 
-  @Container static KafkaContainer kafkaContainer = new KafkaContainer();
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
 
@@ -70,9 +78,11 @@ class AccountConsumerTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
-        .withKafkaContainer(kafkaContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort());
+    registry.add(
+        KafkaProperties.KafkaConsumerProperties.GROUP_ID,
+        () -> RandomUtils.randomUUID().toString());
   }
 
   @BeforeAll
@@ -82,16 +92,16 @@ class AccountConsumerTest {
 
   @BeforeEach
   void setup() {
-    exchangeRate = Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
+    exchangeRate = RandomUtils.flipCoin() ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
     mockServer.mockExchangeRate(exchangeRate);
   }
 
   @Test
   void testOnUserDeletion_Success() {
-    final UserModel userModel = testContext.getRandomUser();
-    final List<Account> userAccounts = testContext.getUserAccounts(userModel.getUserId());
+    final UUID userId = testContext.getRandomUser().getUserId();
+    final List<Account> userAccounts = testContext.getUserAccounts(userId);
     final long initialSize = accountRepository.count();
-    String event = JsonUtils.toJson(new UserDeletionEvent(userModel.getUserId()));
+    String event = TestFactory.fakeUserDeletionEvent(userId).toString();
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
 
@@ -109,14 +119,8 @@ class AccountConsumerTest {
   void testOnTransactionCreation() {
     final UserModel userModel = testContext.getRandomUser();
     final List<Account> userAccounts = testContext.getUserAccounts(userModel.getUserId());
-    Account account = userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
-    TransactionEvent event =
-        TransactionEvent.builder()
-            .withAccountId(account.getAccountId())
-            .withAmount(RandomUtils.randomBigDecimal())
-            .withCurrency(RandomUtils.randomString(3).toUpperCase())
-            .withDate(RandomUtils.randomLocalDate(2025, 2025))
-            .build();
+    Account account = userAccounts.get(RandomUtils.randomInteger(userAccounts.size() - 1));
+    TransactionEvent event = TestFactory.fakeTransactionEvent(account.getAccountId());
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(
             TransactionCreationTopic.TOPIC, RandomUtils.randomUUID(), event.value());
@@ -147,14 +151,8 @@ class AccountConsumerTest {
   void testOnTransactionDeletion() {
     final UserModel userModel = testContext.getRandomUser();
     final List<Account> userAccounts = testContext.getUserAccounts(userModel.getUserId());
-    Account account = userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
-    TransactionEvent event =
-        TransactionEvent.builder()
-            .withAccountId(account.getAccountId())
-            .withAmount(RandomUtils.randomBigDecimal())
-            .withCurrency(RandomUtils.randomString(3).toUpperCase())
-            .withDate(RandomUtils.randomLocalDate(2025, 2025))
-            .build();
+    Account account = userAccounts.get(RandomUtils.randomInteger(userAccounts.size() - 1));
+    TransactionEvent event = TestFactory.fakeTransactionEvent(account.getAccountId());
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(
             TransactionDeletionTopic.TOPIC, RandomUtils.randomUUID(), event.value());
@@ -186,26 +184,13 @@ class AccountConsumerTest {
     final UserModel userModel = testContext.getRandomUser();
     final List<Account> userAccounts =
         new ArrayList<>(testContext.getUserAccounts(userModel.getUserId()));
-    Account previousAccount =
-        userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
+    Account previousAccount = userAccounts.get(RandomUtils.randomInteger(userAccounts.size() - 1));
     userAccounts.remove(previousAccount);
-    Account account = userAccounts.get(RandomUtils.randomInteger(0, userAccounts.size() - 1));
+    Account account = userAccounts.get(RandomUtils.randomInteger(userAccounts.size() - 1));
     TransactionEvent event =
-        TransactionEvent.builder()
-            .withPreviousTransaction(
-                TransactionEvent.builder()
-                    .withAccountId(previousAccount.getAccountId())
-                    .withAmount(RandomUtils.randomBigDecimal())
-                    .withCurrency(RandomUtils.randomString(3).toUpperCase())
-                    .withDate(RandomUtils.randomLocalDate(2025, 2025))
-                    .build())
-            .withAccountId(account.getAccountId())
-            .withAmount(RandomUtils.randomBigDecimal())
-            .withCurrency(RandomUtils.randomString(3).toUpperCase())
-            .withDate(RandomUtils.randomLocalDate(2025, 2025))
-            .build();
+        TestFactory.fakeTransactionEvent(account.getAccountId(), previousAccount.getAccountId());
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(TransactionUpdateTopic.TOPIC, RandomUtils.randomUUID(), event.value());
+        new ProducerRecord<>(TransactionUpdateTopic.TOPIC, event.key(), event.value());
 
     kafkaTemplate.send(producerRecord);
 
@@ -227,14 +212,9 @@ class AccountConsumerTest {
               BigDecimal expectedPreviousAccountBalance =
                   previousAccount
                       .getBalance()
-                      .add(
-                          event
-                              .getPreviousTransaction()
-                              .getAmount()
-                              .multiply(exchangeRate)
-                              .negate());
+                      .subtract(event.getPreviousTransaction().getAmount().multiply(exchangeRate));
               BigDecimal expectedAccountBalance =
-                  account.getBalance().multiply(exchangeRate).add(event.getAmount());
+                  account.getBalance().add(event.getAmount().multiply(exchangeRate));
 
               assertEquals(
                   expectedPreviousAccountBalance.setScale(2, RoundingMode.HALF_UP),

@@ -11,6 +11,7 @@ public abstract class AbstractIntegrationTest {
 
   @DataSourceScriptDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
   protected static Path tempDir;
+
   @Value("${spring.security.base-path}")
   protected String basePath;
 

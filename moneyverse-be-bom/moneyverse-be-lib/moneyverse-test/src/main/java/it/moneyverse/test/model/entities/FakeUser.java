@@ -1,6 +1,6 @@
 package it.moneyverse.test.model.entities;
 
-import static it.moneyverse.test.utils.FakeUtils.ONBOARD;
+import static it.moneyverse.test.model.entities.TestFactory.ONBOARD;
 
 import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;

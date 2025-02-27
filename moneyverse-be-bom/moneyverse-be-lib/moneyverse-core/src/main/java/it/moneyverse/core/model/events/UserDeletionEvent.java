@@ -1,14 +1,15 @@
 package it.moneyverse.core.model.events;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
 
-public class UserDeletionEvent implements MessageEvent<UUID, String> {
+public class UserDeletionEvent extends AbstractEvent {
 
-  private UUID userId;
+  private final UUID userId;
 
-  public UserDeletionEvent() {}
-
-  public UserDeletionEvent(UUID userId) {
+  @JsonCreator
+  public UserDeletionEvent(@JsonProperty("userId") UUID userId) {
     this.userId = userId;
   }
 
@@ -16,17 +17,8 @@ public class UserDeletionEvent implements MessageEvent<UUID, String> {
     return userId;
   }
 
-  public void setUserId(UUID userId) {
-    this.userId = userId;
-  }
-
   @Override
   public UUID key() {
     return userId;
-  }
-
-  @Override
-  public String value() {
-    return userId.toString();
   }
 }

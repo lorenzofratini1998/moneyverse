@@ -3,6 +3,7 @@ package it.moneyverse.account.utils.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.AccountCategoryDto;
 import it.moneyverse.account.model.dto.AccountRequestDto;
 import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
@@ -25,10 +26,7 @@ class AccountMapperTest {
 
   @Test
   void testToAccountCategoryDto_ValidAccountCategory() {
-    AccountCategory category = new AccountCategory();
-    category.setAccountCategoryId(RandomUtils.randomBigDecimal().longValue());
-    category.setName(RandomUtils.randomString(15).toUpperCase());
-    category.setDescription(RandomUtils.randomString(30));
+    AccountCategory category = AccountTestFactory.fakeAccountCategory();
 
     AccountCategoryDto result = AccountMapper.toAccountCategoryDto(category);
 
@@ -47,14 +45,9 @@ class AccountMapperTest {
     AccountCategory category = new AccountCategory();
     category.setName(RandomUtils.randomString(15).toUpperCase());
     AccountRequestDto request =
-        new AccountRequestDto(
-            RandomUtils.randomUUID(),
-            RandomUtils.randomString(25),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomBigDecimal(),
-            category.getName(),
-            RandomUtils.randomString(25),
-            RandomUtils.randomString(3).toUpperCase());
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withAccountCategory(category.getName())
+            .build();
 
     Account account = AccountMapper.toAccount(request, category);
 
@@ -74,7 +67,7 @@ class AccountMapperTest {
 
   @Test
   void testToAccountDto_ValidAccountEntity() {
-    Account account = createAccount();
+    Account account = AccountTestFactory.fakeAccount();
 
     AccountDto accountDto = AccountMapper.toAccountDto(account);
 
@@ -83,6 +76,7 @@ class AccountMapperTest {
     assertEquals(account.getAccountName(), accountDto.getAccountName());
     assertEquals(account.getBalance(), accountDto.getBalance());
     assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
+    assertEquals(account.getCurrency(), accountDto.getCurrency());
     assertEquals(account.getAccountCategory().getName(), accountDto.getAccountCategory());
     assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
     assertEquals(account.isDefault(), accountDto.isDefault());
@@ -98,7 +92,7 @@ class AccountMapperTest {
     int entitiesCount = RandomUtils.randomInteger(0, 10);
     List<Account> accounts = new ArrayList<>(entitiesCount);
     for (int i = 0; i < entitiesCount; i++) {
-      accounts.add(createAccount());
+      accounts.add(AccountTestFactory.fakeAccount());
     }
 
     List<AccountDto> accountDtos = AccountMapper.toAccountDto(accounts);
@@ -120,7 +114,7 @@ class AccountMapperTest {
 
   @Test
   void testToAccount_PartialUpdate() {
-    Account account = createAccount();
+    Account account = AccountTestFactory.fakeAccount();
     AccountCategory category = new AccountCategory();
     category.setName(RandomUtils.randomString(15).toUpperCase());
     AccountUpdateRequestDto request =
@@ -140,20 +134,5 @@ class AccountMapperTest {
     assertEquals(request.accountCategory(), result.getAccountCategory().getName());
     assertEquals(request.accountDescription(), result.getAccountDescription());
     assertEquals(request.isDefault(), result.isDefault());
-  }
-
-  private Account createAccount() {
-    Account account = new Account();
-    AccountCategory category = new AccountCategory();
-    category.setName(RandomUtils.randomString(15).toUpperCase());
-    account.setAccountId(RandomUtils.randomUUID());
-    account.setUserId(RandomUtils.randomUUID());
-    account.setAccountName(RandomUtils.randomString(25));
-    account.setBalance(RandomUtils.randomBigDecimal());
-    account.setBalanceTarget(RandomUtils.randomBigDecimal());
-    account.setAccountCategory(category);
-    account.setAccountDescription(RandomUtils.randomString(25));
-    account.setDefault(RandomUtils.randomBoolean());
-    return account;
   }
 }
