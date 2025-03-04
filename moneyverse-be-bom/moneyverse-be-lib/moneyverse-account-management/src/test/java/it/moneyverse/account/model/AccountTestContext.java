@@ -27,20 +27,20 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
 
   private static AccountTestContext currentInstance;
 
-  private final List<AccountCategory> categories;
-  private final List<Account> accounts;
+  private final List<AccountCategory> categories = AccountTestFactory.createAccountCategories();
+  private final List<Account> accounts = AccountTestFactory.createAccounts(getUsers(), categories);
 
   public AccountTestContext(KeycloakContainer keycloakContainer) {
     super(keycloakContainer);
-    categories = AccountTestFactory.createAccountCategories();
-    accounts = AccountTestFactory.createAccounts(getUsers(), categories);
-    setCurrentInstance(this);
+    init();
   }
 
   public AccountTestContext() {
     super();
-    categories = AccountTestFactory.createAccountCategories();
-    accounts = AccountTestFactory.createAccounts(getUsers(), categories);
+    init();
+  }
+
+  private void init() {
     setCurrentInstance(this);
   }
 

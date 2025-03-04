@@ -1,29 +1,28 @@
 package it.moneyverse.transaction.runtime.messages;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.beans.CategoryDeletionTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
-import it.moneyverse.core.model.events.AccountDeletionEvent;
-import it.moneyverse.core.model.events.CategoryDeletionEvent;
-import it.moneyverse.core.model.events.UserDeletionEvent;
-import it.moneyverse.core.utils.JsonUtils;
-import it.moneyverse.core.utils.properties.KafkaProperties;
-import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
-import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
+import it.moneyverse.core.model.events.AccountEvent;
+import it.moneyverse.core.model.events.CategoryEvent;
+import it.moneyverse.core.model.events.UserEvent;
+import it.moneyverse.test.annotations.MoneyverseTest;
+import it.moneyverse.test.annotations.datasource.FlywayTestDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
-import it.moneyverse.transaction.model.entities.Tag;
+import it.moneyverse.transaction.model.TransactionTestContext;
 import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
-import it.moneyverse.transaction.utils.TransactionTestContext;
+import it.moneyverse.transaction.model.repositories.TransferRepository;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -33,38 +32,35 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(
-    properties = {
-      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
-      "logging.level.org.grpcmock.GrpcMock=WARN",
-      "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
-    })
-@Testcontainers
-@CleanDatabaseAfterEachTest
+@MoneyverseTest
 @EmbeddedKafka(
     partitions = 1,
     topics = {UserDeletionTopic.TOPIC, AccountDeletionTopic.TOPIC, CategoryDeletionTopic.TOPIC})
+@TestPropertySource(
+    properties = {
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
+      "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
+    })
 class TransactionConsumerTest {
 
   private static TransactionTestContext testContext;
 
-  @DataSourceScriptDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
+  @FlywayTestDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
   protected static Path tempDir;
 
   @Autowired private KafkaTemplate<UUID, String> kafkaTemplate;
   @Autowired private TransactionRepository transactionRepository;
   @Autowired private TagRepository tagRepository;
+  @Autowired private TransferRepository transferRepository;
+  @Autowired private SubscriptionRepository subscriptionRepository;
 
-  @Autowired private EmbeddedKafkaBroker embeddedKafkaBroker;
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
 
@@ -75,10 +71,9 @@ class TransactionConsumerTest {
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcAccountService(mockServer.getHost(), mockServer.getPort())
         .withGrpcBudgetService(mockServer.getHost(), mockServer.getPort())
-        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort());
-    registry.add(
-        KafkaProperties.KafkaConsumerProperties.GROUP_ID,
-        () -> RandomUtils.randomUUID().toString());
+        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
+        .withFlywayTestDirectory(tempDir)
+        .withEmbeddedKafka();
   }
 
   @BeforeAll
@@ -89,13 +84,9 @@ class TransactionConsumerTest {
   @Test
   void testOnUserDeletion() {
     final UUID userId = testContext.getRandomUser().getUserId();
-    final List<Transaction> userTransactions = testContext.getTransactions(userId);
-    final List<Tag> userTags = testContext.getUserTags(userId);
-    final long initialSize = transactionRepository.count();
-    final long initialTagSize = tagRepository.count();
-    String event = JsonUtils.toJson(new UserDeletionEvent(userId));
+    UserEvent event = TestFactory.fakeUserEvent(userId);
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(UserDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
+        new ProducerRecord<>(UserDeletionTopic.TOPIC, event.key(), event.value());
 
     mockServer.mockNonExistentUser();
 
@@ -103,11 +94,14 @@ class TransactionConsumerTest {
 
     await()
         .pollDelay(5, TimeUnit.SECONDS)
-        .atMost(60, TimeUnit.SECONDS)
+        .pollInterval(5, TimeUnit.SECONDS)
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
-              assertEquals(initialSize - userTransactions.size(), transactionRepository.count());
-              assertEquals(initialTagSize - userTags.size(), tagRepository.count());
+              assertTrue(transactionRepository.findTransactionByUserId(userId).isEmpty());
+              assertTrue(tagRepository.findByUserId(userId).isEmpty());
+              assertTrue(transferRepository.findTransferByUserId(userId).isEmpty());
+              assertTrue(subscriptionRepository.findSubscriptionByUserId(userId).isEmpty());
             });
   }
 
@@ -116,13 +110,11 @@ class TransactionConsumerTest {
     final UUID accountId =
         testContext
             .getTransactions()
-            .get(RandomUtils.randomInteger(0, testContext.getTransactions().size() - 1))
+            .get(RandomUtils.randomInteger(testContext.getTransactions().size()))
             .getAccountId();
-    final List<Transaction> accountTransactions = testContext.getTransactionsByAccountId(accountId);
-    final long initialSize = transactionRepository.count();
-    String event = JsonUtils.toJson(new AccountDeletionEvent(accountId));
+    AccountEvent event = TestFactory.fakeAccountEvent(accountId);
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(AccountDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
+        new ProducerRecord<>(AccountDeletionTopic.TOPIC, event.key(), event.value());
 
     mockServer.mockNonExistentAccount();
 
@@ -130,11 +122,14 @@ class TransactionConsumerTest {
 
     await()
         .pollDelay(5, TimeUnit.SECONDS)
+        .pollInterval(5, TimeUnit.SECONDS)
         .atMost(60, TimeUnit.SECONDS)
         .untilAsserted(
-            () ->
-                assertEquals(
-                    initialSize - accountTransactions.size(), transactionRepository.count()));
+            () -> {
+              assertTrue(transactionRepository.findTransactionByAccountId(accountId).isEmpty());
+              assertTrue(transferRepository.findTransferByAccountId(accountId).isEmpty());
+              assertTrue(subscriptionRepository.findSubscriptionByAccountId(accountId).isEmpty());
+            });
   }
 
   @Test
@@ -142,13 +137,13 @@ class TransactionConsumerTest {
     final UUID categoryId =
         testContext
             .getTransactions()
-            .get(RandomUtils.randomInteger(0, testContext.getTransactions().size() - 1))
+            .get(RandomUtils.randomInteger(testContext.getTransactions().size()))
             .getCategoryId();
     final List<Transaction> categoryTransactions =
         testContext.getTransactionsByCategoryId(categoryId);
-    String event = JsonUtils.toJson(new CategoryDeletionEvent(categoryId));
+    CategoryEvent event = TestFactory.fakeCategoryEvent(categoryId);
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(CategoryDeletionTopic.TOPIC, RandomUtils.randomUUID(), event);
+        new ProducerRecord<>(CategoryDeletionTopic.TOPIC, event.key(), event.value());
 
     mockServer.mockNonExistentCategory();
 
@@ -156,7 +151,8 @@ class TransactionConsumerTest {
 
     await()
         .pollDelay(5, TimeUnit.SECONDS)
-        .atMost(60, TimeUnit.SECONDS)
+        .pollInterval(5, TimeUnit.SECONDS)
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
               for (Transaction transaction : categoryTransactions) {

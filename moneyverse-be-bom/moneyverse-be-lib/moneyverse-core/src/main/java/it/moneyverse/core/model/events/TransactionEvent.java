@@ -14,6 +14,7 @@ import java.util.UUID;
 @JsonDeserialize(builder = TransactionEvent.Builder.class)
 public class TransactionEvent extends AbstractEvent {
   private final UUID transactionId;
+  private final UUID userId;
   private final UUID accountId;
   private final UUID categoryId;
   private final UUID budgetId;
@@ -22,11 +23,12 @@ public class TransactionEvent extends AbstractEvent {
   private final String currency;
   private final LocalDate date;
   private final TransactionEvent previousTransaction;
-  private final EventTypeEnum eventType;
 
   @JsonbCreator
   public TransactionEvent(Builder builder) {
+    super(builder);
     this.transactionId = builder.transactionId;
+    this.userId = builder.userId;
     this.accountId = builder.accountId;
     this.categoryId = builder.categoryId;
     this.budgetId = builder.budgetId;
@@ -35,11 +37,11 @@ public class TransactionEvent extends AbstractEvent {
     this.currency = builder.currency;
     this.date = builder.date;
     this.previousTransaction = builder.previousTransaction;
-    this.eventType = builder.eventType;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractBuilder<TransactionEvent, Builder> {
     private UUID transactionId;
+    private UUID userId;
     private UUID accountId;
     private UUID categoryId;
     private UUID budgetId;
@@ -52,6 +54,11 @@ public class TransactionEvent extends AbstractEvent {
 
     public Builder withTransactionId(UUID transactionId) {
       this.transactionId = transactionId;
+      return this;
+    }
+
+    public Builder withUserId(UUID userId) {
+      this.userId = userId;
       return this;
     }
 
@@ -95,11 +102,12 @@ public class TransactionEvent extends AbstractEvent {
       return this;
     }
 
-    public Builder withEventType(EventTypeEnum eventType) {
-      this.eventType = eventType;
+    @Override
+    protected Builder self() {
       return this;
     }
 
+    @Override
     public TransactionEvent build() {
       return new TransactionEvent(this);
     }
@@ -116,6 +124,10 @@ public class TransactionEvent extends AbstractEvent {
 
   public UUID getTransactionId() {
     return transactionId;
+  }
+
+  public UUID getUserId() {
+    return userId;
   }
 
   public UUID getAccountId() {
@@ -148,9 +160,5 @@ public class TransactionEvent extends AbstractEvent {
 
   public TransactionEvent getPreviousTransaction() {
     return previousTransaction;
-  }
-
-  public EventTypeEnum getEventType() {
-    return eventType;
   }
 }

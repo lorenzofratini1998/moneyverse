@@ -25,9 +25,9 @@ public class Account extends Auditable implements Serializable {
   @Column(name = "ACCOUNT_NAME", nullable = false)
   private String accountName;
 
-  @Column(name = "BALANCE")
+  @Column(name = "BALANCE", nullable = false)
   @ColumnDefault(value = "0.0")
-  private BigDecimal balance;
+  private BigDecimal balance = BigDecimal.ZERO;
 
   @Column(name = "BALANCE_TARGET")
   private BigDecimal balanceTarget;
@@ -35,9 +35,9 @@ public class Account extends Auditable implements Serializable {
   @Column(name = "ACCOUNT_DESCRIPTION")
   private String accountDescription;
 
-  @Column(name = "IS_DEFAULT")
+  @Column(name = "IS_DEFAULT", nullable = false)
   @ColumnDefault(value = "FALSE")
-  private Boolean isDefault;
+  private Boolean isDefault = false;
 
   @Column(name = "CURRENCY", nullable = false, length = 3)
   private String currency;

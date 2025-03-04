@@ -1,9 +1,10 @@
 package it.moneyverse.transaction.utils.mapper;
 
-import static it.moneyverse.transaction.utils.TransactionTestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.TagTestFactory;
+import it.moneyverse.transaction.model.TransactionTestFactory;
 import it.moneyverse.transaction.model.dto.TransactionDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestDto;
 import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
@@ -18,16 +19,20 @@ class TransactionMapperTest {
 
   @Test
   void testToTransaction_NullTransactionRequest() {
-    assertNull(TransactionMapper.toTransaction(RandomUtils.randomUUID(), null));
+    assertNull(TransactionMapper.toTransaction(RandomUtils.randomUUID(), null, null));
   }
 
   @Test
   void testToTransaction_ValidTransactionRequest_EmptyTags() {
-    UUID userId = RandomUtils.randomUUID();
-    TransactionRequestDto request = createTransactionRequest(userId);
+    TransactionRequestDto request =
+        TransactionTestFactory.TransactionRequestBuilder.defaultInstance();
     TransactionRequestItemDto transactionRequestItemDto = request.transactions().getFirst();
 
-    Transaction result = TransactionMapper.toTransaction(userId, transactionRequestItemDto);
+    Transaction result =
+        TransactionMapper.toTransaction(
+            request.userId(),
+            transactionRequestItemDto,
+            Set.of(TagTestFactory.fakeTag(request.userId())));
 
     assertEquals(request.userId(), result.getUserId());
     assertEquals(transactionRequestItemDto.accountId(), result.getAccountId());
@@ -35,25 +40,7 @@ class TransactionMapperTest {
     assertEquals(transactionRequestItemDto.date(), result.getDate());
     assertEquals(transactionRequestItemDto.description(), result.getDescription());
     assertEquals(transactionRequestItemDto.currency(), result.getCurrency());
-    assertEquals(Collections.emptySet(), result.getTags());
-  }
-
-  @Test
-  void testToTransaction_ValidTransactionRequest_Tags() {
-    UUID userId = RandomUtils.randomUUID();
-    Set<Tag> tags = Set.of(createTag(userId));
-    TransactionRequestDto request = createTransactionRequest(userId, tags);
-    TransactionRequestItemDto transactionRequestItemDto = request.transactions().getFirst();
-
-    Transaction result = TransactionMapper.toTransaction(userId, transactionRequestItemDto, tags);
-
-    assertEquals(request.userId(), result.getUserId());
-    assertEquals(transactionRequestItemDto.accountId(), result.getAccountId());
-    assertEquals(transactionRequestItemDto.categoryId(), result.getCategoryId());
-    assertEquals(transactionRequestItemDto.date(), result.getDate());
-    assertEquals(transactionRequestItemDto.description(), result.getDescription());
-    assertEquals(transactionRequestItemDto.currency(), result.getCurrency());
-    assertEquals(tags, result.getTags());
+    assertEquals(transactionRequestItemDto.tags().size(), result.getTags().size());
   }
 
   @Test
@@ -63,16 +50,19 @@ class TransactionMapperTest {
 
   @Test
   void testToTransactionDto_ValidTransactionEntity() {
-    Transaction transaction = createTransaction(RandomUtils.randomUUID());
+    Transaction transaction = TransactionTestFactory.fakeTransaction(RandomUtils.randomUUID());
 
     TransactionDto result = TransactionMapper.toTransactionDto(transaction);
 
     assertEquals(transaction.getTransactionId(), result.getTransactionId());
+    assertEquals(transaction.getUserId(), result.getUserId());
     assertEquals(transaction.getAccountId(), result.getAccountId());
     assertEquals(transaction.getCategoryId(), result.getCategoryId());
+    assertEquals(transaction.getBudgetId(), result.getBudgetId());
     assertEquals(transaction.getDate(), result.getDate());
     assertEquals(transaction.getDescription(), result.getDescription());
     assertEquals(transaction.getAmount(), result.getAmount());
+    assertEquals(transaction.getNormalizedAmount(), result.getNormalizedAmount());
     assertEquals(transaction.getCurrency(), result.getCurrency());
     assertEquals(transaction.getTags().size(), result.getTags().size());
   }
@@ -85,10 +75,10 @@ class TransactionMapperTest {
 
   @Test
   void testToTransactionDto_NonEmptyTransactionList() {
-    int entitiesCount = RandomUtils.randomInteger(0, 10);
+    int entitiesCount = RandomUtils.randomInteger(10);
     List<Transaction> transactions = new ArrayList<>(entitiesCount);
     for (int i = 0; i < entitiesCount; i++) {
-      transactions.add(createTransaction(RandomUtils.randomUUID()));
+      transactions.add(TransactionTestFactory.fakeTransaction(RandomUtils.randomUUID()));
     }
     List<TransactionDto> transactionDtos = TransactionMapper.toTransactionDto(transactions);
 
@@ -100,9 +90,11 @@ class TransactionMapperTest {
       assertEquals(transaction.getUserId(), transactionDto.getUserId());
       assertEquals(transaction.getAccountId(), transactionDto.getAccountId());
       assertEquals(transaction.getCategoryId(), transactionDto.getCategoryId());
+      assertEquals(transaction.getBudgetId(), transactionDto.getBudgetId());
       assertEquals(transaction.getDate(), transactionDto.getDate());
       assertEquals(transaction.getDescription(), transactionDto.getDescription());
       assertEquals(transaction.getAmount(), transactionDto.getAmount());
+      assertEquals(transaction.getNormalizedAmount(), transactionDto.getNormalizedAmount());
       assertEquals(transaction.getCurrency(), transactionDto.getCurrency());
       assertEquals(transaction.getTags().size(), transactionDto.getTags().size());
     }
@@ -110,18 +102,12 @@ class TransactionMapperTest {
 
   @Test
   void testToTransaction_PartialUpdate() {
-    UUID userId = RandomUtils.randomUUID();
-    Transaction transaction = createTransaction(userId);
-    Set<Tag> tags = createTags(userId);
+    Transaction transaction = TransactionTestFactory.fakeTransaction(RandomUtils.randomUUID());
+    Set<Tag> tags = TagTestFactory.fakeTags(RandomUtils.randomUUID());
     TransactionUpdateRequestDto request =
-        new TransactionUpdateRequestDto(
-            RandomUtils.randomUUID(),
-            RandomUtils.randomUUID(),
-            RandomUtils.randomLocalDate(2024, 2024),
-            RandomUtils.randomString(15),
-            RandomUtils.randomBigDecimal(),
-            RandomUtils.randomString(3).toUpperCase(),
-            tags.stream().map(Tag::getTagId).collect(Collectors.toSet()));
+        TransactionTestFactory.TransactionUpdateRequestBuilder.builder()
+            .withTags(tags.stream().map(Tag::getTagId).collect(Collectors.toSet()))
+            .build();
 
     Transaction result = TransactionMapper.partialUpdate(transaction, request, tags);
 
@@ -129,8 +115,8 @@ class TransactionMapperTest {
     assertEquals(request.categoryId(), result.getCategoryId());
     assertEquals(request.date(), result.getDate());
     assertEquals(request.description(), result.getDescription());
+    assertEquals(request.amount(), result.getAmount());
     assertEquals(request.currency(), result.getCurrency());
     assertEquals(tags.size(), result.getTags().size());
   }
-
 }

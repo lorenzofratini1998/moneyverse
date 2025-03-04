@@ -3,10 +3,10 @@ package it.moneyverse.transaction.model.repositories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.moneyverse.core.boot.*;
+import it.moneyverse.transaction.model.TransactionTestContext;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
-import it.moneyverse.transaction.utils.TransactionTestContext;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;

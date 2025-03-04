@@ -1,7 +1,5 @@
 package it.moneyverse.transaction.runtime.controllers;
 
-import static it.moneyverse.transaction.utils.TransactionTestUtils.createSubscriptionRequest;
-import static it.moneyverse.transaction.utils.TransactionTestUtils.createTransactionRequest;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -12,17 +10,16 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.SubscriptionTestFactory;
+import it.moneyverse.transaction.model.TransactionTestFactory;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.services.SubscriptionService;
 import it.moneyverse.transaction.services.TagManagementService;
 import it.moneyverse.transaction.services.TransactionManagementService;
 import it.moneyverse.transaction.services.TransferManagementService;
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -63,7 +60,8 @@ class TransactionManagementControllerTest {
   @Test
   void testCreateAccount_Success(@Mock TransactionDto transactionDto) throws Exception {
     UUID userId = RandomUtils.randomUUID();
-    TransactionRequestDto request = createTransactionRequest(userId);
+    TransactionRequestDto request =
+        TransactionTestFactory.TransactionRequestBuilder.builder().withUserId(userId).build();
 
     when(transactionService.createTransactions(request)).thenReturn(List.of(transactionDto));
 
@@ -78,7 +76,8 @@ class TransactionManagementControllerTest {
 
   @Test
   void testCreateAccount_Forbidden() throws Exception {
-    TransactionRequestDto request = createTransactionRequest(RandomUtils.randomUUID());
+    TransactionRequestDto request =
+        TransactionTestFactory.TransactionRequestBuilder.defaultInstance();
 
     mockMvc
         .perform(
@@ -90,7 +89,8 @@ class TransactionManagementControllerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("invalidTransactionRequestProvider")
+  @MethodSource(
+      "it.moneyverse.transaction.model.TransactionTestFactory$TransactionRequestBuilder#invalidTransactionRequestProvider")
   void testCreateAccount_BadRequest(Supplier<TransactionRequestDto> requestSupplier)
       throws Exception {
     mockMvc
@@ -100,85 +100,6 @@ class TransactionManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockUserRequestPostProcessor.mockUser(RandomUtils.randomString(15))))
         .andExpect(status().isBadRequest());
-  }
-
-  private static Stream<Supplier<TransactionRequestDto>> invalidTransactionRequestProvider() {
-    return Stream.of(
-        TransactionManagementControllerTest::createRequestWithNullUserId,
-        TransactionManagementControllerTest::createRequestWithNullAccountId,
-        TransactionManagementControllerTest::createRequestWithNullDate,
-        TransactionManagementControllerTest::createRequestWithNullAmount,
-        TransactionManagementControllerTest::createRequestWithNullCurrency);
-  }
-
-  private static TransactionRequestDto createRequestWithNullUserId() {
-    return new TransactionRequestDto(
-        null,
-        List.of(
-            new TransactionRequestItemDto(
-                RandomUtils.randomUUID(),
-                RandomUtils.randomUUID(),
-                RandomUtils.randomLocalDate(2024, 2025),
-                RandomUtils.randomString(15),
-                RandomUtils.randomBigDecimal(),
-                RandomUtils.randomString(3).toUpperCase(),
-                null)));
-  }
-
-  private static TransactionRequestDto createRequestWithNullAccountId() {
-    return new TransactionRequestDto(
-        RandomUtils.randomUUID(),
-        List.of(
-            new TransactionRequestItemDto(
-                null,
-                RandomUtils.randomUUID(),
-                RandomUtils.randomLocalDate(2024, 2025),
-                RandomUtils.randomString(15),
-                RandomUtils.randomBigDecimal(),
-                RandomUtils.randomString(3).toUpperCase(),
-                null)));
-  }
-
-  private static TransactionRequestDto createRequestWithNullDate() {
-    return new TransactionRequestDto(
-        RandomUtils.randomUUID(),
-        List.of(
-            new TransactionRequestItemDto(
-                RandomUtils.randomUUID(),
-                RandomUtils.randomUUID(),
-                null,
-                RandomUtils.randomString(15),
-                RandomUtils.randomBigDecimal(),
-                RandomUtils.randomString(3).toUpperCase(),
-                null)));
-  }
-
-  private static TransactionRequestDto createRequestWithNullAmount() {
-    return new TransactionRequestDto(
-        RandomUtils.randomUUID(),
-        List.of(
-            new TransactionRequestItemDto(
-                RandomUtils.randomUUID(),
-                RandomUtils.randomUUID(),
-                RandomUtils.randomLocalDate(2024, 2025),
-                RandomUtils.randomString(15),
-                null,
-                RandomUtils.randomString(3).toUpperCase(),
-                null)));
-  }
-
-  private static TransactionRequestDto createRequestWithNullCurrency() {
-    return new TransactionRequestDto(
-        RandomUtils.randomUUID(),
-        List.of(
-            new TransactionRequestItemDto(
-                RandomUtils.randomUUID(),
-                RandomUtils.randomUUID(),
-                RandomUtils.randomLocalDate(2024, 2025),
-                RandomUtils.randomString(15),
-                RandomUtils.randomBigDecimal(),
-                null,
-                null)));
   }
 
   @Test
@@ -242,7 +163,8 @@ class TransactionManagementControllerTest {
   @Test
   void testUpdateTransaction_Success(@Mock TransactionDto response) throws Exception {
     UUID transactionId = RandomUtils.randomUUID();
-    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+    TransactionUpdateRequestDto request =
+        TransactionTestFactory.TransactionUpdateRequestBuilder.defaultInstance();
     when(transactionService.updateTransaction(transactionId, request)).thenReturn(response);
 
     mockMvc
@@ -257,7 +179,8 @@ class TransactionManagementControllerTest {
   @Test
   void testUpdateTransaction_NotFound() throws Exception {
     UUID transactionId = RandomUtils.randomUUID();
-    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+    TransactionUpdateRequestDto request =
+        TransactionTestFactory.TransactionUpdateRequestBuilder.defaultInstance();
     when(transactionService.updateTransaction(transactionId, request))
         .thenThrow(ResourceNotFoundException.class);
 
@@ -273,7 +196,8 @@ class TransactionManagementControllerTest {
   @Test
   void testUpdateTransaction_Forbidden() throws Exception {
     UUID transactionId = RandomUtils.randomUUID();
-    TransactionUpdateRequestDto request = createTransactionUpdateRequest();
+    TransactionUpdateRequestDto request =
+        TransactionTestFactory.TransactionUpdateRequestBuilder.defaultInstance();
 
     mockMvc
         .perform(
@@ -322,23 +246,11 @@ class TransactionManagementControllerTest {
         .andExpect(status().isForbidden());
   }
 
-  private TransactionUpdateRequestDto createTransactionUpdateRequest() {
-    UUID tagId = RandomUtils.randomUUID();
-    return new TransactionUpdateRequestDto(
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomLocalDate(2024, 2024),
-        RandomUtils.randomString(30),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        Collections.singleton(tagId));
-  }
-
   @Test
   void testCreateSubscription_Success(@Mock SubscriptionDto subscriptionDto) throws Exception {
     UUID userId = RandomUtils.randomUUID();
     SubscriptionRequestDto request =
-        createSubscriptionRequest(userId, LocalDate.now().plusMonths(1));
+        SubscriptionTestFactory.SubscriptionRequestBuilder.builder().withUserId(userId).build();
 
     when(subscriptionService.createSubscription(request)).thenReturn(subscriptionDto);
 
@@ -352,7 +264,8 @@ class TransactionManagementControllerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("invalidRecurrenceDtoProvider")
+  @MethodSource(
+      "it.moneyverse.transaction.model.SubscriptionTestFactory$SubscriptionRequestBuilder#invalidRecurrenceDtoProvider")
   void testCreateSubscription_BadRequest(Supplier<SubscriptionRequestDto> requestSupplier)
       throws Exception {
     mockMvc
@@ -362,35 +275,5 @@ class TransactionManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockUserRequestPostProcessor.mockUser(RandomUtils.randomString(15))))
         .andExpect(status().isBadRequest());
-  }
-
-  private static Stream<Supplier<SubscriptionRequestDto>> invalidRecurrenceDtoProvider() {
-    return Stream.of(
-        TransactionManagementControllerTest::createRequestWithInvalidRecurrenceRule,
-        TransactionManagementControllerTest::createRequestWithEndDateBeforeStartDate);
-  }
-
-  private static SubscriptionRequestDto createRequestWithInvalidRecurrenceRule() {
-    return new SubscriptionRequestDto(
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        new RecurrenceDto("INVALID", RandomUtils.randomLocalDate(2025, 2025), null));
-  }
-
-  private static SubscriptionRequestDto createRequestWithEndDateBeforeStartDate() {
-    LocalDate startDate = LocalDate.now();
-    LocalDate endDate = startDate.minusMonths(2);
-    return new SubscriptionRequestDto(
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomUUID(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(3).toUpperCase(),
-        new RecurrenceDto("FREQ=MONTHLY", startDate, endDate));
   }
 }

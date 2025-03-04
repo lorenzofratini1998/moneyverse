@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PreferenceService {
-  UserPreferenceDto createUserPreferences(UUID userId, List<UserPreferenceRequest> request);
+  List<UserPreferenceDto> createUserPreferences(UUID userId, List<UserPreferenceRequest> request);
 
-  UserPreferenceDto getUserPreferences(UUID userId, Boolean mandatory);
+  List<UserPreferenceDto> getUserPreferences(UUID userId, Boolean mandatory);
 
   List<PreferenceDto> getPreferences(Boolean mandatory);
 }

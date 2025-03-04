@@ -8,9 +8,11 @@ import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.runtime.messages.AccountEventPublisher;
 import it.moneyverse.account.utils.mapper.AccountMapper;
+import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceUpdateException;
 import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
@@ -58,7 +60,7 @@ public class AccountManagementService implements AccountService {
     AccountCategory category = findAccountCategory(request.accountCategory());
     LOGGER.info("Creating account {} for user {}", request.accountName(), request.userId());
     Account account = AccountMapper.toAccount(request, category);
-    if (accountRepository.findDefaultAccountsByUserId(request.userId()).isEmpty()) {
+    if (accountRepository.findDefaultAccountByUserId(request.userId()).isEmpty()) {
       LOGGER.info("Setting default account for user {}", request.userId());
       account.setDefault(Boolean.TRUE);
     } else {
@@ -105,17 +107,16 @@ public class AccountManagementService implements AccountService {
     AccountCategory category =
         request.accountCategory() != null ? findAccountCategory(request.accountCategory()) : null;
 
-    account = AccountMapper.partialUpdate(account, request, category);
-    if (Boolean.TRUE.equals(request.isDefault())) {
-      accountRepository.findDefaultAccountsByUserId(account.getUserId()).stream()
-          .filter(defaultAcc -> !defaultAcc.getAccountId().equals(accountId))
-          .forEach(
-              defaultAcc -> {
-                defaultAcc.setDefault(false);
-                accountRepository.save(defaultAcc);
-              });
+    if (Boolean.TRUE.equals(account.isDefault()) && Boolean.FALSE.equals(request.isDefault())) {
+      throw new ResourceUpdateException("The default account cannot be disabled");
     }
-    AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
+
+    account = accountRepository.save(AccountMapper.partialUpdate(account, request, category));
+
+    if (Boolean.TRUE.equals(request.isDefault())) {
+      accountRepository.unsetDefaultAccountExcept(accountId);
+    }
+    AccountDto result = AccountMapper.toAccountDto(account);
     LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUserId());
     return result;
   }
@@ -131,7 +132,7 @@ public class AccountManagementService implements AccountService {
   public void deleteAccount(UUID accountId) {
     Account account = findAccountById(accountId);
     accountRepository.delete(account);
-    eventPublisher.publishEvent(account);
+    eventPublisher.publishEvent(account, EventTypeEnum.DELETE);
     LOGGER.info("Deleted account {} for user {}", account.getAccountId(), account.getUserId());
   }
 

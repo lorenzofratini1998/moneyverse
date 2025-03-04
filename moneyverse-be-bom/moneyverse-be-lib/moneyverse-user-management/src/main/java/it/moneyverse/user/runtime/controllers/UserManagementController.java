@@ -30,7 +30,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @PostMapping("/users/{userId}/preferences")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
-  public UserPreferenceDto createUserPreferences(
+  public List<UserPreferenceDto> createUserPreferences(
       @PathVariable UUID userId, @RequestBody List<UserPreferenceRequest> request) {
     return preferenceService.createUserPreferences(userId, request);
   }
@@ -39,7 +39,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @GetMapping("/users/{userId}/preferences")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
-  public UserPreferenceDto getUserPreferences(
+  public List<UserPreferenceDto> getUserPreferences(
       @PathVariable UUID userId, @RequestParam(required = false) Boolean mandatory) {
     return preferenceService.getUserPreferences(userId, mandatory);
   }

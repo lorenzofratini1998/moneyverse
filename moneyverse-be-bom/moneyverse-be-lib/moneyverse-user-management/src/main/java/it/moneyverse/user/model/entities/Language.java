@@ -25,11 +25,11 @@ public class Language implements Serializable {
 
   @Column(name = "IS_DEFAULT", nullable = false)
   @ColumnDefault("FALSE")
-  private Boolean isDefault;
+  private Boolean isDefault = false;
 
   @Column(name = "ENABLED", nullable = false)
   @ColumnDefault("TRUE")
-  private Boolean isEnabled;
+  private Boolean isEnabled = true;
 
   public UUID getLanguageId() {
     return languageId;

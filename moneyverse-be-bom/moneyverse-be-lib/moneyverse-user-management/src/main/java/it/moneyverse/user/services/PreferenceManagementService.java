@@ -22,18 +22,18 @@ public class PreferenceManagementService implements PreferenceService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PreferenceManagementService.class);
 
-  private final KeycloakService keycloakService;
+  private final UserService userService;
   private final CurrencyServiceClient currencyServiceClient;
 
   private final UserPreferenceRepository userPreferenceRepository;
   private final PreferenceRepository preferenceRepository;
 
   public PreferenceManagementService(
-      KeycloakService keycloakService,
+      UserService userService,
       CurrencyServiceClient currencyServiceClient,
       UserPreferenceRepository userPreferenceRepository,
       PreferenceRepository preferenceRepository) {
-    this.keycloakService = keycloakService;
+    this.userService = userService;
     this.currencyServiceClient = currencyServiceClient;
     this.userPreferenceRepository = userPreferenceRepository;
     this.preferenceRepository = preferenceRepository;
@@ -41,65 +41,51 @@ public class PreferenceManagementService implements PreferenceService {
 
   @Override
   @Transactional
-  public UserPreferenceDto createUserPreferences(UUID userId, List<UserPreferenceRequest> request) {
-    keycloakService
-        .getUserById(userId)
-        .orElseThrow(
-            () -> new ResourceNotFoundException("User with id %s not found.".formatted(userId)));
+  public List<UserPreferenceDto> createUserPreferences(
+      UUID userId, List<UserPreferenceRequest> request) {
+    userService.checkIfUserExists(userId);
     LOGGER.info("Creating preferences for user with id {}", userId);
 
     List<UserPreference> userPreferences =
         request.stream()
-            .map(
-                userPreferenceRequest -> {
-                  Preference preference =
-                      getPreferenceById(
-                          userPreferenceRequest.preferenceId(), userPreferenceRequest.value());
-                  return PreferenceMapper.toUserPreference(
-                      userId, userPreferenceRequest, preference);
-                })
+            .map(userPreferenceRequest -> createUserPreference(userId, userPreferenceRequest))
             .toList();
 
-    return PreferenceMapper.toUserPreferenceDto(
-        userId, userPreferenceRepository.saveAll(userPreferences));
+    return PreferenceMapper.toUserPreferenceDto(userPreferenceRepository.saveAll(userPreferences));
   }
 
-  private Preference getPreferenceById(UUID preferenceId, String preferenceValue) {
-    Preference preference =
-        preferenceRepository
-            .findById(preferenceId)
-            .orElseThrow(
-                () ->
-                    new ResourceNotFoundException(
-                        "Preference with id %s not found.".formatted(preferenceId)));
+  private UserPreference createUserPreference(UUID userId, UserPreferenceRequest request) {
+    Preference preference = getPreferenceById(request.preferenceId());
     if (preference.getName().equalsIgnoreCase("CURRENCY")) {
-      checkIfCurrencyExists(preferenceValue);
+      currencyServiceClient.checkIfCurrencyExists(request.value());
     }
-    return preference;
+    return PreferenceMapper.toUserPreference(userId, request, preference);
   }
 
-  private void checkIfCurrencyExists(String currency) {
-    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
-      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
-    }
+  private Preference getPreferenceById(UUID preferenceId) {
+    return preferenceRepository
+        .findById(preferenceId)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Preference with id %s not found.".formatted(preferenceId)));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public UserPreferenceDto getUserPreferences(UUID userId, Boolean mandatory) {
+  public List<UserPreferenceDto> getUserPreferences(UUID userId, Boolean mandatory) {
     return mandatory == null ? getUserPreferences(userId) : getUserMandatoryPreferences(userId);
   }
 
-  private UserPreferenceDto getUserPreferences(UUID userId) {
+  private List<UserPreferenceDto> getUserPreferences(UUID userId) {
     LOGGER.info("Getting preferences for user with id {}", userId);
-    return PreferenceMapper.toUserPreferenceDto(
-        userId, userPreferenceRepository.findByUserId(userId));
+    return PreferenceMapper.toUserPreferenceDto(userPreferenceRepository.findByUserId(userId));
   }
 
-  private UserPreferenceDto getUserMandatoryPreferences(UUID userId) {
+  private List<UserPreferenceDto> getUserMandatoryPreferences(UUID userId) {
     LOGGER.info("Getting mandatory preferences for user with id {}", userId);
     return PreferenceMapper.toUserPreferenceDto(
-        userId, userPreferenceRepository.findMandatoryPreferencesByUserId(userId));
+        userPreferenceRepository.findMandatoryPreferencesByUserId(userId));
   }
 
   @Override

@@ -1,17 +1,16 @@
 package it.moneyverse.currency.runtime.server;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import it.moneyverse.core.boot.*;
+import it.moneyverse.currency.model.CurrencyTestContext;
 import it.moneyverse.currency.model.entities.Currency;
 import it.moneyverse.currency.model.repositories.CurrencyRepository;
 import it.moneyverse.currency.model.repositories.ExchangeRateRepository;
-import it.moneyverse.currency.utils.CurrencyTestContext;
 import it.moneyverse.grpc.lib.CurrencyRequest;
 import it.moneyverse.grpc.lib.CurrencyResponse;
 import it.moneyverse.grpc.lib.CurrencyServiceGrpc;

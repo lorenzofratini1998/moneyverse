@@ -11,7 +11,7 @@ import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.entities.UserModel;
-import it.moneyverse.test.annotations.IntegrationTest;
+import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
@@ -19,6 +19,7 @@ import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,7 +38,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 
-@IntegrationTest
+@MoneyverseTest
 class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   protected static AccountTestContext testContext;
@@ -57,7 +58,8 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
         .withKeycloak(keycloakContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
-        .withKafkaContainer(kafkaContainer);
+        .withKafkaContainer(kafkaContainer)
+        .withFlywayTestDirectory(tempDir);
   }
 
   @BeforeAll
@@ -84,7 +86,15 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(testContext.getAccountsCount() + 1, accountRepository.findAll().size());
     assertNotNull(response.getBody());
-    compareExpectedWithActual(request, response.getBody());
+    assertEquals(request.userId(), response.getBody().getUserId());
+    assertEquals(request.accountName(), response.getBody().getAccountName());
+    assertEquals(
+        request.balance() != null ? request.balance() : BigDecimal.ZERO,
+        response.getBody().getBalance());
+    assertEquals(request.balanceTarget(), response.getBody().getBalanceTarget());
+    assertEquals(request.accountCategory(), response.getBody().getAccountCategory());
+    assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
+    assertEquals(request.currency(), response.getBody().getCurrency());
   }
 
   @Test
@@ -120,7 +130,15 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    compareExpectedWithActual(account, response.getBody());
+    assertEquals(account.getAccountId(), response.getBody().getAccountId());
+    assertEquals(account.getUserId(), response.getBody().getUserId());
+    assertEquals(account.getAccountName(), response.getBody().getAccountName());
+    assertEquals(account.getBalance(), response.getBody().getBalance());
+    assertEquals(account.getBalanceTarget(), response.getBody().getBalanceTarget());
+    assertEquals(account.getCurrency(), response.getBody().getCurrency());
+    assertEquals(account.getAccountCategory().getName(), response.getBody().getAccountCategory());
+    assertEquals(account.getAccountDescription(), response.getBody().getAccountDescription());
+    assertEquals(account.isDefault(), response.getBody().isDefault());
   }
 
   @Test
@@ -167,7 +185,19 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(
         request.isDefault() != null ? request.isDefault() : account.isDefault(),
         response.getBody().isDefault());
-    assertEquals(1, accountRepository.findDefaultAccountsByUserId(user.getUserId()).size());
+    assertEquals(
+        1,
+        accountRepository.findAll().stream()
+            .filter(a -> a.getUserId().equals(user.getUserId()) && a.isDefault())
+            .count());
+    if (request.isDefault() != null && request.isDefault()) {
+      assertEquals(
+          account.getAccountId(),
+          accountRepository
+              .findDefaultAccountByUserId(user.getUserId())
+              .map(Account::getAccountId)
+              .orElse(null));
+    }
   }
 
   @Test
@@ -202,27 +232,5 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, result.getStatusCode());
     assertNotNull(result.getBody());
     assertEquals(testContext.getCategories().size(), result.getBody().size());
-  }
-
-  private void compareExpectedWithActual(AccountRequestDto expected, AccountDto actual) {
-    assertEquals(expected.userId(), actual.getUserId());
-    assertEquals(expected.accountName(), actual.getAccountName());
-    assertEquals(expected.balance(), actual.getBalance());
-    assertEquals(expected.balanceTarget(), actual.getBalanceTarget());
-    assertEquals(expected.accountCategory(), actual.getAccountCategory());
-    assertEquals(expected.accountDescription(), actual.getAccountDescription());
-    assertEquals(expected.currency(), actual.getCurrency());
-  }
-
-  private void compareExpectedWithActual(Account expected, AccountDto actual) {
-    assertEquals(expected.getAccountId(), actual.getAccountId());
-    assertEquals(expected.getUserId(), actual.getUserId());
-    assertEquals(expected.getAccountName(), actual.getAccountName());
-    assertEquals(expected.getBalance(), actual.getBalance());
-    assertEquals(expected.getBalanceTarget(), actual.getBalanceTarget());
-    assertEquals(expected.getCurrency(), actual.getCurrency());
-    assertEquals(expected.getAccountCategory().getName(), actual.getAccountCategory());
-    assertEquals(expected.getAccountDescription(), actual.getAccountDescription());
-    assertEquals(expected.isDefault(), actual.isDefault());
   }
 }

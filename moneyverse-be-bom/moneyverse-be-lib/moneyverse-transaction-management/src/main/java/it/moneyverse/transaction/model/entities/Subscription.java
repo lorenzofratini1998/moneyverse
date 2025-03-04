@@ -1,6 +1,7 @@
 package it.moneyverse.transaction.model.entities;
 
 import it.moneyverse.core.model.entities.Auditable;
+import it.moneyverse.core.model.entities.Copyable;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "SUBSCRIPTIONS")
-public class Subscription extends Auditable implements Serializable {
+public class Subscription extends Auditable implements Serializable, Copyable<Subscription> {
   @Serial private static final long serialVersionUID = 1L;
 
   @Id
@@ -30,10 +31,10 @@ public class Subscription extends Auditable implements Serializable {
   @Column(name = "CATEGORY_ID")
   private UUID categoryId;
 
-  @Column(name = "AMOUNT", nullable = false)
+  @Column(name = "AMOUNT", nullable = false, precision = 18, scale = 2)
   private BigDecimal amount;
 
-  @Column(name = "TOTAL_AMOUNT", nullable = false)
+  @Column(name = "TOTAL_AMOUNT", nullable = false, precision = 18, scale = 2)
   @ColumnDefault(value = "0.0")
   private BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -61,6 +62,33 @@ public class Subscription extends Auditable implements Serializable {
 
   @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Transaction> transactions = new ArrayList<>();
+
+  public Subscription() {}
+
+  private Subscription(Subscription source) {
+    super(source);
+    if (source != null) {
+      this.subscriptionId = source.subscriptionId;
+      this.userId = source.userId;
+      this.accountId = source.accountId;
+      this.categoryId = source.categoryId;
+      this.amount = source.amount;
+      this.totalAmount = source.totalAmount;
+      this.currency = source.currency;
+      this.subscriptionName = source.subscriptionName;
+      this.recurrenceRule = source.recurrenceRule;
+      this.startDate = source.startDate;
+      this.endDate = source.endDate;
+      this.nextExecutionDate = source.nextExecutionDate;
+      this.isActive = source.isActive;
+      this.transactions = source.transactions;
+    }
+  }
+
+  @Override
+  public Subscription copy() {
+    return new Subscription(this);
+  }
 
   public void addTransaction(Transaction transaction) {
     transactions.add(transaction);

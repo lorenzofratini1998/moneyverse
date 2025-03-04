@@ -1,20 +1,20 @@
 package it.moneyverse.transaction.services;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.TagTestFactory;
 import it.moneyverse.transaction.model.dto.TagDto;
 import it.moneyverse.transaction.model.dto.TagRequestDto;
 import it.moneyverse.transaction.model.dto.TagUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.repositories.TagRepository;
-import it.moneyverse.transaction.utils.TransactionTestUtils;
 import it.moneyverse.transaction.utils.mapper.TagMapper;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class TagManagementServiceTest {
   @Test
   void givenTagRequestDto_whenCreateTag_thenReturnTagDto(@Mock Tag tag, @Mock TagDto tagDto) {
     UUID userId = RandomUtils.randomUUID();
-    TagRequestDto request = TransactionTestUtils.createTagRequest(userId);
+    TagRequestDto request = TagTestFactory.fakeTagRequest(userId);
     when(tagRepository.existsByTagNameAndUserId(request.tagName(), userId)).thenReturn(false);
     tagMapper.when(() -> TagMapper.toTag(request)).thenReturn(tag);
     when(tagRepository.save(tag)).thenReturn(tag);
@@ -62,7 +62,7 @@ class TagManagementServiceTest {
   @Test
   void givenTagRequestDto_whenCreateTag_thenTagAlreadyExists() {
     UUID userId = RandomUtils.randomUUID();
-    TagRequestDto request = TransactionTestUtils.createTagRequest(userId);
+    TagRequestDto request = TagTestFactory.fakeTagRequest(userId);
     when(tagRepository.existsByTagNameAndUserId(request.tagName(), userId)).thenReturn(true);
 
     assertThrows(
@@ -76,7 +76,7 @@ class TagManagementServiceTest {
   void givenTagUpdateRequestDto_WhenUpdateTag_thenReturnTagDto(@Mock Tag tag, @Mock TagDto tagDto) {
     UUID tagId = RandomUtils.randomUUID();
     UUID userId = RandomUtils.randomUUID();
-    TagUpdateRequestDto request = TransactionTestUtils.createTagUpdateRequest();
+    TagUpdateRequestDto request = TagTestFactory.fakeTagUpdateRequest();
     when(tagRepository.findById(tagId)).thenReturn(Optional.of(tag));
     when(tag.getUserId()).thenReturn(userId);
     when(tagRepository.existsByTagNameAndUserId(request.tagName(), userId)).thenReturn(false);
@@ -96,7 +96,7 @@ class TagManagementServiceTest {
   void givenTagUpdateRequestDto_WhenUpdateTag_thenTagAlreadyExists(@Mock Tag tag) {
     UUID tagId = RandomUtils.randomUUID();
     UUID userId = RandomUtils.randomUUID();
-    TagUpdateRequestDto request = TransactionTestUtils.createTagUpdateRequest();
+    TagUpdateRequestDto request = TagTestFactory.fakeTagUpdateRequest();
     when(tagRepository.findById(tagId)).thenReturn(Optional.of(tag));
     when(tag.getUserId()).thenReturn(userId);
     when(tagRepository.existsByTagNameAndUserId(request.tagName(), userId)).thenReturn(true);
@@ -113,7 +113,7 @@ class TagManagementServiceTest {
   void givenTagUpdateRequestDto_WhenUpdateTag_thenTagNotFound() {
     UUID tagId = RandomUtils.randomUUID();
     UUID userId = RandomUtils.randomUUID();
-    TagUpdateRequestDto request = TransactionTestUtils.createTagUpdateRequest();
+    TagUpdateRequestDto request = TagTestFactory.fakeTagUpdateRequest();
     when(tagRepository.findById(tagId)).thenReturn(Optional.empty());
 
     assertThrows(
@@ -122,5 +122,23 @@ class TagManagementServiceTest {
     verify(tagRepository, times(1)).findById(tagId);
     verify(tagRepository, never()).existsByTagNameAndUserId(request.tagName(), userId);
     verify(tagRepository, never()).save(any(Tag.class));
+  }
+
+  @Test
+  void givenTagIds_WhenGetTagsByIds_thenReturnTags(@Mock Tag tag) {
+    UUID tagId = RandomUtils.randomUUID();
+    when(tagRepository.findById(tagId)).thenReturn(Optional.of(tag));
+    Set<Tag> result = tagManagementService.getTagsByIds(Set.of(tagId));
+
+    assertEquals(1, result.size());
+    verify(tagRepository, times(1)).findById(tagId);
+  }
+
+  @Test
+  void givenEmptyTagIds_WhenGetTagsByIds_thenReturnEmptySet() {
+    Set<Tag> result = tagManagementService.getTagsByIds(Set.of());
+
+    assertEquals(0, result.size());
+    verify(tagRepository, never()).findById(any(UUID.class));
   }
 }

@@ -23,9 +23,11 @@ public class TransactionDto implements Serializable {
   private final UUID userId;
   private final UUID accountId;
   private final UUID categoryId;
+  private final UUID budgetId;
   private final LocalDate date;
   private final String description;
   private final BigDecimal amount;
+  private final BigDecimal normalizedAmount;
   private final String currency;
   private final Set<TagDto> tags;
   private final UUID transferId;
@@ -36,9 +38,11 @@ public class TransactionDto implements Serializable {
     this.userId = builder.userId;
     this.accountId = builder.accountId;
     this.categoryId = builder.categoryId;
+    this.budgetId = builder.budgetId;
     this.date = builder.date;
     this.description = builder.description;
     this.amount = builder.amount;
+    this.normalizedAmount = builder.normalizedAmount;
     this.currency = builder.currency;
     this.tags = builder.tags;
     this.transferId = builder.transferId;
@@ -54,9 +58,11 @@ public class TransactionDto implements Serializable {
     private UUID userId;
     private UUID accountId;
     private UUID categoryId;
+    private UUID budgetId;
     private LocalDate date;
     private String description;
     private BigDecimal amount;
+    private BigDecimal normalizedAmount;
     private String currency;
     private Set<TagDto> tags;
     private UUID transferId;
@@ -82,6 +88,11 @@ public class TransactionDto implements Serializable {
       return this;
     }
 
+    public Builder withBudgetId(UUID budgetId) {
+      this.budgetId = budgetId;
+      return this;
+    }
+
     public Builder withDate(LocalDate date) {
       this.date = date;
       return this;
@@ -94,6 +105,11 @@ public class TransactionDto implements Serializable {
 
     public Builder withAmount(BigDecimal amount) {
       this.amount = amount;
+      return this;
+    }
+
+    public Builder withNormalizedAmount(BigDecimal normalizedAmount) {
+      this.normalizedAmount = normalizedAmount;
       return this;
     }
 
@@ -138,6 +154,10 @@ public class TransactionDto implements Serializable {
     return categoryId;
   }
 
+  public UUID getBudgetId() {
+    return budgetId;
+  }
+
   public LocalDate getDate() {
     return date;
   }
@@ -148,6 +168,10 @@ public class TransactionDto implements Serializable {
 
   public BigDecimal getAmount() {
     return amount;
+  }
+
+  public BigDecimal getNormalizedAmount() {
+    return normalizedAmount;
   }
 
   public String getCurrency() {

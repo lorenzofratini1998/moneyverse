@@ -14,15 +14,6 @@ public class TransactionMapper {
 
   public static Transaction toTransaction(
       UUID userId, TransactionRequestItemDto request, Set<Tag> tags) {
-    Transaction transaction = toTransaction(userId, request);
-    if (transaction == null) {
-      return null;
-    }
-    transaction.setTags(tags);
-    return transaction;
-  }
-
-  public static Transaction toTransaction(UUID userId, TransactionRequestItemDto request) {
     if (request == null) {
       return null;
     }
@@ -34,6 +25,7 @@ public class TransactionMapper {
     transaction.setDescription(request.description());
     transaction.setAmount(request.amount());
     transaction.setCurrency(request.currency());
+    transaction.setTags(tags);
     return transaction;
   }
 
@@ -46,9 +38,11 @@ public class TransactionMapper {
         .withUserId(transaction.getUserId())
         .withAccountId(transaction.getAccountId())
         .withCategoryId(transaction.getCategoryId())
+        .withBudgetId(transaction.getBudgetId())
         .withDate(transaction.getDate())
         .withDescription(transaction.getDescription())
         .withAmount(transaction.getAmount())
+        .withNormalizedAmount(transaction.getNormalizedAmount())
         .withCurrency(transaction.getCurrency())
         .withTags(TagMapper.toTagDto(transaction.getTags()))
         .withTransferId(
@@ -70,7 +64,7 @@ public class TransactionMapper {
   public static Transaction partialUpdate(
       Transaction transaction, TransactionUpdateRequestDto request, Set<Tag> tags) {
     partialUpdate(transaction, request);
-    if (request != null && request.tags() != null && !request.tags().isEmpty()) {
+    if (tags != null) {
       transaction.setTags(tags);
     }
     return transaction;

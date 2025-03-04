@@ -1,10 +1,9 @@
 package it.moneyverse.user.utils.mapper;
 
-import static it.moneyverse.user.utils.UserTestUtils.createUser;
-import static it.moneyverse.user.utils.UserTestUtils.createUserUpdateRequest;
 import static org.junit.jupiter.api.Assertions.*;
 
 import it.moneyverse.core.model.dto.UserDto;
+import it.moneyverse.user.model.UserTestFactory;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import org.junit.jupiter.api.Test;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -18,7 +17,7 @@ class UserMapperTest {
 
   @Test
   void testToUserDto_UserRepresentation() {
-    UserRepresentation user = createUser();
+    UserRepresentation user = UserTestFactory.fakeUser();
 
     UserDto userDto = UserMapper.toUserDto(user);
 
@@ -35,7 +34,7 @@ class UserMapperTest {
 
   @Test
   void testPartialUpdate_NullUserUpdateRequestDto() {
-    UserRepresentation user = createUser();
+    UserRepresentation user = UserTestFactory.fakeUser();
 
     UserRepresentation result = UserMapper.partialUpdate(user, null);
 
@@ -44,8 +43,9 @@ class UserMapperTest {
 
   @Test
   void testPartialUpdate_UserRepresentation() {
-    UserRepresentation user = createUser();
-    UserUpdateRequestDto request = createUserUpdateRequest();
+    UserRepresentation user = UserTestFactory.fakeUser();
+    UserUpdateRequestDto request =
+        UserTestFactory.UserUpdateRequestBuilder.builder().defaultInstance();
 
     UserRepresentation result = UserMapper.partialUpdate(user, request);
 

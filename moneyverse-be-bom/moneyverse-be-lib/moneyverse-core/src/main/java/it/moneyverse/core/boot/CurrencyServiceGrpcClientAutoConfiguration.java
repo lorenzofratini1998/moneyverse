@@ -15,6 +15,7 @@ import it.moneyverse.grpc.lib.CurrencyServiceGrpc;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -75,7 +76,8 @@ public class CurrencyServiceGrpcClientAutoConfiguration {
 
   @Bean
   public CurrencyServiceClient currencyServiceClient(
-      CurrencyGrpcService currencyGrpcService, UserServiceClient userServiceClient) {
+      CurrencyGrpcService currencyGrpcService,
+      @Autowired(required = false) UserServiceClient userServiceClient) {
     return new CurrencyServiceGrpcClient(currencyGrpcService, userServiceClient);
   }
 }

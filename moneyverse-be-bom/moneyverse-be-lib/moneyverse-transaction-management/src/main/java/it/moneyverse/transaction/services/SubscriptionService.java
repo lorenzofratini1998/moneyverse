@@ -3,6 +3,8 @@ package it.moneyverse.transaction.services;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
 import it.moneyverse.transaction.model.dto.SubscriptionUpdateRequestDto;
+import it.moneyverse.transaction.model.entities.Subscription;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,5 +23,5 @@ public interface SubscriptionService {
 
   void deleteSubscriptionsByAccountId(UUID accountId);
 
-  void removeCategoryFromAllSubscriptions(UUID categoryId);
+  LocalDate calculateNextExecutionDate(Subscription subscription);
 }

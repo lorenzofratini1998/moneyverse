@@ -26,7 +26,7 @@ public class ExchangeRate implements Serializable {
 
   @Column(name = "CURRENCY_FROM", nullable = false, length = 3)
   @ColumnDefault(value = "'EUR'")
-  private String currencyFrom;
+  private String currencyFrom = "EUR";
 
   @Column(name = "CURRENCY_TO", nullable = false, length = 3)
   private String currencyTo;

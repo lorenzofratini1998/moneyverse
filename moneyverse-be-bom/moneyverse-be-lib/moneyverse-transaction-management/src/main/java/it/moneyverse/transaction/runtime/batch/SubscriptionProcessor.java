@@ -1,10 +1,9 @@
 package it.moneyverse.transaction.runtime.batch;
 
-import static it.moneyverse.transaction.utils.SubscriptionUtils.*;
-
-import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.services.SubscriptionService;
+import it.moneyverse.transaction.services.TransactionFactoryService;
 import jakarta.annotation.Nonnull;
 import java.time.LocalDate;
 import java.util.List;
@@ -15,33 +14,40 @@ import org.springframework.stereotype.Component;
 public class SubscriptionProcessor
     implements ItemProcessor<List<Subscription>, List<Subscription>> {
 
-  private final CurrencyServiceClient currencyServiceClient;
+  private static final String BATCH_JOB = "BATCH_JOB";
 
-  public SubscriptionProcessor(CurrencyServiceClient currencyServiceClient) {
-    this.currencyServiceClient = currencyServiceClient;
+  private final SubscriptionService subscriptionService;
+  private final TransactionFactoryService transactionFactoryService;
+
+  public SubscriptionProcessor(
+      SubscriptionService subscriptionService,
+      TransactionFactoryService transactionFactoryService) {
+    this.subscriptionService = subscriptionService;
+    this.transactionFactoryService = transactionFactoryService;
   }
 
   @Override
   public List<Subscription> process(@Nonnull List<Subscription> subscriptions) {
-    for (Subscription subscription : subscriptions) {
-      LocalDate nextExecutionDate = calculateNextExecutionDate(subscription);
-      subscription.setNextExecutionDate(nextExecutionDate);
-      if (subscription.getEndDate() != null
-          && nextExecutionDate != null
-          && nextExecutionDate.isAfter(subscription.getEndDate())) {
-        subscription.setActive(false);
-      }
-      Transaction transaction = createSubscriptionTransaction(subscription, LocalDate.now());
-      transaction.setNormalizedAmount(
-          currencyServiceClient.convertCurrencyAmountByUserPreference(
-              subscription.getUserId(),
-              transaction.getAmount(),
-              transaction.getCurrency(),
-              transaction.getDate()));
-      transaction.setCreatedBy(BATCH_JOB);
-      transaction.setUpdatedBy(BATCH_JOB);
-      subscription.addTransaction(transaction);
-    }
+    subscriptions.forEach(this::processSubscription);
     return subscriptions;
+  }
+
+  private void processSubscription(Subscription subscription) {
+    LocalDate nextExecutionDate = subscriptionService.calculateNextExecutionDate(subscription);
+    subscription.setNextExecutionDate(nextExecutionDate);
+    if (shouldDeactivateSubscription(subscription)) {
+      subscription.setActive(false);
+    }
+    Transaction transaction =
+        transactionFactoryService.createTransaction(subscription, nextExecutionDate);
+    transaction.setCreatedBy(BATCH_JOB);
+    transaction.setUpdatedBy(BATCH_JOB);
+    subscription.addTransaction(transaction);
+  }
+
+  private boolean shouldDeactivateSubscription(Subscription subscription) {
+    return subscription.getNextExecutionDate() == null
+        || (subscription.getEndDate() != null
+            && subscription.getNextExecutionDate().isAfter(subscription.getEndDate()));
   }
 }

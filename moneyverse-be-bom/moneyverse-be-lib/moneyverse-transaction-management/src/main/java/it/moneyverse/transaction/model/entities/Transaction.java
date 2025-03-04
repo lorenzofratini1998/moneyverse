@@ -1,6 +1,7 @@
 package it.moneyverse.transaction.model.entities;
 
 import it.moneyverse.core.model.entities.Auditable;
+import it.moneyverse.core.model.entities.Copyable;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "TRANSACTIONS")
-public class Transaction extends Auditable implements Serializable {
+public class Transaction extends Auditable implements Serializable, Copyable<Transaction> {
 
   @Serial private static final long serialVersionUID = 1L;
 
@@ -39,11 +40,11 @@ public class Transaction extends Auditable implements Serializable {
   @Column(name = "DESCRIPTION", nullable = false)
   private String description;
 
-  @Column(name = "AMOUNT", nullable = false)
+  @Column(name = "AMOUNT", nullable = false, precision = 18, scale = 2)
   private BigDecimal amount;
 
-  @Column(name = "NORMALIZED_AMOUNT", nullable = false)
-  private BigDecimal normalizedAmount = amount;
+  @Column(name = "NORMALIZED_AMOUNT", nullable = false, precision = 18, scale = 2)
+  private BigDecimal normalizedAmount;
 
   @Column(name = "CURRENCY", nullable = false, length = 3)
   private String currency;
@@ -65,25 +66,30 @@ public class Transaction extends Auditable implements Serializable {
 
   public Transaction() {}
 
-  public Transaction(Transaction source) {
-    if (source == null) {
-      throw new IllegalArgumentException("Cannot copy a null Transaction");
+  private Transaction(Transaction source) {
+    super(source);
+    if (source != null) {
+      this.transactionId = source.getTransactionId();
+      this.userId = source.getUserId();
+      this.accountId = source.getAccountId();
+      this.categoryId = source.getCategoryId();
+      this.budgetId = source.getBudgetId();
+      this.date = source.getDate();
+      this.description = source.getDescription();
+      this.amount = source.getAmount();
+      this.normalizedAmount = source.getNormalizedAmount();
+      this.currency = source.getCurrency();
+      this.transfer = source.getTransfer();
+      this.subscription = source.getSubscription();
+      if (source.tags != null) {
+        this.tags = new HashSet<>(source.getTags());
+      }
     }
-    this.transactionId = source.getTransactionId();
-    this.userId = source.getUserId();
-    this.accountId = source.getAccountId();
-    this.categoryId = source.getCategoryId();
-    this.budgetId = source.getBudgetId();
-    this.date = source.getDate();
-    this.description = source.getDescription();
-    this.amount = source.getAmount();
-    this.normalizedAmount = source.getNormalizedAmount();
-    this.currency = source.getCurrency();
-    this.transfer = source.getTransfer();
-    this.subscription = source.getSubscription();
-    if (source.tags != null) {
-      this.tags = new HashSet<>(source.getTags());
-    }
+  }
+
+  @Override
+  public Transaction copy() {
+    return new Transaction(this);
   }
 
   public void addTag(Tag tag) {

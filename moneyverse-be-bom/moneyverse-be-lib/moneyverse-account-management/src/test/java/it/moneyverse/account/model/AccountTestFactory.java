@@ -9,7 +9,7 @@ import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.model.entities.UserModel;
-import it.moneyverse.test.model.entities.TestFactory;
+import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.utils.RandomUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,16 +27,17 @@ import org.springframework.data.domain.Sort;
 public class AccountTestFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountTestFactory.class);
-  private static final UUID FAKE_ACCOUNT_ID = RandomUtils.randomUUID();
-  private static final UUID FAKE_USER_ID = RandomUtils.randomUUID();
-  private static final String FAKE_ACCOUNT_NAME = RandomUtils.randomString(15);
-  private static final BigDecimal FAKE_BALANCE = RandomUtils.randomBigDecimal();
-  private static final BigDecimal FAKE_BALANCE_TARGET = RandomUtils.randomBigDecimal();
-  private static final String FAKE_ACCOUNT_CATEGORY_NAME =
-      RandomUtils.randomString(15).toUpperCase();
-  private static final String FAKE_DESCRIPTION = RandomUtils.randomString(30);
-  private static final String FAKE_CURRENCY = RandomUtils.randomCurrency();
-  private static final Boolean FAKE_DEFAULT = RandomUtils.randomBoolean();
+  private static final Supplier<UUID> FAKE_ACCOUNT_ID = () -> RandomUtils.randomUUID();
+  private static final Supplier<UUID> FAKE_USER_ID = () -> RandomUtils.randomUUID();
+  private static final Supplier<String> FAKE_ACCOUNT_NAME = () -> RandomUtils.randomString(15);
+  private static final Supplier<BigDecimal> FAKE_BALANCE = () -> RandomUtils.randomBigDecimal();
+  private static final Supplier<BigDecimal> FAKE_BALANCE_TARGET =
+      () -> RandomUtils.randomBigDecimal();
+  private static final Supplier<String> FAKE_ACCOUNT_CATEGORY_NAME =
+      () -> RandomUtils.randomString(15).toUpperCase();
+  private static final Supplier<String> FAKE_DESCRIPTION = () -> RandomUtils.randomString(30);
+  private static final Supplier<String> FAKE_CURRENCY = () -> RandomUtils.randomCurrency();
+  private static final Supplier<Boolean> FAKE_DEFAULT = () -> RandomUtils.randomBoolean();
 
   public static List<AccountCategory> createAccountCategories() {
     List<AccountCategory> accountCategories = new ArrayList<>();
@@ -87,7 +88,7 @@ public class AccountTestFactory {
             : null);
     account.setAccountCategory(category);
     account.setAccountDescription("Account Description %s".formatted(counter));
-    account.setCurrency(FAKE_CURRENCY);
+    account.setCurrency(FAKE_CURRENCY.get());
     account.setDefault(counter == 1);
     account.setCreatedBy(TestFactory.FAKE_USER);
     account.setCreatedAt(LocalDateTime.now());
@@ -99,35 +100,37 @@ public class AccountTestFactory {
   public static Account fakeAccount() {
     Account account = new Account();
     AccountCategory category = fakeAccountCategory();
-    category.setName(FAKE_ACCOUNT_CATEGORY_NAME);
-    account.setAccountId(FAKE_ACCOUNT_ID);
-    account.setUserId(FAKE_USER_ID);
-    account.setAccountName(FAKE_ACCOUNT_NAME);
-    account.setBalance(FAKE_BALANCE);
-    account.setBalanceTarget(FAKE_BALANCE_TARGET);
+    category.setName(FAKE_ACCOUNT_CATEGORY_NAME.get());
+    account.setAccountId(FAKE_ACCOUNT_ID.get());
+    account.setUserId(FAKE_USER_ID.get());
+    account.setAccountName(FAKE_ACCOUNT_NAME.get());
+    account.setBalance(FAKE_BALANCE.get());
+    account.setBalanceTarget(FAKE_BALANCE_TARGET.get());
     account.setAccountCategory(category);
-    account.setAccountDescription(FAKE_DESCRIPTION);
-    account.setCurrency(FAKE_CURRENCY);
-    account.setDefault(FAKE_DEFAULT);
+    account.setAccountDescription(FAKE_DESCRIPTION.get());
+    account.setCurrency(FAKE_CURRENCY.get());
+    account.setDefault(FAKE_DEFAULT.get());
     return account;
   }
 
   public static AccountCategory fakeAccountCategory() {
     AccountCategory category = new AccountCategory();
     category.setAccountCategoryId(RandomUtils.randomBigDecimal().longValue());
-    category.setName(FAKE_ACCOUNT_CATEGORY_NAME);
-    category.setDescription(FAKE_DESCRIPTION);
+    category.setName(FAKE_ACCOUNT_CATEGORY_NAME.get());
+    category.setDescription(FAKE_DESCRIPTION.get());
     return category;
   }
 
   public static class AccountRequestDtoBuilder {
-    private UUID userId = FAKE_USER_ID;
-    private String accountName = FAKE_ACCOUNT_NAME;
-    private final BigDecimal balance = RandomUtils.flipCoin() ? FAKE_BALANCE : null;
-    private final BigDecimal balanceTarget = RandomUtils.flipCoin() ? FAKE_BALANCE_TARGET : null;
-    private String accountCategory = FAKE_ACCOUNT_CATEGORY_NAME;
-    private final String accountDescription = RandomUtils.flipCoin() ? FAKE_DESCRIPTION : null;
-    private String currency = FAKE_CURRENCY;
+    private UUID userId = FAKE_USER_ID.get();
+    private String accountName = FAKE_ACCOUNT_NAME.get();
+    private final BigDecimal balance = RandomUtils.flipCoin() ? FAKE_BALANCE.get() : null;
+    private final BigDecimal balanceTarget =
+        RandomUtils.flipCoin() ? FAKE_BALANCE_TARGET.get() : null;
+    private String accountCategory = FAKE_ACCOUNT_CATEGORY_NAME.get();
+    private final String accountDescription =
+        RandomUtils.flipCoin() ? FAKE_DESCRIPTION.get() : null;
+    private String currency = FAKE_CURRENCY.get();
 
     public AccountRequestDtoBuilder withUserId(UUID userId) {
       this.userId = userId;
@@ -188,12 +191,12 @@ public class AccountTestFactory {
   }
 
   public static class AccountUpdateRequestDtoBuilder {
-    private final String accountName = FAKE_ACCOUNT_NAME;
-    private final BigDecimal balance = FAKE_BALANCE;
-    private final BigDecimal balanceTarget = FAKE_BALANCE_TARGET;
-    private String accountCategory = FAKE_ACCOUNT_CATEGORY_NAME;
-    private final String accountDescription = FAKE_DESCRIPTION;
-    private Boolean isDefault = FAKE_DEFAULT;
+    private final String accountName = FAKE_ACCOUNT_NAME.get();
+    private final BigDecimal balance = FAKE_BALANCE.get();
+    private final BigDecimal balanceTarget = FAKE_BALANCE_TARGET.get();
+    private String accountCategory = FAKE_ACCOUNT_CATEGORY_NAME.get();
+    private final String accountDescription = FAKE_DESCRIPTION.get();
+    private Boolean isDefault = FAKE_DEFAULT.get();
 
     public AccountUpdateRequestDtoBuilder withAccountCategory(String accountCategory) {
       this.accountCategory = accountCategory;
@@ -249,7 +252,7 @@ public class AccountTestFactory {
       return criteria -> {
         criteria.setBalance(
             RandomUtils.flipCoin()
-                ? TestFactory.randomBoundCriteria(
+                ? TestFactory.fakeBoundCriteria(
                     testContext.getAccounts().stream().map(Account::getBalance).toList())
                 : null);
         return criteria;
@@ -260,7 +263,7 @@ public class AccountTestFactory {
       return criteria -> {
         criteria.setBalanceTarget(
             RandomUtils.flipCoin()
-                ? TestFactory.randomBoundCriteria(
+                ? TestFactory.fakeBoundCriteria(
                     testContext.getAccounts().stream().map(Account::getBalanceTarget).toList())
                 : null);
         return criteria;

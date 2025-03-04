@@ -76,6 +76,11 @@
         <artifactId>ical4j</artifactId>
         <optional>true</optional>
       </dependency>
+      <dependency>
+        <groupId>org.openapitools</groupId>
+        <artifactId>jackson-databind-nullable</artifactId>
+        <optional>true</optional>
+      </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>

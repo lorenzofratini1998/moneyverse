@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +19,8 @@ public class CurrencyServiceGrpcClient implements CurrencyServiceClient {
   private final UserServiceClient userServiceClient;
 
   public CurrencyServiceGrpcClient(
-      CurrencyGrpcService currencyGrpcService, UserServiceClient userServiceClient) {
+      CurrencyGrpcService currencyGrpcService,
+      @Autowired(required = false) UserServiceClient userServiceClient) {
     this.currencyGrpcService = currencyGrpcService;
     this.userServiceClient = userServiceClient;
   }

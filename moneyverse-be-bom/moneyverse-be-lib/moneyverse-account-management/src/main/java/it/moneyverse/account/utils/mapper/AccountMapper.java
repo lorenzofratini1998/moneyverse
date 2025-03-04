@@ -6,6 +6,7 @@ import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.core.model.dto.AccountDto;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class AccountMapper {
     Account account = new Account();
     account.setUserId(request.userId());
     account.setAccountName(request.accountName());
-    account.setBalance(request.balance());
+    account.setBalance(request.balance() != null ? request.balance() : BigDecimal.ZERO);
     account.setBalanceTarget(request.balanceTarget());
     account.setAccountCategory(accountCategory);
     account.setAccountDescription(request.accountDescription());

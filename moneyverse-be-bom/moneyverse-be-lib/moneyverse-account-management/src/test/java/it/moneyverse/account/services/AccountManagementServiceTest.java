@@ -13,6 +13,7 @@ import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.runtime.messages.AccountEventPublisher;
 import it.moneyverse.account.utils.mapper.AccountMapper;
+import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
@@ -71,8 +72,8 @@ class AccountManagementServiceTest {
         .thenReturn(false);
     when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.of(category));
     mapper.when(() -> AccountMapper.toAccount(request, category)).thenReturn(account);
-    when(accountRepository.findDefaultAccountsByUserId(request.userId()))
-        .thenReturn(Collections.emptyList());
+    when(accountRepository.findDefaultAccountByUserId(request.userId()))
+        .thenReturn(Optional.empty());
     when(accountRepository.save(any(Account.class))).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(accountDto);
 
@@ -83,7 +84,7 @@ class AccountManagementServiceTest {
     verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
     verify(accountCategoryRepository, times(1)).findByName(categoryName);
     mapper.verify(() -> AccountMapper.toAccount(request, category), times(1));
-    verify(accountRepository, times(1)).findDefaultAccountsByUserId(request.userId());
+    verify(accountRepository, times(1)).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, times(1)).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
   }
@@ -107,7 +108,7 @@ class AccountManagementServiceTest {
 
     verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     verify(accountCategoryRepository, never()).findByName(categoryName);
-    verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
+    verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, never()).existsByUserIdAndAccountName(userId, request.accountName());
   }
@@ -131,7 +132,7 @@ class AccountManagementServiceTest {
         () -> accountManagementService.createAccount(request));
 
     verify(accountCategoryRepository, never()).findByName(categoryName);
-    verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
+    verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
   }
@@ -155,7 +156,7 @@ class AccountManagementServiceTest {
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
     verify(accountCategoryRepository, times(1)).findByName(categoryName);
-    verify(accountRepository, never()).findDefaultAccountsByUserId(request.userId());
+    verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
   }
@@ -230,39 +231,6 @@ class AccountManagementServiceTest {
   }
 
   @Test
-  void givenAccountId_WhenUpdateAccountAlreadyExistentDefaultAccount_ThenReturnAccountDto(
-      @Mock Account account,
-      @Mock AccountCategory category,
-      @Mock Account defaultAccount,
-      @Mock AccountDto result) {
-    UUID accountId = RandomUtils.randomUUID();
-    AccountUpdateRequestDto request =
-        AccountTestFactory.AccountUpdateRequestDtoBuilder.builder()
-            .withDefault(Boolean.TRUE)
-            .build();
-
-    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.of(category));
-    mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
-    when(accountRepository.findDefaultAccountsByUserId(any())).thenReturn(List.of(defaultAccount));
-    when(defaultAccount.getAccountId()).thenReturn(RandomUtils.randomUUID());
-    when(accountRepository.save(defaultAccount)).thenReturn(defaultAccount);
-    when(accountRepository.save(account)).thenReturn(account);
-    mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
-
-    result = accountManagementService.updateAccount(accountId, request);
-
-    assertNotNull(result);
-    verify(accountRepository, times(1)).findById(accountId);
-    verify(accountCategoryRepository, times(1)).findByName(any(String.class));
-    mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
-    verify(accountRepository, times(1)).findDefaultAccountsByUserId(any());
-    verify(accountRepository, times(1)).save(defaultAccount);
-    verify(accountRepository, times(1)).save(account);
-    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
-  }
-
-  @Test
   void givenAccountId_WhenUpdateAccount_ThenReturnAccountNotFound() {
     UUID accountId = RandomUtils.randomUUID();
     AccountUpdateRequestDto request =
@@ -318,7 +286,7 @@ class AccountManagementServiceTest {
     accountManagementService.deleteAccount(accountId);
 
     verify(accountRepository, times(1)).findById(accountId);
-    verify(eventPublisher, times(1)).publishEvent(any(Account.class));
+    verify(eventPublisher, times(1)).publishEvent(any(Account.class), any(EventTypeEnum.class));
   }
 
   @Test
@@ -332,7 +300,7 @@ class AccountManagementServiceTest {
 
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountDeletionTopic, never()).name();
-    verify(eventPublisher, never()).publishEvent(any(Account.class));
+    verify(eventPublisher, never()).publishEvent(any(Account.class), any(EventTypeEnum.class));
   }
 
   @Test

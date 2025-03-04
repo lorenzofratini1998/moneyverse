@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserPreferenceRepository extends JpaRepository<UserPreference, Long> {
 
   @Query(
-      "SELECT up FROM UserPreference up JOIN Preference p ON up.userId = :userId AND p.mandatory = TRUE")
+      "SELECT up FROM UserPreference up WHERE up.userId = :userId AND up.preference.mandatory = TRUE")
   List<UserPreference> findMandatoryPreferencesByUserId(UUID userId);
 
   List<UserPreference> findByUserId(UUID userId);

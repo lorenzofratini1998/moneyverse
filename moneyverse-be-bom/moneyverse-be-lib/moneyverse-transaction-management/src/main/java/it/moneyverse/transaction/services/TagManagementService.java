@@ -9,8 +9,11 @@ import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.repositories.TagRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
 import it.moneyverse.transaction.utils.mapper.TagMapper;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,14 @@ public class TagManagementService implements TagService {
   public TagDto getTagById(UUID tagId) {
     LOGGER.info("Getting tag {}", tagId);
     return TagMapper.toTagDto(findTagById(tagId));
+  }
+
+  @Override
+  public Set<Tag> getTagsByIds(Set<UUID> tagIds) {
+    if (tagIds == null || tagIds.isEmpty()) {
+      return Collections.emptySet();
+    }
+    return tagIds.stream().map(this::findTagById).collect(Collectors.toSet());
   }
 
   @Override

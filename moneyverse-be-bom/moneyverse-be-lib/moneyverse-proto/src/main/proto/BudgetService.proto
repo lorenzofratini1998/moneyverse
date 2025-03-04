@@ -23,8 +23,9 @@ message CategoryResponse {
 }
 
 message BudgetRequest {
-  string categoryId = 1;
-  string date = 2;
+  string budgetId = 1;
+  string categoryId = 2;
+  string date = 3;
 }
 
 message BudgetResponse {

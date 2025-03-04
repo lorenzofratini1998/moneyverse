@@ -118,6 +118,18 @@ public class GrpcMockServer extends GrpcMockExtension {
                     .build()));
   }
 
+  public void mockExistentBudget() {
+    stubFor(
+        unaryMethod(BudgetServiceGrpc.getGetBudgetMethod())
+            .willReturn(
+                BudgetResponse.newBuilder()
+                    .setBudgetId(RandomUtils.randomUUID().toString())
+                    .setCategoryId(RandomUtils.randomUUID().toString())
+                    .setStartDate(RandomUtils.randomDate().toString())
+                    .setEndDate(RandomUtils.randomDate().toString())
+                    .build()));
+  }
+
   public int getPort() {
     return port;
   }

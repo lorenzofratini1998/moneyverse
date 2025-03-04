@@ -1,7 +1,6 @@
 package it.moneyverse.user.runtime.server;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import io.grpc.ManagedChannel;
@@ -26,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServerTest {
+class UserServerTest {
 
   private UserServiceGrpc.UserServiceBlockingStub stub;
   private ManagedChannel channel;
@@ -64,10 +63,14 @@ public class UserServerTest {
     UUID userId = RandomUtils.randomUUID();
     UserRequest request = UserRequest.newBuilder().setUserId(userId.toString()).build();
     when(keycloakService.getUserById(userId)).thenReturn(Optional.of(userDto));
+    when(userDto.getUserId()).thenReturn(userId);
+    when(userDto.getFirstName()).thenReturn(RandomUtils.randomString(10));
+    when(userDto.getLastName()).thenReturn(RandomUtils.randomString(10));
+    when(userDto.getEmail()).thenReturn(RandomUtils.randomString(15));
 
-    UserResponse response = stub.checkIfUserExists(request);
+    UserResponse response = stub.getUserById(request);
 
-    assertTrue(response.getExists());
+    assertEquals(userId.toString(), response.getUserId());
     verify(keycloakService, times(1)).getUserById(userId);
   }
 
@@ -77,9 +80,9 @@ public class UserServerTest {
     UserRequest request = UserRequest.newBuilder().setUserId(userId.toString()).build();
     when(keycloakService.getUserById(userId)).thenReturn(Optional.empty());
 
-    UserResponse response = stub.checkIfUserExists(request);
+    UserResponse response = stub.getUserById(request);
 
-    assertFalse(response.getExists());
+    assertEquals("", response.getUserId());
     verify(keycloakService, times(1)).getUserById(userId);
   }
 }

@@ -22,17 +22,19 @@ public class PreferenceMapper {
     return userPreference;
   }
 
-  public static UserPreferenceDto toUserPreferenceDto(
-      UUID userId, List<UserPreference> userPreferences) {
-    return userPreferences.isEmpty()
-        ? UserPreferenceDto.builder()
-            .withUserId(userId)
-            .withPreferences(Collections.emptyList())
-            .build()
-        : UserPreferenceDto.builder()
-            .withUserId(userId)
-            .withPreferences(toUserPreferenceItemDto(userPreferences))
-            .build();
+  public static List<UserPreferenceDto> toUserPreferenceDto(List<UserPreference> userPreferences) {
+    if (userPreferences.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return userPreferences.stream().map(PreferenceMapper::toUserPreferenceDto).toList();
+  }
+
+  public static UserPreferenceDto toUserPreferenceDto(UserPreference userPreference) {
+    return UserPreferenceDto.builder()
+        .withUserId(userPreference.getUserId())
+        .withPreference(toPreferenceDto(userPreference.getPreference()))
+        .withValue(userPreference.getValue())
+        .build();
   }
 
   private static List<UserPreferenceItemDto> toUserPreferenceItemDto(

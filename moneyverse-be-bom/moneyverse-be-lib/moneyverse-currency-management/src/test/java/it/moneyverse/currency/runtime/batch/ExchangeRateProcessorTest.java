@@ -1,6 +1,5 @@
 package it.moneyverse.currency.runtime.batch;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 

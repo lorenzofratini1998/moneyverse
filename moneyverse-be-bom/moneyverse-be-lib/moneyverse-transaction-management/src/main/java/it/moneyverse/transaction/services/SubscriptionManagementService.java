@@ -1,25 +1,22 @@
 package it.moneyverse.transaction.services;
 
-import static it.moneyverse.transaction.utils.SubscriptionUtils.calculateNextExecutionDate;
-import static it.moneyverse.transaction.utils.SubscriptionUtils.createSubscriptionTransaction;
-
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
 import it.moneyverse.transaction.model.dto.SubscriptionUpdateRequestDto;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
+import it.moneyverse.transaction.model.validator.TransactionValidator;
 import it.moneyverse.transaction.runtime.messages.TransactionEventPublisher;
+import it.moneyverse.transaction.utils.DateCalculator;
 import it.moneyverse.transaction.utils.mapper.SubscriptionMapper;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import net.fortuna.ical4j.model.Recur;
-import net.fortuna.ical4j.model.property.RRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,74 +27,81 @@ public class SubscriptionManagementService implements SubscriptionService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionManagementService.class);
   private final AccountServiceClient accountServiceClient;
-  private final CurrencyServiceClient currencyServiceClient;
+  private final UserServiceClient userServiceClient;
   private final BudgetServiceClient budgetServiceClient;
+  private final TransactionFactoryService transactionFactoryService;
   private final TransactionEventPublisher transactionEventPublisher;
   private final SubscriptionRepository subscriptionRepository;
+  private final TransactionValidator transactionValidator;
 
   public SubscriptionManagementService(
       AccountServiceClient accountServiceClient,
-      CurrencyServiceClient currencyServiceClient,
+      UserServiceClient userServiceClient,
       BudgetServiceClient budgetServiceClient,
+      TransactionFactoryService transactionFactoryService,
       TransactionEventPublisher transactionEventPublisher,
-      SubscriptionRepository subscriptionRepository) {
+      SubscriptionRepository subscriptionRepository,
+      TransactionValidator transactionValidator) {
     this.accountServiceClient = accountServiceClient;
-    this.currencyServiceClient = currencyServiceClient;
+    this.userServiceClient = userServiceClient;
     this.budgetServiceClient = budgetServiceClient;
+    this.transactionFactoryService = transactionFactoryService;
     this.transactionEventPublisher = transactionEventPublisher;
     this.subscriptionRepository = subscriptionRepository;
+    this.transactionValidator = transactionValidator;
   }
 
   @Override
   @Transactional
   public SubscriptionDto createSubscription(SubscriptionRequestDto request) {
-    accountServiceClient.checkIfAccountExists(request.accountId());
-    if (request.categoryId() != null) {
-      budgetServiceClient.checkIfCategoryExists(request.categoryId());
-    }
-    currencyServiceClient.checkIfCurrencyExists(request.currency());
+    transactionValidator.validate(request);
     LOGGER.info("Creating subscription for user {}", request.userId());
     Subscription subscription = SubscriptionMapper.toSubscription(request);
-    if (request.recurrence().startDate().isBefore(LocalDate.now())
-        || request.recurrence().startDate().isEqual(LocalDate.now())) {
-      addSubscriptionTransactions(subscription);
-    }
     subscription.setNextExecutionDate(calculateNextExecutionDate(subscription));
+    if (subscription.getNextExecutionDate() == null) {
+      subscription.setActive(false);
+    }
+    if (subscriptionHasStarted(request)) {
+      addTransactions(subscription);
+    }
     subscription = subscriptionRepository.save(subscription);
     transactionEventPublisher.publishEvent(subscription, EventTypeEnum.CREATE);
     return SubscriptionMapper.toSubscriptionDto(subscription);
   }
 
-  private void addSubscriptionTransactions(Subscription subscription) {
-    for (Transaction transaction : createSubscriptionTransactions(subscription)) {
-      subscription.addTransaction(transaction);
-    }
+  private boolean subscriptionHasStarted(SubscriptionRequestDto request) {
+    return !request.recurrence().startDate().isAfter(LocalDate.now());
+  }
+
+  private void addTransactions(Subscription subscription) {
+    LOGGER.info("Adding transactions for subscription {}", subscription.getSubscriptionId());
+    List<Transaction> transactions = createSubscriptionTransactions(subscription);
+    transactions.forEach(subscription::addTransaction);
+    updateTotalAmount(subscription);
   }
 
   private List<Transaction> createSubscriptionTransactions(Subscription subscription) {
     LOGGER.info(
         "Creating previous transactions for subscription {}", subscription.getSubscriptionId());
-    List<Transaction> transactions = new ArrayList<>();
-    RRule<LocalDate> rrule = new RRule<>(subscription.getRecurrenceRule());
-    Recur<LocalDate> recur = rrule.getRecur();
-    LocalDate startDate = subscription.getStartDate();
-    LocalDate endDate =
-        subscription.getEndDate() != null && subscription.getEndDate().isBefore(LocalDate.now())
-            ? subscription.getEndDate()
-            : LocalDate.now();
-    List<LocalDate> dates = recur.getDates(startDate, endDate);
-    for (LocalDate date : dates) {
-      Transaction transaction = createSubscriptionTransaction(subscription, date);
-      transaction.setNormalizedAmount(
-          currencyServiceClient.convertCurrencyAmountByUserPreference(
-              subscription.getUserId(),
-              transaction.getAmount(),
-              transaction.getCurrency(),
-              transaction.getDate()));
-      subscription.setTotalAmount(subscription.getTotalAmount().add(transaction.getAmount()));
-      transactions.add(transaction);
-    }
-    return transactions;
+    DateCalculator dateCalculator = new DateCalculator(subscription.getRecurrenceRule());
+    List<LocalDate> dates =
+        dateCalculator.calculateDates(subscription.getStartDate(), getEndDate(subscription));
+    return dates.stream()
+        .map(date -> transactionFactoryService.createTransaction(subscription, date))
+        .toList();
+  }
+
+  private LocalDate getEndDate(Subscription subscription) {
+    return subscription.getEndDate() != null && subscription.getEndDate().isBefore(LocalDate.now())
+        ? subscription.getEndDate()
+        : LocalDate.now();
+  }
+
+  private void updateTotalAmount(Subscription subscription) {
+    subscription.setTotalAmount(
+        subscription.getTransactions().stream()
+            .map(Transaction::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
   }
 
   @Override
@@ -127,18 +131,23 @@ public class SubscriptionManagementService implements SubscriptionService {
   public SubscriptionDto updateSubscription(
       UUID subscriptionId, SubscriptionUpdateRequestDto request) {
     Subscription subscription = getSubscriptionById(subscriptionId);
-    if (request.accountId() != null) {
-      accountServiceClient.checkIfAccountExists(request.accountId());
-    }
-    if (request.categoryId() != null) {
-      budgetServiceClient.checkIfCategoryExists(request.categoryId());
-    }
-    if (request.currency() != null) {
-      currencyServiceClient.checkIfCurrencyExists(request.currency());
-    }
+    Subscription originalSubscription = subscription.copy();
+    transactionValidator.validate(request);
     LOGGER.info("Updating subscription {}", subscriptionId);
-    return SubscriptionMapper.toSubscriptionDto(
-        subscriptionRepository.save(SubscriptionMapper.partialUpdate(subscription, request)));
+    subscription = SubscriptionMapper.partialUpdate(subscription, request);
+    if (request.categoryId() != null) {
+      for (Transaction transaction : subscription.getTransactions()) {
+        transaction.setCategoryId(request.categoryId());
+        transaction.setBudgetId(
+            budgetServiceClient.getBudgetId(request.categoryId(), transaction.getDate()));
+      }
+    }
+    subscription = subscriptionRepository.save(subscription);
+    if (request.categoryId() != null) {
+      transactionEventPublisher.publishEvent(
+          subscription, originalSubscription, EventTypeEnum.UPDATE);
+    }
+    return SubscriptionMapper.toSubscriptionDto(subscription);
   }
 
   private Subscription getSubscriptionById(UUID subscriptionId) {
@@ -154,6 +163,7 @@ public class SubscriptionManagementService implements SubscriptionService {
   @Transactional
   public void deleteSubscriptionsByUserId(UUID userId) {
     LOGGER.info("Deleting subscriptions by user id {}", userId);
+    userServiceClient.checkIfUserStillExist(userId);
     List<Subscription> subscriptions = subscriptionRepository.findSubscriptionByUserId(userId);
     subscriptionRepository.deleteAll(subscriptions);
   }
@@ -162,26 +172,19 @@ public class SubscriptionManagementService implements SubscriptionService {
   @Transactional
   public void deleteSubscriptionsByAccountId(UUID accountId) {
     LOGGER.info("Deleting subscriptions by account id {}", accountId);
+    accountServiceClient.checkIfAccountStillExists(accountId);
     List<Subscription> subscriptions =
         subscriptionRepository.findSubscriptionByAccountId(accountId);
     subscriptionRepository.deleteAll(subscriptions);
-    for (Subscription subscription : subscriptions) {
-      transactionEventPublisher.publishEvent(subscription, EventTypeEnum.DELETE);
-    }
+    subscriptions.forEach(
+        subscription -> transactionEventPublisher.publishEvent(subscription, EventTypeEnum.DELETE));
   }
 
   @Override
-  @Transactional
-  public void removeCategoryFromAllSubscriptions(UUID categoryId) {
-    LOGGER.info("Removing category {} from all subscriptions", categoryId);
-    List<Subscription> subscriptions =
-        subscriptionRepository.findSubscriptionByCategoryId(categoryId);
-    if (!subscriptions.isEmpty()) {
-      subscriptions.forEach(subscription -> subscription.setCategoryId(null));
-      subscriptionRepository.saveAll(subscriptions);
-    }
-    for (Subscription subscription : subscriptions) {
-      transactionEventPublisher.publishEvent(subscription, EventTypeEnum.UPDATE);
-    }
+  public LocalDate calculateNextExecutionDate(Subscription subscription) {
+    DateCalculator dateCalculator = new DateCalculator(subscription.getRecurrenceRule());
+    return subscription.getEndDate() != null
+        ? dateCalculator.getNextOccurrence(subscription.getStartDate(), subscription.getEndDate())
+        : dateCalculator.getNextOccurrence(subscription.getStartDate());
   }
 }

@@ -5,8 +5,10 @@ import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.test.utils.RandomUtils;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -67,5 +69,39 @@ class BudgetServiceGrpcClientTest {
         ResourceStillExistsException.class,
         () -> budgetServiceGrpcClient.checkIfCategoryStillExists(categoryId));
     verify(budgetGrpcService, times(1)).getCategoryById(categoryId);
+  }
+
+  @Test
+  void testGetBudgetByCategoryIdAndDate(@Mock BudgetDto budgetDto) {
+    UUID categoryId = RandomUtils.randomUUID();
+    LocalDate date = RandomUtils.randomDate();
+    UUID budgetId = RandomUtils.randomUUID();
+    when(budgetGrpcService.getBudgetByCategoryIdAndDate(categoryId, date))
+        .thenReturn(Optional.of(budgetDto));
+    when(budgetDto.getBudgetId()).thenReturn(budgetId);
+
+    UUID response = budgetServiceGrpcClient.getBudgetId(categoryId, date);
+
+    assertEquals(budgetId, response);
+    verify(budgetGrpcService, times(1)).getBudgetByCategoryIdAndDate(categoryId, date);
+  }
+
+  @Test
+  void testCheckIfBudgetStillExists() {
+    UUID budgetId = RandomUtils.randomUUID();
+    when(budgetGrpcService.getBudgetByBudgetId(budgetId)).thenReturn(Optional.empty());
+
+    assertDoesNotThrow(() -> budgetServiceGrpcClient.checkIfBudgetStillExists(budgetId));
+    verify(budgetGrpcService, times(1)).getBudgetByBudgetId(budgetId);
+  }
+
+  @Test
+  void testCheckIfBudgetStillExists_Exception(@Mock BudgetDto budgetDto) {
+    UUID budgetId = RandomUtils.randomUUID();
+    when(budgetGrpcService.getBudgetByBudgetId(budgetId)).thenReturn(Optional.of(budgetDto));
+    assertThrows(
+        ResourceStillExistsException.class,
+        () -> budgetServiceGrpcClient.checkIfBudgetStillExists(budgetId));
+    verify(budgetGrpcService, times(1)).getBudgetByBudgetId(budgetId);
   }
 }

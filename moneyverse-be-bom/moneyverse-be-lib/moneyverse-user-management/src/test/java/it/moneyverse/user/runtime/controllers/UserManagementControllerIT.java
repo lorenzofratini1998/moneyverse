@@ -7,7 +7,7 @@ import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.utils.properties.KeycloakAdminProperties;
-import it.moneyverse.test.annotations.IntegrationTest;
+import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
@@ -16,14 +16,15 @@ import it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import it.moneyverse.user.model.PreferenceTestFactory;
+import it.moneyverse.user.model.UserTestContext;
+import it.moneyverse.user.model.UserTestFactory;
 import it.moneyverse.user.model.dto.*;
 import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;
 import it.moneyverse.user.model.repositories.PreferenceRepository;
 import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.services.KeycloakService;
-import it.moneyverse.user.utils.UserTestContext;
-import it.moneyverse.user.utils.UserTestUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +41,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.junit.jupiter.Container;
 
-@IntegrationTest
+@MoneyverseTest
 class UserManagementControllerIT extends AbstractIntegrationTest {
 
   protected static UserTestContext testContext;
@@ -60,7 +61,8 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
         .withPostgres(postgresContainer)
         .withKeycloak(keycloakContainer)
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
-        .withKafkaContainer(kafkaContainer);
+        .withKafkaContainer(kafkaContainer)
+        .withFlywayTestDirectory(tempDir);
     registry.add(KeycloakAdminProperties.KEYCLOAK_USERNAME, admin::getUsername);
     registry.add(KeycloakAdminProperties.KEYCLOAK_PASSWORD, admin::getPassword);
     registry.add(
@@ -83,7 +85,7 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
 
   @Test
   void testCreateUserPreferences() {
-    Preference preference = UserTestUtils.createPreference();
+    Preference preference = PreferenceTestFactory.fakePreference();
     preference.setPreferenceId(null);
     preference = preferenceRepository.save(preference);
     final UserModel userModel = testContext.getRandomUser();
@@ -91,21 +93,28 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final List<UserPreferenceRequest> request =
         Collections.singletonList(
-            UserTestUtils.createUserPreferenceRequest(preference.getPreferenceId()));
-    mockServer.mockExistentCurrency(RandomUtils.randomString(3).toUpperCase());
+            PreferenceTestFactory.UserPreferenceRequestBuilder.builder()
+                .withPreferenceId(preference.getPreferenceId())
+                .build());
+    mockServer.mockExistentCurrency(RandomUtils.randomCurrency());
     int initialSize = userPreferenceRepository.findAll().size();
 
-    ResponseEntity<UserPreferenceDto> response =
-        restTemplate.postForEntity(
+    ResponseEntity<List<UserPreferenceDto>> response =
+        restTemplate.exchange(
             basePath + "/users/%s/preferences".formatted(userId),
+            HttpMethod.POST,
             new HttpEntity<>(request, headers),
-            UserPreferenceDto.class);
+            new ParameterizedTypeReference<>() {});
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(
-        initialSize + response.getBody().getPreferences().size(),
-        userPreferenceRepository.findAll().size());
+        initialSize + response.getBody().size(), userPreferenceRepository.findAll().size());
+    assertEquals(userId, response.getBody().getFirst().getUserId());
+    assertEquals(
+        request.getFirst().preferenceId(),
+        response.getBody().getFirst().getPreference().getPreferenceId());
+    assertEquals(request.getFirst().value(), response.getBody().getFirst().getValue());
   }
 
   @Test
@@ -113,14 +122,14 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
     final UserModel userModel = testContext.getRandomUser();
     UUID userId = userModel.getUserId();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
-    final boolean mandatory = Math.random() < 0.5;
+    final boolean mandatory = RandomUtils.flipCoin();
     List<UserPreference> expected =
         mandatory
-            ? testContext.getUserPreferencesByUserIdAndMandatory(userId, true)
+            ? testContext.getMandatoryUserPreferencesByUserId(userId)
             : testContext.getUserPreferencesByUserId(userId);
     String path = basePath + "/users/%s/preferences".formatted(userId);
 
-    ResponseEntity<UserPreferenceDto> response =
+    ResponseEntity<List<UserPreferenceDto>> response =
         restTemplate.exchange(
             mandatory
                 ? UriComponentsBuilder.fromUriString(path)
@@ -129,18 +138,18 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
                 : path,
             HttpMethod.GET,
             new HttpEntity<>(headers),
-            UserPreferenceDto.class);
+            new ParameterizedTypeReference<>() {});
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(expected.size(), response.getBody().getPreferences().size());
+    assertEquals(expected.size(), response.getBody().size());
   }
 
   @Test
   void testGetPreferences() {
     final UserModel userModel = testContext.getRandomUser();
     headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
-    final boolean mandatory = Math.random() < 0.5;
+    final boolean mandatory = RandomUtils.flipCoin();
     List<Preference> expected =
         mandatory ? testContext.getMandatoryPreferences() : testContext.getPreferences();
     String path = basePath + "/preferences";
@@ -182,11 +191,11 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void testGetUpdateUser() {
+  void testUpdateUser() {
     final UserModel userModel = testContext.getRandomUser();
     headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
     UserUpdateRequestDto request =
-        new UserUpdateRequestDto(RandomUtils.randomString(10), RandomUtils.randomString(10), null);
+        UserTestFactory.UserUpdateRequestBuilder.builder().withNullEmail().build();
 
     ResponseEntity<UserDto> response =
         restTemplate.exchange(

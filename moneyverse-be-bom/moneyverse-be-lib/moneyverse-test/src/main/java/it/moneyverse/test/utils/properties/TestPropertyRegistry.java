@@ -8,6 +8,7 @@ import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.RandomUtils;
+import java.nio.file.Path;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
 public class TestPropertyRegistry {
@@ -67,6 +68,22 @@ public class TestPropertyRegistry {
   public TestPropertyRegistry withKafkaContainer(KafkaContainer container) {
     registry.add(
         KafkaProperties.KafkaAdminProperties.BOOTSTRAP_SERVERS, container::getBootstrapServers);
+    registry.add(
+        KafkaProperties.KafkaConsumerProperties.GROUP_ID,
+        () -> RandomUtils.randomUUID().toString());
+    return this;
+  }
+
+  public TestPropertyRegistry withFlywayTestDirectory(Path tempDir) {
+    registry.add(
+        "spring.flyway.locations",
+        () ->
+            "classpath:db/migration/schema,filesystem:%s"
+                .formatted(tempDir.toAbsolutePath().toString()));
+    return this;
+  }
+
+  public TestPropertyRegistry withEmbeddedKafka() {
     registry.add(
         KafkaProperties.KafkaConsumerProperties.GROUP_ID,
         () -> RandomUtils.randomUUID().toString());

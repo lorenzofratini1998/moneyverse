@@ -24,8 +24,11 @@ public class BudgetServiceGrpcClient implements BudgetServiceClient {
   }
 
   @Override
-  public Optional<BudgetDto> getBudgetByCategoryIdAndDate(UUID categoryId, LocalDate date) {
-    return budgetGrpcService.getBudgetByCategoryIdAndDate(categoryId, date);
+  public UUID getBudgetId(UUID categoryId, LocalDate date) {
+    return Optional.ofNullable(categoryId)
+        .flatMap(category -> budgetGrpcService.getBudgetByCategoryIdAndDate(category, date))
+        .map(BudgetDto::getBudgetId)
+        .orElse(null);
   }
 
   @Override
@@ -40,6 +43,14 @@ public class BudgetServiceGrpcClient implements BudgetServiceClient {
     if (budgetGrpcService.getCategoryById(categoryId).isPresent()) {
       throw new ResourceStillExistsException(
           "Category %s still exists in the system".formatted(categoryId));
+    }
+  }
+
+  @Override
+  public void checkIfBudgetStillExists(UUID budgetId) {
+    if (budgetGrpcService.getBudgetByBudgetId(budgetId).isPresent()) {
+      throw new ResourceStillExistsException(
+          "Budget %s still exists in the system".formatted(budgetId));
     }
   }
 }

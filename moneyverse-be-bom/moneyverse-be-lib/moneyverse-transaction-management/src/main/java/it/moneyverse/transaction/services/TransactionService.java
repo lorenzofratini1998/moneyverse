@@ -21,4 +21,6 @@ public interface TransactionService {
   void deleteAllTransactionsByAccountId(UUID accountId);
 
   void removeCategoryFromTransactions(UUID categoryId);
+
+  void removeBudgetFromTransactions(UUID budgetId);
 }

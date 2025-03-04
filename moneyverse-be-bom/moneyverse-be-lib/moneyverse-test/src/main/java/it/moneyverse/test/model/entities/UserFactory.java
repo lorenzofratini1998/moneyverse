@@ -1,7 +1,7 @@
 package it.moneyverse.test.model.entities;
 
-import static it.moneyverse.test.model.entities.TestFactory.MAX_USERS;
-import static it.moneyverse.test.model.entities.TestFactory.MIN_USERS;
+import static it.moneyverse.test.model.TestFactory.MAX_USERS;
+import static it.moneyverse.test.model.TestFactory.MIN_USERS;
 
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.utils.RandomUtils;

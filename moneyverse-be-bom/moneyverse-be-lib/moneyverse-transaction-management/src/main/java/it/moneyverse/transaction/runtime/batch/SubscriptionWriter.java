@@ -2,6 +2,7 @@ package it.moneyverse.transaction.runtime.batch;
 
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.transaction.model.entities.Subscription;
+import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.runtime.messages.TransactionEventPublisher;
 import java.time.LocalDate;
@@ -29,16 +30,23 @@ public class SubscriptionWriter implements ItemWriter<List<Subscription>> {
   @Override
   public void write(Chunk<? extends List<Subscription>> chunk) {
     LOGGER.info("Adding scheduled subscription transactions to batch");
-    List<Subscription> entities = chunk.getItems().stream().flatMap(List::stream).toList();
-    if (!entities.isEmpty()) {
-      entities = subscriptionRepository.saveAll(entities);
-      entities.stream()
-          .flatMap(subscription -> subscription.getTransactions().stream())
-          .filter(transaction -> transaction.getDate().equals(LocalDate.now()))
-          .toList()
-          .forEach(
-              transaction ->
-                  transactionEventPublisher.publishEvent(transaction, EventTypeEnum.CREATE));
+    List<Subscription> subscriptions = chunk.getItems().stream().flatMap(List::stream).toList();
+    if (!subscriptions.isEmpty()) {
+      saveSubscriptions(subscriptions);
+      publishEvents(subscriptions);
     }
+  }
+
+  private void saveSubscriptions(List<Subscription> subscriptions) {
+    subscriptionRepository.saveAll(subscriptions);
+  }
+
+  private void publishEvents(List<Subscription> subscriptions) {
+    List<Transaction> batchTransactions =
+        subscriptions.stream()
+            .flatMap(subscription -> subscription.getTransactions().stream())
+            .filter(transaction -> transaction.getDate().equals(LocalDate.now()))
+            .toList();
+    transactionEventPublisher.publishEvent(batchTransactions, EventTypeEnum.CREATE);
   }
 }

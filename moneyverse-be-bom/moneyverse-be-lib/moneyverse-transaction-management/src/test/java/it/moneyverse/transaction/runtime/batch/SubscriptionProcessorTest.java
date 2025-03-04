@@ -1,13 +1,17 @@
 package it.moneyverse.transaction.runtime.batch;
 
-import static it.moneyverse.transaction.utils.TransactionTestUtils.createSubscription;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.SubscriptionTestFactory;
 import it.moneyverse.transaction.model.entities.Subscription;
+import it.moneyverse.transaction.model.entities.Transaction;
+import it.moneyverse.transaction.services.SubscriptionService;
+import it.moneyverse.transaction.services.TransactionFactoryService;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,13 +23,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class SubscriptionProcessorTest {
 
   @InjectMocks private SubscriptionProcessor subscriptionProcessor;
-  @Mock private CurrencyServiceClient currencyServiceClient;
+  @Mock private SubscriptionService subscriptionService;
+  @Mock private TransactionFactoryService transactionFactoryService;
 
   @Test
-  void testProcess() throws Exception {
-    Subscription subscription = createSubscription();
-    when(currencyServiceClient.convertCurrencyAmountByUserPreference(any(), any(), any(), any()))
-        .thenReturn(RandomUtils.randomBigDecimal());
+  void testProcess(@Mock Transaction transaction) {
+    Subscription subscription = SubscriptionTestFactory.fakeSubscription();
+    when(subscriptionService.calculateNextExecutionDate(subscription))
+        .thenReturn(RandomUtils.randomDate());
+    when(transactionFactoryService.createTransaction(eq(subscription), any(LocalDate.class)))
+        .thenReturn(transaction);
 
     List<Subscription> result = subscriptionProcessor.process(List.of(subscription));
 

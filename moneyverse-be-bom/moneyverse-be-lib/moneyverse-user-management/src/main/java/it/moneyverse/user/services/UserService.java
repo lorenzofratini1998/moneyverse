@@ -13,4 +13,6 @@ public interface UserService {
   void disableUser(UUID userId);
 
   void deleteUser(UUID userId);
+
+  void checkIfUserExists(UUID userId);
 }

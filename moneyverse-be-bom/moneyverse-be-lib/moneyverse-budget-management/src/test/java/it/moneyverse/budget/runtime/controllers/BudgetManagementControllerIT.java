@@ -1,29 +1,26 @@
 package it.moneyverse.budget.runtime.controllers;
 
-import static it.moneyverse.budget.utils.BudgetTestUtils.createBudgetRequest;
-import static it.moneyverse.budget.utils.BudgetTestUtils.createBudgetUpdateRequest;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import it.moneyverse.budget.model.BudgetTestContext;
+import it.moneyverse.budget.model.BudgetTestFactory;
+import it.moneyverse.budget.model.CategoryTestFactory;
 import it.moneyverse.budget.model.dto.*;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
-import it.moneyverse.budget.utils.BudgetCriteriaRandomGenerator;
-import it.moneyverse.budget.utils.BudgetTestContext;
 import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.entities.UserModel;
-import it.moneyverse.test.annotations.IntegrationTest;
+import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
-import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +28,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -40,7 +36,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.junit.jupiter.Container;
 
-@IntegrationTest
+@MoneyverseTest
 class BudgetManagementControllerIT extends AbstractIntegrationTest {
 
   protected static BudgetTestContext testContext;
@@ -61,7 +57,8 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
         .withKeycloak(keycloakContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
-        .withKafkaContainer(kafkaContainer);
+        .withKafkaContainer(kafkaContainer)
+        .withFlywayTestDirectory(tempDir);
   }
 
   @BeforeAll
@@ -79,7 +76,6 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final UUID userId = testContext.getRandomUser().getUserId();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final CategoryRequestDto request = testContext.createCategoryForUser(userId);
-    CategoryDto expected = testContext.getExpectedCategoryDto(request);
 
     ResponseEntity<CategoryDto> response =
         restTemplate.postForEntity(
@@ -87,10 +83,13 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(testContext.getCategoriesCount() + 1, categoryRepository.findAll().size());
-    assertThat(response.getBody())
-        .usingRecursiveComparison()
-        .ignoringFieldsOfTypes(UUID.class)
-        .isEqualTo(expected);
+    assertNotNull(response.getBody());
+    assertEquals(request.userId(), response.getBody().getUserId());
+    assertEquals(request.description(), response.getBody().getDescription());
+    assertEquals(request.categoryName(), response.getBody().getCategoryName());
+    if (response.getBody().getParentCategory() != null) {
+      assertEquals(request.parentId(), response.getBody().getParentCategory().getCategoryId());
+    }
   }
 
   @Test
@@ -133,71 +132,95 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetCategory() {
     final UserModel user = testContext.getRandomAdminOrUser();
-    final UUID categoryId = testContext.getRandomCategoryByUserId(user.getUserId()).getCategoryId();
+    final Category category = testContext.getRandomCategoryByUserId(user.getUserId());
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
 
     ResponseEntity<CategoryDto> response =
         restTemplate.exchange(
-            basePath + "/categories/" + categoryId,
+            basePath + "/categories/" + category.getCategoryId(),
             HttpMethod.GET,
             new HttpEntity<>(headers),
             CategoryDto.class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(categoryId, response.getBody().getCategoryId());
+    assertEquals(category.getCategoryId(), response.getBody().getCategoryId());
+    assertEquals(category.getUserId(), response.getBody().getUserId());
+    assertEquals(category.getCategoryName(), response.getBody().getCategoryName());
+    assertEquals(category.getDescription(), response.getBody().getDescription());
+    if (category.getParentCategory() != null) {
+      assertEquals(
+          category.getParentCategory().getCategoryId(),
+          response.getBody().getParentCategory().getCategoryId());
+    }
   }
 
   @Test
   void testUpdateCategory() {
     final UserModel user = testContext.getRandomAdminOrUser();
-    final UUID categoryId = testContext.getRandomCategoryByUserId(user.getUserId()).getCategoryId();
+    final Category category = testContext.getRandomCategoryByUserId(user.getUserId());
+    final Category parentCategory = testContext.getRandomCategoryByUserId(user.getUserId());
     CategoryUpdateRequestDto request =
-        new CategoryUpdateRequestDto(
-            null,
-            RandomUtils.randomString(25),
-            JsonNullable.of(
-                testContext
-                    .getRandomCategoryByUserIdAndCategoryId(user.getUserId(), categoryId)
-                    .getCategoryId()));
+        CategoryTestFactory.CategoryUpdateRequestBuilder.builder()
+            .withParentCategory(
+                category.getCategoryId().equals(parentCategory.getCategoryId())
+                    ? null
+                    : parentCategory.getCategoryId())
+            .build();
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
 
     ResponseEntity<CategoryDto> response =
         restTemplate.exchange(
-            basePath + "/categories/" + categoryId,
+            basePath + "/categories/" + category.getCategoryId(),
             HttpMethod.PUT,
             new HttpEntity<>(request, headers),
             CategoryDto.class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(categoryId, response.getBody().getCategoryId());
-    assertEquals(request.description(), response.getBody().getDescription());
-    assertEquals(request.parentId().get(), response.getBody().getParentCategory().getCategoryId());
+    assertEquals(category.getCategoryId(), response.getBody().getCategoryId());
+    assertEquals(
+        request.description() != null ? request.description() : category.getDescription(),
+        response.getBody().getDescription());
+    assertEquals(
+        request.parentId().get() != null
+            ? request.parentId().get()
+            : category.getParentCategory().getCategoryId(),
+        response.getBody().getParentCategory().getCategoryId());
+    assertEquals(
+        request.categoryName() != null ? request.categoryName() : category.getCategoryName(),
+        response.getBody().getCategoryName());
+    assertEquals(category.getUserId(), response.getBody().getUserId());
+    assertEquals(
+        request.description() != null ? request.description() : category.getDescription(),
+        response.getBody().getDescription());
   }
 
   @Test
   void testDeleteCategory() {
-    final UserModel user = testContext.getRandomAdminOrUser();
-    final UUID categoryId = testContext.getRandomCategoryByUserId(user.getUserId()).getCategoryId();
+    final UserModel user = testContext.getRandomUser();
+    final Category category = testContext.getRandomCategoryByUserId(user.getUserId());
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
+    int expectedDeleted =
+        category.getParentCategory() == null ? category.getSubCategories().size() + 1 : 1;
 
     ResponseEntity<Void> response =
         restTemplate.exchange(
-            basePath + "/categories/" + categoryId,
+            basePath + "/categories/" + category.getCategoryId(),
             HttpMethod.DELETE,
             new HttpEntity<>(headers),
             Void.class);
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    assertEquals(testContext.getCategoriesCount() - 1, categoryRepository.count());
+    assertEquals(
+        testContext.getCategoriesCount() - expectedDeleted, categoryRepository.findAll().size());
   }
 
   @Test
   void testCreateBudget() {
     final UUID userId = testContext.getRandomUser().getUserId();
-    final Category randomUserCategory = testContext.getRandomCategoryByUserId(userId);
-    final BudgetRequestDto request = createBudgetRequest(randomUserCategory.getCategoryId());
+    final Category category = testContext.getRandomCategoryByUserId(userId);
+    final BudgetRequestDto request = testContext.createBudgetRequest(category);
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     mockServer.mockExistentCurrency(request.currency());
 
@@ -215,7 +238,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetBudgetsByUserId() {
     final UUID userId = testContext.getRandomUser().getUserId();
-    final BudgetCriteria criteria = new BudgetCriteriaRandomGenerator(testContext).generate();
+    final BudgetCriteria criteria = testContext.createBudgetCriteria();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
 
     ResponseEntity<List<BudgetDto>> response =
@@ -252,7 +275,8 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   void testUpdateBudget() {
     final UUID userId = testContext.getRandomUser().getUserId();
     final UUID budgetId = testContext.getRandomBudgetByUserId(userId).getBudgetId();
-    final BudgetUpdateRequestDto request = createBudgetUpdateRequest();
+    final BudgetUpdateRequestDto request =
+        BudgetTestFactory.BudgetUpdateRequestBuilder.defaultInstance();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     mockServer.mockExistentCurrency(request.currency());
 

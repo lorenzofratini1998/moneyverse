@@ -1,17 +1,17 @@
 package it.moneyverse.transaction.runtime.batch;
 
-import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
-import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
+import it.moneyverse.test.annotations.MoneyverseTest;
+import it.moneyverse.test.annotations.datasource.FlywayTestDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import it.moneyverse.transaction.model.TransactionTestContext;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.repositories.SubscriptionRepository;
 import it.moneyverse.transaction.model.repositories.TransactionRepository;
-import it.moneyverse.transaction.utils.TransactionTestContext;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -28,26 +28,24 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(
+@MoneyverseTest
+@SpringBatchTest
+@TestPropertySource(
     properties = {
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.RedisAutoConfiguration, it.moneyverse.core.boot.SecurityAutoConfiguration",
       "spring.batch.jdbc.initialize-schema=never"
     })
-@SpringBatchTest
-@Testcontainers
-@CleanDatabaseAfterEachTest
 class SubscriptionBatchIT {
 
   protected static TransactionTestContext testContext;
 
-  @DataSourceScriptDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
+  @FlywayTestDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
   protected static Path tempDir;
 
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
@@ -68,6 +66,7 @@ class SubscriptionBatchIT {
         .withGrpcBudgetService(mockServer.getHost(), mockServer.getPort())
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
+        .withFlywayTestDirectory(tempDir)
         .withKafkaContainer(kafkaContainer);
   }
 
@@ -92,7 +91,8 @@ class SubscriptionBatchIT {
     int initialSize = transactionRepository.findAll().size();
     mockServer.mockUserPreference(subscriptions.getFirst().getCurrency());
     mockServer.mockExchangeRate(
-        Math.random() < 0.5 ? BigDecimal.ONE : RandomUtils.randomBigDecimal());
+        RandomUtils.flipCoin() ? BigDecimal.ONE : RandomUtils.randomBigDecimal());
+    mockServer.mockExistentBudget();
 
     var jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 

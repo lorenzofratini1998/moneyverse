@@ -5,9 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.grpc.lib.*;
 import it.moneyverse.test.utils.RandomUtils;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -59,6 +61,94 @@ class BudgetGrpcServiceTest {
 
     Optional<CategoryDto> responseDto =
         budgetGrpcService.fallbackGetCategoryById(categoryId, throwable);
+
+    assertTrue(responseDto.isEmpty());
+  }
+
+  @Test
+  void givenCategoryAndDate_WhenGetBudgetByCategoryIdAndDate_ThenReturnBudgetDto() {
+    UUID categoryId = UUID.randomUUID();
+    LocalDate date = LocalDate.now();
+    BudgetResponse response =
+        BudgetResponse.newBuilder()
+            .setBudgetId(RandomUtils.randomUUID().toString())
+            .setCategoryId(categoryId.toString())
+            .setStartDate(date.minusDays(RandomUtils.randomInteger(10)).toString())
+            .setEndDate(date.minusDays(RandomUtils.randomInteger(10)).toString())
+            .build();
+    when(stub.getBudget(any(BudgetRequest.class))).thenReturn(response);
+
+    Optional<BudgetDto> responseDto =
+        budgetGrpcService.getBudgetByCategoryIdAndDate(categoryId, date);
+
+    assertTrue(responseDto.isPresent());
+    verify(stub, times(1)).getBudget(any(BudgetRequest.class));
+  }
+
+  @Test
+  void givenCategoryAndDate_WhenGetBudgetByCategoryIdAndDate_ThenReturnEmptyResponse() {
+    UUID categoryId = UUID.randomUUID();
+    LocalDate date = LocalDate.now();
+    BudgetResponse response = BudgetResponse.getDefaultInstance();
+    when(stub.getBudget(any(BudgetRequest.class))).thenReturn(response);
+
+    Optional<BudgetDto> responseDto =
+        budgetGrpcService.getBudgetByCategoryIdAndDate(categoryId, date);
+
+    assertTrue(responseDto.isEmpty());
+    verify(stub, times(1)).getBudget(any(BudgetRequest.class));
+  }
+
+  @Test
+  void givenCircuitBreaker_WhenGetBudgetByCategoryIdAndDate_ThenFallbackMethodIsTriggered() {
+    UUID categoryId = UUID.randomUUID();
+    LocalDate date = LocalDate.now();
+    Throwable throwable = mock(CallNotPermittedException.class);
+
+    Optional<BudgetDto> responseDto =
+        budgetGrpcService.fallbackGetBudgetByCategoryIdAndDate(categoryId, date, throwable);
+
+    assertTrue(responseDto.isEmpty());
+  }
+
+  @Test
+  void givenBudgetId_WhenGetBudgetById_ThenReturnBudgetDto() {
+    UUID budgetId = UUID.randomUUID();
+    BudgetResponse response =
+        BudgetResponse.newBuilder()
+            .setBudgetId(budgetId.toString())
+            .setCategoryId(RandomUtils.randomUUID().toString())
+            .setStartDate(LocalDate.now().minusDays(RandomUtils.randomInteger(10)).toString())
+            .setEndDate(LocalDate.now().minusDays(RandomUtils.randomInteger(10)).toString())
+            .build();
+
+    when(stub.getBudget(any(BudgetRequest.class))).thenReturn(response);
+
+    Optional<BudgetDto> responseDto = budgetGrpcService.getBudgetByBudgetId(budgetId);
+
+    assertTrue(responseDto.isPresent());
+    verify(stub, times(1)).getBudget(any(BudgetRequest.class));
+  }
+
+  @Test
+  void givenBudgetId_WhenGetBudgetById_ThenReturnEmptyResponse() {
+    UUID budgetId = UUID.randomUUID();
+    BudgetResponse response = BudgetResponse.getDefaultInstance();
+    when(stub.getBudget(any(BudgetRequest.class))).thenReturn(response);
+
+    Optional<BudgetDto> responseDto = budgetGrpcService.getBudgetByBudgetId(budgetId);
+
+    assertTrue(responseDto.isEmpty());
+    verify(stub, times(1)).getBudget(any(BudgetRequest.class));
+  }
+
+  @Test
+  void givenCircuitBreaker_WhenGetBudgetById_ThenFallbackMethodIsTriggered() {
+    UUID budgetId = UUID.randomUUID();
+    Throwable throwable = mock(CallNotPermittedException.class);
+
+    Optional<BudgetDto> responseDto =
+        budgetGrpcService.fallbackGetBudgetByBudgetId(budgetId, throwable);
 
     assertTrue(responseDto.isEmpty());
   }

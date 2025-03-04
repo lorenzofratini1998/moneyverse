@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
 import it.moneyverse.core.boot.SecurityAutoConfiguration;
+import it.moneyverse.currency.model.CurrencyTestFactory;
 import it.moneyverse.currency.model.entities.ExchangeRate;
 import it.moneyverse.currency.model.repositories.ExchangeRateRepository;
 import it.moneyverse.test.utils.RandomUtils;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,20 +49,11 @@ class ExchangeRateWriterTest {
   void testWrite() {
     List<ExchangeRate> exchangeRates = new ArrayList<>();
     for (int i = 0; i < RandomUtils.randomInteger(1, 10); i++) {
-      exchangeRates.add(fakeExchangeRate());
+      exchangeRates.add(CurrencyTestFactory.fakeExchangeRate());
     }
     Chunk<List<ExchangeRate>> chunk = new Chunk<>(List.of(exchangeRates));
     exchangeRateWriter.write(chunk);
 
     assertEquals(exchangeRates.size(), exchangeRateRepository.findAll().size());
-  }
-
-  private ExchangeRate fakeExchangeRate() {
-    ExchangeRate exchangeRate = new ExchangeRate();
-    exchangeRate.setDate(LocalDate.now());
-    exchangeRate.setCurrencyFrom(RandomUtils.randomString(3).toUpperCase());
-    exchangeRate.setCurrencyTo(RandomUtils.randomString(3).toUpperCase());
-    exchangeRate.setRate(RandomUtils.randomBigDecimal());
-    return exchangeRate;
   }
 }

@@ -11,6 +11,7 @@ import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.test.utils.RandomUtils;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +54,8 @@ class AccountMapperTest {
 
     assertEquals(request.userId(), account.getUserId());
     assertEquals(request.accountName(), account.getAccountName());
-    assertEquals(request.balance(), account.getBalance());
+    assertEquals(
+        request.balance() != null ? request.balance() : BigDecimal.ZERO, account.getBalance());
     assertEquals(request.balanceTarget(), account.getBalanceTarget());
     assertEquals(request.accountCategory(), account.getAccountCategory().getName());
     assertEquals(request.accountDescription(), account.getAccountDescription());

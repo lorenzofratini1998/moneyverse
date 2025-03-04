@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import it.moneyverse.core.model.dto.CurrencyDto;
-import it.moneyverse.currency.utils.CurrencyTestContext;
-import it.moneyverse.test.annotations.IntegrationTest;
+import it.moneyverse.currency.model.CurrencyTestContext;
+import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
@@ -22,7 +22,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 
-@IntegrationTest
+@MoneyverseTest
 @TestPropertySource(properties = {"spring.runner.initializer.enabled=false"})
 class CurrencyManagementControllerIT extends AbstractIntegrationTest {
 
@@ -36,7 +36,8 @@ class CurrencyManagementControllerIT extends AbstractIntegrationTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
-        .withKeycloak(keycloakContainer);
+        .withKeycloak(keycloakContainer)
+        .withFlywayTestDirectory(tempDir);
   }
 
   @BeforeAll

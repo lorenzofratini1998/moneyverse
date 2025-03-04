@@ -20,19 +20,19 @@ public class Currency implements Serializable {
   @Column(name = "ISO_CODE", length = 3, nullable = false, unique = true)
   private String code;
 
-  @Column(name = "CURRENCY_NAME", length = 50)
+  @Column(name = "CURRENCY_NAME", length = 50, nullable = false)
   private String name;
 
-  @Column(name = "COUNTRY", length = 50)
+  @Column(name = "COUNTRY", length = 50, nullable = false)
   private String country;
 
   @Column(name = "IS_DEFAULT", nullable = false)
   @ColumnDefault("FALSE")
-  private Boolean isDefault;
+  private Boolean isDefault = Boolean.FALSE;
 
   @Column(name = "IS_ENABLED", nullable = false)
   @ColumnDefault("TRUE")
-  private Boolean isEnabled;
+  private Boolean isEnabled = Boolean.TRUE;
 
   public UUID getCurrencyId() {
     return currencyId;

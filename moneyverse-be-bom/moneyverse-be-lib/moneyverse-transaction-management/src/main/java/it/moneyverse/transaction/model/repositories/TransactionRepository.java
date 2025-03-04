@@ -14,4 +14,6 @@ public interface TransactionRepository
   List<Transaction> findTransactionByAccountId(UUID accountId);
 
   List<Transaction> findTransactionByCategoryId(UUID categoryId);
+
+  List<Transaction> findTransactionByBudgetId(UUID budgetId);
 }

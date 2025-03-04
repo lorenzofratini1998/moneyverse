@@ -1,7 +1,8 @@
 package it.moneyverse.account.runtime.messages;
 
 import it.moneyverse.account.model.entities.Account;
-import it.moneyverse.account.model.event.AccountDeletionEvent;
+import it.moneyverse.core.enums.EventTypeEnum;
+import it.moneyverse.core.model.events.AccountEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +15,13 @@ public class AccountEventPublisher {
     this.eventPublisher = eventPublisher;
   }
 
-  public void publishEvent(Account account) {
-    AccountDeletionEvent event =
-        new AccountDeletionEvent(account.getAccountId(), account.getUserId());
+  public void publishEvent(Account account, EventTypeEnum eventType) {
+    AccountEvent event =
+        AccountEvent.builder()
+            .withAccountId(account.getAccountId())
+            .withUserId(account.getUserId())
+            .withEventType(eventType)
+            .build();
     eventPublisher.publishEvent(event);
   }
 }

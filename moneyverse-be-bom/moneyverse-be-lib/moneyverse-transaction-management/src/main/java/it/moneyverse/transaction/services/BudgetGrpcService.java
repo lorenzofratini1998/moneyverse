@@ -68,12 +68,25 @@ public class BudgetGrpcService {
       name = BudgetServiceGrpcCircuitBreakerProperties.BUDGET_SERVICE_GRPC,
       fallbackMethod = "fallbackGetBudgetByCategoryIdAndDate")
   public Optional<BudgetDto> getBudgetByCategoryIdAndDate(UUID categoryId, LocalDate date) {
-    final BudgetResponse response =
-        stub.getBudget(
-            BudgetRequest.newBuilder()
-                .setCategoryId(categoryId.toString())
-                .setDate(date.toString())
-                .build());
+    BudgetRequest request =
+        BudgetRequest.newBuilder()
+            .setCategoryId(categoryId.toString())
+            .setDate(date.toString())
+            .build();
+    return getBudget(request);
+  }
+
+  @Cacheable(value = BUDGETS_CACHE, key = "#budgetId", unless = "#result == null")
+  @CircuitBreaker(
+      name = BudgetServiceGrpcCircuitBreakerProperties.BUDGET_SERVICE_GRPC,
+      fallbackMethod = "fallbackGetBudgetByBudgetId")
+  public Optional<BudgetDto> getBudgetByBudgetId(UUID budgetId) {
+    BudgetRequest request = BudgetRequest.newBuilder().setBudgetId(budgetId.toString()).build();
+    return getBudget(request);
+  }
+
+  private Optional<BudgetDto> getBudget(BudgetRequest request) {
+    final BudgetResponse response = stub.getBudget(request);
     if (response == null || isEmptyResponse(response)) {
       return Optional.empty();
     }
@@ -89,20 +102,28 @@ public class BudgetGrpcService {
             .build());
   }
 
+  private boolean isEmptyResponse(BudgetResponse response) {
+    return response.getBudgetId().isEmpty()
+        && response.getCategoryId().isEmpty()
+        && response.getStartDate().isEmpty()
+        && response.getEndDate().isEmpty();
+  }
+
   Optional<BudgetDto> fallbackGetBudgetByCategoryIdAndDate(
       UUID categoryId, LocalDate date, Throwable throwable) {
     LOGGER.error(
-        "Impossible to contact the BudgetService to check whether the budget related to category {} and date {} exists. Returning EMPTY as fallback: {}",
+        "Impossible to contact the BudgetService to check if a budget for the category {} and date {} exists. Returning EMPTY as fallback: {}",
         categoryId,
         date,
         throwable.getMessage());
     return Optional.empty();
   }
 
-  private boolean isEmptyResponse(BudgetResponse response) {
-    return response.getBudgetId().isEmpty()
-        && response.getCategoryId().isEmpty()
-        && response.getStartDate().isEmpty()
-        && response.getEndDate().isEmpty();
+  Optional<BudgetDto> fallbackGetBudgetByBudgetId(UUID budgetId, Throwable throwable) {
+    LOGGER.error(
+        "Impossible to contact the BudgetService to check whether the budget {} exists. Returning EMPTY as fallback: {}",
+        budgetId,
+        throwable.getMessage());
+    return Optional.empty();
   }
 }

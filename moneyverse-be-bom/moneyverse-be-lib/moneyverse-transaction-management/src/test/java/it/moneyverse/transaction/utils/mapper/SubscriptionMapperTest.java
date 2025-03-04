@@ -1,11 +1,9 @@
 package it.moneyverse.transaction.utils.mapper;
 
-import static it.moneyverse.transaction.utils.TransactionTestUtils.createSubscription;
-import static it.moneyverse.transaction.utils.TransactionTestUtils.createSubscriptionRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.model.SubscriptionTestFactory;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
 import it.moneyverse.transaction.model.entities.Subscription;
@@ -21,8 +19,7 @@ class SubscriptionMapperTest {
   @Test
   void testToSubscription_SubscriptionRequest() {
     SubscriptionRequestDto request =
-        createSubscriptionRequest(
-            RandomUtils.randomUUID(), RandomUtils.randomLocalDate(2024, 2025));
+        SubscriptionTestFactory.SubscriptionRequestBuilder.defaultInstance();
 
     Subscription subscription = SubscriptionMapper.toSubscription(request);
 
@@ -44,7 +41,7 @@ class SubscriptionMapperTest {
 
   @Test
   void testToSubscriptionDto_Subscription() {
-    Subscription subscription = createSubscription();
+    Subscription subscription = SubscriptionTestFactory.fakeSubscription();
 
     SubscriptionDto subscriptionDto = SubscriptionMapper.toSubscriptionDto(subscription);
 
