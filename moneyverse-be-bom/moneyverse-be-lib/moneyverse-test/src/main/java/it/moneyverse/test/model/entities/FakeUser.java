@@ -1,6 +1,6 @@
 package it.moneyverse.test.model.entities;
 
-import static it.moneyverse.test.utils.FakeUtils.ONBOARD;
+import static it.moneyverse.test.model.TestFactory.ONBOARD;
 
 import it.moneyverse.core.enums.UserRoleEnum;
 import it.moneyverse.core.model.entities.UserModel;
@@ -27,7 +27,7 @@ public class FakeUser extends FakeAuditable implements UserModel {
     this.surname = "Test %s".formatted(counter);
     this.email = "test%s@example.com".formatted(counter);
     this.username = "test%s@example.com".formatted(counter);
-    this.password = RandomUtils.randomUUID().toString();
+    this.password = RandomUtils.randomString(20);
     this.role = counter == 1 ? UserRoleEnum.ADMIN : UserRoleEnum.USER;
     this.attributes =
         new HashMap<>() {

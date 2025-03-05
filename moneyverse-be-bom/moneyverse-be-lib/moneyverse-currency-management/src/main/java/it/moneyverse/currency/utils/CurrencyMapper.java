@@ -1,6 +1,6 @@
 package it.moneyverse.currency.utils;
 
-import it.moneyverse.currency.model.dto.CurrencyDto;
+import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.model.entities.Currency;
 import java.util.Collections;
 import java.util.List;

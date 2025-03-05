@@ -1,6 +1,7 @@
 package it.moneyverse.budget.runtime.server;
 
 import io.grpc.ServerBuilder;
+import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.core.runtime.server.GrpcServer;
 import jakarta.annotation.PostConstruct;
@@ -15,14 +16,16 @@ public class BudgetServer extends GrpcServer {
 
   public BudgetServer(
       @Value("${grpc.server.budget-service.port}") Integer port,
-      CategoryRepository categoryRepository) {
+      CategoryRepository categoryRepository,
+      BudgetRepository budgetRepository) {
     this.port = port;
     this.server =
         ServerBuilder.forPort(port)
-            .addService(new BudgetManagementGrpcService(categoryRepository))
+            .addService(new BudgetManagementGrpcService(categoryRepository, budgetRepository))
             .build();
   }
 
+  @Override
   @PostConstruct
   public void start() throws IOException {
     super.start();

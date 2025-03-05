@@ -1,18 +1,18 @@
 package it.moneyverse.user.runtime.server;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.grpc.lib.UserRequest;
 import it.moneyverse.grpc.lib.UserResponse;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.services.KeycloakService;
 import java.io.IOException;
 import java.util.Optional;
@@ -25,25 +25,28 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServerTest {
+class UserServerTest {
 
   private UserServiceGrpc.UserServiceBlockingStub stub;
   private ManagedChannel channel;
   private UserServer userServer;
   @Mock KeycloakService keycloakService;
+  @Mock UserPreferenceRepository userPreferenceRepository;
 
   @BeforeEach
   void setup() throws IOException {
     String serverName = InProcessServerBuilder.generateName();
     Server server =
         InProcessServerBuilder.forName(serverName)
-            .addService(new UserGrpcService(keycloakService))
+            .addService(new UserGrpcService(keycloakService, userPreferenceRepository))
             .directExecutor()
             .build()
             .start();
     channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     stub = UserServiceGrpc.newBlockingStub(channel);
-    userServer = new UserServer(RandomUtils.randomBigDecimal().intValue(), keycloakService);
+    userServer =
+        new UserServer(
+            RandomUtils.randomBigDecimal().intValue(), keycloakService, userPreferenceRepository);
     userServer.start();
   }
 
@@ -60,10 +63,14 @@ public class UserServerTest {
     UUID userId = RandomUtils.randomUUID();
     UserRequest request = UserRequest.newBuilder().setUserId(userId.toString()).build();
     when(keycloakService.getUserById(userId)).thenReturn(Optional.of(userDto));
+    when(userDto.getUserId()).thenReturn(userId);
+    when(userDto.getFirstName()).thenReturn(RandomUtils.randomString(10));
+    when(userDto.getLastName()).thenReturn(RandomUtils.randomString(10));
+    when(userDto.getEmail()).thenReturn(RandomUtils.randomString(15));
 
-    UserResponse response = stub.checkIfUserExists(request);
+    UserResponse response = stub.getUserById(request);
 
-    assertTrue(response.getExists());
+    assertEquals(userId.toString(), response.getUserId());
     verify(keycloakService, times(1)).getUserById(userId);
   }
 
@@ -73,9 +80,9 @@ public class UserServerTest {
     UserRequest request = UserRequest.newBuilder().setUserId(userId.toString()).build();
     when(keycloakService.getUserById(userId)).thenReturn(Optional.empty());
 
-    UserResponse response = stub.checkIfUserExists(request);
+    UserResponse response = stub.getUserById(request);
 
-    assertFalse(response.getExists());
+    assertEquals("", response.getUserId());
     verify(keycloakService, times(1)).getUserById(userId);
   }
 }

@@ -7,14 +7,25 @@ option java_package = "it.moneyverse.grpc.lib";
 option java_outer_classname = "CurrencyServiceProto";
 
 service CurrencyService {
-  rpc CheckIfCurrencyExists (CurrencyRequest) returns (CurrencyResponse) {
-  }
+  rpc GetCurrencyByCode (CurrencyRequest) returns (CurrencyResponse) {}
+  rpc GetExchangeRate (ExchangeRateRequest) returns (ExchangeRateResponse) {}
 }
 
 message CurrencyRequest {
-  string code = 1;
+  string isoCode = 1;
 }
 
 message CurrencyResponse {
-  bool exists = 1;
+  string currencyId = 1;
+  string isoCode = 2;
+}
+
+message ExchangeRateRequest {
+  string fromCurrency = 1;
+  string toCurrency = 2;
+  string date = 3;
+}
+
+message ExchangeRateResponse {
+  double rate = 1;
 }

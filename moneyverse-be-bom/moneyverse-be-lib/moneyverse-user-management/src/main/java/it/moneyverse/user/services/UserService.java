@@ -1,6 +1,6 @@
 package it.moneyverse.user.services;
 
-import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import java.util.UUID;
 
@@ -13,4 +13,6 @@ public interface UserService {
   void disableUser(UUID userId);
 
   void deleteUser(UUID userId);
+
+  void checkIfUserExists(UUID userId);
 }

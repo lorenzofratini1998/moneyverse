@@ -1,7 +1,5 @@
 package it.moneyverse.budget.model.repositories;
 
-import static it.moneyverse.test.utils.FakeUtils.randomBoundCriteria;
-import static it.moneyverse.test.utils.FakeUtils.randomDateCriteria;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -9,6 +7,7 @@ import static org.mockito.Mockito.*;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.entities.Category;
+import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.utils.RandomUtils;
 import jakarta.persistence.criteria.*;
 import java.math.BigDecimal;
@@ -35,10 +34,10 @@ class BudgetPredicateBuilderTest {
       @Mock Join<Budget, Category> categoryJoins,
       @Mock Path<Object> objectPath) {
     UUID userId = RandomUtils.randomUUID();
-    when(criteria.getAmount()).thenReturn(Optional.of(randomBoundCriteria()));
-    when(criteria.getBudgetLimit()).thenReturn(Optional.of(randomBoundCriteria()));
-    when(criteria.getCurrency()).thenReturn(Optional.of(RandomUtils.randomString(3).toUpperCase()));
-    when(criteria.getDate()).thenReturn(Optional.of(randomDateCriteria()));
+    when(criteria.getAmount()).thenReturn(Optional.of(TestFactory.fakeBoundCriteria()));
+    when(criteria.getBudgetLimit()).thenReturn(Optional.of(TestFactory.fakeBoundCriteria()));
+    when(criteria.getCurrency()).thenReturn(Optional.of(RandomUtils.randomCurrency()));
+    when(criteria.getDate()).thenReturn(Optional.of(TestFactory.fakeDateCriteria()));
 
     when(cb.equal(any(), any(String.class))).thenReturn(predicate);
     when(cb.greaterThan(any(), any(BigDecimal.class))).thenReturn(predicate);
@@ -60,5 +59,4 @@ class BudgetPredicateBuilderTest {
     verify(cb, times(1)).greaterThanOrEqualTo(any(), any(LocalDate.class));
     verify(cb, times(1)).and(any(Predicate[].class));
   }
-
 }

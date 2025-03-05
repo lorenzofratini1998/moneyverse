@@ -2,11 +2,11 @@ package it.moneyverse.budget.model.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import it.moneyverse.budget.model.BudgetTestContext;
+import it.moneyverse.budget.model.BudgetTestFactory;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.entities.Category;
-import it.moneyverse.budget.utils.BudgetCriteriaRandomGenerator;
-import it.moneyverse.budget.utils.BudgetTestContext;
 import it.moneyverse.core.boot.*;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -66,7 +66,8 @@ class BudgetCustomRepositoryImplTest {
 
   @Test
   void givenCriteria_thenReturnFilteredBudgets() {
-    BudgetCriteria criteria = new BudgetCriteriaRandomGenerator(testContext).generate();
+    BudgetCriteria criteria =
+        BudgetTestFactory.BudgetCriteriaBuilder.generator(testContext).generate();
     UUID userId = testContext.getRandomUser().getUserId();
     List<Budget> expected = testContext.filterBudgets(userId, criteria);
 

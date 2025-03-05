@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class TransactionCriteria {
   private List<UUID> accounts;
-  private List<UUID> budgets;
+  private List<UUID> categories;
   private DateCriteria date;
   private BoundCriteria amount;
   private List<UUID> tags;
@@ -27,12 +27,12 @@ public class TransactionCriteria {
     this.accounts = accounts;
   }
 
-  public Optional<List<UUID>> getBudgets() {
-    return Optional.ofNullable(budgets);
+  public Optional<List<UUID>> getCategories() {
+    return Optional.ofNullable(categories);
   }
 
-  public void setBudgets(List<UUID> budgets) {
-    this.budgets = budgets;
+  public void setCategories(List<UUID> categories) {
+    this.categories = categories;
   }
 
   public Optional<DateCriteria> getDate() {

@@ -5,18 +5,18 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import it.moneyverse.core.services.UserGrpcService;
 import it.moneyverse.core.services.UserServiceGrpcClient;
 import it.moneyverse.core.utils.properties.UserServiceGrpcCircuitBreakerProperties;
 import it.moneyverse.core.utils.properties.UserServiceGrpcClientProperties;
 import it.moneyverse.grpc.lib.UserServiceGrpc;
 import it.moneyverse.grpc.lib.UserServiceGrpc.UserServiceBlockingStub;
+import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.Duration;
 
 @Configuration
 @EnableConfigurationProperties(
@@ -63,8 +63,12 @@ public class UserServiceGrpcClientAutoConfiguration {
   }
 
   @Bean
-  public UserServiceGrpcClient userServiceGrpcClient(
-      UserServiceBlockingStub userServiceBlockingStub) {
-    return new UserServiceGrpcClient(userServiceBlockingStub);
+  public UserGrpcService userGrpcService(UserServiceBlockingStub userServiceBlockingStub) {
+    return new UserGrpcService(userServiceBlockingStub);
+  }
+
+  @Bean
+  public UserServiceGrpcClient userServiceGrpcClient(UserGrpcService userGrpcService) {
+    return new UserServiceGrpcClient(userGrpcService);
   }
 }

@@ -3,12 +3,12 @@ package it.moneyverse.budget.utils.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import it.moneyverse.budget.model.dto.BudgetDto;
+import it.moneyverse.budget.model.BudgetTestFactory;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.entities.Category;
-import it.moneyverse.budget.utils.BudgetTestUtils;
+import it.moneyverse.core.model.dto.BudgetDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,7 +26,7 @@ class BudgetMapperTest {
 
   @Test
   void testToBudgetEntity() {
-    BudgetRequestDto request = BudgetTestUtils.createBudgetRequest();
+    BudgetRequestDto request = BudgetTestFactory.BudgetRequestBuilder.defaultInstance();
     Budget budget = BudgetMapper.toBudget(request, category);
 
     assertEquals(request.budgetLimit(), budget.getBudgetLimit());
@@ -43,7 +43,7 @@ class BudgetMapperTest {
 
   @Test
   void testToBudgetDto() {
-    Budget budget = BudgetTestUtils.createBudget(category);
+    Budget budget = BudgetTestFactory.fakeBudget(category);
     BudgetDto dto = BudgetMapper.toBudgetDto(budget);
 
     assertEquals(budget.getBudgetId(), dto.getBudgetId());
@@ -60,8 +60,8 @@ class BudgetMapperTest {
 
   @Test
   void testToBudget_PartialUpdate() {
-    Budget budget = BudgetTestUtils.createBudget(category);
-    BudgetUpdateRequestDto request = BudgetTestUtils.createBudgetUpdateRequest();
+    Budget budget = BudgetTestFactory.fakeBudget(category);
+    BudgetUpdateRequestDto request = BudgetTestFactory.BudgetUpdateRequestBuilder.defaultInstance();
     Budget result = BudgetMapper.partialUpdate(budget, request);
 
     assertEquals(budget.getBudgetId(), result.getBudgetId());

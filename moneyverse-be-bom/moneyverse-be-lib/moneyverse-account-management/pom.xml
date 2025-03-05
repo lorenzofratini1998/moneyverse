@@ -34,6 +34,11 @@
     </dependency>
     <!-- External dependencies -->
     <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>jakarta.json</groupId>
       <artifactId>jakarta.json-api</artifactId>
       <optional>true</optional>
@@ -65,6 +70,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.openapitools</groupId>
+      <artifactId>jackson-databind-nullable</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <optional>true</optional>
@@ -82,7 +92,17 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -181,6 +201,12 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
+      <optional>true</optional>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.redis</groupId>
+      <artifactId>testcontainers-redis</artifactId>
       <optional>true</optional>
       <scope>test</scope>
     </dependency>

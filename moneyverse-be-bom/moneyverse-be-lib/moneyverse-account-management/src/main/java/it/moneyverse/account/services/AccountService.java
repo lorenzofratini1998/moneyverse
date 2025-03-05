@@ -1,6 +1,9 @@
 package it.moneyverse.account.services;
 
 import it.moneyverse.account.model.dto.*;
+import it.moneyverse.core.model.dto.AccountDto;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,4 +22,8 @@ public interface AccountService {
   void deleteAccountsByUserId(UUID userId);
 
   List<AccountCategoryDto> getAccountCategories();
+
+  void incrementAccountBalance(UUID accountId, BigDecimal amount, String currency, LocalDate date);
+
+  void decrementAccountBalance(UUID accountId, BigDecimal amount, String currency, LocalDate date);
 }

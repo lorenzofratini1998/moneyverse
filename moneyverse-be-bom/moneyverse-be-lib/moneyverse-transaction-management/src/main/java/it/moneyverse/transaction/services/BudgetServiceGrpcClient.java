@@ -1,42 +1,56 @@
 package it.moneyverse.transaction.services;
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import it.moneyverse.core.utils.properties.BudgetServiceGrpcCircuitBreakerProperties;
-import it.moneyverse.grpc.lib.BudgetRequest;
-import it.moneyverse.grpc.lib.BudgetResponse;
-import it.moneyverse.grpc.lib.BudgetServiceGrpc;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.BudgetDto;
+import it.moneyverse.core.model.dto.CategoryDto;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BudgetServiceGrpcClient implements BudgetServiceClient {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BudgetServiceGrpcClient.class);
+  private final BudgetGrpcService budgetGrpcService;
 
-  private final BudgetServiceGrpc.BudgetServiceBlockingStub stub;
-
-  public BudgetServiceGrpcClient(BudgetServiceGrpc.BudgetServiceBlockingStub stub) {
-    this.stub = stub;
+  public BudgetServiceGrpcClient(BudgetGrpcService budgetGrpcService) {
+    this.budgetGrpcService = budgetGrpcService;
   }
 
   @Override
-  @CircuitBreaker(
-      name = BudgetServiceGrpcCircuitBreakerProperties.BUDGET_SERVICE_GRPC,
-      fallbackMethod = "fallbackCheckIfBudgetExists")
-  public Boolean checkIfBudgetExists(UUID budgetId) {
-    final BudgetResponse response =
-        stub.checkIfBudgetExists(
-            BudgetRequest.newBuilder().setBudgetId(budgetId.toString()).build());
-    return response.getExists();
+  public Optional<CategoryDto> getCategoryById(UUID categoryId) {
+    return budgetGrpcService.getCategoryById(categoryId);
   }
 
-  Boolean fallbackCheckIfBudgetExists(UUID budgetId, Throwable throwable) {
-    LOGGER.error(
-        "Impossible to contact the BudgetService to check whether the budget {} exists. Returning FALSE as fallback: {}",
-        budgetId,
-        throwable.getMessage());
-    return false;
+  @Override
+  public UUID getBudgetId(UUID categoryId, LocalDate date) {
+    return Optional.ofNullable(categoryId)
+        .flatMap(category -> budgetGrpcService.getBudgetByCategoryIdAndDate(category, date))
+        .map(BudgetDto::getBudgetId)
+        .orElse(null);
+  }
+
+  @Override
+  public void checkIfCategoryExists(UUID categoryId) {
+    if (budgetGrpcService.getCategoryById(categoryId).isEmpty()) {
+      throw new ResourceNotFoundException("Category %s does not exists".formatted(categoryId));
+    }
+  }
+
+  @Override
+  public void checkIfCategoryStillExists(UUID categoryId) {
+    if (budgetGrpcService.getCategoryById(categoryId).isPresent()) {
+      throw new ResourceStillExistsException(
+          "Category %s still exists in the system".formatted(categoryId));
+    }
+  }
+
+  @Override
+  public void checkIfBudgetStillExists(UUID budgetId) {
+    if (budgetGrpcService.getBudgetByBudgetId(budgetId).isPresent()) {
+      throw new ResourceStillExistsException(
+          "Budget %s still exists in the system".formatted(budgetId));
+    }
   }
 }

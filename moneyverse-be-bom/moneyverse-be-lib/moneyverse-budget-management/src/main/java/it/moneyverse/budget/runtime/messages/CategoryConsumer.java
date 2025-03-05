@@ -4,7 +4,7 @@ import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
 
 import it.moneyverse.budget.services.CategoryService;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
-import it.moneyverse.core.model.events.UserDeletionEvent;
+import it.moneyverse.core.model.events.UserEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -32,7 +32,7 @@ public class CategoryConsumer {
   public void onUserDeletionEvent(
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
-    UserDeletionEvent event = JsonUtils.fromJson(record.value(), UserDeletionEvent.class);
+    UserEvent event = JsonUtils.fromJson(record.value(), UserEvent.class);
     categoryService.deleteCategoriesByUserId(event.key());
   }
 }

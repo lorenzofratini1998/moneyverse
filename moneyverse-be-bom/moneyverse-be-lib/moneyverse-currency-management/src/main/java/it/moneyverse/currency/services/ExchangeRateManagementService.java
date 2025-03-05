@@ -49,6 +49,10 @@ public class ExchangeRateManagementService implements ExchangeRateService {
           "Failed to read exchange rates from %s with status code: %s and body: %s"
               .formatted(URL, response.getStatusCode(), response.getBody()));
     }
+    String body = response.getBody();
+    if (body != null && body.isEmpty()) {
+      return readExchangeRates(startPeriod.minusDays(1), endPeriod.minusDays(1));
+    }
     return response;
   }
 

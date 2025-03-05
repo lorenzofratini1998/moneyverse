@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.model.entities;
 
+import it.moneyverse.core.model.entities.Auditable;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Table(
     name = "TAGS",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"USER_ID", "TAG_NAME"})})
-public class Tag implements Serializable {
+public class Tag extends Auditable implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 

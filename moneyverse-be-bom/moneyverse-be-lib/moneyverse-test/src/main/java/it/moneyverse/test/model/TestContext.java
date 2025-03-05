@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -111,7 +112,11 @@ public abstract class TestContext<SELF extends TestContext<SELF>> {
           }
           case List<?> list ->
               uri.queryParam(
-                  fieldName, list.stream().map(Object::toString).collect(Collectors.joining(",")));
+                  fieldName,
+                  list.stream()
+                      .filter(Objects::nonNull)
+                      .map(Object::toString)
+                      .collect(Collectors.joining(",")));
           default -> uri.queryParam(fieldName, fieldValue);
         }
       }

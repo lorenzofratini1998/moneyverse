@@ -1,19 +1,18 @@
 package it.moneyverse.budget.services;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.Category_;
-import it.moneyverse.budget.model.event.CategoryDeletionEvent;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.model.repositories.DefaultCategoryRepository;
+import it.moneyverse.budget.runtime.messages.BudgetEventPublisher;
 import it.moneyverse.budget.utils.mapper.CategoryMapper;
+import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.beans.CategoryDeletionTopic;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
-import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.services.UserServiceClient;
 import java.util.List;
 import java.util.UUID;
@@ -33,23 +32,22 @@ public class CategoryManagementService implements CategoryService {
   private final CategoryRepository categoryRepository;
   private final DefaultCategoryRepository defaultCategoryRepository;
   private final UserServiceClient userServiceClient;
-  private final MessageProducer<UUID, String> messageProducer;
+  private final BudgetEventPublisher eventPublisher;
 
   public CategoryManagementService(
       CategoryRepository categoryRepository,
       DefaultCategoryRepository defaultCategoryRepository,
       UserServiceClient userServiceClient,
-      MessageProducer<UUID, String> messageProducer) {
+      BudgetEventPublisher eventPublisher) {
     this.categoryRepository = categoryRepository;
     this.defaultCategoryRepository = defaultCategoryRepository;
     this.userServiceClient = userServiceClient;
-    this.messageProducer = messageProducer;
+    this.eventPublisher = eventPublisher;
   }
 
   @Override
   @Transactional
   public CategoryDto createCategory(CategoryRequestDto request) {
-    checkIfUserExists(request.userId());
     checkIfCategoryAlreadyExists(request.userId(), request.categoryName());
     Category parentCategory = null;
     if (request.parentId() != null) {
@@ -148,9 +146,11 @@ public class CategoryManagementService implements CategoryService {
   @Transactional
   public void deleteCategory(UUID categoryId) {
     Category category = findCategoryById(categoryId);
+    if (category.getParentCategory() != null) {
+      category.getParentCategory().getSubCategories().remove(category);
+    }
     categoryRepository.delete(category);
-    messageProducer.send(
-        new CategoryDeletionEvent(categoryId, category.getUserId()), CategoryDeletionTopic.TOPIC);
+    eventPublisher.publishEvent(category, EventTypeEnum.DELETE);
     LOGGER.info(
         "Deleted category '{}' for user '{}'", category.getCategoryId(), category.getUserId());
   }
@@ -158,15 +158,9 @@ public class CategoryManagementService implements CategoryService {
   @Override
   @Transactional
   public void deleteCategoriesByUserId(UUID userId) {
-    checkIfUserExists(userId);
+    userServiceClient.checkIfUserStillExist(userId);
     LOGGER.info("Deleting categories related to user '{}'", userId);
     categoryRepository.deleteAll(categoryRepository.findCategoriesByUserId(userId));
-  }
-
-  private void checkIfUserExists(UUID userId) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
-    }
   }
 
   private Category findCategoryById(UUID categoryId) {

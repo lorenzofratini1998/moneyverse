@@ -1,7 +1,7 @@
 package it.moneyverse.user.utils.mapper;
 
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.core.model.dto.PreferenceDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.UserPreferenceItemDto;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.entities.Preference;
@@ -22,17 +22,19 @@ public class PreferenceMapper {
     return userPreference;
   }
 
-  public static UserPreferenceDto toUserPreferenceDto(
-      UUID userId, List<UserPreference> userPreferences) {
-    return userPreferences.isEmpty()
-        ? UserPreferenceDto.builder()
-            .withUserId(userId)
-            .withPreferences(Collections.emptyList())
-            .build()
-        : UserPreferenceDto.builder()
-            .withUserId(userId)
-            .withPreferences(toUserPreferenceItemDto(userPreferences))
-            .build();
+  public static List<UserPreferenceDto> toUserPreferenceDto(List<UserPreference> userPreferences) {
+    if (userPreferences.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return userPreferences.stream().map(PreferenceMapper::toUserPreferenceDto).toList();
+  }
+
+  public static UserPreferenceDto toUserPreferenceDto(UserPreference userPreference) {
+    return UserPreferenceDto.builder()
+        .withUserId(userPreference.getUserId())
+        .withPreference(toPreferenceDto(userPreference.getPreference()))
+        .withValue(userPreference.getValue())
+        .build();
   }
 
   private static List<UserPreferenceItemDto> toUserPreferenceItemDto(

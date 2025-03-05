@@ -1,13 +1,11 @@
 package it.moneyverse.budget.utils.mapper;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.DefaultCategory;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import it.moneyverse.core.model.dto.CategoryDto;
+import java.util.*;
 
 public class CategoryMapper {
 
@@ -39,7 +37,11 @@ public class CategoryMapper {
   }
 
   public static CategoryDto toCategoryDto(Category category) {
-    if (category == null) {
+    return toCategoryDto(category, new HashSet<>());
+  }
+
+  public static CategoryDto toCategoryDto(Category category, Set<UUID> visitedIds) {
+    if (category == null || visitedIds.contains(category.getCategoryId())) {
       return null;
     }
     return CategoryDto.builder()

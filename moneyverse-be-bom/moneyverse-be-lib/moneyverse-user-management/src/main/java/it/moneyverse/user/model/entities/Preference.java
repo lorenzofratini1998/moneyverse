@@ -24,11 +24,11 @@ public class Preference implements Serializable {
 
   @Column(name = "MANDATORY", nullable = false)
   @ColumnDefault("FALSE")
-  private Boolean mandatory;
+  private Boolean mandatory = false;
 
   @Column(name = "UPDATABLE", nullable = false)
   @ColumnDefault("TRUE")
-  private Boolean updatable;
+  private Boolean updatable = true;
 
   @Column(name = "DEFAULT_VALUE")
   private String defaultValue;

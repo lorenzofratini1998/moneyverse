@@ -1,8 +1,8 @@
 package it.moneyverse.budget.runtime.controllers;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import jakarta.validation.Valid;
 import java.util.List;

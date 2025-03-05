@@ -38,6 +38,17 @@ public abstract class Auditable implements AuditableModel {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
+  protected Auditable() {}
+
+  protected Auditable(Auditable source) {
+    if (source != null) {
+      this.createdBy = source.createdBy;
+      this.createdAt = source.createdAt;
+      this.updatedBy = source.updatedBy;
+      this.updatedAt = source.updatedAt;
+    }
+  }
+
   @Override
   public String getCreatedBy() {
     return createdBy;

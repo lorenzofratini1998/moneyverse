@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.services.AccountManagementService;
 import it.moneyverse.core.boot.DatasourceAutoConfiguration;
@@ -12,12 +13,12 @@ import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,7 +53,7 @@ class AccountManagementControllerTest {
 
   @Test
   void testCreateAccount_Success(@Mock AccountDto response) throws Exception {
-    AccountRequestDto request = createAccountRequest();
+    AccountRequestDto request = AccountTestFactory.AccountRequestDtoBuilder.defaultInstance();
 
     when(accountService.createAccount(request)).thenReturn(response);
 
@@ -67,7 +68,7 @@ class AccountManagementControllerTest {
 
   @Test
   void testCreateAccount_Forbidden() throws Exception {
-    AccountRequestDto request = createAccountRequest();
+    AccountRequestDto request = AccountTestFactory.AccountRequestDtoBuilder.defaultInstance();
 
     mockMvc
         .perform(
@@ -79,7 +80,8 @@ class AccountManagementControllerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("invalidAccountRequestProvider")
+  @MethodSource(
+      "it.moneyverse.account.model.AccountTestFactory$AccountRequestDtoBuilder#invalidAccountRequestProvider")
   void testBadRequest(Supplier<AccountRequestDto> requestSupplier) throws Exception {
     mockMvc
         .perform(
@@ -93,7 +95,7 @@ class AccountManagementControllerTest {
 
   @Test
   void testAccountCreation_AccountAlreadyExists() throws Exception {
-    AccountRequestDto request = createAccountRequest();
+    AccountRequestDto request = AccountTestFactory.AccountRequestDtoBuilder.defaultInstance();
     when(accountService.createAccount(request)).thenThrow(ResourceAlreadyExistsException.class);
     mockMvc
         .perform(
@@ -106,7 +108,7 @@ class AccountManagementControllerTest {
 
   @Test
   void testAccountCreation_AccountNotFound() throws Exception {
-    AccountRequestDto request = createAccountRequest();
+    AccountRequestDto request = AccountTestFactory.AccountRequestDtoBuilder.defaultInstance();
     when(accountService.createAccount(request)).thenThrow(ResourceNotFoundException.class);
     mockMvc
         .perform(
@@ -115,17 +117,6 @@ class AccountManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(MockAdminRequestPostProcessor.mockAdmin()))
         .andExpect(status().isNotFound());
-  }
-
-  private AccountRequestDto createAccountRequest() {
-    return new AccountRequestDto(
-        RandomUtils.randomUUID(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase());
   }
 
   @Test
@@ -245,7 +236,6 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase(),
         null);
   }
 
@@ -299,57 +289,5 @@ class AccountManagementControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(SecurityMockMvcRequestPostProcessors.jwt()))
         .andExpect(status().isOk());
-  }
-
-  private static Stream<Supplier<AccountRequestDto>> invalidAccountRequestProvider() {
-    return Stream.of(
-        AccountManagementControllerTest::createRequestWithNullUserId,
-        AccountManagementControllerTest::createRequestWithNullAccountName,
-        AccountManagementControllerTest::createRequestWithNullAccountCategory,
-        AccountManagementControllerTest::createRequestWithNullCurrency);
-  }
-
-  private static AccountRequestDto createRequestWithNullUserId() {
-    return new AccountRequestDto(
-        null,
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase());
-  }
-
-  private static AccountRequestDto createRequestWithNullAccountName() {
-    return new AccountRequestDto(
-        RandomUtils.randomUUID(),
-        null,
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase());
-  }
-
-  private static AccountRequestDto createRequestWithNullAccountCategory() {
-    return new AccountRequestDto(
-        RandomUtils.randomUUID(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        null,
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(3).toUpperCase());
-  }
-
-  private static AccountRequestDto createRequestWithNullCurrency() {
-    return new AccountRequestDto(
-        RandomUtils.randomUUID(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(15),
-        RandomUtils.randomString(15),
-        null);
   }
 }

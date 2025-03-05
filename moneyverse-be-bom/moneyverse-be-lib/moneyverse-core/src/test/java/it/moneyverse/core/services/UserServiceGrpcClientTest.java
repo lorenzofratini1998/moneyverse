@@ -1,14 +1,11 @@
 package it.moneyverse.core.services;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import it.moneyverse.grpc.lib.UserRequest;
-import it.moneyverse.grpc.lib.UserResponse;
-import it.moneyverse.grpc.lib.UserServiceGrpc;
+import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.UserDto;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,29 +17,35 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UserServiceGrpcClientTest {
 
-  @Mock private UserServiceGrpc.UserServiceBlockingStub stub;
+  @Mock private UserGrpcService userGrpcService;
 
   @InjectMocks private UserServiceGrpcClient userServiceClient;
 
   @Test
-  void givenUsername_WhenCheckIfUserExists_ThenReturnTrue() {
+  void testGetUserById(@Mock UserDto userDto) {
     UUID userId = UUID.randomUUID();
-    UserResponse mockResponse = UserResponse.newBuilder().setExists(true).build();
-    when(stub.checkIfUserExists(any(UserRequest.class))).thenReturn(mockResponse);
+    when(userGrpcService.getUserById(userId)).thenReturn(Optional.of(userDto));
 
-    Boolean exists = userServiceClient.checkIfUserExists(userId);
+    Optional<UserDto> response = userServiceClient.getUserById(userId);
 
-    assertTrue(exists);
-    verify(stub, times(1)).checkIfUserExists(any(UserRequest.class));
+    assertTrue(response.isPresent());
+    verify(userGrpcService, times(1)).getUserById(userId);
   }
 
   @Test
-  void givenCircuitBreakerOpen_WhenCheckIfUserExists_ThenFallbackMethodIsTriggered() {
+  void testCheckIfUserStillExists() {
     UUID userId = UUID.randomUUID();
-    Throwable throwable = mock(CallNotPermittedException.class);
+    when(userGrpcService.getUserById(userId)).thenReturn(Optional.empty());
+    assertDoesNotThrow(() -> userServiceClient.checkIfUserStillExist(userId));
+    verify(userGrpcService, times(1)).getUserById(userId);
+  }
 
-    Boolean exists = userServiceClient.fallbackCheckIfUserExists(userId, throwable);
-
-    assertFalse(exists);
+  @Test
+  void testCheckIfUserStillExists_Exception(@Mock UserDto userDto) {
+    UUID userId = UUID.randomUUID();
+    when(userGrpcService.getUserById(userId)).thenReturn(Optional.of(userDto));
+    assertThrows(
+        ResourceStillExistsException.class, () -> userServiceClient.checkIfUserStillExist(userId));
+    verify(userGrpcService, times(1)).getUserById(userId);
   }
 }

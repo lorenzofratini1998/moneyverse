@@ -2,11 +2,11 @@ package it.moneyverse.account.model.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import it.moneyverse.account.model.AccountTestContext;
+import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.AccountCriteria;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
-import it.moneyverse.account.utils.AccountCriteriaRandomGenerator;
-import it.moneyverse.account.utils.AccountTestContext;
 import it.moneyverse.core.boot.*;
 import it.moneyverse.test.utils.RandomUtils;
 import jakarta.persistence.EntityManager;
@@ -67,7 +67,8 @@ public class AccountCustomRepositoryImplTest {
   @Test
   void givenCriteria_thenReturnFilteredAccounts() {
     UUID userId = RandomUtils.randomUUID();
-    AccountCriteria criteria = new AccountCriteriaRandomGenerator(testContext).generate();
+    AccountCriteria criteria =
+        AccountTestFactory.AccountCriteriaBuilder.generator(testContext).generate();
     List<Account> expected = testContext.filterAccounts(userId, criteria);
 
     List<Account> actual = customRepository.findAccounts(userId, criteria);

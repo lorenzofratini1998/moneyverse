@@ -32,12 +32,11 @@ public class CreateTestUsersStrategy implements KeycloakConfigurationStrategy {
     users.stream().map(this::getUserRepresentation).forEach(this::saveTestUser);
     RealmResource realm = keycloak.realm(TEST_REALM);
     users.forEach(
-        user -> {
-          Optional.ofNullable(realm.users().searchByUsername(user.getUsername(), true).getFirst())
-              .map(UserRepresentation::getId)
-              .map(UUID::fromString)
-              .ifPresent(user::setUserId);
-        });
+        user ->
+            Optional.ofNullable(realm.users().searchByUsername(user.getUsername(), true).getFirst())
+                .map(UserRepresentation::getId)
+                .map(UUID::fromString)
+                .ifPresent(user::setUserId));
   }
 
   private UserRepresentation getUserRepresentation(UserModel fake) {

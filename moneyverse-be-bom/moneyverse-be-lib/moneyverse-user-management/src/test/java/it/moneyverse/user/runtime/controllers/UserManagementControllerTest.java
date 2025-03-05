@@ -1,17 +1,17 @@
 package it.moneyverse.user.runtime.controllers;
 
-import static it.moneyverse.user.utils.UserTestUtils.createUserPreferenceRequest;
-import static it.moneyverse.user.utils.UserTestUtils.createUserUpdateRequest;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import it.moneyverse.core.boot.CurrencyServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.UserDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.user.model.PreferenceTestFactory;
+import it.moneyverse.user.model.UserTestFactory;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import it.moneyverse.user.services.PreferenceManagementService;
@@ -57,9 +57,10 @@ class UserManagementControllerTest {
   void testCreateUserPreferences_Success(@Mock UserPreferenceDto preferenceDto) throws Exception {
     UUID userId = RandomUtils.randomUUID();
     List<UserPreferenceRequest> request =
-        Collections.singletonList(createUserPreferenceRequest(userId));
+        Collections.singletonList(
+            PreferenceTestFactory.UserPreferenceRequestBuilder.defaultInstance());
     when(preferenceManagementService.createUserPreferences(userId, request))
-        .thenReturn(preferenceDto);
+        .thenReturn(List.of(preferenceDto));
 
     mockMvc
         .perform(
@@ -71,7 +72,8 @@ class UserManagementControllerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("it.moneyverse.user.utils.UserTestUtils#invalidPreferencesRequestProvider")
+  @MethodSource(
+      "it.moneyverse.user.model.PreferenceTestFactory$UserPreferenceRequestBuilder#invalidPreferencesRequestProvider")
   void testCreateUserPreferences_BadRequest(Supplier<List<UserPreferenceRequest>> requestSupplier)
       throws Exception {
     UUID userId = RandomUtils.randomUUID();
@@ -117,7 +119,8 @@ class UserManagementControllerTest {
   @Test
   void testUpdateUser_Success(@Mock UserDto userDto) throws Exception {
     UUID userId = RandomUtils.randomUUID();
-    UserUpdateRequestDto request = createUserUpdateRequest();
+    UserUpdateRequestDto request =
+        UserTestFactory.UserUpdateRequestBuilder.builder().defaultInstance();
     when(userManagementService.updateUser(userId, request)).thenReturn(userDto);
 
     mockMvc
@@ -132,7 +135,8 @@ class UserManagementControllerTest {
   @Test
   void testUpdateUser_UserNotFound() throws Exception {
     UUID userId = RandomUtils.randomUUID();
-    UserUpdateRequestDto request = createUserUpdateRequest();
+    UserUpdateRequestDto request =
+        UserTestFactory.UserUpdateRequestBuilder.builder().defaultInstance();
     when(userManagementService.updateUser(userId, request))
         .thenThrow(ResourceNotFoundException.class);
 

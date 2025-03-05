@@ -1,25 +1,24 @@
 package it.moneyverse.budget.services;
 
-import static it.moneyverse.budget.utils.BudgetTestUtils.createBudgetRequest;
-import static it.moneyverse.budget.utils.BudgetTestUtils.createBudgetUpdateRequest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import it.moneyverse.budget.model.BudgetTestFactory;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
-import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
+import it.moneyverse.budget.runtime.messages.BudgetEventPublisher;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
+import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.events.BudgetDeletionEvent;
+import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +30,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class BudgetManagementServiceTest {
@@ -42,7 +41,7 @@ class BudgetManagementServiceTest {
   @Mock private CategoryRepository categoryRepository;
   @Mock private BudgetRepository budgetRepository;
   @Mock private CurrencyServiceClient currencyServiceClient;
-  @Mock ApplicationEventPublisher publisher;
+  @Mock BudgetEventPublisher publisher;
   private MockedStatic<BudgetMapper> mapper;
 
   @BeforeEach
@@ -58,9 +57,10 @@ class BudgetManagementServiceTest {
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenReturnCreatedBudget(
       @Mock Category category, @Mock Budget budget, @Mock BudgetDto budgetDto) {
-    BudgetRequestDto request = createBudgetRequest();
+    BudgetRequestDto request = BudgetTestFactory.BudgetRequestBuilder.defaultInstance();
     when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.of(category));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(budgetRepository.existsByCategory_CategoryIdAndStartDateAndEndDate(
             request.categoryId(), request.startDate(), request.endDate()))
         .thenReturn(false);
@@ -81,7 +81,7 @@ class BudgetManagementServiceTest {
 
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenCategoryNotFound() {
-    BudgetRequestDto request = createBudgetRequest();
+    BudgetRequestDto request = BudgetTestFactory.BudgetRequestBuilder.defaultInstance();
     when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.empty());
 
     assertThrows(
@@ -97,9 +97,11 @@ class BudgetManagementServiceTest {
 
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenReturnCurrencyNotFound(@Mock Category category) {
-    BudgetRequestDto request = createBudgetRequest();
+    BudgetRequestDto request = BudgetTestFactory.BudgetRequestBuilder.defaultInstance();
     when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.of(category));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(false);
+    Mockito.doThrow(ResourceNotFoundException.class)
+        .when(currencyServiceClient)
+        .checkIfCurrencyExists(request.currency());
 
     assertThrows(
         ResourceNotFoundException.class, () -> budgetManagementService.createBudget(request));
@@ -111,9 +113,9 @@ class BudgetManagementServiceTest {
 
   @Test
   void givenBudgetRequest_WhenCreateBudget_ThenReturnBudgetAlreadyExists(@Mock Category category) {
-    BudgetRequestDto request = createBudgetRequest();
+    BudgetRequestDto request = BudgetTestFactory.BudgetRequestBuilder.defaultInstance();
     when(categoryRepository.findById(request.categoryId())).thenReturn(Optional.of(category));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(budgetRepository.existsByCategory_CategoryIdAndStartDateAndEndDate(
             request.categoryId(), request.startDate(), request.endDate()))
         .thenReturn(true);
@@ -146,10 +148,10 @@ class BudgetManagementServiceTest {
   void givenBudgetIdAndRequest_WhenUpdateBudget_ThenReturnUpdatedBudget(
       @Mock Budget budget, @Mock Category category, @Mock BudgetDto budgetDto) {
     UUID budgetId = RandomUtils.randomUUID();
-    BudgetUpdateRequestDto request = createBudgetUpdateRequest();
+    BudgetUpdateRequestDto request = BudgetTestFactory.BudgetUpdateRequestBuilder.defaultInstance();
 
     when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
-    when(currencyServiceClient.checkIfCurrencyExists(request.currency())).thenReturn(true);
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     mapper.when(() -> BudgetMapper.partialUpdate(budget, request)).thenReturn(budget);
     when(budgetRepository.save(budget)).thenReturn(budget);
     mapper.when(() -> BudgetMapper.toBudgetDto(budget)).thenReturn(budgetDto);
@@ -177,7 +179,7 @@ class BudgetManagementServiceTest {
 
     verify(budgetRepository, times(1)).findById(budgetId);
     verify(budgetRepository, times(1)).delete(budget);
-    verify(publisher, times(1)).publishEvent(any(BudgetDeletionEvent.class));
+    verify(publisher, times(1)).publishEvent(budget, EventTypeEnum.DELETE);
   }
 
   @Test
@@ -191,64 +193,6 @@ class BudgetManagementServiceTest {
 
     verify(budgetRepository, times(1)).findById(budgetId);
     verify(budgetRepository, never()).delete(any(Budget.class));
-    verify(publisher, never()).publishEvent(any(BudgetDeletionEvent.class));
-  }
-
-  @Test
-  void givenBudgetIdAndAmount_WhenIncrementBudgetAmount_ThenIncrementBudgetAmount(
-      @Mock Budget budget, @Mock Category category) {
-    UUID budgetId = RandomUtils.randomUUID();
-    BigDecimal amount = RandomUtils.randomBigDecimal();
-    when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
-    when(budget.getAmount()).thenReturn(RandomUtils.randomBigDecimal());
-    when(budget.getCategory()).thenReturn(category);
-
-    budgetManagementService.incrementBudgetAmount(budgetId, amount);
-
-    verify(budgetRepository, times(1)).findById(budgetId);
-    verify(budgetRepository, times(1)).save(budget);
-  }
-
-  @Test
-  void givenBudgetIdAndAmount_WhenIncrementBudgetAmount_ThenBudgetNotFound() {
-    UUID budgetId = RandomUtils.randomUUID();
-    BigDecimal amount = RandomUtils.randomBigDecimal();
-    when(budgetRepository.findById(budgetId)).thenReturn(Optional.empty());
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> budgetManagementService.incrementBudgetAmount(budgetId, amount));
-
-    verify(budgetRepository, times(1)).findById(budgetId);
-    verify(budgetRepository, never()).save(any(Budget.class));
-  }
-
-  @Test
-  void givenBudgetIdAndAmount_WhenDecrementBudgetAmount_ThenDecrementBudgetAmount(
-      @Mock Budget budget, @Mock Category category) {
-    UUID budgetId = RandomUtils.randomUUID();
-    BigDecimal amount = RandomUtils.randomBigDecimal();
-    when(budgetRepository.findById(budgetId)).thenReturn(Optional.of(budget));
-    when(budget.getAmount()).thenReturn(RandomUtils.randomBigDecimal());
-    when(budget.getCategory()).thenReturn(category);
-
-    budgetManagementService.decrementBudgetAmount(budgetId, amount);
-
-    verify(budgetRepository, times(1)).findById(budgetId);
-    verify(budgetRepository, times(1)).save(budget);
-  }
-
-  @Test
-  void givenBudgetIdAndAmount_WhenDecrementBudgetAmount_ThenBudgetNotFound() {
-    UUID budgetId = RandomUtils.randomUUID();
-    BigDecimal amount = RandomUtils.randomBigDecimal();
-    when(budgetRepository.findById(budgetId)).thenReturn(Optional.empty());
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> budgetManagementService.decrementBudgetAmount(budgetId, amount));
-
-    verify(budgetRepository, times(1)).findById(budgetId);
-    verify(budgetRepository, never()).save(any(Budget.class));
+    verify(publisher, never()).publishEvent(any(Category.class), any(EventTypeEnum.class));
   }
 }

@@ -1,11 +1,10 @@
 package it.moneyverse.transaction.model.repositories;
 
-import static it.moneyverse.test.utils.FakeUtils.randomBoundCriteria;
-import static it.moneyverse.test.utils.FakeUtils.randomDateCriteria;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.entities.Tag;
@@ -37,9 +36,9 @@ class TransactionPredicateBuilderTest {
       @Mock Path<Object> object) {
     UUID userId = RandomUtils.randomUUID();
     when(criteria.getAccounts()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
-    when(criteria.getBudgets()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
-    when(criteria.getAmount()).thenReturn(Optional.of(randomBoundCriteria()));
-    when(criteria.getDate()).thenReturn(Optional.of(randomDateCriteria()));
+    when(criteria.getCategories()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
+    when(criteria.getAmount()).thenReturn(Optional.of(TestFactory.fakeBoundCriteria()));
+    when(criteria.getDate()).thenReturn(Optional.of(TestFactory.fakeDateCriteria()));
     when(criteria.getTags()).thenReturn(Optional.of(List.of(RandomUtils.randomUUID())));
 
     when(cb.equal(any(), any(String.class))).thenReturn(predicate);
@@ -65,5 +64,4 @@ class TransactionPredicateBuilderTest {
     verify(cb, times(2)).and(any(Predicate[].class));
     verify(cb, times(2)).or(any(Predicate[].class));
   }
-
 }

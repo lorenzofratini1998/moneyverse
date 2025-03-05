@@ -2,6 +2,7 @@ package it.moneyverse.user.runtime.server;
 
 import io.grpc.ServerBuilder;
 import it.moneyverse.core.runtime.server.GrpcServer;
+import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.services.KeycloakService;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -14,10 +15,14 @@ import org.springframework.stereotype.Component;
 public class UserServer extends GrpcServer {
 
   public UserServer(
-      @Value("${grpc.server.user-service.port}") Integer port, KeycloakService keycloakService) {
+      @Value("${grpc.server.user-service.port}") Integer port,
+      KeycloakService keycloakService,
+      UserPreferenceRepository userPreferenceRepository) {
     this.port = port;
     this.server =
-        ServerBuilder.forPort(port).addService(new UserGrpcService(keycloakService)).build();
+        ServerBuilder.forPort(port)
+            .addService(new UserGrpcService(keycloakService, userPreferenceRepository))
+            .build();
   }
 
   @PostConstruct

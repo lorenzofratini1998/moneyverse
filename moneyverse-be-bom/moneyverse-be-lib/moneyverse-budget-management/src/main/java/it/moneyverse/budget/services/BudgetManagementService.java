@@ -1,25 +1,26 @@
 package it.moneyverse.budget.services;
 
 import it.moneyverse.budget.model.dto.BudgetCriteria;
-import it.moneyverse.budget.model.dto.BudgetDto;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
+import it.moneyverse.budget.runtime.messages.BudgetEventPublisher;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
+import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.events.BudgetDeletionEvent;
+import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BinaryOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,13 +32,13 @@ public class BudgetManagementService implements BudgetService {
   private final CategoryRepository categoryRepository;
   private final BudgetRepository budgetRepository;
   private final CurrencyServiceClient currencyServiceClient;
-  private final ApplicationEventPublisher eventPublisher;
+  private final BudgetEventPublisher eventPublisher;
 
   public BudgetManagementService(
       CategoryRepository categoryRepository,
       BudgetRepository budgetRepository,
       CurrencyServiceClient currencyServiceClient,
-      ApplicationEventPublisher eventPublisher) {
+      BudgetEventPublisher eventPublisher) {
     this.categoryRepository = categoryRepository;
     this.budgetRepository = budgetRepository;
     this.currencyServiceClient = currencyServiceClient;
@@ -48,7 +49,7 @@ public class BudgetManagementService implements BudgetService {
   @Transactional
   public BudgetDto createBudget(BudgetRequestDto request) {
     Category category = findCategoryById(request.categoryId());
-    checkIfCurrencyExists(request.currency());
+    currencyServiceClient.checkIfCurrencyExists(request.currency());
     checkIfBudgetAlreadyExists(request.categoryId(), request.startDate(), request.endDate());
     LOGGER.info("Creating budget for category '{}'", request.categoryId());
     Budget budget = BudgetMapper.toBudget(request, category);
@@ -90,7 +91,7 @@ public class BudgetManagementService implements BudgetService {
   public BudgetDto updateBudget(UUID budgetId, BudgetUpdateRequestDto request) {
     Budget budget = findBudgetById(budgetId);
     if (request.currency() != null) {
-      checkIfCurrencyExists(request.currency());
+      currencyServiceClient.checkIfCurrencyExists(request.currency());
     }
     budget = BudgetMapper.partialUpdate(budget, request);
     BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
@@ -104,26 +105,39 @@ public class BudgetManagementService implements BudgetService {
   public void deleteBudget(UUID budgetId) {
     Budget budget = findBudgetById(budgetId);
     budgetRepository.delete(budget);
-    eventPublisher.publishEvent(new BudgetDeletionEvent(budgetId));
+    eventPublisher.publishEvent(budget, EventTypeEnum.DELETE);
     LOGGER.info("Deleted budget {} for user {}", budgetId, budget.getCategory().getUserId());
   }
 
   @Override
   @Transactional
-  public void incrementBudgetAmount(UUID budgetId, BigDecimal amount) {
-    Budget budget = findBudgetById(budgetId);
-    budget.setAmount(budget.getAmount().add(amount));
-    budgetRepository.save(budget);
-    LOGGER.info("Incremented budget {} for user {}", budgetId, budget.getCategory().getUserId());
+  public void incrementBudgetAmount(
+      UUID budgetId, BigDecimal amount, String currency, LocalDate date) {
+    updateBudgetAmount(budgetId, amount, currency, date, BigDecimal::add);
+    LOGGER.info("Incremented budget {} by {}", budgetId, amount);
   }
 
   @Override
   @Transactional
-  public void decrementBudgetAmount(UUID budgetId, BigDecimal amount) {
+  public void decrementBudgetAmount(
+      UUID budgetId, BigDecimal amount, String currency, LocalDate date) {
+    updateBudgetAmount(budgetId, amount, currency, date, BigDecimal::subtract);
+    LOGGER.info("Decremented budget {} by {}", budgetId, amount);
+  }
+
+  private void updateBudgetAmount(
+      UUID budgetId,
+      BigDecimal amount,
+      String currency,
+      LocalDate date,
+      BinaryOperator<BigDecimal> operation) {
     Budget budget = findBudgetById(budgetId);
-    budget.setAmount(budget.getAmount().subtract(amount));
+    BigDecimal effectiveAmount =
+        budget.getCurrency().equals(currency)
+            ? amount
+            : currencyServiceClient.convertAmount(amount, currency, budget.getCurrency(), date);
+    budget.setAmount(operation.apply(budget.getAmount(), effectiveAmount));
     budgetRepository.save(budget);
-    LOGGER.info("Decremented budget {} for user {}", budgetId, budget.getCategory().getUserId());
   }
 
   private Budget findBudgetById(UUID budgetId) {
@@ -131,11 +145,5 @@ public class BudgetManagementService implements BudgetService {
         .findById(budgetId)
         .orElseThrow(
             () -> new ResourceNotFoundException("Budget with id %s not found".formatted(budgetId)));
-  }
-
-  private void checkIfCurrencyExists(String currency) {
-    if (Boolean.FALSE.equals(currencyServiceClient.checkIfCurrencyExists(currency))) {
-      throw new ResourceNotFoundException("Currency %s does not exists".formatted(currency));
-    }
   }
 }

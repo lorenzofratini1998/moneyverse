@@ -1,22 +1,25 @@
 package it.moneyverse.account.runtime.controllers;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import it.moneyverse.account.model.AccountTestContext;
+import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.model.repositories.AccountRepository;
-import it.moneyverse.account.utils.AccountTestContext;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.entities.UserModel;
-import it.moneyverse.test.annotations.IntegrationTest;
+import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.extensions.testcontainers.RedisContainer;
 import it.moneyverse.test.utils.AbstractIntegrationTest;
-import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -35,13 +38,14 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 
-@IntegrationTest
+@MoneyverseTest
 class AccountManagementControllerIT extends AbstractIntegrationTest {
 
   protected static AccountTestContext testContext;
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @Container static KeycloakContainer keycloakContainer = new KeycloakContainer();
   @Container static KafkaContainer kafkaContainer = new KafkaContainer();
+  @Container static RedisContainer redisContainer = new RedisContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
   @Autowired protected AccountRepository accountRepository;
   private HttpHeaders headers;
@@ -50,10 +54,12 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
+        .withRedis(redisContainer)
         .withKeycloak(keycloakContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
-        .withKafkaContainer(kafkaContainer);
+        .withKafkaContainer(kafkaContainer)
+        .withFlywayTestDirectory(tempDir);
   }
 
   @BeforeAll
@@ -71,9 +77,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     final UUID userId = testContext.getRandomUser().getUserId();
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
     final AccountRequestDto request = testContext.createAccountForUser(userId);
-    mockServer.mockExistentUser();
-    mockServer.mockExistentCurrency();
-    AccountDto expected = testContext.getExpectedAccountDto(request);
+    mockServer.mockExistentCurrency(request.currency());
 
     ResponseEntity<AccountDto> response =
         restTemplate.postForEntity(
@@ -81,7 +85,16 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(testContext.getAccountsCount() + 1, accountRepository.findAll().size());
-    compareActualWithExpectedAccount(response.getBody(), expected);
+    assertNotNull(response.getBody());
+    assertEquals(request.userId(), response.getBody().getUserId());
+    assertEquals(request.accountName(), response.getBody().getAccountName());
+    assertEquals(
+        request.balance() != null ? request.balance() : BigDecimal.ZERO,
+        response.getBody().getBalance());
+    assertEquals(request.balanceTarget(), response.getBody().getBalanceTarget());
+    assertEquals(request.accountCategory(), response.getBody().getAccountCategory());
+    assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
+    assertEquals(request.currency(), response.getBody().getCurrency());
   }
 
   @Test
@@ -105,51 +118,86 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
   @Test
   void testGetAccount() {
     final UserModel user = testContext.getRandomUser();
-    final UUID accountId = testContext.getRandomAccount(user.getUserId()).getAccountId();
+    final Account account = testContext.getRandomAccount(user.getUserId());
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
 
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(
-            basePath + "/accounts/" + accountId,
+            basePath + "/accounts/" + account.getAccountId(),
             HttpMethod.GET,
             new HttpEntity<>(headers),
             AccountDto.class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(accountId, response.getBody().getAccountId());
+    assertEquals(account.getAccountId(), response.getBody().getAccountId());
+    assertEquals(account.getUserId(), response.getBody().getUserId());
+    assertEquals(account.getAccountName(), response.getBody().getAccountName());
+    assertEquals(account.getBalance(), response.getBody().getBalance());
+    assertEquals(account.getBalanceTarget(), response.getBody().getBalanceTarget());
+    assertEquals(account.getCurrency(), response.getBody().getCurrency());
+    assertEquals(account.getAccountCategory().getName(), response.getBody().getAccountCategory());
+    assertEquals(account.getAccountDescription(), response.getBody().getAccountDescription());
+    assertEquals(account.isDefault(), response.getBody().isDefault());
   }
 
   @Test
   void testUpdateAccount() {
     final UserModel user = testContext.getRandomUser();
-    final UUID accountId = testContext.getRandomAccount(user.getUserId()).getAccountId();
+    final Account account = testContext.getRandomAccount(user.getUserId());
+    final AccountCategory category = testContext.getRandomAccountCategory();
     AccountUpdateRequestDto request =
-        new AccountUpdateRequestDto(
-            null,
-            RandomUtils.randomBigDecimal(),
-            null,
-            null,
-            RandomUtils.randomString(25),
-            RandomUtils.randomString(3).toUpperCase(),
-            RandomUtils.randomBoolean());
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.builder()
+            .withAccountCategory(category.getName())
+            .build();
 
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
-    mockServer.mockExistentCurrency();
 
     ResponseEntity<AccountDto> response =
         restTemplate.exchange(
-            basePath + "/accounts/" + accountId,
+            basePath + "/accounts/" + account.getAccountId(),
             HttpMethod.PUT,
             new HttpEntity<>(request, headers),
             AccountDto.class);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(request.balance(), response.getBody().getBalance());
-    assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
-    assertEquals(request.isDefault(), response.getBody().isDefault());
-    assertEquals(1, accountRepository.findDefaultAccountsByUserId(user.getUserId()).size());
+    assertEquals(account.getAccountId(), response.getBody().getAccountId());
+    assertEquals(
+        request.accountName() != null ? request.accountName() : account.getAccountName(),
+        response.getBody().getAccountName());
+    assertEquals(
+        request.balance() != null ? request.balance() : account.getBalance(),
+        response.getBody().getBalance());
+    assertEquals(
+        request.balanceTarget() != null ? request.balanceTarget() : account.getBalanceTarget(),
+        response.getBody().getBalanceTarget());
+    assertEquals(
+        request.accountCategory() != null
+            ? request.accountCategory()
+            : account.getAccountCategory().getName(),
+        response.getBody().getAccountCategory());
+    assertEquals(
+        request.accountDescription() != null
+            ? request.accountDescription()
+            : account.getAccountDescription(),
+        response.getBody().getAccountDescription());
+    assertEquals(
+        request.isDefault() != null ? request.isDefault() : account.isDefault(),
+        response.getBody().isDefault());
+    assertEquals(
+        1,
+        accountRepository.findAll().stream()
+            .filter(a -> a.getUserId().equals(user.getUserId()) && a.isDefault())
+            .count());
+    if (request.isDefault() != null && request.isDefault()) {
+      assertEquals(
+          account.getAccountId(),
+          accountRepository
+              .findDefaultAccountByUserId(user.getUserId())
+              .map(Account::getAccountId)
+              .orElse(null));
+    }
   }
 
   @Test
@@ -184,12 +232,5 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, result.getStatusCode());
     assertNotNull(result.getBody());
     assertEquals(testContext.getCategories().size(), result.getBody().size());
-  }
-
-  private void compareActualWithExpectedAccount(AccountDto actual, AccountDto expected) {
-    assertThat(actual)
-        .usingRecursiveComparison()
-        .ignoringFieldsOfTypes(UUID.class)
-        .isEqualTo(expected);
   }
 }

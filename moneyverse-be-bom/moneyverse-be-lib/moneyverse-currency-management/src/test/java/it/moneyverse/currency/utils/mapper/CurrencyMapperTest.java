@@ -3,7 +3,8 @@ package it.moneyverse.currency.utils.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import it.moneyverse.currency.model.dto.CurrencyDto;
+import it.moneyverse.core.model.dto.CurrencyDto;
+import it.moneyverse.currency.model.CurrencyTestFactory;
 import it.moneyverse.currency.model.entities.Currency;
 import it.moneyverse.currency.utils.CurrencyMapper;
 import it.moneyverse.test.utils.RandomUtils;
@@ -21,7 +22,7 @@ class CurrencyMapperTest {
 
   @Test
   void testToCurrencyDto_ValidCurrencyEntity() {
-    Currency currency = createCurrency();
+    Currency currency = CurrencyTestFactory.fakeCurrency();
 
     CurrencyDto result = CurrencyMapper.toCurrencyDto(currency);
 
@@ -41,7 +42,7 @@ class CurrencyMapperTest {
     int entitiesCount = RandomUtils.randomInteger(0, 10);
     List<Currency> currencies = new ArrayList<>(entitiesCount);
     for (int i = 0; i < entitiesCount; i++) {
-      currencies.add(createCurrency());
+      currencies.add(CurrencyTestFactory.fakeCurrency());
     }
 
     List<CurrencyDto> currencyDtos = CurrencyMapper.toCurrencyDto(currencies);
@@ -55,14 +56,5 @@ class CurrencyMapperTest {
       assertEquals(currency.getName(), currencyDto.getName());
       assertEquals(currency.getCountry(), currencyDto.getCountry());
     }
-  }
-
-  private Currency createCurrency() {
-    Currency currency = new Currency();
-    currency.setCurrencyId(RandomUtils.randomUUID());
-    currency.setName(RandomUtils.randomString(15));
-    currency.setCode(RandomUtils.randomString(3));
-    currency.setCountry(RandomUtils.randomString(15));
-    return currency;
   }
 }

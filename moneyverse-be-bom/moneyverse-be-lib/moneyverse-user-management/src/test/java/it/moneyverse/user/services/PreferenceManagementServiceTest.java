@@ -1,14 +1,13 @@
 package it.moneyverse.user.services;
 
-import static it.moneyverse.user.utils.UserTestUtils.createUserPreferenceRequest;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.UserDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.user.model.PreferenceTestFactory;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,7 +32,7 @@ class PreferenceManagementServiceTest {
 
   @InjectMocks private PreferenceManagementService preferenceManagementService;
 
-  @Mock KeycloakService keycloakService;
+  @Mock UserService userService;
   @Mock PreferenceRepository preferenceRepository;
   @Mock UserPreferenceRepository userPreferenceRepository;
   private MockedStatic<PreferenceMapper> preferenceMapper;
@@ -51,11 +51,11 @@ class PreferenceManagementServiceTest {
   void givenUserIdAndUserPreferences_WhenCreatePreferences_ThenUserPreferencesCreated(
       @Mock Preference preference,
       @Mock UserPreference userPreference,
-      @Mock UserPreferenceDto preferenceDto,
-      @Mock UserDto userDto) {
+      @Mock UserPreferenceDto preferenceDto) {
     UUID userId = RandomUtils.randomUUID();
-    List<UserPreferenceRequest> request = List.of(createUserPreferenceRequest(userId));
-    when(keycloakService.getUserById(userId)).thenReturn(Optional.of(userDto));
+    List<UserPreferenceRequest> request =
+        List.of(PreferenceTestFactory.UserPreferenceRequestBuilder.defaultInstance());
+    Mockito.doNothing().when(userService).checkIfUserExists(userId);
     when(preferenceRepository.findById(any(UUID.class))).thenReturn(Optional.of(preference));
     when(preference.getName()).thenReturn("STRING");
     preferenceMapper
@@ -64,48 +64,46 @@ class PreferenceManagementServiceTest {
     when(userPreferenceRepository.saveAll(List.of(userPreference)))
         .thenReturn(List.of(userPreference));
     preferenceMapper
-        .when(() -> PreferenceMapper.toUserPreferenceDto(userId, List.of(userPreference)))
-        .thenReturn(preferenceDto);
+        .when(() -> PreferenceMapper.toUserPreferenceDto(List.of(userPreference)))
+        .thenReturn(List.of(preferenceDto));
 
-    UserPreferenceDto result = preferenceManagementService.createUserPreferences(userId, request);
+    List<UserPreferenceDto> result =
+        preferenceManagementService.createUserPreferences(userId, request);
 
     assertNotNull(result);
-    verify(keycloakService, times(1)).getUserById(userId);
+    verify(userService, times(1)).checkIfUserExists(userId);
     verify(preferenceRepository, times(1)).findById(any(UUID.class));
-    preferenceMapper.verify(
-        () -> PreferenceMapper.toUserPreference(userId, request.getFirst(), preference), times(1));
     verify(userPreferenceRepository, times(1)).saveAll(List.of(userPreference));
-    preferenceMapper.verify(
-        () -> PreferenceMapper.toUserPreferenceDto(userId, List.of(userPreference)), times(1));
   }
 
   @Test
   void givenUserIdAndPreferences_WhenCreateUserPreferences_ThenUserNotFound() {
     UUID userId = RandomUtils.randomUUID();
-    List<UserPreferenceRequest> request = List.of(createUserPreferenceRequest(userId));
-    when(keycloakService.getUserById(userId)).thenReturn(Optional.empty());
+    List<UserPreferenceRequest> request =
+        List.of(PreferenceTestFactory.UserPreferenceRequestBuilder.defaultInstance());
+    Mockito.doThrow(ResourceNotFoundException.class).when(userService).checkIfUserExists(userId);
 
     assertThrows(
         ResourceNotFoundException.class,
         () -> preferenceManagementService.createUserPreferences(userId, request));
 
-    verify(keycloakService, times(1)).getUserById(userId);
+    verify(userService, times(1)).checkIfUserExists(userId);
     verify(preferenceRepository, never()).saveAll(any());
   }
 
   @Test
-  void givenUserIdAndPreferences_WhenCreateUserPreferences_ThenPreferenceNotFound(
-      @Mock UserDto userDto) {
+  void givenUserIdAndPreferences_WhenCreateUserPreferences_ThenPreferenceNotFound() {
     UUID userId = RandomUtils.randomUUID();
-    List<UserPreferenceRequest> request = List.of(createUserPreferenceRequest(userId));
-    when(keycloakService.getUserById(userId)).thenReturn(Optional.of(userDto));
+    List<UserPreferenceRequest> request =
+        List.of(PreferenceTestFactory.UserPreferenceRequestBuilder.defaultInstance());
+    Mockito.doNothing().when(userService).checkIfUserExists(userId);
     when(preferenceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     assertThrows(
         ResourceNotFoundException.class,
         () -> preferenceManagementService.createUserPreferences(userId, request));
 
-    verify(keycloakService, times(1)).getUserById(userId);
+    verify(userService, times(1)).checkIfUserExists(userId);
     verify(preferenceRepository, times(1)).findById(any(UUID.class));
     verify(preferenceRepository, never()).saveAll(any());
   }

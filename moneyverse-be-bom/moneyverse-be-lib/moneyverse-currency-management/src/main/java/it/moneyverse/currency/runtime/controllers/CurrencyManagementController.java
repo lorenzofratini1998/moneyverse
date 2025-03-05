@@ -1,6 +1,6 @@
 package it.moneyverse.currency.runtime.controllers;
 
-import it.moneyverse.currency.model.dto.CurrencyDto;
+import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.services.CurrencyManagementService;
 import java.util.List;
 import java.util.Optional;

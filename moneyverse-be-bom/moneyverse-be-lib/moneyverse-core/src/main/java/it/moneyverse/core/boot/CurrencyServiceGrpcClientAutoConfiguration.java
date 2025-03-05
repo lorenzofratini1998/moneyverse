@@ -5,14 +5,17 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import it.moneyverse.core.services.CurrencyGrpcService;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.CurrencyServiceGrpcClient;
+import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.core.utils.properties.CurrencyServiceGrpcCircuitBreakerProperties;
 import it.moneyverse.core.utils.properties.CurrencyServiceGrpcClientProperties;
 import it.moneyverse.grpc.lib.CurrencyServiceGrpc;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,8 +69,15 @@ public class CurrencyServiceGrpcClientAutoConfiguration {
   }
 
   @Bean
+  public CurrencyGrpcService currencyGrpcService(
+      CurrencyServiceGrpc.CurrencyServiceBlockingStub stub) {
+    return new CurrencyGrpcService(stub);
+  }
+
+  @Bean
   public CurrencyServiceClient currencyServiceClient(
-      CurrencyServiceGrpc.CurrencyServiceBlockingStub currencyServiceBlockingStub) {
-    return new CurrencyServiceGrpcClient(currencyServiceBlockingStub);
+      CurrencyGrpcService currencyGrpcService,
+      @Autowired(required = false) UserServiceClient userServiceClient) {
+    return new CurrencyServiceGrpcClient(currencyGrpcService, userServiceClient);
   }
 }

@@ -9,41 +9,40 @@ import java.util.UUID;
 @Table(name = "DEFAULT_CATEGORIES")
 public class DefaultCategory implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+  @Serial private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "DEFAULT_CATEGORY_ID")
   private UUID id;
 
-    @Column(name = "NAME", nullable = false, unique = true)
-    private String name;
+  @Column(name = "NAME", nullable = false, unique = true)
+  private String name;
 
-    @Column(name = "DESCRIPTION")
-    private String description;
+  @Column(name = "DESCRIPTION")
+  private String description;
 
   public UUID getId() {
-        return id;
-    }
+    return id;
+  }
 
   public void setId(UUID id) {
-        this.id = id;
-    }
+    this.id = id;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 }

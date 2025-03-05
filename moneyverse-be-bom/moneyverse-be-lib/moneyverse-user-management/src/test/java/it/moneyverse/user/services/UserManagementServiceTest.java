@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
-import it.moneyverse.core.model.events.UserDeletionEvent;
+import it.moneyverse.core.model.dto.UserDto;
+import it.moneyverse.core.model.events.UserEvent;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.UserDto;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UserManagementServiceTest {
+class UserManagementServiceTest {
 
   @InjectMocks private UserManagementService userManagementService;
 
@@ -52,7 +52,7 @@ public class UserManagementServiceTest {
     userManagementService.deleteUser(userId);
 
     verify(keycloakService, times(1)).deleteUser(userId);
-    verify(messageProducer, times(1)).send(any(UserDeletionEvent.class), any(String.class));
+    verify(messageProducer, times(1)).send(any(UserEvent.class), any(String.class));
   }
 
   @Test
@@ -63,6 +63,6 @@ public class UserManagementServiceTest {
     assertThrows(ResourceNotFoundException.class, () -> userManagementService.deleteUser(userId));
 
     verify(keycloakService, times(1)).deleteUser(userId);
-    verify(messageProducer, never()).send(any(UserDeletionEvent.class), any(String.class));
+    verify(messageProducer, never()).send(any(UserEvent.class), any(String.class));
   }
 }

@@ -48,6 +48,7 @@
     <grpc-starter.version>3.4.0</grpc-starter.version>
     <grpcmock.version>0.15.0</grpcmock.version>
     <hibernate-jpamodelgen.version>6.6.3.Final</hibernate-jpamodelgen.version>
+    <ical4j.version>4.1.0</ical4j.version>
     <jackson.databind.nullable-version>0.2.6</jackson.databind.nullable-version>
     <keycloak.version>25.0.0</keycloak.version>
     <org.apache.tomcat.annotations-api.version>6.0.53</org.apache.tomcat.annotations-api.version>
@@ -55,6 +56,7 @@
     <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
     <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
     <testcontainers-kafka.version>1.20.4</testcontainers-kafka.version>
+    <testcontainers-redis.version>2.2.3</testcontainers-redis.version>
     <!-- Sonar Settings -->
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.organization>lorenzofratini1998</sonar.organization>
@@ -126,6 +128,11 @@
         <version>${keycloak.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.mnode.ical4j</groupId>
+        <artifactId>ical4j</artifactId>
+        <version>${ical4j.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.openapitools</groupId>
         <artifactId>jackson-databind-nullable</artifactId>
         <version>${jackson.databind.nullable-version}</version>
@@ -144,6 +151,11 @@
         <groupId>org.testcontainers</groupId>
         <artifactId>kafka</artifactId>
         <version>${testcontainers-kafka.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.redis</groupId>
+        <artifactId>testcontainers-redis</artifactId>
+        <version>${testcontainers-redis.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -1,11 +1,17 @@
 package it.moneyverse.account.runtime.messages;
 
+import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
+
 import it.moneyverse.account.services.AccountService;
-import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.beans.TransactionCreationTopic;
+import it.moneyverse.core.model.beans.TransactionDeletionTopic;
+import it.moneyverse.core.model.beans.TransactionUpdateTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
-import it.moneyverse.core.model.events.UserDeletionEvent;
-import it.moneyverse.core.services.UserServiceClient;
+import it.moneyverse.core.model.events.TransactionEvent;
+import it.moneyverse.core.model.events.UserEvent;
 import it.moneyverse.core.utils.JsonUtils;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -15,17 +21,16 @@ import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class AccountConsumer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountConsumer.class);
   private final AccountService accountService;
-  private final UserServiceClient userServiceClient;
 
-  public AccountConsumer(AccountService accountService, UserServiceClient userServiceClient) {
+  public AccountConsumer(AccountService accountService) {
     this.accountService = accountService;
-    this.userServiceClient = userServiceClient;
   }
 
   @RetryableTopic
@@ -34,17 +39,72 @@ public class AccountConsumer {
       autoStartup = "true",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
-  public void onMessage(
+  public void onUserDeletion(
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     LOGGER.info("Received event: {} from topic: {}", record.value(), topic);
-    UserDeletionEvent event = JsonUtils.fromJson(record.value(), UserDeletionEvent.class);
-    checkIfUserExists(event.key());
+    UserEvent event = JsonUtils.fromJson(record.value(), UserEvent.class);
     accountService.deleteAccountsByUserId(event.key());
   }
 
-  private void checkIfUserExists(UUID userId) {
-    if (Boolean.FALSE.equals(userServiceClient.checkIfUserExists(userId))) {
-      throw new ResourceNotFoundException("User %s does not exists".formatted(userId));
+  @RetryableTopic
+  @KafkaListener(
+      topics = TransactionCreationTopic.TOPIC,
+      autoStartup = "true",
+      groupId =
+          "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
+  public void onTransactionCreation(
+      ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    logMessage(record, topic);
+    TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
+    accountService.incrementAccountBalance(
+        event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+  }
+
+  @RetryableTopic
+  @KafkaListener(
+      topics = TransactionDeletionTopic.TOPIC,
+      autoStartup = "true",
+      groupId =
+          "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
+  public void onTransactionDeletion(
+      ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    logMessage(record, topic);
+    TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
+    accountService.decrementAccountBalance(
+        event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+  }
+
+  @Transactional
+  @RetryableTopic
+  @KafkaListener(
+      topics = TransactionUpdateTopic.TOPIC,
+      autoStartup = "true",
+      groupId =
+          "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
+  public void onTransactionUpdate(
+      ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    logMessage(record, topic);
+    TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
+    LOGGER.info(
+        "Undoing transaction {} on account {}",
+        event.getPreviousTransaction().getTransactionId(),
+        event.getPreviousTransaction().getAccountId());
+    applyTransaction(
+        event.getPreviousTransaction().getAccountId(),
+        event.getPreviousTransaction().getAmount().negate(),
+        event.getPreviousTransaction().getCurrency(),
+        event.getPreviousTransaction().getDate());
+    LOGGER.info(
+        "Applying transaction {} on account {}", event.getTransactionId(), event.getAccountId());
+    applyTransaction(event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+  }
+
+  private void applyTransaction(
+      UUID accountId, BigDecimal amount, String currency, LocalDate date) {
+    if (amount.compareTo(BigDecimal.ZERO) > 0) {
+      accountService.incrementAccountBalance(accountId, amount, currency, date);
+    } else if (amount.compareTo(BigDecimal.ZERO) < 0) {
+      accountService.decrementAccountBalance(accountId, amount.abs(), currency, date);
     }
   }
 }

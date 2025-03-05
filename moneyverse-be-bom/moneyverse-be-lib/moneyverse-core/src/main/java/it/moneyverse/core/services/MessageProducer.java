@@ -29,7 +29,7 @@ public class MessageProducer<K, V> {
         .thenApply(
             sendResult -> {
               LOGGER.info(
-                  "Sent account event successfully. Key: {}, Topic: {}, Partition: {}, Value: {}",
+                  "Sent event successfully. Key: {}, Topic: {}, Partition: {}, Value: {}",
                   sendResult.getProducerRecord().key(),
                   sendResult.getProducerRecord().topic(),
                   sendResult.getProducerRecord().partition(),
@@ -39,11 +39,11 @@ public class MessageProducer<K, V> {
         .exceptionally(
             throwable -> {
               LOGGER.error(
-                  "Failed to send account event. Key: {}, Error: {}",
+                  "Failed to send event. Key: {}, Error: {}",
                   key,
                   throwable.getMessage(),
                   throwable);
-              throw new CompletionException("Error sending account event", throwable);
+              throw new CompletionException("Error sending event", throwable);
             });
   }
 }

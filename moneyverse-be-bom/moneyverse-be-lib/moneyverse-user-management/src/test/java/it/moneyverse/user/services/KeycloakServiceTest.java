@@ -1,14 +1,14 @@
 package it.moneyverse.user.services;
 
-import static it.moneyverse.user.utils.UserTestUtils.createUserUpdateRequest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.core.utils.properties.KeycloakProperties;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.user.exceptions.UserServiceException;
-import it.moneyverse.user.model.dto.UserDto;
+import it.moneyverse.user.model.UserTestFactory;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
 import it.moneyverse.user.utils.mapper.UserMapper;
 import jakarta.ws.rs.NotFoundException;
@@ -28,7 +28,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class KeycloakServiceTest {
+class KeycloakServiceTest {
 
   private static final String REALM_NAME = RandomUtils.randomString(10);
 
@@ -102,7 +102,8 @@ public class KeycloakServiceTest {
   void givenUserId_WhenUpdateRequest_ThenReturnUpdateUser(
       @Mock UserRepresentation user, @Mock UserDto userDto) {
     UUID userId = RandomUtils.randomUUID();
-    UserUpdateRequestDto request = createUserUpdateRequest();
+    UserUpdateRequestDto request =
+        UserTestFactory.UserUpdateRequestBuilder.builder().defaultInstance();
 
     when(keycloakClient.realm(REALM_NAME)).thenReturn(realm);
     when(realm.users()).thenReturn(usersResource);

@@ -3,10 +3,10 @@ package it.moneyverse.transaction.model.repositories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.moneyverse.core.boot.*;
+import it.moneyverse.transaction.model.TransactionTestContext;
 import it.moneyverse.transaction.model.dto.TransactionCriteria;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
-import it.moneyverse.transaction.utils.TransactionTestContext;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +49,13 @@ public class TransactionCustomRepositoryImplTest {
   public static void beforeAll() {
     testContext = new TransactionTestContext();
     testContext.getTags().forEach(tag -> tag.setTagId(null));
-    testContext.getTransactions().forEach(transaction -> transaction.setTransactionId(null));
+    testContext
+        .getTransactions()
+        .forEach(
+            transaction -> {
+              transaction.setTransactionId(null);
+              transaction.setTransfer(null);
+            });
   }
 
   @BeforeEach
@@ -65,7 +71,7 @@ public class TransactionCustomRepositoryImplTest {
   }
 
   @Test
-  void givenCriteria_TheReturnFilteredBudgets() {
+  void givenCriteria_TheReturnFilteredCategories() {
     UUID userId = testContext.getRandomUser().getUserId();
     TransactionCriteria criteria = testContext.createTransactionCriteria(userId);
     List<Transaction> expected = testContext.filterTransactions(userId, criteria);

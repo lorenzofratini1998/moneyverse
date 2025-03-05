@@ -22,23 +22,31 @@ public class TransactionDto implements Serializable {
   private final UUID transactionId;
   private final UUID userId;
   private final UUID accountId;
+  private final UUID categoryId;
   private final UUID budgetId;
   private final LocalDate date;
   private final String description;
   private final BigDecimal amount;
+  private final BigDecimal normalizedAmount;
   private final String currency;
   private final Set<TagDto> tags;
+  private final UUID transferId;
+  private final UUID subscriptionId;
 
   public TransactionDto(Builder builder) {
     this.transactionId = builder.transactionId;
     this.userId = builder.userId;
     this.accountId = builder.accountId;
+    this.categoryId = builder.categoryId;
     this.budgetId = builder.budgetId;
     this.date = builder.date;
     this.description = builder.description;
     this.amount = builder.amount;
+    this.normalizedAmount = builder.normalizedAmount;
     this.currency = builder.currency;
     this.tags = builder.tags;
+    this.transferId = builder.transferId;
+    this.subscriptionId = builder.subscriptionId;
   }
 
   public static Builder builder() {
@@ -49,12 +57,16 @@ public class TransactionDto implements Serializable {
     private UUID transactionId;
     private UUID userId;
     private UUID accountId;
+    private UUID categoryId;
     private UUID budgetId;
     private LocalDate date;
     private String description;
     private BigDecimal amount;
+    private BigDecimal normalizedAmount;
     private String currency;
     private Set<TagDto> tags;
+    private UUID transferId;
+    private UUID subscriptionId;
 
     public Builder withTransactionId(UUID transactionId) {
       this.transactionId = transactionId;
@@ -68,6 +80,11 @@ public class TransactionDto implements Serializable {
 
     public Builder withAccountId(UUID accountId) {
       this.accountId = accountId;
+      return this;
+    }
+
+    public Builder withCategoryId(UUID categoryId) {
+      this.categoryId = categoryId;
       return this;
     }
 
@@ -91,6 +108,11 @@ public class TransactionDto implements Serializable {
       return this;
     }
 
+    public Builder withNormalizedAmount(BigDecimal normalizedAmount) {
+      this.normalizedAmount = normalizedAmount;
+      return this;
+    }
+
     public Builder withCurrency(String currency) {
       this.currency = currency;
       return this;
@@ -98,6 +120,16 @@ public class TransactionDto implements Serializable {
 
     public Builder withTags(Set<TagDto> tags) {
       this.tags = tags;
+      return this;
+    }
+
+    public Builder withTransferId(UUID transferId) {
+      this.transferId = transferId;
+      return this;
+    }
+
+    public Builder withSubscriptionId(UUID subscriptionId) {
+      this.subscriptionId = subscriptionId;
       return this;
     }
 
@@ -118,6 +150,10 @@ public class TransactionDto implements Serializable {
     return accountId;
   }
 
+  public UUID getCategoryId() {
+    return categoryId;
+  }
+
   public UUID getBudgetId() {
     return budgetId;
   }
@@ -134,11 +170,23 @@ public class TransactionDto implements Serializable {
     return amount;
   }
 
+  public BigDecimal getNormalizedAmount() {
+    return normalizedAmount;
+  }
+
   public String getCurrency() {
     return currency;
   }
 
   public Set<TagDto> getTags() {
     return tags;
+  }
+
+  public UUID getTransferId() {
+    return transferId;
+  }
+
+  public UUID getSubscriptionId() {
+    return subscriptionId;
   }
 }

@@ -1,20 +1,19 @@
 package it.moneyverse.budget.utils.mapper;
 
-import static it.moneyverse.budget.utils.BudgetTestUtils.createDefaultCategory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import it.moneyverse.budget.model.dto.CategoryDto;
+import it.moneyverse.budget.model.CategoryTestFactory;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.DefaultCategory;
+import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.openapitools.jackson.nullable.JsonNullable;
 
 /** Unit test for {@link CategoryMapper} */
 class CategoryMapperTest {
@@ -26,12 +25,7 @@ class CategoryMapperTest {
 
   @Test
   void testToCategoryEntity_ValidCategoryRequest() {
-    CategoryRequestDto request =
-        new CategoryRequestDto(
-            RandomUtils.randomUUID(),
-            null,
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15));
+    CategoryRequestDto request = CategoryTestFactory.CategoryRequestBuilder.defaultInstance();
 
     Category category = CategoryMapper.toCategory(request);
 
@@ -48,7 +42,7 @@ class CategoryMapperTest {
 
   @Test
   void testToCategoryDto_ValidCategoryEntity() {
-    Category category = createCategory();
+    Category category = CategoryTestFactory.fakeCategory();
 
     CategoryDto dto = CategoryMapper.toCategoryDto(category);
 
@@ -61,9 +55,8 @@ class CategoryMapperTest {
 
   @Test
   void testToCategoryDto_CategoryEntityWithParentCategory() {
-    Category category = createCategory();
-    Category parentCategory = createCategory();
-    category.setParentCategory(parentCategory);
+    Category parentCategory = CategoryTestFactory.fakeCategory();
+    Category category = CategoryTestFactory.fakeCategory(parentCategory);
 
     CategoryDto dto = CategoryMapper.toCategoryDto(category);
 
@@ -84,7 +77,7 @@ class CategoryMapperTest {
     int entitiesCount = RandomUtils.randomInteger(0, 10);
     List<Category> categories = new ArrayList<>(entitiesCount);
     for (int i = 0; i < entitiesCount; i++) {
-      categories.add(createCategory());
+      categories.add(CategoryTestFactory.fakeCategory());
     }
 
     List<CategoryDto> categoryDtos = CategoryMapper.toCategoryDto(categories);
@@ -107,7 +100,7 @@ class CategoryMapperTest {
 
   @Test
   void testToCategoryDto_DefaultCategory() {
-    DefaultCategory defaultCategory = createDefaultCategory();
+    DefaultCategory defaultCategory = CategoryTestFactory.fakeDefaultCategory();
 
     CategoryDto dto = CategoryMapper.toCategoryDto(defaultCategory);
 
@@ -126,7 +119,7 @@ class CategoryMapperTest {
     int entitiesCount = RandomUtils.randomInteger(0, 10);
     List<DefaultCategory> categories = new ArrayList<>(entitiesCount);
     for (int i = 0; i < entitiesCount; i++) {
-      categories.add(createDefaultCategory());
+      categories.add(CategoryTestFactory.fakeDefaultCategory());
     }
 
     List<CategoryDto> categoryDtos = CategoryMapper.mapDefaultCategories(categories);
@@ -143,10 +136,9 @@ class CategoryMapperTest {
 
   @Test
   void testToCategory_PartialUpdate() {
-    Category category = createCategory();
+    Category category = CategoryTestFactory.fakeCategory();
     CategoryUpdateRequestDto request =
-        new CategoryUpdateRequestDto(
-            RandomUtils.randomString(15), RandomUtils.randomString(15), JsonNullable.undefined());
+        CategoryTestFactory.CategoryUpdateRequestBuilder.defaultInstance();
 
     Category result = CategoryMapper.partialUpdate(category, request);
 
@@ -157,27 +149,17 @@ class CategoryMapperTest {
 
   @Test
   void testToCategory_PartialUpdateWithParentCategory() {
-    Category category = createCategory();
-    Category parentCategory = createCategory();
+    Category parentCategory = CategoryTestFactory.fakeCategory();
+    Category category = CategoryTestFactory.fakeCategory(parentCategory);
     CategoryUpdateRequestDto request =
-        new CategoryUpdateRequestDto(
-            RandomUtils.randomString(15),
-            RandomUtils.randomString(15),
-            JsonNullable.of(parentCategory.getCategoryId()));
+        CategoryTestFactory.CategoryUpdateRequestBuilder.builder()
+            .withParentCategory(parentCategory.getCategoryId())
+            .build();
 
     Category result = CategoryMapper.partialUpdate(category, request, parentCategory);
 
     assertEquals(request.categoryName(), result.getCategoryName());
     assertEquals(request.description(), result.getDescription());
     assertEquals(parentCategory.getCategoryId(), result.getParentCategory().getCategoryId());
-  }
-
-  private Category createCategory() {
-    Category category = new Category();
-    category.setCategoryId(RandomUtils.randomUUID());
-    category.setUserId(RandomUtils.randomUUID());
-    category.setCategoryName(RandomUtils.randomString(15));
-    category.setDescription(RandomUtils.randomString(15));
-    return category;
   }
 }

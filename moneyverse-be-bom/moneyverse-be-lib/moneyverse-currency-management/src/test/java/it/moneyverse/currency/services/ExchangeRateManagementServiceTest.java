@@ -53,8 +53,9 @@ class ExchangeRateManagementServiceTest {
     when(restTemplate.getForEntity(anyString(), eq(String.class)))
         .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND));
 
+    LocalDate today = LocalDate.now();
     assertThrows(
         HttpRequestException.class,
-        () -> exchangeRateManagementService.readExchangeRates(LocalDate.now(), LocalDate.now()));
+        () -> exchangeRateManagementService.readExchangeRates(today, today));
   }
 }

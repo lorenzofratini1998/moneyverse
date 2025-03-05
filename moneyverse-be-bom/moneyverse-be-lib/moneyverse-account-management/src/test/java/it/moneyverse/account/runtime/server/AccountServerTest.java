@@ -1,19 +1,21 @@
 package it.moneyverse.account.runtime.server;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.grpc.lib.AccountRequest;
 import it.moneyverse.grpc.lib.AccountResponse;
 import it.moneyverse.grpc.lib.AccountServiceGrpc;
 import it.moneyverse.test.utils.RandomUtils;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class AccountServerTest {
+class AccountServerTest {
 
   private AccountServiceGrpc.AccountServiceBlockingStub stub;
   private ManagedChannel channel;
@@ -35,7 +37,7 @@ public class AccountServerTest {
     String serverName = InProcessServerBuilder.generateName();
     Server server =
         InProcessServerBuilder.forName(serverName)
-            .addService(new AccountServer.AccountGrpcService(accountRepository))
+            .addService(new AccountManagementGrpcService(accountRepository))
             .directExecutor()
             .build()
             .start();
@@ -54,26 +56,37 @@ public class AccountServerTest {
   }
 
   @Test
-  void checkIfAccountExists_shouldReturnTrueForExistingAccount() {
+  void getAccountById_thenReturnAccountResponse(
+      @Mock Account account, @Mock AccountCategory accountCategory) {
     UUID accountId = RandomUtils.randomUUID();
     AccountRequest request = AccountRequest.newBuilder().setAccountId(accountId.toString()).build();
-    when(accountRepository.existsByAccountId(accountId)).thenReturn(true);
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(account.getAccountId()).thenReturn(accountId);
+    when(account.getUserId()).thenReturn(RandomUtils.randomUUID());
+    when(account.getAccountName()).thenReturn(RandomUtils.randomString(15));
+    when(account.getBalance()).thenReturn(RandomUtils.randomBigDecimal());
+    when(account.getBalanceTarget()).thenReturn(RandomUtils.randomBigDecimal());
+    when(account.getAccountCategory()).thenReturn(accountCategory);
+    when(accountCategory.getName()).thenReturn(RandomUtils.randomString(15));
+    when(account.getAccountDescription()).thenReturn(RandomUtils.randomString(15));
+    when(account.getCurrency()).thenReturn(RandomUtils.randomString(15));
+    when(account.isDefault()).thenReturn(true);
 
-    AccountResponse response = stub.checkIfAccountExists(request);
+    AccountResponse response = stub.getAccountById(request);
 
-    assertTrue(response.getExists());
-    verify(accountRepository, times(1)).existsByAccountId(accountId);
+    assertEquals(accountId.toString(), response.getAccountId());
+    verify(accountRepository, times(1)).findById(accountId);
   }
 
   @Test
-  void checkIfAccountExists_shouldReturnFalseForNonExistingAccount() {
+  void getAccountById_thenReturnDefaultAccountResponse() {
     UUID accountId = RandomUtils.randomUUID();
     AccountRequest request = AccountRequest.newBuilder().setAccountId(accountId.toString()).build();
-    when(accountRepository.existsByAccountId(accountId)).thenReturn(false);
+    when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
-    AccountResponse response = stub.checkIfAccountExists(request);
+    AccountResponse response = stub.getAccountById(request);
 
-    assertFalse(response.getExists());
-    verify(accountRepository, times(1)).existsByAccountId(accountId);
+    assertNotEquals(accountId.toString(), response.getAccountId());
+    verify(accountRepository, times(1)).findById(accountId);
   }
 }

@@ -11,33 +11,30 @@ import org.slf4j.LoggerFactory;
 
 public class EntityScriptGenerator {
 
-  public static final String SQL_SCRIPT_FILE_NAME = "script.sql";
+  public static final String SQL_SCRIPT_FILE_NAME = "V100__Insert_Test_Values.sql";
   private static final Logger LOGGER = LoggerFactory.getLogger(EntityScriptGenerator.class);
 
   private final ScriptMetadata metadata;
   private final ScriptService scriptService;
-
-  private String script;
 
   public EntityScriptGenerator(ScriptMetadata metadata, ScriptService scriptService) {
     this.metadata = metadata;
     this.scriptService = scriptService;
   }
 
-  public void execute() {
-    script = generateScript();
-    saveFile();
-  }
-
-  private String generateScript() {
+  public StringBuilder generateScript() {
     StringBuilder script = new StringBuilder();
     for (List<?> entities : metadata.getEntities()) {
       script.append(scriptService.createInsertScript(entities));
     }
-    return script.toString();
+    return script;
   }
 
-  private void saveFile() {
+  public void save(StringBuilder script) {
+    saveFile(script.toString());
+  }
+
+  private void saveFile(String script) {
     Path sqlFile = metadata.getDirectory().resolve(SQL_SCRIPT_FILE_NAME);
     try {
       Files.write(sqlFile, script.getBytes());

@@ -1,15 +1,12 @@
 package it.moneyverse.transaction.services;
 
-import it.moneyverse.transaction.model.dto.TransactionCriteria;
-import it.moneyverse.transaction.model.dto.TransactionDto;
-import it.moneyverse.transaction.model.dto.TransactionRequestDto;
-import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.dto.*;
 import java.util.List;
 import java.util.UUID;
 
 public interface TransactionService {
 
-  TransactionDto createTransaction(TransactionRequestDto request);
+  List<TransactionDto> createTransactions(TransactionRequestDto request);
 
   List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
 
@@ -22,5 +19,8 @@ public interface TransactionService {
   void deleteAllTransactionsByUserId(UUID userId);
 
   void deleteAllTransactionsByAccountId(UUID accountId);
+
+  void removeCategoryFromTransactions(UUID categoryId);
+
   void removeBudgetFromTransactions(UUID budgetId);
 }

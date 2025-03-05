@@ -1,67 +1,72 @@
 package it.moneyverse.budget.runtime.messages;
 
-import static it.moneyverse.test.utils.FakeUtils.randomTransactionEvent;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import it.moneyverse.budget.model.BudgetTestContext;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
-import it.moneyverse.budget.utils.BudgetTestContext;
 import it.moneyverse.core.model.beans.TransactionCreationTopic;
 import it.moneyverse.core.model.beans.TransactionDeletionTopic;
 import it.moneyverse.core.model.beans.TransactionUpdateTopic;
-import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.model.events.TransactionEvent;
-import it.moneyverse.core.utils.JsonUtils;
-import it.moneyverse.test.annotations.datasource.CleanDatabaseAfterEachTest;
-import it.moneyverse.test.annotations.datasource.DataSourceScriptDir;
+import it.moneyverse.test.annotations.MoneyverseTest;
+import it.moneyverse.test.annotations.datasource.FlywayTestDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
-import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
+import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(
-    properties = {
-      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration",
-      "logging.level.org.grpcmock.GrpcMock=WARN",
-      "logging.level.org.apache.kafka.clients=ERROR",
-      "logging.level.org.springframework.kafka.listener=ERROR"
+@MoneyverseTest
+@EmbeddedKafka(
+    partitions = 1,
+    topics = {
+      TransactionCreationTopic.TOPIC,
+      TransactionDeletionTopic.TOPIC,
+      TransactionUpdateTopic.TOPIC
     })
-@Testcontainers
-@CleanDatabaseAfterEachTest
+@TestPropertySource(
+    properties = {
+      "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
+      "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
+    })
 class BudgetConsumerTest {
 
-  private static final BigDecimal TOLERANCE = new BigDecimal("0.01");
+  private static final BigDecimal TOLERANCE = BigDecimal.valueOf(0.01);
 
   protected static BudgetTestContext testContext;
 
-  @DataSourceScriptDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
+  @FlywayTestDir(fileName = EntityScriptGenerator.SQL_SCRIPT_FILE_NAME)
   protected static Path tempDir;
+
+  private BigDecimal exchangeRate;
 
   @Autowired private KafkaTemplate<UUID, String> kafkaTemplate;
   @Autowired private CategoryRepository categoryRepository;
   @Autowired private BudgetRepository budgetRepository;
 
-  @Container static KafkaContainer kafkaContainer = new KafkaContainer();
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
 
@@ -69,9 +74,10 @@ class BudgetConsumerTest {
   static void mappingProperties(DynamicPropertyRegistry registry) {
     new TestPropertyRegistry(registry)
         .withPostgres(postgresContainer)
-        .withKafkaContainer(kafkaContainer)
         .withGrpcUserService(mockServer.getHost(), mockServer.getPort())
-        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort());
+        .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
+        .withFlywayTestDirectory(tempDir)
+        .withEmbeddedKafka();
   }
 
   @BeforeAll
@@ -79,87 +85,128 @@ class BudgetConsumerTest {
     testContext = new BudgetTestContext().generateScript(tempDir);
   }
 
+  @BeforeEach
+  void setup() {
+    exchangeRate = RandomUtils.flipCoin() ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
+    mockServer.mockExchangeRate(exchangeRate);
+  }
+
   @Test
   void testOnTransactionCreation() {
-    final UserModel userModel = testContext.getRandomUser();
-    final Budget budget = testContext.getRandomBudgetByUserId(userModel.getUserId());
-    final TransactionEvent event = randomTransactionEvent(budget.getBudgetId());
+    final Budget budget =
+        testContext
+            .getBudgets()
+            .get(RandomUtils.randomInteger(0, testContext.getBudgets().size() - 1));
+    TransactionEvent event =
+        TestFactory.TransactionEventBuilder.builder().withBudgetId(budget.getBudgetId()).build();
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(
-            TransactionCreationTopic.TOPIC, event.getTransactionId(), JsonUtils.toJson(event));
+        new ProducerRecord<>(TransactionCreationTopic.TOPIC, event.key(), event.value());
 
     kafkaTemplate.send(producerRecord);
 
     await()
         .pollDelay(5, TimeUnit.SECONDS)
-        .atMost(60, TimeUnit.SECONDS)
+        .pollInterval(5, TimeUnit.SECONDS)
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
-            () -> {
-              BigDecimal expectedAmount =
-                  budget.getAmount().add(event.getAmount()).setScale(2, RoundingMode.HALF_UP);
-              BigDecimal actualAmount =
-                  Objects.requireNonNull(
-                          budgetRepository.findById(budget.getBudgetId()).orElse(null))
-                      .getAmount()
-                      .setScale(2, RoundingMode.HALF_UP);
-              checkExpectedWithActualBudgetAmount(expectedAmount, actualAmount);
-            });
+            () ->
+                checkExpectedWithActualBudgetAmount(
+                    budget
+                        .getAmount()
+                        .add(event.getAmount().multiply(exchangeRate))
+                        .setScale(2, RoundingMode.HALF_UP),
+                    budgetRepository
+                        .findById(budget.getBudgetId())
+                        .orElseThrow(IllegalArgumentException::new)
+                        .getAmount()));
   }
 
   @Test
   void testOnTransactionDeletion() {
-    final UserModel userModel = testContext.getRandomUser();
-    final Budget budget = testContext.getRandomBudgetByUserId(userModel.getUserId());
-    final TransactionEvent event = randomTransactionEvent(budget.getBudgetId());
+    final Budget budget =
+        testContext
+            .getBudgets()
+            .get(RandomUtils.randomInteger(0, testContext.getBudgets().size() - 1));
+    TransactionEvent event =
+        TestFactory.TransactionEventBuilder.builder().withBudgetId(budget.getBudgetId()).build();
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(
-            TransactionDeletionTopic.TOPIC, event.getTransactionId(), JsonUtils.toJson(event));
+            TransactionDeletionTopic.TOPIC, event.getTransactionId(), event.value());
 
     kafkaTemplate.send(producerRecord);
 
     await()
         .pollDelay(5, TimeUnit.SECONDS)
-        .atMost(60, TimeUnit.SECONDS)
+        .pollInterval(5, TimeUnit.SECONDS)
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
-              BigDecimal expectedAmount =
-                  budget.getAmount().subtract(event.getAmount()).setScale(2, RoundingMode.HALF_UP);
-              BigDecimal actualAmount =
-                  Objects.requireNonNull(
-                          budgetRepository.findById(budget.getBudgetId()).orElse(null))
+              checkExpectedWithActualBudgetAmount(
+                  budget
                       .getAmount()
-                      .setScale(2, RoundingMode.HALF_UP);
-              checkExpectedWithActualBudgetAmount(expectedAmount, actualAmount);
+                      .subtract(event.getAmount().multiply(exchangeRate))
+                      .setScale(2, RoundingMode.HALF_UP),
+                  budgetRepository
+                      .findById(budget.getBudgetId())
+                      .orElseThrow(IllegalArgumentException::new)
+                      .getAmount());
             });
   }
 
   @Test
   void testOnTransactionUpdate() {
-    final UserModel userModel = testContext.getRandomUser();
-    final Budget budget = testContext.getRandomBudgetByUserId(userModel.getUserId());
-    final TransactionEvent event = randomTransactionEvent(budget.getBudgetId());
+    final Budget budget =
+        testContext
+            .getBudgets()
+            .get(RandomUtils.randomInteger(0, testContext.getBudgets().size() - 1));
+    final List<Budget> userBudgets =
+        testContext.getBudgets().stream()
+            .filter(b -> b.getCategory().getUserId().equals(budget.getCategory().getUserId()))
+            .collect(Collectors.toList());
+    userBudgets.remove(budget);
+    Budget previousBudget = userBudgets.get(RandomUtils.randomInteger(userBudgets.size() - 1));
+    final TransactionEvent event =
+        TestFactory.TransactionEventBuilder.builder()
+            .withBudgetId(budget.getBudgetId())
+            .withPreviousTransaction(
+                TestFactory.TransactionEventBuilder.builder()
+                    .withBudgetId(previousBudget.getBudgetId())
+                    .build())
+            .build();
+
     final ProducerRecord<UUID, String> producerRecord =
-        new ProducerRecord<>(
-            TransactionUpdateTopic.TOPIC, event.getTransactionId(), JsonUtils.toJson(event));
+        new ProducerRecord<>(TransactionUpdateTopic.TOPIC, event.key(), event.value());
 
     kafkaTemplate.send(producerRecord);
 
     await()
         .pollDelay(5, TimeUnit.SECONDS)
-        .atMost(60, TimeUnit.SECONDS)
+        .pollInterval(5, TimeUnit.SECONDS)
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
-              BigDecimal expectedAmount =
-                  budget
+              Budget prevBudget =
+                  budgetRepository
+                      .findById(previousBudget.getBudgetId())
+                      .orElseThrow(IllegalArgumentException::new);
+              Budget b =
+                  budgetRepository
+                      .findById(budget.getBudgetId())
+                      .orElseThrow(IllegalArgumentException::new);
+
+              BigDecimal expectedPreviousBudgetAmount =
+                  previousBudget
                       .getAmount()
-                      .add(event.getAmount().subtract(event.getPreviousAmount()))
-                      .setScale(2, RoundingMode.HALF_UP);
-              BigDecimal actualAmount =
-                  Objects.requireNonNull(
-                          budgetRepository.findById(budget.getBudgetId()).orElse(null))
-                      .getAmount()
-                      .setScale(2, RoundingMode.HALF_UP);
-              checkExpectedWithActualBudgetAmount(expectedAmount, actualAmount);
+                      .subtract(event.getPreviousTransaction().getAmount().multiply(exchangeRate));
+              BigDecimal expectedBudgetAmount =
+                  budget.getAmount().add(event.getAmount().multiply(exchangeRate));
+
+              checkExpectedWithActualBudgetAmount(
+                  expectedPreviousBudgetAmount.setScale(2, RoundingMode.HALF_UP),
+                  prevBudget.getAmount());
+
+              checkExpectedWithActualBudgetAmount(
+                  expectedBudgetAmount.setScale(2, RoundingMode.HALF_UP), b.getAmount());
             });
   }
 

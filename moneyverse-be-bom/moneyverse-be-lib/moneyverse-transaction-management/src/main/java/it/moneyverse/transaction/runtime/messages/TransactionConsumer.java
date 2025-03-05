@@ -3,11 +3,13 @@ package it.moneyverse.transaction.runtime.messages;
 import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
 
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
+import it.moneyverse.core.model.beans.BudgetDeletionTopic;
 import it.moneyverse.core.model.beans.CategoryDeletionTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
-import it.moneyverse.core.model.events.AccountDeletionEvent;
-import it.moneyverse.core.model.events.BudgetDeletionEvent;
-import it.moneyverse.core.model.events.UserDeletionEvent;
+import it.moneyverse.core.model.events.AccountEvent;
+import it.moneyverse.core.model.events.BudgetEvent;
+import it.moneyverse.core.model.events.CategoryEvent;
+import it.moneyverse.core.model.events.UserEvent;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.transaction.services.TransactionService;
 import java.util.UUID;
@@ -36,7 +38,7 @@ public class TransactionConsumer {
   public void onUserDeletionEvent(
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
-    UserDeletionEvent event = JsonUtils.fromJson(record.value(), UserDeletionEvent.class);
+    UserEvent event = JsonUtils.fromJson(record.value(), UserEvent.class);
     transactionService.deleteAllTransactionsByUserId(event.getUserId());
   }
 
@@ -49,8 +51,8 @@ public class TransactionConsumer {
   public void onAccountDeletionEvent(
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
-    AccountDeletionEvent event = JsonUtils.fromJson(record.value(), AccountDeletionEvent.class);
-    transactionService.deleteAllTransactionsByAccountId(event.accountId());
+    AccountEvent event = JsonUtils.fromJson(record.value(), AccountEvent.class);
+    transactionService.deleteAllTransactionsByAccountId(event.getAccountId());
   }
 
   @RetryableTopic
@@ -59,10 +61,23 @@ public class TransactionConsumer {
       autoStartup = "true",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
-  public void onBudgetDeletionEvent(
+  public void onCategoryDeletionEvent(
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
-    BudgetDeletionEvent event = JsonUtils.fromJson(record.value(), BudgetDeletionEvent.class);
-    transactionService.removeBudgetFromTransactions(event.budgetId());
+    CategoryEvent event = JsonUtils.fromJson(record.value(), CategoryEvent.class);
+    transactionService.removeCategoryFromTransactions(event.getCategoryId());
+  }
+
+  @RetryableTopic
+  @KafkaListener(
+      topics = BudgetDeletionTopic.TOPIC,
+      autoStartup = "true",
+      groupId =
+          "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
+  public void onCategoryBudgetEvent(
+      ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    logMessage(record, topic);
+    BudgetEvent event = JsonUtils.fromJson(record.value(), BudgetEvent.class);
+    transactionService.removeBudgetFromTransactions(event.getBudgetId());
   }
 }

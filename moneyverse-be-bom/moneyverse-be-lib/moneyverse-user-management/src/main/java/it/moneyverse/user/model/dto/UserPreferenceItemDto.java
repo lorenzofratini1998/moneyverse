@@ -2,6 +2,7 @@ package it.moneyverse.user.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.moneyverse.core.model.dto.PreferenceDto;
 import java.io.Serializable;
 import java.util.UUID;
 

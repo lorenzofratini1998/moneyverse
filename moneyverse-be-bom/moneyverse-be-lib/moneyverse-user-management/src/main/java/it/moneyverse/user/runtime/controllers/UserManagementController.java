@@ -1,5 +1,8 @@
 package it.moneyverse.user.runtime.controllers;
 
+import it.moneyverse.core.model.dto.PreferenceDto;
+import it.moneyverse.core.model.dto.UserDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.user.model.dto.*;
 import it.moneyverse.user.services.PreferenceService;
 import it.moneyverse.user.services.UserService;
@@ -27,7 +30,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @PostMapping("/users/{userId}/preferences")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
-  public UserPreferenceDto createUserPreferences(
+  public List<UserPreferenceDto> createUserPreferences(
       @PathVariable UUID userId, @RequestBody List<UserPreferenceRequest> request) {
     return preferenceService.createUserPreferences(userId, request);
   }
@@ -36,7 +39,7 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @GetMapping("/users/{userId}/preferences")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
-  public UserPreferenceDto getUserPreferences(
+  public List<UserPreferenceDto> getUserPreferences(
       @PathVariable UUID userId, @RequestParam(required = false) Boolean mandatory) {
     return preferenceService.getUserPreferences(userId, mandatory);
   }

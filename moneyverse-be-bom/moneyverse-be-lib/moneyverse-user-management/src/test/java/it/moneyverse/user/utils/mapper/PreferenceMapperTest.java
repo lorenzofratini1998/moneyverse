@@ -1,12 +1,12 @@
 package it.moneyverse.user.utils.mapper;
 
-import static it.moneyverse.user.utils.UserTestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import it.moneyverse.core.model.dto.PreferenceDto;
+import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.test.utils.RandomUtils;
-import it.moneyverse.user.model.dto.PreferenceDto;
-import it.moneyverse.user.model.dto.UserPreferenceDto;
+import it.moneyverse.user.model.PreferenceTestFactory;
 import it.moneyverse.user.model.dto.UserPreferenceRequest;
 import it.moneyverse.user.model.entities.Preference;
 import it.moneyverse.user.model.entities.UserPreference;
@@ -20,9 +20,11 @@ class PreferenceMapperTest {
   @Test
   void testToUserPreference() {
     UUID userId = RandomUtils.randomUUID();
-    Preference preference = createPreference();
+    Preference preference = PreferenceTestFactory.fakePreference();
     UserPreferenceRequest userPreferenceRequest =
-        createUserPreferenceRequest(preference.getPreferenceId());
+        PreferenceTestFactory.UserPreferenceRequestBuilder.builder()
+            .withPreferenceId(preference.getPreferenceId())
+            .build();
 
     UserPreference userPreference =
         PreferenceMapper.toUserPreference(userId, userPreferenceRequest, preference);
@@ -35,25 +37,25 @@ class PreferenceMapperTest {
   @Test
   void testToUserPreferenceDto_NonEmptyList() {
     UUID userId = RandomUtils.randomUUID();
-    List<UserPreference> userPreferences = List.of(createUserPreference(userId));
+    List<UserPreference> userPreferences =
+        List.of(
+            PreferenceTestFactory.fakeUserPreference(
+                userId, PreferenceTestFactory.fakePreference()));
 
-    UserPreferenceDto userPreferenceDto =
-        PreferenceMapper.toUserPreferenceDto(userId, userPreferences);
+    List<UserPreferenceDto> userPreferenceDto =
+        PreferenceMapper.toUserPreferenceDto(userPreferences);
 
-    assertEquals(userId, userPreferenceDto.getUserId());
-    assertEquals(1, userPreferenceDto.getPreferences().size());
+    assertEquals(1, userPreferenceDto.size());
   }
 
   @Test
   void testToUserPreferenceDto_EmptyList() {
-    UUID userId = RandomUtils.randomUUID();
     List<UserPreference> userPreferences = Collections.emptyList();
 
-    UserPreferenceDto userPreferenceDto =
-        PreferenceMapper.toUserPreferenceDto(userId, userPreferences);
+    List<UserPreferenceDto> userPreferenceDto =
+        PreferenceMapper.toUserPreferenceDto(userPreferences);
 
-    assertEquals(userId, userPreferenceDto.getUserId());
-    assertEquals(0, userPreferenceDto.getPreferences().size());
+    assertEquals(0, userPreferenceDto.size());
   }
 
   @Test
@@ -63,7 +65,7 @@ class PreferenceMapperTest {
 
   @Test
   void testToPreferenceDto_Preference() {
-    Preference preference = createPreference();
+    Preference preference = PreferenceTestFactory.fakePreference();
 
     PreferenceDto preferenceDto = PreferenceMapper.toPreferenceDto(preference);
 
@@ -81,7 +83,7 @@ class PreferenceMapperTest {
 
   @Test
   void testToPreferenceDto_NonEmptyList() {
-    List<Preference> preferences = List.of(createPreference());
+    List<Preference> preferences = List.of(PreferenceTestFactory.fakePreference());
 
     List<PreferenceDto> preferenceDtos = PreferenceMapper.toPreferenceDto(preferences);
 

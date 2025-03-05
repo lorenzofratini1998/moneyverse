@@ -14,7 +14,6 @@ public record AccountUpdateRequestDto(
     BigDecimal balanceTarget,
     String accountCategory,
     String accountDescription,
-    String currency,
     Boolean isDefault)
     implements Serializable {
     @Override

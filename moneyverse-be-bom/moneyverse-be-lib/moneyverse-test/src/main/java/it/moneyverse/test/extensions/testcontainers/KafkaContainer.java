@@ -1,5 +1,6 @@
 package it.moneyverse.test.extensions.testcontainers;
 
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 
 public class KafkaContainer extends ConfluentKafkaContainer {
@@ -13,5 +14,6 @@ public class KafkaContainer extends ConfluentKafkaContainer {
 
   public KafkaContainer(String image) {
     super(image);
+    super.waitingFor(Wait.forListeningPort());
   }
 }
