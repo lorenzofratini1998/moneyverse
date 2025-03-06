@@ -5,6 +5,7 @@ import it.moneyverse.core.security.converter.KeycloakJwtRolesConverter;
 import it.moneyverse.core.services.SecurityService;
 import it.moneyverse.core.utils.SecurityContextUtils;
 import it.moneyverse.core.utils.properties.KeycloakProperties;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.DelegatingJwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableConfigurationProperties(KeycloakProperties.class)
@@ -43,7 +45,8 @@ public class SecurityAutoConfiguration {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity httpSecurity, CorsConfiguration corsConfiguration) throws Exception {
 
     DelegatingJwtGrantedAuthoritiesConverter authoritiesConverter =
         new DelegatingJwtGrantedAuthoritiesConverter(
@@ -54,6 +57,7 @@ public class SecurityAutoConfiguration {
 
     httpSecurity
         .httpBasic(HttpBasicConfigurer::disable)
+        .cors(cors -> cors.configurationSource(request -> corsConfiguration))
         .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .logout(AbstractHttpConfigurer::disable)
@@ -93,5 +97,15 @@ public class SecurityAutoConfiguration {
   @Bean
   public SecurityService securityService() {
     return new SecurityService();
+  }
+
+  @Bean
+  public CorsConfiguration corsConfiguration() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowCredentials(true);
+    return configuration;
   }
 }

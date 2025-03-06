@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
 @Validated
+@CrossOrigin("*")
 public class UserManagementController implements UserOperations, PreferenceOperations {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserManagementController.class);

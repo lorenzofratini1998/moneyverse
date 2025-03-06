@@ -1,0 +1,8 @@
+{
+  "/usersManagement/**": {
+    "target": "http://localhost:8081/usersManagement/api/v1",
+    "secure": false,
+    "logLevel": "debug",
+    "changeOrigin": true
+  }
+}

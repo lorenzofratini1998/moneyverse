@@ -10,7 +10,7 @@ import {
 import {environment} from '../../../environments/environment';
 
 const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
-  urlPattern: /^(http:\/\/localhost:8080)(\/.*)?$/i,
+  urlPattern: /^http:\/\/[^\/:]+:80(\d*)(\/.*)?$/i,
   bearerPrefix: "Bearer"
 })
 
@@ -24,7 +24,7 @@ export const provideKeycloakAngular = () =>
     initOptions: {
       onLoad: 'check-sso',
       silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-      redirectUri: window.location.origin + "/"
+      redirectUri: environment.keycloak.redirectUri
     },
     features: [
       withAutoRefreshToken({
