@@ -1,4 +1,4 @@
-package it.moneyverse.currency.utils;
+package it.moneyverse.currency.model.factories;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class ExchangeRateUtilsTest {
+class ExchangeRateFactoryTest {
 
   private static final String XML_INPUT =
       """
@@ -30,9 +30,11 @@ class ExchangeRateUtilsTest {
   <message:DataSet data:action="Replace" data:validFromDate="2025-01-26T15:35:54.537+01:00" data:structureRef="ECB_EXR1" data:dataScope="DataStructure" xsi:type="ecb_exr1:DataSetType">
       <Series FREQ="D" CURRENCY="GBP" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
           <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="0.83118"/>
+          <Obs TIME_PERIOD="2025-01-03" OBS_VALUE="NaN"/>
       </Series>
       <Series FREQ="D" CURRENCY="USD" CURRENCY_DENOM="EUR" EXR_TYPE="SP00" EXR_SUFFIX="A">
           <Obs TIME_PERIOD="2025-01-02" OBS_VALUE="1.0321"/>
+          <Obs TIME_PERIOD="2025-01-03" OBS_VALUE="NaN"/>
       </Series>
   </message:DataSet>
 </message:StructureSpecificData>
@@ -40,7 +42,7 @@ class ExchangeRateUtilsTest {
 
   @Test
   void testParseXML() {
-    List<ExchangeRate> result = ExchangeRateUtils.parseXML(XML_INPUT);
+    List<ExchangeRate> result = ExchangeRateFactory.createExchangeRates(XML_INPUT);
 
     assertNotNull(result);
     assertFalse(result.isEmpty());
@@ -48,22 +50,31 @@ class ExchangeRateUtilsTest {
     assertEquals("EUR", result.getFirst().getCurrencyFrom());
     assertEquals("2025-01-02", result.getFirst().getDate().toString());
     assertEquals(BigDecimal.valueOf(0.83118), result.getFirst().getRate());
-    assertEquals("USD", result.get(1).getCurrencyTo());
+    assertEquals("GBP", result.get(1).getCurrencyTo());
     assertEquals("EUR", result.get(1).getCurrencyFrom());
-    assertEquals("2025-01-02", result.get(1).getDate().toString());
-    assertEquals(BigDecimal.valueOf(1.0321), result.get(1).getRate());
+    assertEquals("2025-01-03", result.get(1).getDate().toString());
+    assertEquals(BigDecimal.valueOf(0.83118), result.get(1).getRate());
+    assertEquals("USD", result.get(2).getCurrencyTo());
+    assertEquals("EUR", result.get(2).getCurrencyFrom());
+    assertEquals("2025-01-02", result.get(2).getDate().toString());
+    assertEquals(BigDecimal.valueOf(1.0321), result.get(2).getRate());
+    assertEquals("USD", result.get(3).getCurrencyTo());
+    assertEquals("EUR", result.get(3).getCurrencyFrom());
+    assertEquals("2025-01-03", result.get(3).getDate().toString());
+    assertEquals(BigDecimal.valueOf(1.0321), result.get(3).getRate());
   }
 
   @Test
   void testEmptyXML() {
-    List<ExchangeRate> result = ExchangeRateUtils.parseXML("");
+    List<ExchangeRate> result = ExchangeRateFactory.createExchangeRates("");
 
     assertEquals(Collections.emptyList(), result);
   }
 
   @Test
   void testIncorrectXML() {
-    List<ExchangeRate> result = ExchangeRateUtils.parseXML(
+    List<ExchangeRate> result =
+        ExchangeRateFactory.createExchangeRates(
             XML_INPUT.substring(0, RandomUtils.randomInteger(1, XML_INPUT.length())));
     assertEquals(Collections.emptyList(), result);
   }

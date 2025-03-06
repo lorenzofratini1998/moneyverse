@@ -1,6 +1,6 @@
 server:
   port:
-    8080
+    ${PORT:8080}
 
 spring:
   security:
@@ -21,3 +21,10 @@ management:
       probes:
         enabled: true
       show-details: always
+
+springdoc:
+  api-docs:
+    path: /public/api/docs
+  swagger-ui:
+    path: /public/api/docs/swagger-ui.html
+    operations-sorter: alpha

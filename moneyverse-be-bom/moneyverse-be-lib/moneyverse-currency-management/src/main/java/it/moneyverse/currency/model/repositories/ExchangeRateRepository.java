@@ -9,9 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, UUID> {
 
-    @Query(value = "SELECT MIN(e.date) FROM ExchangeRate e")
-    Optional<LocalDate> findMinDate();
+  @Query(value = "SELECT MAX(e.date) FROM ExchangeRate e")
+  Optional<LocalDate> findMaxDate();
 
   Optional<ExchangeRate> findExchangeRateByCurrencyFromAndCurrencyToAndDate(
       String currencyFrom, String currencyTo, LocalDate date);
+
+  boolean existsExchangeRatesByDate(LocalDate date);
 }

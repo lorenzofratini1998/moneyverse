@@ -33,9 +33,7 @@ public class UserManagementAutoConfiguration {
     return KeycloakBuilder.builder()
         .serverUrl("http://%s:%s".formatted(properties.getHost(), properties.getPort()))
         .realm(properties.getRealmName())
-        .username(adminProperties.getUsername())
-        .password(adminProperties.getPassword())
-        .grantType(OAuth2Constants.PASSWORD)
+        .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
         .clientId(adminProperties.getClientId())
         .clientSecret(adminProperties.getClientSecret())
         .build();

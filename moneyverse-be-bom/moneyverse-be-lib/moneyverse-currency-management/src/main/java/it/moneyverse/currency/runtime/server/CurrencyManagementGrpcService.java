@@ -62,9 +62,9 @@ class CurrencyManagementGrpcService extends CurrencyServiceGrpc.CurrencyServiceI
       if (isSameCurrency(fromCurrency, toCurrency)) {
         response = buildExchangeRateResponse(1.0);
       } else if (request.getFromCurrency().equalsIgnoreCase(ISO_CODE_EUR)) {
-        response = getExchangeRateFromEur(fromCurrency, date);
+        response = getExchangeRateFromEur(toCurrency, date);
       } else if (request.getToCurrency().equalsIgnoreCase(ISO_CODE_EUR)) {
-        response = getExchangeRateToEur(toCurrency, date);
+        response = getExchangeRateToEur(fromCurrency, date);
       } else {
         response = getExchangeRate(fromCurrency, toCurrency, date);
       }
@@ -82,13 +82,13 @@ class CurrencyManagementGrpcService extends CurrencyServiceGrpc.CurrencyServiceI
 
   private ExchangeRateResponse getExchangeRateFromEur(String toCurrency, LocalDate date) {
     BigDecimal rate = getRate(ISO_CODE_EUR, toCurrency, date);
-    return buildExchangeRateResponse(
-        BigDecimal.ONE.divide(rate, RoundingMode.HALF_UP).doubleValue());
+    return buildExchangeRateResponse(rate.doubleValue());
   }
 
   private ExchangeRateResponse getExchangeRateToEur(String fromCurrency, LocalDate date) {
     BigDecimal rate = getRate(fromCurrency, ISO_CODE_EUR, date);
-    return buildExchangeRateResponse(rate.doubleValue());
+    return buildExchangeRateResponse(
+        BigDecimal.ONE.divide(rate, 4, RoundingMode.HALF_UP).doubleValue());
   }
 
   private ExchangeRateResponse getExchangeRate(

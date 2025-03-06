@@ -10,3 +10,10 @@ spring:
       initialize-schema: always
     job:
       enabled: false
+
+springdoc:
+  api-docs:
+    path: /public/api/docs
+  swagger-ui:
+    path: /public/api/docs/swagger-ui.html
+    operations-sorter: alpha

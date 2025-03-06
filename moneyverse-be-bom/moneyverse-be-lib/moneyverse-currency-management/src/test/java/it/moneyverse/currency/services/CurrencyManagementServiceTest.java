@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.model.entities.Currency;
 import it.moneyverse.currency.model.repositories.CurrencyRepository;
-import it.moneyverse.currency.utils.CurrencyMapper;
+import it.moneyverse.currency.utils.mapper.CurrencyMapper;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;

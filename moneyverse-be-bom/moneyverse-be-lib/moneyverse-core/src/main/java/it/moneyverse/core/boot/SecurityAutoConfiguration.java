@@ -8,7 +8,6 @@ import it.moneyverse.core.utils.properties.KeycloakProperties;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,9 +43,7 @@ public class SecurityAutoConfiguration {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(
-      HttpSecurity httpSecurity, @Value("${spring.security.base-path}") String basePath)
-      throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
     DelegatingJwtGrantedAuthoritiesConverter authoritiesConverter =
         new DelegatingJwtGrantedAuthoritiesConverter(
@@ -72,12 +69,7 @@ public class SecurityAutoConfiguration {
                 }));
 
     httpSecurity.authorizeHttpRequests(
-        authz ->
-            authz
-                .requestMatchers(basePath + "/public/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated());
+        authz -> authz.requestMatchers("/public/**").permitAll().anyRequest().authenticated());
 
     return httpSecurity.build();
   }

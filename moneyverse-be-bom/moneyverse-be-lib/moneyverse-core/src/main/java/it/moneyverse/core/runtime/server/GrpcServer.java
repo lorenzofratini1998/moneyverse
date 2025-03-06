@@ -15,7 +15,7 @@ public abstract class GrpcServer {
 
   public void start() throws IOException {
     server.start();
-    LOGGER.info("Server started, listening on {}", port);
+    LOGGER.info("gRPC Server started, listening on {}", port);
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(

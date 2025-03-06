@@ -1,4 +1,4 @@
-package it.moneyverse.currency.utils;
+package it.moneyverse.currency.utils.mapper;
 
 import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.model.entities.Currency;

@@ -3,7 +3,6 @@ package it.moneyverse.currency.model.batch;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
-import java.math.BigDecimal;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Obs {
@@ -12,7 +11,7 @@ public class Obs {
   private String timePeriod;
 
   @XmlAttribute(name = "OBS_VALUE")
-  private BigDecimal obsValue;
+  private String obsValue;
 
   public String getTimePeriod() {
     return timePeriod;
@@ -22,11 +21,11 @@ public class Obs {
     this.timePeriod = timePeriod;
   }
 
-  public BigDecimal getObsValue() {
+  public String getObsValue() {
     return obsValue;
   }
 
-  public void setObsValue(BigDecimal obsValue) {
+  public void setObsValue(String obsValue) {
     this.obsValue = obsValue;
   }
 }

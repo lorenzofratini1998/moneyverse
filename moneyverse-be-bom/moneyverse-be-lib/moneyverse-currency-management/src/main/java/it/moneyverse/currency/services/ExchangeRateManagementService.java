@@ -1,13 +1,11 @@
 package it.moneyverse.currency.services;
 
-import static it.moneyverse.currency.utils.ExchangeRateUtils.URL;
-
 import it.moneyverse.core.exceptions.HttpRequestException;
 import it.moneyverse.currency.model.entities.Currency;
 import it.moneyverse.currency.model.entities.ExchangeRate;
+import it.moneyverse.currency.model.factories.ExchangeRateFactory;
 import it.moneyverse.currency.model.repositories.CurrencyRepository;
 import it.moneyverse.currency.model.repositories.ExchangeRateRepository;
-import it.moneyverse.currency.utils.ExchangeRateUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +22,9 @@ import org.springframework.web.client.RestTemplate;
 public class ExchangeRateManagementService implements ExchangeRateService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeRateManagementService.class);
+  private static final String URL =
+      "https://data-api.ecb.europa.eu/service/data/EXR/D.%s.EUR.SP00.A?startPeriod=%s&endPeriod=%s&detail=dataonly&format=structurespecificdata";
+  private static final LocalDate START_DATE = LocalDate.of(2002, 1, 2);
 
   private final RestTemplate restTemplate;
   private final CurrencyRepository currencyRepository;
@@ -66,11 +67,28 @@ public class ExchangeRateManagementService implements ExchangeRateService {
   @Async
   @Override
   public void initializeExchangeRates() {
-    LocalDate startPeriod = exchangeRateRepository.findMinDate().orElse(ExchangeRateUtils.MIN_DATE);
+    LocalDate startPeriod = exchangeRateRepository.findMaxDate().orElse(START_DATE);
     LocalDate endPeriod = LocalDate.now();
     ResponseEntity<String> response = readExchangeRates(startPeriod, endPeriod);
+    if (exchangeRateRepository.existsExchangeRatesByDate(startPeriod)
+        || exchangeRateRepository.existsExchangeRatesByDate(endPeriod)) {
+      LOGGER.info("Exchange rates already initialized from {} to {}", startPeriod, endPeriod);
+      return;
+    }
     List<ExchangeRate> exchangeRates =
-        ExchangeRateUtils.parseXML(Objects.requireNonNull(response.getBody()));
-    exchangeRateRepository.saveAll(exchangeRates);
+        ExchangeRateFactory.createExchangeRates(Objects.requireNonNull(response.getBody()));
+    saveExchangeRates(exchangeRates);
+    LOGGER.info("Exchange rates initialized from {} to {}", startPeriod, endPeriod);
+  }
+
+  private void saveExchangeRates(List<ExchangeRate> exchangeRates) {
+    LOGGER.info("Saving {} exchange rates...", exchangeRates.size());
+    int batchSize = 1000;
+    for (int i = 0; i < exchangeRates.size(); i += batchSize) {
+      int end = Math.min(i + batchSize, exchangeRates.size());
+      List<ExchangeRate> batch = exchangeRates.subList(i, end);
+      exchangeRateRepository.saveAll(batch);
+      exchangeRateRepository.flush();
+    }
   }
 }

@@ -1,7 +1,7 @@
 package it.moneyverse.currency.runtime.batch;
 
 import it.moneyverse.currency.model.entities.ExchangeRate;
-import it.moneyverse.currency.utils.ExchangeRateUtils;
+import it.moneyverse.currency.model.factories.ExchangeRateFactory;
 import java.util.List;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
@@ -12,6 +12,6 @@ public class ExchangeRateProcessor implements ItemProcessor<String, List<Exchang
 
   @Override
   public List<ExchangeRate> process(@NonNull String item) {
-    return ExchangeRateUtils.parseXML(item);
+    return ExchangeRateFactory.createExchangeRates(item);
   }
 }

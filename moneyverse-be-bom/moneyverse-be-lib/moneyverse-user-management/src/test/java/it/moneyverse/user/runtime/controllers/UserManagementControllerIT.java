@@ -63,8 +63,6 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
         .withGrpcCurrencyService(mockServer.getHost(), mockServer.getPort())
         .withKafkaContainer(kafkaContainer)
         .withFlywayTestDirectory(tempDir);
-    registry.add(KeycloakAdminProperties.KEYCLOAK_USERNAME, admin::getUsername);
-    registry.add(KeycloakAdminProperties.KEYCLOAK_PASSWORD, admin::getPassword);
     registry.add(
         KeycloakAdminProperties.KEYCLOAK_CLIENT_ID,
         () -> KeycloakSetupContextConstants.TEST_CLIENT);

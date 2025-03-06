@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import it.moneyverse.core.model.dto.CurrencyDto;
 import it.moneyverse.currency.model.CurrencyTestFactory;
 import it.moneyverse.currency.model.entities.Currency;
-import it.moneyverse.currency.utils.CurrencyMapper;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.ArrayList;
 import java.util.Collections;
