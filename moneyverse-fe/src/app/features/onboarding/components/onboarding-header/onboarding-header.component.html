@@ -1,0 +1,18 @@
+<div class="px-4 py-4 flex justify-between items-center p-4">
+  <div class="w-45 h-auto">
+    <svg-icon src="/assets/images/moneyverse-logo.svg"></svg-icon>
+  </div>
+  <div class="flex items-center gap-x-4">
+    <label class="flex cursor-pointer gap-2 mx-2">
+      <i-lucide [name]="SunIcon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+      <input type="checkbox" class="toggle theme-controller" (change)="themeService.toggleTheme()"/>
+      <i-lucide [name]="MoonIcon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+    </label>
+    <button
+      class="btn btn-ghost"
+      (click)="this.authService.logout()"
+    >
+      <i-lucide [name]="LogOutIcon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+    </button>
+  </div>
+</div>

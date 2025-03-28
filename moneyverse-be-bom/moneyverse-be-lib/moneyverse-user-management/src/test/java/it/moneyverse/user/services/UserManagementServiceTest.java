@@ -11,6 +11,8 @@ import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.Optional;
 import java.util.UUID;
+
+import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +27,7 @@ class UserManagementServiceTest {
 
   @Mock private KeycloakService keycloakService;
   @Mock private MessageProducer<UUID, String> messageProducer;
+  @Mock private UserPreferenceRepository userPreferenceRepository;
 
   @Test
   void givenUserId_WhenGetUser_ThenReturnUser(@Mock UserDto userDto) {

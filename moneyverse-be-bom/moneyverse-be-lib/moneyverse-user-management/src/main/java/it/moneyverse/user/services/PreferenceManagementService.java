@@ -90,6 +90,18 @@ public class PreferenceManagementService implements PreferenceService {
 
   @Override
   @Transactional(readOnly = true)
+  public UserPreferenceDto getUserPreference(UUID userId, String key) {
+    return userPreferenceRepository
+        .findUserPreferenceByUserIdAndPreference_Name(userId, key)
+        .map(PreferenceMapper::toUserPreferenceDto)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Preference with key %s not found for user %s".formatted(key, userId)));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public List<PreferenceDto> getPreferences(Boolean mandatory) {
     return PreferenceMapper.toPreferenceDto(
         mandatory == null

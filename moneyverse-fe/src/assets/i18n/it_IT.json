@@ -1,0 +1,13 @@
+{
+  "menu": {
+    "overview": "Riepilogo",
+    "accounts": "Accounts",
+    "settings": "Impostazioni",
+    "logout": "Esci"
+  },
+  "features": {
+    "overview": {
+      "title": "Riepilogo"
+    }
+  }
+}

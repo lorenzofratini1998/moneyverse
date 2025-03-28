@@ -1,0 +1,39 @@
+<div class="flex flex-col gap-4">
+  <div class="card bg-base-100 w-full shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title text-xl font-medium">Profile</h2>
+      <p>Let's configure your profile.</p>
+      <app-profile-form
+        [user]="user()"
+        (formSubmit)="submit($event)">
+      </app-profile-form>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 w-full shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title text-xl font-medium text-red-600 dark:text-red-400">Danger Zone</h2>
+      <div class="card-actions flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-2">
+        <div>
+          <h3 class="text-lg font-bold mb-1"><b>Delete this profile</b></h3>
+          <p>Once you delete your profile, there is no going back. Please be certain.</p>
+        </div>
+        <button
+          (click)="openConfirmDialog()"
+          class="btn btn-outline btn-error"
+        >
+          <i-lucide [name]="Trash2Icon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+          <span>Delete profile</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <app-confirm-dialog
+    #confirmDialog
+    title="Are you sure?"
+    message="Once you delete your profile, there is no going back. Please be certain.">
+  </app-confirm-dialog>
+
+  <app-toast></app-toast>
+</div>

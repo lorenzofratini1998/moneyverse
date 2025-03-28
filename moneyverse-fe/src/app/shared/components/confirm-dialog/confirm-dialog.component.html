@@ -1,0 +1,10 @@
+<dialog #dialog class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">{{ title() }}</h3>
+    <p class="py-4">{{ message() }}</p>
+    <div class="modal-action">
+      <button class="btn btn-error" (click)="onConfirm()">Confirm</button>
+      <button class="btn btn-outline" (click)="onCancel()">Cancel</button>
+    </div>
+  </div>
+</dialog>

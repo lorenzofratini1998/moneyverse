@@ -1,0 +1,26 @@
+<div class="toast toast-top toast-center toast-container z-50">
+  @if (message(); as toast) {
+    <div
+      class="alert alert-soft shadow-lg mb-2"
+      [ngClass]="getToastClass(toast)"
+    >
+      <div class="flex items-center gap-2">
+        @switch (toast.type) {
+          @case ("success") {
+            <i-lucide [name]="CircleCheckIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+          }
+          @case ("error") {
+            <i-lucide [name]="CircleXIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+          }
+          @case ("warning") {
+            <i-lucide [name]="TriangleAlertIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+          }
+          @default {
+            <i-lucide [name]="InfoIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+          }
+        }
+        <span>{{ toast.message }}</span>
+      </div>
+    </div>
+  }
+</div>

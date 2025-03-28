@@ -5,6 +5,7 @@ import it.moneyverse.test.model.TestContext;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
+import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.user.model.entities.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -61,6 +62,11 @@ public class UserTestContext extends TestContext<UserTestContext> {
 
   public List<Preference> getMandatoryPreferences() {
     return preferences.stream().filter(Preference::getMandatory).toList();
+  }
+
+  public UserPreference getRandomUserPreference(UUID userId) {
+    List<UserPreference> userPreferences = getUserPreferencesByUserId(userId);
+    return userPreferences.get(RandomUtils.randomInteger(userPreferences.size()));
   }
 
   @Override

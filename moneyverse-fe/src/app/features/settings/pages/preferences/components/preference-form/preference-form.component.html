@@ -1,0 +1,68 @@
+<form
+  [formGroup]="preferenceForm"
+  (ngSubmit)="save()"
+>
+  <div class="flex flex-col gap-6 py-4">
+    <!-- Currency -->
+    <div class="flex flex-col">
+      <label class="input">
+        <span class="label">Currency</span>
+        <input
+          id="currency"
+          type="text"
+          formControlName="currency"
+          class="input input-md w-full"
+        />
+        <i-lucide [name]="LockKeyholeIcon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+      </label>
+    </div>
+    <!-- Language -->
+    <div class="flex flex-col">
+      <label class="select validator">
+        <span class="label">Language</span>
+        <select
+          id="language"
+          class="select select-bordered"
+          formControlName="language"
+          required
+        >
+          @for (language of languages(); track language.languageId) {
+            <option [value]="language.isoCode">
+              {{ language.country }}
+            </option>
+          }
+        </select>
+      </label>
+      <div class="validator-hint hidden">Please select a valid language.</div>
+    </div>
+
+    <!-- Date Format -->
+    <div class="flex flex-col">
+      <label class="select validator">
+        <span class="label">Date Format</span>
+        <select
+          id="date-format"
+          class="select select-bordered"
+          formControlName="dateFormat"
+          required
+        >
+          @for (dateFormat of dateFormats(); track dateFormat.value) {
+            <option [value]="dateFormat.value">
+              {{ dateFormat.label }}
+            </option>
+          }
+        </select>
+      </label>
+      <div class="validator-hint hidden">Please select a valid date format.</div>
+    </div>
+  </div>
+
+  <div class="flex justify-center mt-4">
+    <button
+      class="btn btn-primary"
+      type="submit"
+      [disabled]="!preferenceForm.valid"
+    >Save
+    </button>
+  </div>
+</form>

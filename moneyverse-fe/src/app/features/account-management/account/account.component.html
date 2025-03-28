@@ -1,0 +1,82 @@
+<div class="container mx-auto p-6">
+  <header class="mb-8 flex justify-between items-center">
+    <h1 class="text-3xl font-bold">I tuoi account</h1>
+    <button
+      class="btn btn-primary"
+      (click)="openAddAccountDialog()">
+      <svg-icon src="/assets/icons/plus.svg" class="size-5"></svg-icon>
+      <span>Aggiungi Account</span>
+    </button>
+  </header>
+
+  <!-- Accounts summary -->
+  <app-account-summary
+    *ngIf="accounts$().length && accountCategories$().length && userCurrency$()"
+    [accounts]="accounts$()"
+    [categories]="accountCategories$()"
+    [userCurrency]="userCurrency$()!.value">
+  </app-account-summary>
+
+  <!-- Accounts list -->
+  <div class="rounded-xl shadow-md p-6">
+    <div class="pb-6 flex justify-between items-center">
+      <h2 class="text-2xl font-semibold">Tutti gli account</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (account of accounts$(); track account.accountId) {
+        <app-account-card
+          [account]="account"
+          [category]="getCategory(account.accountCategory)"
+          (view)="showAccountDetails($event)"
+          (edit)="openEditAccountDialog(account)"
+          (delete)="deleteAccount($event)"
+        >
+        </app-account-card>
+      }
+    </div>
+  </div>
+</div>
+
+<app-dialog
+  [show]="showAccountFormDialog()"
+>
+  <div class="flex flex-col gap-y-6">
+    <h3 class="font-bold text-lg py-4">
+      @if (accountToEdit()) {
+        Modifica account
+      } @else {
+        Aggiungi un nuovo account
+      }
+    </h3>
+    <app-account-form
+      [categories]="accountCategories$()"
+      [currencies]="currencies$()"
+      [currency]="userCurrency$()!.value"
+      [account]="accountToEdit() || null"
+      (save)="saveAccount($event)"
+      (cancel)="closeAccountDialog()">
+    </app-account-form>
+  </div>
+</app-dialog>
+
+<app-dialog
+  [show]="selectedAccount() !== undefined"
+>
+  @if (selectedAccount(); as account) {
+    <h3 class="font-bold text-lg">{{ account.accountName }}</h3>
+    <div class="py-4">
+      <app-account-detail
+        [account]="account"
+        [category]="getCategory(account.accountCategory)">
+      </app-account-detail>
+    </div>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn" (click)="clearSelectedAccount()">Close</button>
+      </form>
+    </div>
+  }
+</app-dialog>
+
+<app-toast></app-toast>

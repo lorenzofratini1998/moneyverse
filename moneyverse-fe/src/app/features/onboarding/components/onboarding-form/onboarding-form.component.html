@@ -1,0 +1,74 @@
+<form
+  [formGroup]="onboardingForm"
+  (ngSubmit)="save()"
+  class="flex flex-col justify-center gap-y-4 py-4"
+>
+  <div class="flex flex-col">
+    <label class="select validator">
+      <span class="label">Currency</span>
+      <select
+        id="currency"
+        class="select select-bordered"
+        formControlName="currency"
+        required
+        [attr.disabled]="userCurrency() !== undefined"
+      >
+        @for (currency of currencies(); track currency.currencyId) {
+          <option [value]="currency.code">
+            {{ currency.name }} ({{ currency.code }})
+          </option>
+        }
+      </select>
+    </label>
+    <div class="validator-hint hidden">Please select a valid currency.</div>
+  </div>
+
+  <div class="flex flex-col">
+    <label class="select validator">
+      <span class="label">Language</span>
+      <select
+        id="language"
+        class="select select-bordered"
+        formControlName="language"
+        required
+        [attr.disabled]="userLanguage() !== undefined"
+      >
+        @for (language of languages(); track language.languageId) {
+          <option [value]="language.isoCode">
+            {{ language.country }}
+          </option>
+        }
+      </select>
+    </label>
+    <div class="validator-hint hidden">Please select a valid language.</div>
+  </div>
+
+  <div class="flex flex-col">
+    <label class="select validator">
+      <span class="label">Date Format</span>
+      <select
+        id="date-format"
+        class="select select-bordered"
+        formControlName="dateFormat"
+        required
+        [attr.disabled]="userDateFormat() !== undefined"
+      >
+        @for (dateFormat of dateFormats(); track dateFormat.label) {
+          <option [value]="dateFormat.value">
+            {{ dateFormat.label }}
+          </option>
+        }
+      </select>
+    </label>
+    <div class="validator-hint hidden">Please select a valid date format.</div>
+  </div>
+
+  <div class="flex justify-center">
+    <button
+      class="btn btn-primary"
+      type="submit"
+      [disabled]="!onboardingForm.valid"
+    >Save
+    </button>
+  </div>
+</form>

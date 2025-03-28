@@ -17,4 +17,6 @@ public interface UserPreferenceRepository extends JpaRepository<UserPreference, 
 
   Optional<UserPreference> findUserPreferenceByUserIdAndPreference_Name(
       UUID userId, String preferenceName);
+
+  void deleteUserPreferenceByUserId(UUID userId);
 }

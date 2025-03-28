@@ -14,5 +14,7 @@ public interface PreferenceOperations {
 
   List<UserPreferenceDto> getUserPreferences(UUID userId, Boolean mandatory);
 
+  UserPreferenceDto getUserPreference(UUID userId, String key);
+
   List<PreferenceDto> getPreferences(Boolean mandatory);
 }

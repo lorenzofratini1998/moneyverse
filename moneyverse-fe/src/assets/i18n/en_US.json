@@ -1,0 +1,20 @@
+{
+  "menu": {
+    "overview": "Overview",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "features": {
+    "overview": {
+      "title": "Overview"
+    },
+    "settings": {
+      "title": "Settings",
+      "profile": {
+        "title": "Profile",
+        "subtitle": "Let's configure your profile"
+      },
+      "preferences": "Preferences"
+    }
+  }
+}

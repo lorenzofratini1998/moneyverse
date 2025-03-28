@@ -144,6 +144,29 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
   }
 
   @Test
+  void testGetUserPreference() {
+    final UserModel userModel = testContext.getRandomUser();
+    UUID userId = userModel.getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final UserPreference userPreference = testContext.getRandomUserPreference(userId);
+    ResponseEntity<UserPreferenceDto> response =
+        restTemplate.exchange(
+            basePath
+                + "/users/%s/preferences/%s"
+                    .formatted(userId, userPreference.getPreference().getName()),
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            UserPreferenceDto.class);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(userId, response.getBody().getUserId());
+    assertEquals(
+        userPreference.getPreference().getName(), response.getBody().getPreference().getName());
+    assertEquals(userPreference.getValue(), response.getBody().getValue());
+  }
+
+  @Test
   void testGetPreferences() {
     final UserModel userModel = testContext.getRandomUser();
     headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));

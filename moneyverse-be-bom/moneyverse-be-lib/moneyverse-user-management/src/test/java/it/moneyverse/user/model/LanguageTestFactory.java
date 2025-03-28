@@ -14,8 +14,9 @@ public class LanguageTestFactory {
   public static Language fakeLanguage(int i) {
     Language language = new Language();
     language.setLanguageId(RandomUtils.randomUUID());
-    language.setIsoCode(RandomUtils.randomString(3).toUpperCase());
+    language.setIsoCode(RandomUtils.randomString(5).toUpperCase());
     language.setCountry(RandomUtils.randomString(20));
+    language.setIcon(RandomUtils.randomString(10));
     language.setDefault(i == 0);
     return language;
   }

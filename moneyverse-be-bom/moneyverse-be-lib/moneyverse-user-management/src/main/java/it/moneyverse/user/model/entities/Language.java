@@ -17,11 +17,14 @@ public class Language implements Serializable {
   @Column(name = "LANGUAGE_ID")
   private UUID languageId;
 
-  @Column(name = "ISO_CODE", length = 3, nullable = false)
+  @Column(name = "ISO_CODE", length = 5, nullable = false)
   private String isoCode;
 
   @Column(name = "COUNTRY", length = 50, nullable = false)
   private String country;
+
+  @Column(name = "ICON", length = 10, nullable = false)
+  private String icon;
 
   @Column(name = "IS_DEFAULT", nullable = false)
   @ColumnDefault("FALSE")
@@ -53,6 +56,14 @@ public class Language implements Serializable {
 
   public void setCountry(String country) {
     this.country = country;
+  }
+
+  public String getIcon() {
+    return icon;
+  }
+
+  public void setIcon(String icon) {
+    this.icon = icon;
   }
 
   public Boolean isDefault() {

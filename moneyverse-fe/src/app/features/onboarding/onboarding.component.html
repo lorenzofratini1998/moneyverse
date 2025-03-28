@@ -1,0 +1,20 @@
+<app-onboarding-header></app-onboarding-header>
+
+<div class="flex flex-col justify-center items-center">
+  <div class="card bg-base-100 w-96 shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title">Configure your preferences</h2>
+      <p>Let's configure you preferences</p>
+      <app-onboarding-form
+        [currencies]="currencies$()"
+        [languages]="languages$()"
+        [dateFormats]="dateFormats$()"
+        [userCurrency]="userCurrency$()"
+        [userLanguage]="userLanguage$()"
+        [userDateFormat]="userDateFormat$()"
+        (formSubmit)="save($event)"
+      ></app-onboarding-form>
+    </div>
+  </div>
+</div>
+<app-toast></app-toast>

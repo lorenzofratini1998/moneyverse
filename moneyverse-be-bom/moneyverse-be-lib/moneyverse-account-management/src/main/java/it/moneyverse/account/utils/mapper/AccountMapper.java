@@ -69,24 +69,12 @@ public class AccountMapper {
     if (request == null) {
       return null;
     }
-    if (request.accountName() != null) {
-      account.setAccountName(request.accountName());
-    }
-    if (request.balance() != null) {
-      account.setBalance(request.balance());
-    }
-    if (request.balanceTarget() != null) {
-      account.setBalanceTarget(request.balanceTarget());
-    }
-    if (request.accountCategory() != null) {
-      account.setAccountCategory(accountCategory);
-    }
-    if (request.accountDescription() != null) {
-      account.setAccountDescription(request.accountDescription());
-    }
-    if (request.isDefault() != null) {
-      account.setDefault(request.isDefault());
-    }
+    account.setAccountName(request.accountName());
+    account.setBalance(request.balance());
+    account.setBalanceTarget(request.balanceTarget());
+    account.setAccountCategory(accountCategory);
+    account.setAccountDescription(request.accountDescription());
+    account.setDefault(request.isDefault());
     return account;
   }
 }

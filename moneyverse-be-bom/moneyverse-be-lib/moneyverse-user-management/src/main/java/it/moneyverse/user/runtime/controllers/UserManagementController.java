@@ -49,6 +49,14 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   }
 
   @Override
+  @GetMapping("/users/{userId}/preferences/{key}")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
+  public UserPreferenceDto getUserPreference(@PathVariable UUID userId, @PathVariable String key) {
+    return preferenceService.getUserPreference(userId, key);
+  }
+
+  @Override
   @GetMapping("/preferences")
   @ResponseStatus(HttpStatus.OK)
   public List<PreferenceDto> getPreferences(@RequestParam(required = false) Boolean mandatory) {
@@ -85,5 +93,12 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
   public void disableUser(@PathVariable UUID userId) {
     userService.disableUser(userId);
+  }
+
+  @Override
+  @GetMapping("/languages")
+  @ResponseStatus(HttpStatus.OK)
+  public List<LanguageDto> getLanguages() {
+    return userService.getLanguages();
   }
 }
