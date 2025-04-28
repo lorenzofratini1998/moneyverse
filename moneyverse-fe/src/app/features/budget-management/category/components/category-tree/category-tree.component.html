@@ -1,0 +1,13 @@
+<div class="flex justify-start py-2">
+  <h2 class="text-lg font-bold">Categorie: {{ categories().length }}</h2>
+</div>
+<ul>
+  @for (parent of parentCategories(); track parent.categoryId) {
+    <app-category-tree-item
+      [category]="parent"
+      [level]="0"
+      (delete)="deleteCategory.emit($event)"
+    />
+    <div class="divider m-0"></div>
+  }
+</ul>

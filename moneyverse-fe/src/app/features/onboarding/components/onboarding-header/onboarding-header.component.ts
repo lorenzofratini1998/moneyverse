@@ -1,27 +1,24 @@
 import {Component, inject} from '@angular/core';
-import {LogOutIcon, LucideAngularModule, MoonIcon, SunIcon} from "lucide-angular";
+import {LucideAngularModule} from "lucide-angular";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {SvgIconComponent} from "angular-svg-icon";
 import {AuthService} from '../../../../core/auth/auth.service';
-import {ThemeService} from '../../../../shared/services/theme.service';
+import {SvgComponent} from '../../../../shared/components/svg/svg.component';
+import {DarkModeToggleComponent} from '../../../../shared/components/dark-mode-toggle/dark-mode-toggle.component';
+import {IconsEnum} from "../../../../shared/models/icons.model";
 
 @Component({
   selector: 'app-onboarding-header',
   imports: [
     LucideAngularModule,
     ReactiveFormsModule,
-    SvgIconComponent,
-    FormsModule
+    FormsModule,
+    SvgComponent,
+    DarkModeToggleComponent
   ],
   templateUrl: './onboarding-header.component.html'
 })
 export class OnboardingHeaderComponent {
 
-  protected readonly LogOutIcon = LogOutIcon;
-
   protected readonly authService = inject(AuthService);
-  protected readonly themeService = inject(ThemeService);
-
-  protected readonly SunIcon = SunIcon;
-  protected readonly MoonIcon = MoonIcon;
+  protected readonly Icons = IconsEnum;
 }

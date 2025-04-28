@@ -128,8 +128,8 @@ class CategoryManagementServiceTest {
         CategoryTestFactory.CategoryUpdateRequestBuilder.defaultInstance();
 
     when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-    when(categoryRepository.existsByUserIdAndCategoryName(
-            category.getUserId(), request.categoryName()))
+    when(categoryRepository.existsByUserIdAndCategoryNameAndCategoryIdNot(
+            category.getUserId(), request.categoryName(), categoryId))
         .thenReturn(false);
     mapper.when(() -> CategoryMapper.partialUpdate(category, request)).thenReturn(category);
     when(categoryRepository.save(category)).thenReturn(category);
@@ -140,7 +140,8 @@ class CategoryManagementServiceTest {
     assertNotNull(categoryDto);
     verify(categoryRepository, times(1)).findById(categoryId);
     verify(categoryRepository, times(1))
-        .existsByUserIdAndCategoryName(category.getUserId(), request.categoryName());
+        .existsByUserIdAndCategoryNameAndCategoryIdNot(
+            category.getUserId(), request.categoryName(), categoryId);
     mapper.verify(() -> CategoryMapper.partialUpdate(category, request), times(1));
     verify(categoryRepository, times(1)).save(category);
     mapper.verify(() -> CategoryMapper.toCategoryDto(category), times(1));
@@ -177,8 +178,8 @@ class CategoryManagementServiceTest {
         CategoryTestFactory.CategoryUpdateRequestBuilder.defaultInstance();
 
     when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-    when(categoryRepository.existsByUserIdAndCategoryName(
-            category.getUserId(), request.categoryName()))
+    when(categoryRepository.existsByUserIdAndCategoryNameAndCategoryIdNot(
+            category.getUserId(), request.categoryName(), categoryId))
         .thenReturn(true);
     assertThrows(
         ResourceAlreadyExistsException.class,
@@ -186,7 +187,8 @@ class CategoryManagementServiceTest {
 
     verify(categoryRepository, times(1)).findById(categoryId);
     verify(categoryRepository, times(1))
-        .existsByUserIdAndCategoryName(category.getUserId(), request.categoryName());
+        .existsByUserIdAndCategoryNameAndCategoryIdNot(
+            category.getUserId(), request.categoryName(), categoryId);
 
     mapper.verify(
         () ->

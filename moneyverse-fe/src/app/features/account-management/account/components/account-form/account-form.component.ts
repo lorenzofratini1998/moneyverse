@@ -1,43 +1,42 @@
-import {Component, computed, effect, inject, input, output} from '@angular/core';
+import {Component, effect, inject, input, output} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Account, AccountCategory} from '../../../account.model';
 import {CurrencyDto} from '../../../../../shared/models/currencyDto';
-import {SvgIconComponent} from 'angular-svg-icon';
+import {SvgComponent} from '../../../../../shared/components/svg/svg.component';
+import {IconsEnum} from '../../../../../shared/models/icons.model';
 
 @Component({
   selector: 'app-account-form',
   imports: [
     ReactiveFormsModule,
-    SvgIconComponent,
+    SvgComponent,
   ],
   templateUrl: './account-form.component.html',
   styleUrl: './account-form.component.scss'
 })
 export class AccountFormComponent {
+  protected readonly Icons = IconsEnum;
   private readonly fb = inject(FormBuilder);
   categories = input.required<AccountCategory[]>();
   currencies = input.required<CurrencyDto[]>();
-  account = input.required<Account | null>();
+  account = input<Account | null>(null);
   currency = input.required<string>();
   save = output<any>();
   cancel = output<any>();
 
   accountForm: FormGroup = this.createForm();
-  isEditMode = computed(() => !!this.account());
 
   constructor() {
     effect(() => {
       const currentAccount = this.account();
       if (currentAccount) {
         this.patchForm(currentAccount);
-      } else {
-        this.resetForm();
       }
     })
 
     effect(() => {
       const currency = this.currency();
-      if (!this.isEditMode) {
+      if (!this.account()) {
         this.accountForm.get('currency')?.setValue(currency);
       }
     })
@@ -56,8 +55,7 @@ export class AccountFormComponent {
   }
 
   private patchForm(account: Account): void {
-    const form = this.accountForm;
-    form.patchValue({
+    this.accountForm.patchValue({
         accountName: account.accountName,
         accountDescription: account.accountDescription,
         accountCategory: account.accountCategory,
@@ -93,7 +91,6 @@ export class AccountFormComponent {
     const form = this.accountForm;
     if (form.valid) {
       this.save.emit(form.value);
-      this.resetForm();
     } else {
       Object.keys(form.controls).forEach(key => {
         form.get(key)?.markAsTouched();
@@ -102,7 +99,7 @@ export class AccountFormComponent {
     }
   }
 
-  resetForm() {
+  reset() {
     this.accountForm.reset({
       accountName: '',
       accountDescription: null,
@@ -116,5 +113,6 @@ export class AccountFormComponent {
 
   cancelForm(): void {
     this.cancel.emit({});
+    this.reset();
   }
 }

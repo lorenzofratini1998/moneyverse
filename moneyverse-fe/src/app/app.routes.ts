@@ -4,6 +4,7 @@ import {OnboardingComponent} from './features/onboarding/onboarding.component';
 import {OverviewComponent} from './features/overview/overview.component';
 import {MainLayoutComponent} from './core/layout/main-layout/main-layout.component';
 import {AccountComponent} from './features/account-management/account/account.component';
+import {CategoryComponent} from './features/budget-management/category/category.component';
 
 export const routes: Routes = [
     {
@@ -29,6 +30,10 @@ export const routes: Routes = [
         {
           path: 'accounts',
           component: AccountComponent
+        },
+        {
+          path: 'categories',
+          component: CategoryComponent
         }
       ]
     },

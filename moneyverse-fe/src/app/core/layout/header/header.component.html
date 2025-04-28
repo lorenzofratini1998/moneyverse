@@ -1,19 +1,13 @@
 <div class="flex justify-end items-center py-2">
   <div class="flex justify-end items-center">
-    <label class="flex cursor-pointer gap-2 mx-2">
-      <svg-icon src="/assets/icons/sun.svg" class="size-5"></svg-icon>
-      <input type="checkbox" class="toggle theme-controller" [(ngModel)]="isDarkModeEnabled"
-             (change)="themeService.toggleTheme()"/>
-      <svg-icon src="/assets/icons/moon.svg" class="size-5"></svg-icon>
-    </label>
+    <app-dark-mode-toggle/>
 
     <div class="dropdown dropdown-bottom dropdown-end">
       <button
         tabindex="0"
-        (click)="changeLanguage(selectedLanguage)"
         class="btn btn-circle btn-ghost mx-2 w-10"
         aria-label="Change language">
-        <svg-icon [src]="'/assets/icons/flags/' + selectedLanguage.icon + '.svg'" class="size-5"></svg-icon>
+        <app-svg [src]="'/assets/icons/flags/' + selectedLanguage.icon + '.svg'" class="size-5"/>
       </button>
       <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-30 p-2 shadow-sm">
         @for (language of languages$(); track language.isoCode) {
@@ -22,7 +16,7 @@
               class="flex items-center gap-2"
               (click)="changeLanguage(language)"
             >
-              <svg-icon [src]="'/assets/icons/flags/' + language.icon + '.svg'" class="size-5"></svg-icon>
+              <app-svg [src]="'/assets/icons/flags/' + language.icon + '.svg'" class="size-5"/>
               <span>{{ language.country }}</span>
             </a>
           </li>
@@ -66,7 +60,7 @@
               routerLink="/settings"
               class="cursor-pointer rounded-md transition-colors duration-150"
             >
-              <svg-icon src="/assets/icons/cog.svg" class="size-5"></svg-icon>
+              <app-svg [name]="IconsEnum.SETTINGS"/>
               <span>{{ 'menu.settings' | translate }}</span>
             </a>
           </li>
@@ -75,7 +69,7 @@
               routerLink="/logout"
               class="cursor-pointer rounded-md transition-colors duration-150"
             >
-              <svg-icon src="/assets/icons/log-out.svg" class="size-5"></svg-icon>
+              <app-svg [name]="IconsEnum.LOG_OUT"/>
               <span>{{ 'menu.logout' | translate }}</span>
             </a>
           </li>

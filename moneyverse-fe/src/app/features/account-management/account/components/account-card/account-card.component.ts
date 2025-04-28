@@ -3,7 +3,9 @@ import {Account, AccountCategory} from '../../../account.model';
 import {CurrencyPipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import {EyeIcon, LucideAngularModule, PencilIcon, StarIcon, Trash2Icon} from 'lucide-angular';
+import {LucideAngularModule} from 'lucide-angular';
+import {SvgComponent} from '../../../../../shared/components/svg/svg.component';
+import {IconsEnum} from '../../../../../shared/models/icons.model';
 
 @Component({
   selector: 'app-account-card',
@@ -12,15 +14,11 @@ import {EyeIcon, LucideAngularModule, PencilIcon, StarIcon, Trash2Icon} from 'lu
     CurrencyPipe,
     FormsModule,
     ConfirmDialogComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    SvgComponent
   ]
 })
 export class AccountCardComponent {
-
-  protected readonly Trash2Icon = Trash2Icon;
-  protected readonly PencilIcon = PencilIcon;
-  protected readonly EyeIcon = EyeIcon;
-  protected readonly StarIcon = StarIcon;
 
   account = input.required<Account>();
   category = input.required<AccountCategory>();
@@ -45,4 +43,6 @@ export class AccountCardComponent {
       }
     });
   }
+
+  protected readonly Icons = IconsEnum;
 }

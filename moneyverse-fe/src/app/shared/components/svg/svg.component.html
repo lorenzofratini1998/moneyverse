@@ -1,0 +1,12 @@
+@if (src() !== '') {
+  <svg-icon
+    [src]="src()"
+    [class]="class()"
+  />
+} @else {
+  <i-lucide
+    [name]="currentIcon"
+    [strokeWidth]="strokeWidth()"
+    [class]="class()"
+  />
+}

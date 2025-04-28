@@ -2,12 +2,14 @@ import {Component, inject} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ToastComponent, ToastEnum} from '../../shared/components/toast/toast.component';
 import {MessageService} from '../../shared/services/message.service';
+import {ColorPickerComponent} from '../../shared/components/color-picker/color-picker.component';
 
 @Component({
   selector: 'app-overview',
   imports: [
     FormsModule,
-    ToastComponent
+    ToastComponent,
+    ColorPickerComponent
   ],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.scss'

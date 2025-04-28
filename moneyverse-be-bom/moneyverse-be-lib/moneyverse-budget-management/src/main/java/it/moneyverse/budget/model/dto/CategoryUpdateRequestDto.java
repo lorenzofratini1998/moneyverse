@@ -2,15 +2,16 @@ package it.moneyverse.budget.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import it.moneyverse.core.model.dto.StyleRequestDto;
 import it.moneyverse.core.utils.JsonUtils;
 import java.io.Serializable;
 import java.util.UUID;
-import org.openapitools.jackson.nullable.JsonNullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_ABSENT)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record CategoryUpdateRequestDto(
-    String categoryName, String description, JsonNullable<UUID> parentId) implements Serializable {
+    String categoryName, String description, UUID parentId, StyleRequestDto style)
+    implements Serializable {
 
   @Override
   public String toString() {

@@ -3,6 +3,8 @@ package it.moneyverse.test.model;
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.DateCriteria;
+import it.moneyverse.core.model.dto.StyleRequestDto;
+import it.moneyverse.core.model.entities.Style;
 import it.moneyverse.core.model.events.AccountEvent;
 import it.moneyverse.core.model.events.CategoryEvent;
 import it.moneyverse.core.model.events.TransactionEvent;
@@ -160,6 +162,18 @@ public class TestFactory {
 
   public static BigDecimal fakeExchangeRate() {
     return RandomUtils.flipCoin() ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
+  }
+
+  public static Style fakeStyle() {
+    Style style = new Style();
+    style.setBackgroundColor("#FEE2E2");
+    style.setTextColor("#EF4444");
+    style.setIcon("circle-dollar-sign");
+    return style;
+  }
+
+  public static StyleRequestDto fakeStyleRequest() {
+    return new StyleRequestDto("#FEE2E2", "#EF4444", "circle-dollar-sign");
   }
 
   private TestFactory() {}

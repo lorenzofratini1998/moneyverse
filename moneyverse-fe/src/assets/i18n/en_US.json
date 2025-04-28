@@ -2,6 +2,8 @@
   "menu": {
     "overview": "Overview",
     "settings": "Settings",
+    "accounts": "Accounts",
+    "categories": "Categories",
     "logout": "Logout"
   },
   "features": {

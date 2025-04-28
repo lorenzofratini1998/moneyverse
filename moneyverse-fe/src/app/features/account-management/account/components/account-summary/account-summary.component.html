@@ -7,7 +7,7 @@
     @if (selectedCategory()) {
       <form class="filter flex gap-2">
         <button class="btn btn-square" type="reset" value="x" (click)="resetDrillDown()">
-          <svg-icon src="/assets/icons/x-mark.svg" class="size-5"></svg-icon>
+          <app-svg [name]="Icons.X"/>
         </button>
         <input class="btn" type="radio" name="category_selected" [checked]="true"
                [attr.aria-label]="selectedCategory()"/>

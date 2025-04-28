@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ViewChild} from '@angular/core';
 import {Account, AccountCategory, AccountRequest} from '../account.model';
 import {AccountService} from '../account.service';
 import {AuthService} from '../../../core/auth/auth.service';
@@ -16,7 +16,9 @@ import {DialogComponent} from '../../../shared/components/dialog/dialog.componen
 import {toSignal} from '@angular/core/rxjs-interop';
 import {CurrencyDto} from '../../../shared/models/currencyDto';
 import {PreferenceKey} from '../../../shared/models/preference.model';
-import {SvgIconComponent} from 'angular-svg-icon';
+import {SvgComponent} from '../../../shared/components/svg/svg.component';
+import {IconsEnum} from "../../../shared/models/icons.model";
+import {AccountStore} from '../account.store';
 
 @Component({
   selector: 'app-account',
@@ -28,12 +30,14 @@ import {SvgIconComponent} from 'angular-svg-icon';
     AccountDetailComponent,
     NgIf,
     DialogComponent,
-    SvgIconComponent,
+    SvgComponent,
 
   ],
   templateUrl: './account.component.html'
 })
 export class AccountComponent {
+  protected readonly Icons = IconsEnum;
+  protected readonly accountStore = inject(AccountStore);
   private readonly accountService = inject(AccountService);
   private readonly currencyService = inject(CurrencyService);
   private readonly preferenceService = inject(PreferenceService);
@@ -42,6 +46,8 @@ export class AccountComponent {
 
   private readonly refreshAccounts$ = new Subject<void>();
   private readonly userId$ = this.authService.getUserId().pipe(shareReplay(1));
+
+  @ViewChild(AccountFormComponent) accountForm!: AccountFormComponent;
 
   accounts$ = toSignal(
     combineLatest([
@@ -60,8 +66,6 @@ export class AccountComponent {
     switchMap(userId => this.preferenceService.getUserPreference(userId, PreferenceKey.CURRENCY))));
 
   selectedAccount = signal<Account | undefined>(undefined);
-  showAccountFormDialog = signal<boolean>(false);
-  accountToEdit = signal<Account | null>(null);
 
   showAccountDetails(account: Account): void {
     this.selectedAccount.set(account);
@@ -77,22 +81,12 @@ export class AccountComponent {
     return category;
   }
 
-  openAddAccountDialog(): void {
-    this.accountToEdit.set(null);
-    this.showAccountFormDialog.set(true);
-  }
-
-  openEditAccountDialog(account: Account): void {
-    this.accountToEdit.set(account);
-    this.showAccountFormDialog.set(true);
-  }
-
   saveAccount(accountData: any): void {
     this.authService.getUserId().pipe(
       take(1),
       switchMap(userId => {
-          if (this.accountToEdit() !== null) {
-            return this.accountService.updateAccount(this.accountToEdit()!.accountId, this.createUpdateAccountRequest(accountData))
+        if (this.accountStore.selectedAccount() !== null) {
+          return this.accountService.updateAccount(this.accountStore.selectedAccount()!.accountId, this.createUpdateAccountRequest(accountData))
           } else {
             return this.accountService.createAccount(this.createAccountRequest(accountData, userId))
           }
@@ -100,17 +94,17 @@ export class AccountComponent {
       )
     ).subscribe({
       next: () => {
-        this.refreshAccounts$.next();
         this.messageService.showMessage({
           type: ToastEnum.SUCCESS,
-          message: this.accountToEdit() !== null ? 'Account updated successfully.' : 'Account created successfully.'
+          message: this.accountStore.selectedAccount() !== null ? 'Account updated successfully.' : 'Account created successfully.'
         });
-        this.showAccountFormDialog.set(false);
+        this.accountForm.reset();
+        this.refreshAccounts$.next();
       },
       error: () => {
         this.messageService.showMessage({
           type: ToastEnum.ERROR,
-          message: this.accountToEdit() !== null ? 'Error during the account update.' : 'Error during the account creation.'
+          message: this.accountStore.selectedAccount() !== null ? 'Error during the account update.' : 'Error during the account creation.'
         });
       }
     })
@@ -138,11 +132,6 @@ export class AccountComponent {
     updateRequest.currency = accountData.currency;
     updateRequest.isDefault = accountData.isDefault;
     return updateRequest;
-  }
-
-  closeAccountDialog(): void {
-    this.showAccountFormDialog.set(false);
-    this.accountToEdit.set(null);
   }
 
   deleteAccount(account: Account) {

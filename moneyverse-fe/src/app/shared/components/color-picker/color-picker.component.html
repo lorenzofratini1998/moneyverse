@@ -1,0 +1,28 @@
+<div class="dropdown dropdown-bottom dropdown-center">
+  <button
+    type="button"
+    class="w-5 h-5 rounded cursor-pointer peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-blue-500"
+    [ngStyle]="{'background-color': selectedColor().text}">
+  </button>
+  <div
+    tabindex="0"
+    class="dropdown-content p-2 bg-base-100 w-35 shadow-md grid grid-cols-5 gap-2">
+    @for (color of colors; track color.name) {
+      <label class="relative">
+        <input type="radio"
+               [value]="color.name"
+               [checked]="color.selected"
+               [name]="color.name"
+               [id]="'color_{{ color.name }}'"
+               class="sr-only peer"
+               (change)="selectColor(color)"
+        >
+        <div
+          class="w-5 h-5 rounded cursor-pointer peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-blue-500"
+          [ngStyle]="{'background-color': color.text}"></div>
+      </label>
+    }
+  </div>
+</div>
+
+

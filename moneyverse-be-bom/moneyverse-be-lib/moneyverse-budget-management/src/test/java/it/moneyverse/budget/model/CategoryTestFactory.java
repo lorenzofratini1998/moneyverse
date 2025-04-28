@@ -61,6 +61,7 @@ public class CategoryTestFactory {
     category.setUserId(userId);
     category.setCategoryName("Category %s".formatted(counter));
     category.setDescription(RandomUtils.randomString(30));
+    category.setStyle(TestFactory.fakeStyle());
     category.setCreatedBy(TestFactory.FAKE_USER);
     category.setCreatedAt(LocalDateTime.now());
     category.setUpdatedBy(TestFactory.FAKE_USER);
@@ -86,6 +87,7 @@ public class CategoryTestFactory {
     category.setUserId(RandomUtils.randomUUID());
     category.setCategoryName(RandomUtils.randomString(15));
     category.setDescription(RandomUtils.randomString(15));
+    category.setStyle(TestFactory.fakeStyle());
     return category;
   }
 
@@ -95,6 +97,7 @@ public class CategoryTestFactory {
     defaultCategory.setId(RandomUtils.randomUUID());
     defaultCategory.setName("Default Category %s".formatted(counter));
     defaultCategory.setDescription(RandomUtils.randomString(30));
+    defaultCategory.setStyle(TestFactory.fakeStyle());
     return defaultCategory;
   }
 
@@ -103,6 +106,7 @@ public class CategoryTestFactory {
     defaultCategory.setId(RandomUtils.randomUUID());
     defaultCategory.setName(RandomUtils.randomString(15));
     defaultCategory.setDescription(RandomUtils.randomString(15));
+    defaultCategory.setStyle(TestFactory.fakeStyle());
     return defaultCategory;
   }
 
@@ -147,17 +151,18 @@ public class CategoryTestFactory {
     }
 
     public CategoryRequestDto build() {
-      return new CategoryRequestDto(userId, parentId, categoryName, description);
+      return new CategoryRequestDto(
+          userId, parentId, categoryName, description, TestFactory.fakeStyleRequest());
     }
   }
 
   public static class CategoryUpdateRequestBuilder {
     private final String categoryName = RandomUtils.randomString(15);
     private final String description = RandomUtils.randomString(15);
-    private JsonNullable<UUID> parentCategory = JsonNullable.undefined();
+    private UUID parentCategory = null;
 
     public CategoryUpdateRequestBuilder withParentCategory(UUID parentCategory) {
-      this.parentCategory = JsonNullable.of(parentCategory);
+      this.parentCategory = parentCategory;
       return this;
     }
 
@@ -170,7 +175,8 @@ public class CategoryTestFactory {
     }
 
     public CategoryUpdateRequestDto build() {
-      return new CategoryUpdateRequestDto(categoryName, description, parentCategory);
+      return new CategoryUpdateRequestDto(
+          categoryName, description, parentCategory, TestFactory.fakeStyleRequest());
     }
   }
 }

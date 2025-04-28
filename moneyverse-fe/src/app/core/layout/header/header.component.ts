@@ -1,4 +1,4 @@
-import {Component, effect, EventEmitter, inject, Input, Output, Signal} from '@angular/core';
+import {Component, effect, EventEmitter, Input, Output, Signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {TranslatePipe} from '@ngx-translate/core';
 import {AuthService} from '../../auth/auth.service';
@@ -8,8 +8,9 @@ import {PreferenceService} from '../../../shared/services/preference.service';
 import {LanguageDto} from '../../../shared/models/preference.model';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {LanguageService} from '../../../shared/services/language.service';
-import {ThemeService} from '../../../shared/services/theme.service';
-import {SvgIconComponent} from 'angular-svg-icon';
+import {SvgComponent} from '../../../shared/components/svg/svg.component';
+import {DarkModeToggleComponent} from '../../../shared/components/dark-mode-toggle/dark-mode-toggle.component';
+import {ICONS, IconsEnum} from '../../../shared/models/icons.model';
 
 @Component({
   selector: 'app-header',
@@ -17,28 +18,20 @@ import {SvgIconComponent} from 'angular-svg-icon';
     FormsModule,
     TranslatePipe,
     RouterLink,
-    SvgIconComponent
+    SvgComponent,
+    DarkModeToggleComponent
   ],
   templateUrl: './header.component.html'
 })
 export class HeaderComponent {
 
-  protected readonly themeService = inject(ThemeService);
-
   @Input() pageTitle: string = '';
   @Output() toggleMenu: EventEmitter<void> = new EventEmitter();
 
   languages$: Signal<LanguageDto[]>;
-  isDarkModeEnabled: boolean = false;
-  isOpen: boolean = true;
 
   user: UserModel;
   selectedLanguage: LanguageDto;
-
-  toggle(event: any) {
-    event.stopPropagation();
-    this.isOpen = !this.isOpen;
-  }
 
   constructor(authService: AuthService,
               private readonly preferenceService: PreferenceService,
@@ -58,7 +51,6 @@ export class HeaderComponent {
     this.languageService.useLanguage(lang.isoCode);
   }
 
-  onToggleMenu() {
-    this.toggleMenu.emit();
-  }
+  protected readonly Icons = ICONS;
+  protected readonly IconsEnum = IconsEnum;
 }

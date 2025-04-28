@@ -1,19 +1,17 @@
 import {Component} from '@angular/core';
 import {RouterLink, RouterOutlet} from '@angular/router';
-import {SvgIconComponent} from 'angular-svg-icon';
+import {SvgComponent} from '../../../../shared/components/svg/svg.component';
 
 @Component({
   selector: 'app-settings',
   imports: [
     RouterOutlet,
     RouterLink,
-    SvgIconComponent
+    SvgComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
 export class SettingsComponent {
-
-  pageTitle: string = 'Settings';
 
 }

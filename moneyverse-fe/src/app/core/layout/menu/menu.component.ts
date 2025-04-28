@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
-import {SvgIconComponent} from 'angular-svg-icon';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
-import {HomeIcon, LayersIcon, LucideAngularModule} from 'lucide-angular';
+import {LucideAngularModule} from 'lucide-angular';
+import {SvgComponent} from '../../../shared/components/svg/svg.component';
 
 interface MenuItem {
   path: string;
@@ -13,11 +13,11 @@ interface MenuItem {
 @Component({
   selector: 'app-menu',
   imports: [
-    SvgIconComponent,
     RouterLinkActive,
     TranslatePipe,
     RouterLink,
-    LucideAngularModule
+    LucideAngularModule,
+    SvgComponent
   ],
   templateUrl: './menu.component.html'
 })
@@ -26,13 +26,18 @@ export class MenuComponent {
   menuItems: MenuItem[] = [
     {
       path: '/overview',
-      icon: HomeIcon,
+      icon: 'home',
       translationKey: 'menu.overview'
     },
     {
       path: '/accounts',
-      icon: LayersIcon,
+      icon: 'layers',
       translationKey: 'menu.accounts'
+    },
+    {
+      path: '/categories',
+      icon: 'shapes',
+      translationKey: 'menu.categories'
     }
   ];
 }

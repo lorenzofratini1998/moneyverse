@@ -64,7 +64,7 @@ class CategoryMapperTest {
     assertEquals(category.getUserId(), dto.getUserId());
     assertEquals(category.getCategoryName(), dto.getCategoryName());
     assertEquals(category.getDescription(), dto.getDescription());
-    assertEquals(parentCategory.getCategoryId(), dto.getParentCategory().getCategoryId());
+    assertEquals(parentCategory.getCategoryId(), dto.getParentCategory());
   }
 
   @Test

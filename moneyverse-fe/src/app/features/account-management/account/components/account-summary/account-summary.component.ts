@@ -2,7 +2,8 @@ import {Component, computed, input, signal} from '@angular/core';
 import {Account, AccountCategory} from '../../../account.model';
 import {CurrencyPipe} from '@angular/common';
 import {PieChartComponent} from '../../../../../shared/components/pie-chart/pie-chart.component';
-import {SvgIconComponent} from 'angular-svg-icon';
+import {SvgComponent} from '../../../../../shared/components/svg/svg.component';
+import {IconsEnum} from "../../../../../shared/models/icons.model";
 
 @Component({
   selector: 'app-account-summary',
@@ -10,7 +11,7 @@ import {SvgIconComponent} from 'angular-svg-icon';
   imports: [
     CurrencyPipe,
     PieChartComponent,
-    SvgIconComponent
+    SvgComponent
   ]
 })
 export class AccountSummaryComponent {
@@ -73,4 +74,5 @@ export class AccountSummaryComponent {
     this.selectedCategory.set(null);
   }
 
+  protected readonly Icons = IconsEnum;
 }

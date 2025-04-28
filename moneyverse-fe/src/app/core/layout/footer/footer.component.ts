@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
-import {SvgIconComponent} from 'angular-svg-icon';
+import {SvgComponent} from '../../../shared/components/svg/svg.component';
 
 @Component({
   selector: 'app-footer',
   imports: [
-    SvgIconComponent
+    SvgComponent
   ],
   templateUrl: './footer.component.html',
 })

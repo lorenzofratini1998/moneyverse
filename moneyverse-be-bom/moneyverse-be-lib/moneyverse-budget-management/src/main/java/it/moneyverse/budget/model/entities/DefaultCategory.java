@@ -1,5 +1,6 @@
 package it.moneyverse.budget.model.entities;
 
+import it.moneyverse.core.model.entities.Style;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,6 +22,8 @@ public class DefaultCategory implements Serializable {
 
   @Column(name = "DESCRIPTION")
   private String description;
+
+  @Embedded private Style style;
 
   public UUID getId() {
     return id;
@@ -44,5 +47,13 @@ public class DefaultCategory implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public Style getStyle() {
+    return style;
+  }
+
+  public void setStyle(Style style) {
+    this.style = style;
   }
 }

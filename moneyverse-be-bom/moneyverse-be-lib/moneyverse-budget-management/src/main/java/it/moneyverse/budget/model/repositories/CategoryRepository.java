@@ -12,6 +12,9 @@ import org.springframework.stereotype.Repository;
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
   Boolean existsByUserIdAndCategoryName(UUID userId, String categoryName);
 
+  Boolean existsByUserIdAndCategoryNameAndCategoryIdNot(
+      UUID userId, String categoryName, UUID categoryId);
+
   List<Category> findCategoriesByUserId(UUID userId, Pageable pageable);
 
   List<Category> findCategoriesByUserId(UUID userId);

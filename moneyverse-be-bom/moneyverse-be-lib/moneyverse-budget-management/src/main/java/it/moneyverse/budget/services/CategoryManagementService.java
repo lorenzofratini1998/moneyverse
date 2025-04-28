@@ -73,11 +73,10 @@ public class CategoryManagementService implements CategoryService {
   @Transactional(readOnly = true)
   public List<CategoryDto> getCategoriesByUserId(UUID userId, PageCriteria pageCriteria) {
     LOGGER.info("Fetching categories for user: '{}'", userId);
+    int offset = pageCriteria.getOffset() != null ? pageCriteria.getOffset() : 0;
+    int limit = pageCriteria.getLimit() != null ? pageCriteria.getLimit() : Integer.MAX_VALUE;
     Pageable pageRequest =
-        PageRequest.of(
-            pageCriteria.getOffset(),
-            pageCriteria.getLimit(),
-            Sort.by(Category_.CATEGORY_NAME).ascending());
+        PageRequest.of(offset, limit, Sort.by(Category_.CATEGORY_NAME).ascending());
     return CategoryMapper.toCategoryDto(
         categoryRepository.findCategoriesByUserId(userId, pageRequest));
   }
@@ -111,10 +110,10 @@ public class CategoryManagementService implements CategoryService {
   public CategoryDto updateCategory(UUID categoryId, CategoryUpdateRequestDto request) {
     Category category = findCategoryById(categoryId);
     if (request.categoryName() != null) {
-      checkIfCategoryAlreadyExists(category.getUserId(), request.categoryName());
+      checkIfCategoryAlreadyExists(category.getUserId(), request.categoryName(), categoryId);
     }
     category =
-        request.parentId().isPresent()
+        request.parentId() != null
             ? updateCategoryWithParent(category, request)
             : CategoryMapper.partialUpdate(category, request);
     CategoryDto result = CategoryMapper.toCategoryDto(categoryRepository.save(category));
@@ -123,10 +122,10 @@ public class CategoryManagementService implements CategoryService {
   }
 
   private Category updateCategoryWithParent(Category category, CategoryUpdateRequestDto request) {
-    if (!request.parentId().isPresent()) {
+    if (request.parentId() == null) {
       return CategoryMapper.partialUpdate(category, request, null);
     }
-    UUID parentId = request.parentId().get();
+    UUID parentId = request.parentId();
     if (category.getCategoryId().equals(parentId)) {
       throw new IllegalArgumentException("Category cannot be its own parent");
     }
@@ -137,6 +136,15 @@ public class CategoryManagementService implements CategoryService {
   private void checkIfCategoryAlreadyExists(UUID userId, String categoryName) {
     if (Boolean.TRUE.equals(
         categoryRepository.existsByUserIdAndCategoryName(userId, categoryName))) {
+      throw new ResourceAlreadyExistsException(
+          "Category with name '%s' already exists for user '%s'".formatted(categoryName, userId));
+    }
+  }
+
+  private void checkIfCategoryAlreadyExists(UUID userId, String categoryName, UUID categoryId) {
+    if (Boolean.TRUE.equals(
+        categoryRepository.existsByUserIdAndCategoryNameAndCategoryIdNot(
+            userId, categoryName, categoryId))) {
       throw new ResourceAlreadyExistsException(
           "Category with name '%s' already exists for user '%s'".formatted(categoryName, userId));
     }

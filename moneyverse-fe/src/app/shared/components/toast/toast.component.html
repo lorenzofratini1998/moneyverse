@@ -7,16 +7,16 @@
       <div class="flex items-center gap-2">
         @switch (toast.type) {
           @case ("success") {
-            <i-lucide [name]="CircleCheckIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+            <app-svg [name]="Icons.CIRCLE_CHECK" class="size-6"/>
           }
           @case ("error") {
-            <i-lucide [name]="CircleXIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+            <app-svg [name]="Icons.CIRCLE_X" class="size-6"/>
           }
           @case ("warning") {
-            <i-lucide [name]="TriangleAlertIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+            <app-svg [name]="Icons.TRIANGLE_ALERT" class="size-6"/>
           }
           @default {
-            <i-lucide [name]="InfoIcon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+            <app-svg [name]="Icons.INFO" class="size-6"/>
           }
         }
         <span>{{ toast.message }}</span>

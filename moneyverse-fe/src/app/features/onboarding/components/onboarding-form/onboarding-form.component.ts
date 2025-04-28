@@ -22,17 +22,17 @@ export class OnboardingFormComponent {
   formSubmit = output<any>();
 
   onboardingForm = this.fb.group({
-    currency: ['', Validators.required],
-    language: ['', Validators.required],
-    dateFormat: ['', Validators.required]
+    CURRENCY: ['', Validators.required],
+    LANGUAGE: ['', Validators.required],
+    DATE_FORMAT: ['', Validators.required]
   })
 
   constructor() {
     effect(() => {
       this.onboardingForm.patchValue({
-        currency: this.userCurrency()?.value ?? this.currencies().find(curr => curr.default)?.code ?? '',
-        language: this.userLanguage()?.value ?? this.languages().find(lang => lang.default)?.isoCode ?? '',
-        dateFormat: this.userDateFormat()?.value ?? this.dateFormats().find(format => format.default)?.value ?? ''
+        CURRENCY: this.userCurrency()?.value ?? this.currencies().find(curr => curr.default)?.code ?? '',
+        LANGUAGE: this.userLanguage()?.value ?? this.languages().find(lang => lang.default)?.isoCode ?? '',
+        DATE_FORMAT: this.userDateFormat()?.value ?? this.dateFormats().find(format => format.default)?.value ?? ''
       });
     });
   }

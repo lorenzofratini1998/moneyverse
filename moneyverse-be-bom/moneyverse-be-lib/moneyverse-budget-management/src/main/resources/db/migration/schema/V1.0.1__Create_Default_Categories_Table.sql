@@ -3,6 +3,9 @@ CREATE TABLE default_categories
     default_category_id UUID         NOT NULL,
     name                VARCHAR(255) NOT NULL,
     description         VARCHAR(255),
+    background_color VARCHAR(255),
+    text_color       VARCHAR(255),
+    icon             VARCHAR(255),
     CONSTRAINT pk_default_categories PRIMARY KEY (default_category_id)
 );
 

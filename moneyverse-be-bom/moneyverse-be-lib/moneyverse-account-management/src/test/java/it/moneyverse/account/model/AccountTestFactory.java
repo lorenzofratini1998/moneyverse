@@ -294,7 +294,10 @@ public class AccountTestFactory {
 
     private Function<AccountCriteria, AccountCriteria> withPage() {
       return criteria -> {
-        criteria.setPage(new PageCriteria());
+        PageCriteria pageCriteria = new PageCriteria();
+        pageCriteria.setOffset(0);
+        pageCriteria.setLimit(Integer.MAX_VALUE);
+        criteria.setPage(pageCriteria);
         return criteria;
       };
     }

@@ -8,6 +8,8 @@ import {ProfileFormComponent} from './components/profile-form/profile-form.compo
 import {UserUpdateRequestDto} from '../../../../core/auth/models/user.model';
 import {ConfirmDialogComponent} from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import {LucideAngularModule, Trash2Icon} from 'lucide-angular';
+import {SvgComponent} from '../../../../shared/components/svg/svg.component';
+import {IconsEnum} from "../../../../shared/models/icons.model";
 
 @Component({
   selector: 'app-profile',
@@ -17,7 +19,8 @@ import {LucideAngularModule, Trash2Icon} from 'lucide-angular';
     ReactiveFormsModule,
     ProfileFormComponent,
     ConfirmDialogComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    SvgComponent
   ],
   templateUrl: './profile.component.html'
 })
@@ -78,4 +81,5 @@ export class ProfileComponent {
   }
 
   protected readonly Trash2Icon = Trash2Icon;
+  protected readonly Icons = IconsEnum;
 }

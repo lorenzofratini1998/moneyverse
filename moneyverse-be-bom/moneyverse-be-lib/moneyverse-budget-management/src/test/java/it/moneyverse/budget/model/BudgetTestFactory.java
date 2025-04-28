@@ -194,7 +194,10 @@ public class BudgetTestFactory {
 
     private Function<BudgetCriteria, BudgetCriteria> withPage() {
       return criteria -> {
-        criteria.setPage(new PageCriteria());
+        PageCriteria pageCriteria = new PageCriteria();
+        pageCriteria.setOffset(0);
+        pageCriteria.setLimit(Integer.MAX_VALUE);
+        criteria.setPage(pageCriteria);
         return criteria;
       };
     }

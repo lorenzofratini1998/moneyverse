@@ -1,0 +1,76 @@
+<form
+  [formGroup]="categoryForm"
+  (ngSubmit)="saveCategory()"
+>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-col items-center justify-center gap-3">
+      <span class="badge"
+            [ngStyle]="{'background-color': backgroundColor.value, 'color': textColor.value}"
+      >
+        <app-svg [name]="icon.value"/>
+        {{ preview() }}
+      </span>
+      <div class="flex gap-2">
+        <app-color-picker
+          [initialColor]="categoryColor()"
+          (select)="updateColor($event)"
+        />
+        <app-icon-picker
+          [initialIcon]="categoryIcon()"
+          (select)="updateIcon($event)"
+        />
+      </div>
+    </div>
+    <div class="flex justify-between gap-3">
+      <!-- Category Name -->
+      <div class="flex flex-col w-full">
+        <label class="floating-label validator w-full">
+          <span>Category Name</span>
+          <input id="categoryName"
+                 type="text"
+                 required
+                 formControlName="categoryName"
+                 class="input input-md w-full"
+          />
+        </label>
+        @if (categoryName?.invalid && (categoryName?.touched || categoryName?.dirty)) {
+          <div class="validator-hint">Enter valid category name</div>
+        }
+      </div>
+      <!-- Parent Category (Optional) -->
+      <label class="select w-full">
+        <span class="label">Parent Category</span>
+        <select
+          id="parentCategory"
+          class="select select-bordered"
+          formControlName="parentCategory"
+        >
+          <option [ngValue]="null" selected>-</option>
+          @for (category of categories(); track category.categoryId) {
+            <option [ngValue]="category.categoryId">
+              {{ category.categoryName }}
+            </option>
+          }
+        </select>
+      </label>
+    </div>
+    <label class="floating-label w-full">
+      <span>Description</span>
+      <input id="categoryDescription"
+             type="text"
+             formControlName="description"
+             class="input input-md w-full"
+      />
+    </label>
+    <div class="modal-action flex justify-center gap-4">
+      <button type="button" class="btn btn-outline" (click)="cancelForm()">
+        <app-svg [name]="Icons.X"/>
+        <span>Cancel</span>
+      </button>
+      <button class="btn btn-primary" type="submit">
+        <app-svg [name]="Icons.CHECK"/>
+        <span>Save</span>
+      </button>
+    </div>
+  </div>
+</form>

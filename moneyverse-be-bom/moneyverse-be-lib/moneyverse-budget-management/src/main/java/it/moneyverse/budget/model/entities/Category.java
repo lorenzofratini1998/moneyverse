@@ -1,6 +1,7 @@
 package it.moneyverse.budget.model.entities;
 
 import it.moneyverse.core.model.entities.Auditable;
+import it.moneyverse.core.model.entities.Style;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -33,6 +34,8 @@ public class Category extends Auditable implements Serializable {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "PARENT_ID")
   private Category parentCategory;
+
+  @Embedded private Style style;
 
   @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Category> subCategories = new ArrayList<>();
@@ -82,6 +85,14 @@ public class Category extends Auditable implements Serializable {
 
   public List<Category> getSubCategories() {
     return subCategories;
+  }
+
+  public Style getStyle() {
+    return style;
+  }
+
+  public void setStyle(Style style) {
+    this.style = style;
   }
 
   public void setSubCategories(List<Category> subCategories) {

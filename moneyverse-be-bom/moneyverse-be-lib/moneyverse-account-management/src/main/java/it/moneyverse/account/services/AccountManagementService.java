@@ -81,15 +81,18 @@ public class AccountManagementService implements AccountService {
   @Override
   @Transactional(readOnly = true)
   public List<AccountDto> findAccounts(UUID userId, AccountCriteria criteria) {
+    LOGGER.info("Finding accounts with filters: {}", criteria);
     if (criteria.getPage() == null) {
-      criteria.setPage(new PageCriteria());
+      PageCriteria page = new PageCriteria();
+      page.setOffset(0);
+      page.setLimit(Integer.MAX_VALUE);
+      criteria.setPage(page);
     }
     if (criteria.getSort() == null) {
       criteria.setSort(
           new SortCriteria<>(
               SortAttribute.getDefault(AccountSortAttributeEnum.class), Direction.ASC));
     }
-    LOGGER.info("Finding accounts with filters: {}", criteria);
     return AccountMapper.toAccountDto(accountRepository.findAccounts(userId, criteria));
   }
 

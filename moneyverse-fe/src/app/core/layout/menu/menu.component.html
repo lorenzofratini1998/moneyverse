@@ -1,6 +1,6 @@
 <div class="flex flex-col min-h-full bg-base-200 rounded-box">
   <a routerLink="/" class="w-45 h-auto">
-    <svg-icon src="/assets/images/moneyverse-logo.svg"></svg-icon>
+    <app-svg src="/assets/images/moneyverse-logo.svg"/>
   </a>
   <ul class="menu w-full">
     @for (menuItem of menuItems; track menuItem.path) {
@@ -8,7 +8,7 @@
          routerLinkActive="bg-primary/10"
          class="flex items-center gap-2 cursor-pointer p-3 rounded-md transition-colors duration-150"
       >
-        <i-lucide [name]="menuItem.icon" [strokeWidth]="1.5" class="size-6"></i-lucide>
+        <app-svg [name]="menuItem.icon" class="size-6"/>
         <span class="font-medium">{{ menuItem.translationKey | translate }}</span>
       </a>
     }

@@ -88,7 +88,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.description(), response.getBody().getDescription());
     assertEquals(request.categoryName(), response.getBody().getCategoryName());
     if (response.getBody().getParentCategory() != null) {
-      assertEquals(request.parentId(), response.getBody().getParentCategory().getCategoryId());
+      assertEquals(request.parentId(), response.getBody().getParentCategory());
     }
   }
 
@@ -96,6 +96,8 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
   void testGetCategoriesByUser() {
     final UUID userId = testContext.getRandomUser().getUserId();
     final PageCriteria criteria = new PageCriteria();
+    criteria.setOffset(0);
+    criteria.setLimit(Integer.MAX_VALUE);
     final List<Category> expected = testContext.getCategoriesByUser(userId, criteria);
 
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
@@ -150,8 +152,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(category.getDescription(), response.getBody().getDescription());
     if (category.getParentCategory() != null) {
       assertEquals(
-          category.getParentCategory().getCategoryId(),
-          response.getBody().getParentCategory().getCategoryId());
+          category.getParentCategory().getCategoryId(), response.getBody().getParentCategory());
     }
   }
 
@@ -183,10 +184,10 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
         request.description() != null ? request.description() : category.getDescription(),
         response.getBody().getDescription());
     assertEquals(
-        request.parentId().get() != null
-            ? request.parentId().get()
+        request.parentId() != null
+            ? request.parentId()
             : category.getParentCategory().getCategoryId(),
-        response.getBody().getParentCategory().getCategoryId());
+        response.getBody().getParentCategory());
     assertEquals(
         request.categoryName() != null ? request.categoryName() : category.getCategoryName(),
         response.getBody().getCategoryName());

@@ -1,11 +1,11 @@
-<div class="card bg-base-100 shadow-sm ">
+<div class="card bg-base-100 shadow-sm">
   <div class="card-body">
     <div class="flex justify-between items-center">
       <h2 class="card-title text-lg font-semibold">{{ account().accountName }}</h2>
       <div class="flex gap-4">
         @if (account().default) {
           <div class="badge badge-soft badge-warning">
-            <i-lucide [name]="StarIcon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+            <app-svg [name]="Icons.STAR"/>
           </div>
         }
         <div class="badge badge-soft badge-info">{{ category().name }}</div>
@@ -19,19 +19,19 @@
         class="btn btn-outline btn-info btn-sm"
         (click)="onView()"
       >
-        <i-lucide [name]="EyeIcon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+        <app-svg [name]="Icons.EYE"/>
       </button>
       <button
         class="btn btn-outline btn-sm"
         (click)="onEdit()"
       >
-        <i-lucide [name]="PencilIcon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+        <app-svg [name]="Icons.PENCIL"/>
       </button>
       <button
         class="btn btn-outline btn-error btn-sm"
         (click)="openConfirmDialog()"
       >
-        <i-lucide [name]="Trash2Icon" [strokeWidth]="1.5" class="size-5"></i-lucide>
+        <app-svg [name]="Icons.TRASH"/>
       </button>
     </div>
   </div>

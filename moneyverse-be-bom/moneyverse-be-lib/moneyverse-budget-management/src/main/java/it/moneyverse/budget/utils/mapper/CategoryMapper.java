@@ -5,6 +5,8 @@ import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.DefaultCategory;
 import it.moneyverse.core.model.dto.CategoryDto;
+import it.moneyverse.core.model.dto.StyleDto;
+import it.moneyverse.core.utils.mappers.StyleMapper;
 import java.util.*;
 
 public class CategoryMapper {
@@ -17,6 +19,7 @@ public class CategoryMapper {
     category.setUserId(userId);
     category.setCategoryName(defaultCategory.getName());
     category.setDescription(defaultCategory.getDescription());
+    category.setStyle(defaultCategory.getStyle());
     return category;
   }
 
@@ -33,6 +36,7 @@ public class CategoryMapper {
     category.setCategoryName(request.categoryName());
     category.setDescription(request.description());
     category.setParentCategory(parentCategory);
+    category.setStyle(StyleMapper.toStyle(request.style()));
     return category;
   }
 
@@ -44,6 +48,7 @@ public class CategoryMapper {
     if (category == null || visitedIds.contains(category.getCategoryId())) {
       return null;
     }
+    visitedIds.add(category.getCategoryId());
     return CategoryDto.builder()
         .withCategoryId(category.getCategoryId())
         .withUserId(category.getUserId())
@@ -51,8 +56,19 @@ public class CategoryMapper {
         .withDescription(category.getDescription())
         .withParentCategory(
             category.getParentCategory() != null
-                ? toCategoryDto(category.getParentCategory())
+                ? category.getParentCategory().getCategoryId()
                 : null)
+        .withChildren(
+            category.getSubCategories().stream()
+                .map(subCategory -> toCategoryDto(subCategory, visitedIds))
+                .filter(Objects::nonNull)
+                .toList())
+        .withStyle(
+            StyleDto.builder()
+                .withBackgroundColor(category.getStyle().getBackgroundColor())
+                .withTextColor(category.getStyle().getTextColor())
+                .withIcon(category.getStyle().getIcon())
+                .build())
         .build();
   }
 
@@ -71,6 +87,12 @@ public class CategoryMapper {
         .withCategoryId(category.getId())
         .withCategoryName(category.getName())
         .withDescription(category.getDescription())
+        .withStyle(
+            StyleDto.builder()
+                .withBackgroundColor(category.getStyle().getBackgroundColor())
+                .withTextColor(category.getStyle().getTextColor())
+                .withIcon(category.getStyle().getIcon())
+                .build())
         .build();
   }
 
@@ -91,13 +113,17 @@ public class CategoryMapper {
     if (request.description() != null) {
       category.setDescription(request.description());
     }
+    if (request.style() != null) {
+      category.setStyle(StyleMapper.toStyle(request.style()));
+    }
+    category.setParentCategory(null);
     return category;
   }
 
   public static Category partialUpdate(
       Category category, CategoryUpdateRequestDto request, Category parentCategory) {
     category = partialUpdate(category, request);
-    if (request.parentId().isPresent()) {
+    if (request.parentId() != null) {
       category.setParentCategory(parentCategory);
     }
     return category;

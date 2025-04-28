@@ -11,6 +11,7 @@ import it.moneyverse.budget.model.entities.*;
 import it.moneyverse.core.model.dto.*;
 import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.model.TestContext;
+import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.model.dto.ScriptMetadata;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.services.SQLScriptService;
@@ -115,7 +116,11 @@ public class BudgetTestContext extends TestContext<BudgetTestContext> {
 
   private CategoryRequestDto toCategoryRequest(Category category) {
     return new CategoryRequestDto(
-        category.getUserId(), null, category.getCategoryName(), category.getDescription());
+        category.getUserId(),
+        null,
+        category.getCategoryName(),
+        category.getDescription(),
+        TestFactory.fakeStyleRequest());
   }
 
   public int getCategoriesCount() {

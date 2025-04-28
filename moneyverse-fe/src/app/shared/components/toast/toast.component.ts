@@ -1,7 +1,9 @@
 import {Component, effect, inject} from '@angular/core';
 import {MessageService} from '../../services/message.service';
 import {NgClass} from '@angular/common';
-import {CircleCheckIcon, CircleXIcon, InfoIcon, LucideAngularModule, TriangleAlertIcon, XIcon} from 'lucide-angular';
+import {LucideAngularModule} from 'lucide-angular';
+import {SvgComponent} from '../svg/svg.component';
+import {IconsEnum} from "../../models/icons.model";
 
 export enum ToastEnum {
   SUCCESS = 'success',
@@ -20,7 +22,8 @@ export interface ToastMessage {
   selector: 'app-toast',
   imports: [
     NgClass,
-    LucideAngularModule
+    LucideAngularModule,
+    SvgComponent
   ],
   templateUrl: './toast.component.html',
   styleUrl: './toast.component.scss'
@@ -66,9 +69,5 @@ export class ToastComponent {
     this.messageService.clearMessage();
   }
 
-  protected readonly CircleCheckIcon = CircleCheckIcon;
-  protected readonly CircleXIcon = CircleXIcon;
-  protected readonly TriangleAlertIcon = TriangleAlertIcon;
-  protected readonly InfoIcon = InfoIcon;
-  protected readonly XIcon = XIcon;
+  protected readonly Icons = IconsEnum;
 }

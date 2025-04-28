@@ -2,6 +2,7 @@ package it.moneyverse.budget.utils.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 
 import it.moneyverse.budget.model.BudgetTestFactory;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
@@ -9,6 +10,7 @@ import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Budget;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.core.model.dto.BudgetDto;
+import it.moneyverse.test.model.TestFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -44,6 +46,8 @@ class BudgetMapperTest {
   @Test
   void testToBudgetDto() {
     Budget budget = BudgetTestFactory.fakeBudget(category);
+    when(category.getStyle()).thenReturn(TestFactory.fakeStyle());
+
     BudgetDto dto = BudgetMapper.toBudgetDto(budget);
 
     assertEquals(budget.getBudgetId(), dto.getBudgetId());

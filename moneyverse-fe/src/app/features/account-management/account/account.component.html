@@ -3,8 +3,8 @@
     <h1 class="text-3xl font-bold">I tuoi account</h1>
     <button
       class="btn btn-primary"
-      (click)="openAddAccountDialog()">
-      <svg-icon src="/assets/icons/plus.svg" class="size-5"></svg-icon>
+      (click)="accountStore.openForm()">
+      <app-svg [name]="Icons.PLUS"/>
       <span>Aggiungi Account</span>
     </button>
   </header>
@@ -29,7 +29,7 @@
           [account]="account"
           [category]="getCategory(account.accountCategory)"
           (view)="showAccountDetails($event)"
-          (edit)="openEditAccountDialog(account)"
+          (edit)="accountStore.openForm(account)"
           (delete)="deleteAccount($event)"
         >
         </app-account-card>
@@ -39,11 +39,11 @@
 </div>
 
 <app-dialog
-  [show]="showAccountFormDialog()"
+  [show]="accountStore.isFormOpen()"
 >
   <div class="flex flex-col gap-y-6">
     <h3 class="font-bold text-lg py-4">
-      @if (accountToEdit()) {
+      @if (accountStore.selectedAccount()) {
         Modifica account
       } @else {
         Aggiungi un nuovo account
@@ -53,9 +53,9 @@
       [categories]="accountCategories$()"
       [currencies]="currencies$()"
       [currency]="userCurrency$()!.value"
-      [account]="accountToEdit() || null"
+      [account]="accountStore.selectedAccount()"
       (save)="saveAccount($event)"
-      (cancel)="closeAccountDialog()">
+      (cancel)="accountStore.closeForm()">
     </app-account-form>
   </div>
 </app-dialog>

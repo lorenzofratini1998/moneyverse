@@ -110,11 +110,11 @@
 
   <div class="modal-action flex justify-center gap-4">
     <button type="button" class="btn btn-outline" (click)="cancelForm()">
-      <svg-icon src="/assets/icons/x-mark.svg" class="size-5"></svg-icon>
+      <app-svg [name]="Icons.X"/>
       <span>Cancel</span>
     </button>
     <button class="btn btn-primary" type="submit">
-      <svg-icon src="/assets/icons/check.svg" class="size-5"></svg-icon>
+      <app-svg [name]="Icons.CHECK"/>
       <span>Save</span>
     </button>
   </div>

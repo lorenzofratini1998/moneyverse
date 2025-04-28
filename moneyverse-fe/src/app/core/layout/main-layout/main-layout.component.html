@@ -6,11 +6,6 @@
     <app-header (toggleMenu)="toggleUserMenu()"/>
     <div class="overflow-auto flex-1">
       <router-outlet></router-outlet>
-      @if (loadingService.loading()) {
-        <div class="loading-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <span class="loading loading-spinner loading-lg h-12 text-primary"></span>
-        </div>>
-      }
     </div>
     <app-footer/>
   </div>

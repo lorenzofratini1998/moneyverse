@@ -47,14 +47,76 @@ public class SQLScriptService implements ScriptService {
       StringBuilder values,
       StringBuilder manyToManyScript) {
     for (Field field : currentClass.getDeclaredFields()) {
-      ReflectionUtils.makeAccessible(field);
-      if (field.isAnnotationPresent(Column.class)) {
-        appendColumnAndValue(field, entity, columns, values);
-      } else if (field.isAnnotationPresent(JoinColumn.class)) {
-        appendJoinColumnAndValue(field, entity, columns, values);
-      } else if (field.isAnnotationPresent(ManyToMany.class)
-          && field.isAnnotationPresent(JoinTable.class)) {
-        appendManyToManyScript(field, entity, manyToManyScript);
+      handleField(field, entity, columns, values, manyToManyScript);
+    }
+  }
+
+  private <T> void handleField(
+      Field field,
+      T entity,
+      StringBuilder columns,
+      StringBuilder values,
+      StringBuilder manyToManyScript) {
+
+    ReflectionUtils.makeAccessible(field);
+
+    if (tryColumn(field, entity, columns, values)) {
+      return;
+    }
+    if (tryJoinColumn(field, entity, columns, values)) {
+      return;
+    }
+    if (tryManyToMany(field, entity, manyToManyScript)) {
+      return;
+    }
+    tryEmbedded(field, entity, columns, values);
+  }
+
+  private <T> boolean tryColumn(
+      Field field, T entity, StringBuilder columns, StringBuilder values) {
+
+    if (!field.isAnnotationPresent(Column.class)) {
+      return false;
+    }
+    appendColumnAndValue(field, entity, columns, values);
+    return true;
+  }
+
+  private <T> boolean tryJoinColumn(
+      Field field, T entity, StringBuilder columns, StringBuilder values) {
+
+    if (!field.isAnnotationPresent(JoinColumn.class)) {
+      return false;
+    }
+    appendJoinColumnAndValue(field, entity, columns, values);
+    return true;
+  }
+
+  private <T> boolean tryManyToMany(Field field, T entity, StringBuilder manyToManyScript) {
+
+    if (!(field.isAnnotationPresent(ManyToMany.class)
+        && field.isAnnotationPresent(JoinTable.class))) {
+      return false;
+    }
+    appendManyToManyScript(field, entity, manyToManyScript);
+    return true;
+  }
+
+  private <T> void tryEmbedded(Field field, T entity, StringBuilder columns, StringBuilder values) {
+
+    if (!field.isAnnotationPresent(Embedded.class)) {
+      return;
+    }
+
+    Object embeddable = getFieldValue(field, entity);
+    if (embeddable == null) {
+      return;
+    }
+
+    for (Field embField : embeddable.getClass().getDeclaredFields()) {
+      ReflectionUtils.makeAccessible(embField);
+      if (embField.isAnnotationPresent(Column.class)) {
+        appendColumnAndValue(embField, embeddable, columns, values);
       }
     }
   }
