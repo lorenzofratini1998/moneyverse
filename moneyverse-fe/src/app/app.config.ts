@@ -17,13 +17,16 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {provideEchartsCore} from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import {SVGRenderer} from 'echarts/renderers';
-import {LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components';
-import {PieChart} from 'echarts/charts';
+import {GridComponent, LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components';
+import {BarChart, LineChart, PieChart} from 'echarts/charts';
 import {provideAngularSvgIcon} from 'angular-svg-icon';
 import {LoadingService} from './shared/services/loading.service';
 import {finalize} from 'rxjs';
+import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
+import {providePrimeNG} from 'primeng/config';
+import Aura from '@primeng/themes/aura';
 
-echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, SVGRenderer]);
+echarts.use([TitleComponent, TooltipComponent, LegendComponent, GridComponent, PieChart, BarChart, LineChart, SVGRenderer]);
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
   new TranslateHttpLoader(http);
@@ -57,6 +60,20 @@ export const appConfig: ApplicationConfig = {
       },
     })]),
     provideEchartsCore({echarts}),
-    provideAngularSvgIcon()
+    provideAngularSvgIcon(),
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+        options: {
+          prefix: 'p',
+          darkModeSelector: '.p-dark',
+          cssLayer: {
+            name: 'primeng',
+            order: 'theme, base, primeng'
+          }
+        }
+      }
+    })
   ]
 };

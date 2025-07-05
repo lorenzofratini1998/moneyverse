@@ -1,0 +1,62 @@
+<div>
+  <header class="mb-8 flex justify-between items-center">
+    <h1 class="text-3xl font-bold">Category Management</h1>
+    <div class="flex gap-4">
+      @if (categoryStore.categories().length === 0) {
+        <button
+          class="btn btn-primary"
+          (click)="showAddDefaultCategoryModal.set(true)"
+        >
+          <app-svg [name]="IconsEnum.BOX"/>
+          <span>Add Default Categories</span>
+        </button>
+      }
+      <button
+        class="btn btn-primary"
+        (click)="categoryStore.openForm()"
+      >
+        <app-svg [name]="IconsEnum.PLUS"/>
+        <span>New Category</span>
+      </button>
+    </div>
+  </header>
+
+  <app-category-table
+    (delete)="onDeleteCategory($event)"
+  ></app-category-table>
+</div>
+
+<app-dialog
+  [show]="showAddDefaultCategoryModal()"
+>
+  <div class="flex flex-col gap-y-6">
+    <h3 class="font-bold text-lg py-4">Le seguenti categorie di spesa verranno create</h3>
+    <app-default-category-modal
+      (confirm)="createDefaultCategories()"
+      (cancel)="showAddDefaultCategoryModal.set(false)"
+    />
+  </div>
+</app-dialog>
+
+<app-dialog
+  [show]="categoryStore.isFormOpen()"
+>
+  <div class="flex flex-col gap-y-6">
+    <h3 class="font-bold text-lg py-4">
+      New category
+    </h3>
+    <app-category-form
+      [categories]="categoryStore.categories()"
+      [category]="this.categoryStore.selectedCategory()"
+      (cancel)="categoryStore.closeForm()"
+      (save)="saveCategory($event)"
+    />
+  </div>
+</app-dialog>
+
+<app-confirm-dialog
+  title="Delete category"
+  message="Are you sure you want to delete this category? All associated transactions will be deleted.">
+</app-confirm-dialog>
+
+<app-toast></app-toast>

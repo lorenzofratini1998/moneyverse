@@ -11,6 +11,8 @@ export const environment = {
   services: {
     userManagementUrl: 'http://localhost:8081/usersManagement/api/v1',
     accountManagementUrl: 'http://localhost:8082/accountsManagement/api/v1',
-    budgetManagementUrl: 'http://localhost:8083/budgetsManagement/api/v1'
+    budgetManagementUrl: 'http://localhost:8083/budgetsManagement/api/v1',
+    transactionManagementUrl: 'http://localhost:8084/transactionsManagement/api/v1',
+    dashboardUrl: 'http://localhost:8084/dashboard/api/v1'
   }
 }

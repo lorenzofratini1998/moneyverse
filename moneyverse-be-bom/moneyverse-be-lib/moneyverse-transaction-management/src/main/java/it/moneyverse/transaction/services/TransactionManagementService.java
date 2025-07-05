@@ -85,7 +85,10 @@ public class TransactionManagementService implements TransactionService {
   @Transactional(readOnly = true)
   public List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria) {
     if (criteria.getPage() == null) {
-      criteria.setPage(new PageCriteria());
+      PageCriteria pageCriteria = new PageCriteria();
+      pageCriteria.setOffset(0);
+      pageCriteria.setLimit(25);
+      criteria.setPage(pageCriteria);
     }
     if (criteria.getSort() == null) {
       criteria.setSort(

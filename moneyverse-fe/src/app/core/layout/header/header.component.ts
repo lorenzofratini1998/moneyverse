@@ -11,6 +11,12 @@ import {LanguageService} from '../../../shared/services/language.service';
 import {SvgComponent} from '../../../shared/components/svg/svg.component';
 import {DarkModeToggleComponent} from '../../../shared/components/dark-mode-toggle/dark-mode-toggle.component';
 import {ICONS, IconsEnum} from '../../../shared/models/icons.model';
+import {
+  DashboardFilterDrawerComponent
+} from '../../../shared/components/dashboard-filter-drawer/dashboard-filter-drawer.component';
+import {
+  DashboardFilterPanelComponent
+} from '../../../shared/components/dashboard-filter-panel/dashboard-filter-panel.component';
 
 @Component({
   selector: 'app-header',
@@ -19,7 +25,9 @@ import {ICONS, IconsEnum} from '../../../shared/models/icons.model';
     TranslatePipe,
     RouterLink,
     SvgComponent,
-    DarkModeToggleComponent
+    DarkModeToggleComponent,
+    DashboardFilterDrawerComponent,
+    DashboardFilterPanelComponent
   ],
   templateUrl: './header.component.html'
 })

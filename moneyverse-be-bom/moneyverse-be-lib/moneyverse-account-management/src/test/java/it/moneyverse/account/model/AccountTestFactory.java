@@ -272,7 +272,7 @@ public class AccountTestFactory {
 
     private Function<AccountCriteria, AccountCriteria> withRandomAccountCategory() {
       return criteria -> {
-        criteria.setAccountCategory(
+        criteria.setAccountCategories(
             RandomUtils.flipCoin() ? testContext.getRandomAccountCategory().getName() : null);
         return criteria;
       };
@@ -280,7 +280,7 @@ public class AccountTestFactory {
 
     private Function<AccountCriteria, AccountCriteria> withRandomCurrency() {
       return criteria -> {
-        criteria.setCurrency(RandomUtils.flipCoin() ? RandomUtils.randomCurrency() : null);
+        criteria.setCurrencies(RandomUtils.flipCoin() ? RandomUtils.randomCurrency() : null);
         return criteria;
       };
     }

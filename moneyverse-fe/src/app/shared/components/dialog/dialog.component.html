@@ -1,7 +1,9 @@
 <div
   class="modal"
-  [class.modal-open]="show()">
-  <div class="modal-box w-11/12 max-w-2xl">
+  [class.modal-open]="show()"
+  (click)="onBackdropClick($event)"
+>
+  <div class="modal-box w-11/12 max-w-2xl" (click)="$event.stopPropagation()">
     <ng-content></ng-content>
   </div>
 </div>

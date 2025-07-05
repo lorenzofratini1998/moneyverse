@@ -2,15 +2,5 @@
   <a routerLink="/" class="w-45 h-auto">
     <app-svg src="/assets/images/moneyverse-logo.svg"/>
   </a>
-  <ul class="menu w-full">
-    @for (menuItem of menuItems; track menuItem.path) {
-      <a [routerLink]="menuItem.path"
-         routerLinkActive="bg-primary/10"
-         class="flex items-center gap-2 cursor-pointer p-3 rounded-md transition-colors duration-150"
-      >
-        <app-svg [name]="menuItem.icon" class="size-6"/>
-        <span class="font-medium">{{ menuItem.translationKey | translate }}</span>
-      </a>
-    }
-  </ul>
+  <app-menu-list [items]="menuItems"></app-menu-list>
 </div>

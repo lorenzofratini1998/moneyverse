@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/transaction_management
+    username: ${SPRING_DATASOURCE_USERNAME:undefined}
+    password: ${SPRING_DATASOURCE_PASSWORD:undefined}
+  security:
+    oauth2:
+      keycloak:
+        host: localhost
+        port: 7080
+        realm-name: moneyverse-fe
+  cache:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${SPRING_CACHE_REDIS_PASSWORD:undefined}
+  kafka:
+    admin:
+      bootstrap-servers: localhost:29092
+    consumer:
+      group-id: transaction-management
+grpc:
+  client:
+    currency-service:
+      host: localhost
+      port: 9080
+    user-service:
+      host: localhost
+      port: 9081
+    account-service:
+      host: localhost
+      port: 9082
+    budget-service:
+      host: localhost
+      port: 9083

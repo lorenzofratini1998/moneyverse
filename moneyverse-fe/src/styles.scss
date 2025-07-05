@@ -1,7 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @use "tailwindcss";
-
 @plugin "daisyui";
+@plugin "tailwindcss-primeui";
 
 :root {
   font-size: 1rem;
@@ -12,4 +12,19 @@
 
 .btn {
   @apply rounded-full;
+}
+
+.table th,
+.table td {
+  @apply text-center align-middle;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }

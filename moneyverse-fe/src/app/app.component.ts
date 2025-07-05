@@ -22,6 +22,6 @@ export class AppComponent {
   ) {
     this.languageService.useLanguages();
     this.authService.getUserId().subscribe(userId => this.languageService.setLanguage(userId));
-    this.themeService.setTheme('light');
+    this.themeService.initializeTheme();
   }
 }

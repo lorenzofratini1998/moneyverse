@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 
 @Component({
   selector: 'app-dialog',
@@ -7,4 +7,9 @@ import {Component, input} from '@angular/core';
 })
 export class DialogComponent {
   show = input.required<boolean>();
+  close = output<void>();
+
+  onBackdropClick(event: MouseEvent) {
+    this.close.emit();
+  }
 }

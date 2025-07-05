@@ -1,0 +1,82 @@
+<div class="overflow-x-auto">
+  <table class="table w-full">
+    <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Parent</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (category of paginatedCategories(); track category.categoryId) {
+        <tr>
+          <td>
+            <app-category-badge
+              [backgroundColor]="category.style.backgroundColor"
+              [textColor]="category.style.textColor"
+              [icon]="category.style.icon"
+              [text]="category.categoryName"
+            />
+          </td>
+          <td>{{ category.description }}</td>
+          <td>
+            @if (category.parentCategory) {
+              @if (getParentCategory(category.parentCategory); as parent) {
+                <app-category-badge
+                  [backgroundColor]="parent.style.backgroundColor"
+                  [textColor]="parent.style.textColor"
+                  [icon]="parent.style.icon"
+                  [text]="parent.categoryName"
+                />
+              }
+            } @else {
+              -
+            }
+          </td>
+          <td class="p-0">
+            @if (!category.parentCategory && category.children && category.children.length > 0) {
+              <button
+                class="btn btn-ghost btn-success btn-xs"
+                (click)="categoryStore.showCategoryTree(category)"
+              >
+                <app-svg [name]="Icons.NETWORK"/>
+              </button>
+            }
+            <button
+              class="btn btn-ghost btn-xs"
+              (click)="categoryStore.openForm(category)"
+            >
+              <app-svg [name]="Icons.PENCIL"/>
+            </button>
+            <button
+              class="btn btn-ghost btn-error btn-xs"
+              (click)="deleteCategory(category)"
+            >
+              <app-svg [name]="Icons.TRASH"/>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<app-pagination
+  [currentPage]="currentPage()"
+  [itemsPerPage]="itemsPerPage()"
+  [totalItems]="categoryStore.categories().length"
+  (pageChange)="handlePageChange($event)"
+  (itemsPerPageChange)="handleItemsPerPageChange($event)"
+/>
+
+<app-dialog
+  [show]="categoryStore.selectedCategory() !== null && categoryStore.isTreeOpen()"
+  (close)="categoryStore.closeCategoryTree()"
+>
+  @if (categoryStore.selectedCategory(); as root) {
+    <app-category-tree
+      [category]="root"
+    ></app-category-tree>
+  }
+</app-dialog>

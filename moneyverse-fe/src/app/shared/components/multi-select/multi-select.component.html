@@ -1,0 +1,37 @@
+<div class="join w-full floating-label">
+  <span class="label">{{ label() }}</span>
+  <div class="relative w-full">
+    <!-- Trigger -->
+    <div tabindex="0" class="input input-bordered w-full flex flex-wrap gap-2 items-center cursor-pointer"
+         (click)="toggleDropdown()">
+      @if (selected.length === 0) {
+        <span>Seleziona...</span>
+      } @else {
+        {{ selected.length }} Elements selected
+      }
+      <div class="ml-auto">
+        @if (isOpen) {
+          <app-svg [name]="IconsEnum.CHEVRON_UP"/>
+        } @else {
+          <app-svg [name]="IconsEnum.CHEVRON_DOWN"/>
+        }
+      </div>
+    </div>
+
+    <!-- Dropdown -->
+    @if (isOpen) {
+      <ul tabindex="0"
+          class="absolute z-10 mt-1 w-full bg-base-100 border border-gray-200 rounded shadow max-h-60 overflow-auto">
+        @for (option of options(); track option) {
+          <li (click)="toggleOption(option); $event.stopPropagation()"
+              class="p-2 hover:bg-base-200 cursor-pointer flex justify-between">
+            <div class="flex gap-x-2">
+              <input type="checkbox" class="checkbox checkbox-sm" [checked]="isSelected(option)" readonly/>
+              <span>{{ option }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

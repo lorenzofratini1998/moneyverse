@@ -1,9 +1,8 @@
-import {Component, computed, inject, input, output, Signal} from '@angular/core';
+import {Component, computed, inject, input, output} from '@angular/core';
 import {ThemeService} from '../../services/theme.service';
 import {CurrencyPipe} from '../../pipes/currency.pipe';
 import {PercentagePipe} from '../../pipes/percentage.pipe';
 import {NgxEchartsDirective} from 'ngx-echarts';
-import {EChartsCoreOption} from 'echarts';
 
 export interface PieChartOptions {
   data: {

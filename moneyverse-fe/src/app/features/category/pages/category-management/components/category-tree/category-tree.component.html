@@ -1,0 +1,29 @@
+<div class="py-1">
+  <div class="flex justify-between items-center">
+    <div class="flex">
+      @if (level() > 0) {
+        <div class="inline-block" [style.width]="(level() * 1.5) + 'rem'"></div>
+        <app-svg [name]="IconsEnum.CORNER_DOWN_RIGHT" class="size-6 flex-shrink-0"/>
+      }
+      <app-category-badge
+        [backgroundColor]="category().style.backgroundColor"
+        [textColor]="category().style.textColor"
+        [icon]="category().style.icon"
+        [text]="category().categoryName"
+      />
+    </div>
+  </div>
+</div>
+
+@if (category().children?.length) {
+  <ul>
+    @for (child of category().children; track child.categoryId) {
+      <li>
+        <app-category-tree
+          [category]="child"
+          [level]="level() + 1"
+        />
+      </li>
+    }
+  </ul>
+}

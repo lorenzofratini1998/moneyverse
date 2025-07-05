@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,8 +28,8 @@ public class AccountPredicateBuilder {
     predicates.add(cb.equal(root.get(Account_.USER_ID), userId));
     withBalance(param);
     withBalanceTarget(param);
-    withAccountCategory(param);
-    withCurrency(param);
+    withAccountCategories(param);
+    withCurrencies(param);
     withIsDefault(param);
     return cb.and(predicates.toArray(new Predicate[0]));
   }
@@ -41,11 +42,14 @@ public class AccountPredicateBuilder {
               balance
                   .getLower()
                   .ifPresent(
-                      lower -> predicates.add(cb.greaterThan(root.get(Account_.BALANCE), lower)));
+                      lower ->
+                          predicates.add(
+                              cb.greaterThanOrEqualTo(root.get(Account_.BALANCE), lower)));
               balance
                   .getUpper()
                   .ifPresent(
-                      upper -> predicates.add(cb.lessThan(root.get(Account_.BALANCE), upper)));
+                      upper ->
+                          predicates.add(cb.lessThanOrEqualTo(root.get(Account_.BALANCE), upper)));
             });
   }
 
@@ -58,29 +62,42 @@ public class AccountPredicateBuilder {
                   .getLower()
                   .ifPresent(
                       lower ->
-                          predicates.add(cb.greaterThan(root.get(Account_.BALANCE_TARGET), lower)));
+                          predicates.add(
+                              cb.greaterThanOrEqualTo(root.get(Account_.BALANCE_TARGET), lower)));
               balanceTarget
                   .getUpper()
                   .ifPresent(
                       upper ->
-                          predicates.add(cb.lessThan(root.get(Account_.BALANCE_TARGET), upper)));
+                          predicates.add(
+                              cb.lessThanOrEqualTo(root.get(Account_.BALANCE_TARGET), upper)));
             });
   }
 
-  private void withAccountCategory(AccountCriteria param) {
-    param
-        .getAccountCategory()
-        .ifPresent(
-            category ->
-                predicates.add(
-                    cb.equal(
-                        root.get(Account_.ACCOUNT_CATEGORY).get(AccountCategory_.NAME), category)));
+  private void withAccountCategories(AccountCriteria param) {
+    List<String> categories = param.getAccountCategories().orElse(Collections.emptyList());
+    if (!categories.isEmpty()) {
+      Predicate[] categoryPredicates =
+          categories.stream()
+              .map(
+                  category ->
+                      cb.equal(
+                          root.get(Account_.ACCOUNT_CATEGORY).get(AccountCategory_.NAME), category))
+              .toArray(Predicate[]::new);
+
+      predicates.add(cb.or(categoryPredicates));
+    }
   }
 
-  private void withCurrency(AccountCriteria param) {
-    param
-        .getCurrency()
-        .ifPresent(currency -> predicates.add(cb.equal(root.get(Account_.CURRENCY), currency)));
+  private void withCurrencies(AccountCriteria param) {
+    List<String> currencies = param.getCurrencies().orElse(Collections.emptyList());
+    if (!currencies.isEmpty()) {
+      Predicate[] currencyPredicates =
+          currencies.stream()
+              .map(currency -> cb.equal(root.get(Account_.CURRENCY), currency))
+              .toArray(Predicate[]::new);
+
+      predicates.add(cb.or(currencyPredicates));
+    }
   }
 
   private void withIsDefault(AccountCriteria param) {

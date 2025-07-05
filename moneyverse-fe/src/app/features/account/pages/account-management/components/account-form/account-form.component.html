@@ -1,0 +1,121 @@
+<form [formGroup]="accountForm" (ngSubmit)="saveAccount()">
+  <div class="flex flex-col justify-start">
+    <!-- Account name -->
+    <div class="flex justify-between items-center gap-3">
+      <div class="flex flex-col w-full">
+        <label class="floating-label validator w-full">
+          <span>Nome Account</span>
+          <input id="accountName" type="text" required formControlName="accountName" class="input input-md w-full"/>
+        </label>
+        <div class="validator-hint hidden">Enter valid account name</div>
+      </div>
+
+      @if (accountStore.selectedAccount() !== null) {
+        <div class="flex items-center gap-2 bg-base-200 px-3 py-2 rounded">
+          <span>Default</span>
+          <input type="checkbox" formControlName="isDefault" [checked]="accountStore.selectedAccount()?.default"
+                 class="toggle toggle-neutral checked:toggle-success"/>
+        </div>
+      }
+    </div>
+
+
+    <!-- Account Description -->
+    <div class="py-4">
+      <label class="floating-label">
+        <span>Descrizione Account</span>
+        <input id="accountDescription" type="text" formControlName="accountDescription"
+               class="input input-md w-full"/>
+      </label>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <!-- Account Category -->
+      <div class="flex flex-col">
+        <label class="select validator">
+          <span class="label">Category</span>
+          <select
+            id="accountCategory"
+            class="select select-bordered"
+            formControlName="accountCategory"
+            required
+          >
+            <option value="" disabled selected>Select a category</option>
+            @for (category of accountStore.categories(); track category.accountCategoryId) {
+              <option [value]="category.name">
+                {{ category.name }}
+              </option>
+            }
+          </select>
+        </label>
+        <div class="validator-hint hidden">Please select a valid account</div>
+      </div>
+
+      <!-- Valuta -->
+      <div class="flex flex-col">
+        <label class="select validator">
+          <span class="label">Currency</span>
+          <select
+            id="currency"
+            class="select select-bordered"
+            formControlName="currency"
+            required
+          >
+            <option value="" disabled selected>Select a currency</option>
+            @for (currency of currencyStore.currencies(); track currency.code) {
+              <option [value]="currency.code">
+                {{ currency.name }} ({{ currency.code }})
+              </option>
+            }
+          </select>
+        </label>
+        <div class="validator-hint hidden">Please select a valid currency.</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <!-- Account balance -->
+      <label class="floating-label">
+        <span>Account balance</span>
+        <div class="input-group flex">
+          <input
+            id="balance"
+            formControlName="balance"
+            type="number"
+            step="0.01"
+            class="input input-md rounded-r-none"
+            (blur)="onBlurBalance($event)"
+          />
+          <span class="bg-base-200 px-3 py-2 rounded-r">{{ this.accountForm.get('currency')?.value }}</span>
+        </div>
+      </label>
+
+      <!-- Account balance target -->
+      <label class="floating-label">
+        <span>Account Target</span>
+        <div class="input-group flex">
+          <input
+            id="target"
+            formControlName="target"
+            type="number"
+            step="0.01"
+            class="input input-md rounded-r-none"
+            (blur)="onBlurTarget($event)"
+          />
+          <span class="bg-base-200 px-3 py-2 rounded-r">{{ this.accountForm.get('currency')?.value }}</span>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <div class="modal-action flex justify-center gap-4">
+    <button type="button" class="btn btn-outline" (click)="cancelForm()">
+      <app-svg [name]="Icons.X"/>
+      <span>Cancel</span>
+    </button>
+    <button class="btn btn-primary" type="submit">
+      <app-svg [name]="Icons.CHECK"/>
+      <span>Save</span>
+    </button>
+  </div>
+</form>

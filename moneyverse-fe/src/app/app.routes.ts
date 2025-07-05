@@ -3,8 +3,7 @@ import {canActivateAuthRole, canUseApplication} from './core/auth/auth.guard';
 import {OnboardingComponent} from './features/onboarding/onboarding.component';
 import {OverviewComponent} from './features/overview/overview.component';
 import {MainLayoutComponent} from './core/layout/main-layout/main-layout.component';
-import {AccountComponent} from './features/account-management/account/account.component';
-import {CategoryComponent} from './features/budget-management/category/category.component';
+import {TransactionComponent} from './features/transaction-management/transaction/transaction.component';
 
 export const routes: Routes = [
     {
@@ -29,11 +28,17 @@ export const routes: Routes = [
         },
         {
           path: 'accounts',
-          component: AccountComponent
+          loadChildren: () =>
+            import('./features/account/account.module').then(m => m.AccountModule)
         },
         {
           path: 'categories',
-          component: CategoryComponent
+          loadChildren: () =>
+            import('./features/category/category.module').then(m => m.CategoryModule)
+        },
+        {
+          path: 'transactions',
+          component: TransactionComponent
         }
       ]
     },

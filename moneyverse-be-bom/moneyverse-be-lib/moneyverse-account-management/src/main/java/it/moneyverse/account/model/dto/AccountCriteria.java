@@ -5,14 +5,16 @@ import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.utils.JsonUtils;
+
+import java.util.List;
 import java.util.Optional;
 
 public class AccountCriteria {
   
   private BoundCriteria balance;
   private BoundCriteria balanceTarget;
-  private String accountCategory;
-  private String currency;
+  private List<String> accountCategories;
+  private List<String> currencies;
   private Boolean isDefault;
   private PageCriteria page;
   private SortCriteria<AccountSortAttributeEnum> sort;
@@ -33,20 +35,20 @@ public class AccountCriteria {
     this.balanceTarget = balanceTarget;
   }
 
-  public Optional<String> getAccountCategory() {
-    return Optional.ofNullable(accountCategory);
+  public Optional<List<String>> getAccountCategories() {
+    return Optional.ofNullable(accountCategories);
   }
 
-  public void setAccountCategory(String accountCategory) {
-    this.accountCategory = accountCategory;
+  public void setAccountCategories(List<String> accountCategories) {
+    this.accountCategories = accountCategories;
   }
 
-  public Optional<String> getCurrency() {
-    return Optional.ofNullable(currency);
+  public Optional<List<String>> getCurrencies() {
+    return Optional.ofNullable(currencies);
   }
 
-  public void setCurrency(String currency) {
-    this.currency = currency;
+  public void setCurrencies(List<String> currencies) {
+    this.currencies = currencies;
   }
 
   public Optional<Boolean> getIsDefault() {

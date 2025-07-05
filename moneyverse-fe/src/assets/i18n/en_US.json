@@ -2,8 +2,22 @@
   "menu": {
     "overview": "Overview",
     "settings": "Settings",
-    "accounts": "Accounts",
-    "categories": "Categories",
+    "accounts": {
+      "title": "Accounts",
+      "dashboard": "Dashboard",
+      "manage": "Manage Accounts"
+    },
+    "categories": {
+      "title": "Categories",
+      "manage": "Manage Categories",
+      "dashboard": "Dashboard",
+      "budgeting": "Budgeting"
+    },
+    "transactions": {
+      "title": "Transactions",
+      "manage": "Manage Transactions",
+      "tags": "Tags"
+    },
     "logout": "Logout"
   },
   "features": {

@@ -1,0 +1,131 @@
+<form
+  [formGroup]="transactionForm"
+  (ngSubmit)="saveTransaction()"
+>
+  <div class="flex flex-col gap-3">
+    <div class="flex gap-3 w-full">
+      <!-- Date: 1/3 width of the row -->
+      <div class="flex flex-col w-1/4">
+        <label class="floating-label validator">
+          <span>Date</span>
+          <input
+            id="date"
+            type="date"
+            required
+            formControlName="date"
+            class="input input-md w-full"
+          />
+        </label>
+        @if (date?.invalid && (date?.touched || date?.dirty)) {
+          <div class="validator-hint">Date cannot be empty</div>
+        }
+      </div>
+
+      <!-- Description: 2/3 width of the row -->
+      <div class="flex flex-col w-3/4">
+        <label class="floating-label validator">
+          <span>Description</span>
+          <input
+            id="description"
+            type="text"
+            required
+            formControlName="description"
+            class="input input-md w-full"
+          />
+        </label>
+        @if (description?.invalid && (description?.touched || description?.dirty)) {
+          <div class="validator-hint">Description cannot be empty</div>
+        }
+      </div>
+    </div>
+
+    <div class="flex gap-3 w-full">
+      <!-- Account -->
+      <div class="flex flex-col w-1/2">
+        <label class="select">
+          <span class="label">Account</span>
+          <select
+            id="account"
+            class="select select-bordered"
+            formControlName="account"
+            required
+          >
+            @for (account of accounts(); track account.accountId) {
+              <option [ngValue]="account.accountId">
+                {{ account.accountName }}
+              </option>
+            }
+          </select>
+        </label>
+        @if (account?.invalid && (account?.touched || account?.dirty)) {
+          <div class="validator-hint">Account cannot be empty</div>
+        }
+      </div>
+
+      <div class="flex flex-col w-1/2">
+        <!-- Category -->
+        <label class="select">
+          <span class="label">Category</span>
+          <select
+            id="category"
+            class="select select-bordered"
+            formControlName="category"
+            required
+          >
+            @for (category of categories(); track category.categoryId) {
+              <option [ngValue]="category.categoryId">
+                {{ category.categoryName }}
+              </option>
+            }
+          </select>
+        </label>
+        @if (category?.invalid && (category?.touched || category?.dirty)) {
+          <div class="validator-hint">Category cannot be empty</div>
+        }
+      </div>
+    </div>
+
+    <div class="flex gap-3 w-full">
+      <!-- Amount -->
+      <label class="floating-label w-1/2">
+        <span>Amount</span>
+        <div class="input-group flex">
+          <input
+            id="amount"
+            formControlName="amount"
+            type="number"
+            class="input input-md rounded-r-none"
+            (blur)="onBlurAmount($event)"
+          />
+          <span class="bg-base-200 px-3 py-2 rounded-r">{{ this.transactionForm.get('currency')?.value }}</span>
+        </div>
+      </label>
+
+      <!-- Currency -->
+      <label class="select w-1/2">
+        <span class="label">Currency</span>
+        <select
+          id="currency"
+          class="select select-bordered"
+          formControlName="currency"
+        >
+          @for (currency of currencies(); track currency.code) {
+            <option [ngValue]="currency.code">
+              {{ currency.name }} ({{ currency.code }})
+            </option>
+          }
+        </select>
+      </label>
+    </div>
+    <div class="modal-action flex justify-center gap-4">
+      <button type="button" class="btn btn-outline" (click)="cancelForm()">
+        <app-svg [name]="Icons.X"/>
+        <span>Cancel</span>
+      </button>
+      <button class="btn btn-primary" type="submit">
+        <app-svg [name]="Icons.CHECK"/>
+        <span>Save</span>
+      </button>
+    </div>
+  </div>
+</form>

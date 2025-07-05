@@ -1,0 +1,153 @@
+<div class="dropdown dropdown-end" [class.dropdown-open]="isOpen()">
+  <div
+    tabindex="0"
+    role="button"
+    class="btn btn-outline btn-primary gap-2 min-w-32"
+    [class.btn-active]="isOpen()"
+    (click)="toggleDropdown($event)"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"/>
+    </svg>
+    {{ getDisplayText() }}
+    <svg class="w-4 h-4 transition-transform" [class.rotate-180]="isOpen()" xmlns="http://www.w3.org/2000/svg"
+         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </div>
+
+  @if (isOpen()) {
+    <div
+      class="dropdown-content z-[1] card card-compact w-80 p-4 shadow-xl bg-base-100 border border-base-300"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Year Selection View -->
+      @if (currentView() === 'year') {
+        <div class="space-y-4">
+          <!-- Year Navigation Header -->
+          <div class="flex items-center justify-between">
+            <button
+              class="btn btn-sm btn-circle btn-ghost"
+              (click)="navigateDecade(-1)"
+              [disabled]="currentDecadeStart() <= minYear"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+
+            <div class="text-center">
+              <div class="text-sm font-semibold">Seleziona Anno</div>
+              <div class="text-xs text-base-content/60">
+                {{ currentDecadeStart() }} - {{ currentDecadeEnd() }}
+              </div>
+            </div>
+
+            <button
+              class="btn btn-sm btn-circle btn-ghost"
+              (click)="navigateDecade(1)"
+              [disabled]="currentDecadeEnd() >= maxYear"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Years Grid -->
+          <div class="grid grid-cols-3 gap-2">
+            @for (year of displayedYears(); track year) {
+              <button
+                class="btn btn-sm h-10 transition-all duration-200"
+                [class]="getYearButtonClass(year)"
+                [disabled]="isYearDisabled(year)"
+                (click)="selectYear(year)"
+              >
+                {{ year }}
+              </button>
+            }
+          </div>
+
+          <!-- Year Quick Actions -->
+          <div class="pt-3 border-t border-base-200">
+            <button
+              class="btn btn-xs btn-ghost w-full"
+              (click)="selectYear(currentYear)"
+              [disabled]="isYearDisabled(currentYear)"
+            >
+              Anno Corrente ({{ currentYear }})
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Month Selection View -->
+      @if (currentView() === 'month') {
+        <div class="space-y-4">
+          <!-- Month Navigation Header -->
+          <div class="flex items-center justify-between">
+            <button
+              class="btn btn-sm btn-circle btn-ghost"
+              (click)="goBackToYearSelection()"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+
+            <div class="text-center">
+              <div class="text-sm font-semibold">Seleziona Mese</div>
+              <div class="text-xs text-base-content/60">{{ selectedYear() }}</div>
+            </div>
+
+            <div class="w-8"></div> <!-- Spacer -->
+          </div>
+
+          <!-- Months Grid -->
+          <div class="grid grid-cols-3 gap-2">
+            @for (month of months; track month.value) {
+              <button
+                class="btn btn-sm h-12 transition-all duration-200 text-xs"
+                [class]="getMonthButtonClass(month.value)"
+                [disabled]="isMonthDisabled(month.value)"
+                (click)="selectMonth(month.value)"
+              >
+                {{ month.short }}
+              </button>
+            }
+          </div>
+
+          <!-- Month Quick Actions -->
+          <div class="pt-3 border-t border-base-200">
+            <div class="flex gap-2">
+              <button
+                class="btn btn-xs btn-ghost flex-1"
+                (click)="selectCurrentMonth()"
+                [disabled]="!isCurrentYearSelected() || isMonthDisabled(currentMonth)"
+              >
+                Mese Corrente
+              </button>
+              @if (selection()) {
+                <button
+                  class="btn btn-xs btn-ghost"
+                  (click)="clearSelection()"
+                >
+                  Cancella
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Overlay per chiudere il dropdown cliccando fuori -->
+  @if (isOpen()) {
+    <div
+      class="fixed inset-0 z-[0]"
+      (click)="closeDropdown()"
+    ></div>
+  }
+</div>

@@ -1,0 +1,9 @@
+<div class="badge badge-soft badge-neutral">
+  {{ name() }}
+  <button
+    class="btn btn-xs btn-ghost btn-circle"
+    (click)="removeEmitter()"
+  >
+    <app-svg [name]="Icons.X" class="size-3"/>
+  </button>
+</div>
