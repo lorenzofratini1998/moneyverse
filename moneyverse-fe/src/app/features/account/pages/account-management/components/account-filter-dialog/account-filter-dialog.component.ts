@@ -1,6 +1,6 @@
 import {Component, effect, inject, input, output} from '@angular/core';
 import {IconsEnum} from '../../../../../../shared/models/icons.model';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {AccountStore} from '../../../../account.store';
 import {CurrencyStore} from '../../../../../../shared/stores/currency.store';
 
@@ -10,29 +10,36 @@ import {FloatLabel} from 'primeng/floatlabel';
 import {RangeSliderComponent} from '../../../../../../shared/components/range-slider/range-slider.component';
 import {BoundCriteria} from '../../../../../../shared/models/criteria.model';
 import {Dialog} from 'primeng/dialog';
+import {ToggleSwitch} from 'primeng/toggleswitch';
+import {Checkbox} from 'primeng/checkbox';
 
 @Component({
-  selector: 'app-account-filter',
+  selector: 'app-account-filter-dialog',
   imports: [
     ReactiveFormsModule,
     MultiSelect,
     FloatLabel,
     RangeSliderComponent,
-    Dialog
+    Dialog,
+    ToggleSwitch,
+    FormsModule,
+    Checkbox
   ],
-  templateUrl: './account-filter.component.html',
-  styleUrl: './account-filter.component.scss'
+  templateUrl: './account-filter-dialog.component.html',
+  styleUrl: './account-filter-dialog.component.scss'
 })
-export class AccountFilterComponent {
+export class AccountFilterDialogComponent {
 
   protected readonly Icons = IconsEnum;
   protected readonly currencyStore = inject(CurrencyStore);
   protected readonly accountStore = inject(AccountStore);
   private readonly fb = inject(FormBuilder);
-  isVisible = input.required<boolean>();
-  submit = output<any>();
-  close = output<void>();
-  filterForm: FormGroup = this.createForm();
+  isOpen = input<boolean>(false);
+  submitted = output<any>();
+  closed = output<void>();
+  protected _isOpen = false;
+  isBalanceTargetEnabled = false;
+  filterForm: FormGroup;
 
   private getBalanceRange(): { min: number; max: number } {
     const accounts = this.accountStore.accounts();
@@ -60,31 +67,47 @@ export class AccountFilterComponent {
     };
   }
 
+  constructor() {
+    effect(() => {
+      if (this.isOpen() !== this._isOpen) {
+        this._isOpen = this.isOpen();
+      }
+    });
+    this.filterForm = this.createForm();
+    effect(() => {
+      const criteria = this.accountStore.accountCriteria();
+      this.filterForm.patchValue({
+        accountCategories: criteria.accountCategories ?? null,
+        currencies: criteria.currencies ?? null,
+        balanceMin: criteria.balance?.lower ?? null,
+        balanceMax: criteria.balance?.upper ?? null,
+        balanceTargetMin: criteria.balanceTarget?.lower ?? null,
+        balanceTargetMax: criteria.balanceTarget?.upper ?? null,
+        isDefault: criteria.isDefault ?? null
+      }, {emitEvent: false});
+    });
+  }
+
   private createForm(): FormGroup {
     const criteria = this.accountStore.accountCriteria();
-
     return this.fb.group({
       accountCategories: [criteria.accountCategories ?? null],
       currencies: [criteria.currencies ?? null],
       balanceMin: [criteria.balance?.lower ?? null],
       balanceMax: [criteria.balance?.upper ?? null],
       balanceTargetMin: [criteria.balanceTarget?.lower ?? null],
-      balanceTargetMax: [criteria.balanceTarget?.upper ?? null]
+      balanceTargetMax: [criteria.balanceTarget?.upper ?? null],
+      isDefault: [criteria.isDefault ?? null]
     });
   }
 
-  constructor() {
-    effect(() => {
-      const criteria = this.accountStore.accountCriteria();
-      this.filterForm.patchValue({
-        accountCategory: criteria.accountCategories ?? null,
-        currency: criteria.currencies ?? null,
-        balanceMin: criteria.balance?.lower ?? null,
-        balanceMax: criteria.balance?.upper ?? null,
-        balanceTargetMin: criteria.balanceTarget?.lower ?? null,
-        balanceTargetMax: criteria.balanceTarget?.upper ?? null
-      }, {emitEvent: false});
-    });
+  open() {
+    this._isOpen = true;
+  }
+
+  close() {
+    this._isOpen = false;
+    this.closed.emit();
   }
 
   getBalanceMin(): number {
@@ -103,13 +126,8 @@ export class AccountFilterComponent {
     return this.getBalanceTargetRange().max;
   }
 
-  getBalanceInitialValues(): [number, number] {
-    const formValue = this.filterForm.value;
-    const range = this.getBalanceRange();
-    return [
-      formValue.balanceMin ?? range.min,
-      formValue.balanceMax ?? range.max
-    ];
+  get isDefault() {
+    return this.filterForm.value.isDefault;
   }
 
   onBalanceRangeChange(range: BoundCriteria): void {
@@ -129,6 +147,8 @@ export class AccountFilterComponent {
 
   reset() {
     this.accountStore.resetFilters();
+    this.isBalanceTargetEnabled = false;
+    this.close();
   }
 
   apply() {
@@ -138,7 +158,8 @@ export class AccountFilterComponent {
       balanceMin,
       balanceMax,
       balanceTargetMin,
-      balanceTargetMax
+      balanceTargetMax,
+      isDefault
     } = this.filterForm.value;
 
     const criteria: AccountCriteria = {
@@ -148,18 +169,19 @@ export class AccountFilterComponent {
         lower: balanceMin,
         upper: balanceMax
       },
-      balanceTarget: {
-        lower: balanceTargetMin,
-        upper: balanceTargetMax
-      }
+      isDefault: isDefault
     };
 
-    this.accountStore.updateCriteria(criteria);
-    this.submit.emit({});
-  }
+    if (this.isBalanceTargetEnabled && balanceTargetMin !== null && balanceTargetMax !== null) {
+      criteria.balanceTarget = {
+        lower: balanceTargetMin,
+        upper: balanceTargetMax
+      };
+    }
 
-  onDialogHide() {
-    this.close.emit();
+    this.accountStore.updateCriteria(criteria);
+    this.submitted.emit({});
+    this.close();
   }
 
 }

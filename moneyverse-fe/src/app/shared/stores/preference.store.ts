@@ -32,8 +32,7 @@ export const PreferenceStore = signalStore(
             console.error(`Preference load failed for ${key}`, err);
           }
         });
-
-    }
+    },
   })),
 
   withComputed((store) => ({

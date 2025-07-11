@@ -2,80 +2,39 @@
   <header class="mb-8 flex justify-between items-center">
     <h1 class="text-3xl font-bold">Account Management</h1>
     <div class="flex gap-x-3">
-      <button
-        class="btn btn-primary"
-        (click)="accountStore.openForm()">
+      <p-button
+        (onClick)="accountFilterComponent.open()"
+        [rounded]="true"
+        [outlined]="true"
+        severity="contrast">
+        <app-svg [name]="Icons.FUNNEL"/>
+        <span>Filters</span>
+      </p-button>
+      <p-button
+        (onClick)="accountForm.open()"
+        [rounded]="true"
+        severity="contrast">
         <app-svg [name]="Icons.PLUS"/>
         <span>New Account</span>
-      </button>
+      </p-button>
     </div>
   </header>
 
-  <button pButton (click)="isFilterOpen = true">Filter</button>
-  <app-account-filter [isVisible]="isFilterOpen" (submit)="isFilterOpen = false" (close)="isFilterOpen = false"/>
-
-  <div class="flex flex-col gap-y-3">
-    <!--<p-panel [toggleable]="true" [collapsed]="true">
-      <ng-template #header>
-        <div class="font-semibold flex justify-between items-center">
-          <div class="flex gap-x-2">
-            <div class="indicator">
-              @if (accountStore.activeFiltersCount() > 0) {
-                <span class="indicator-item badge badge-primary badge-xs">
-              {{ accountStore.activeFiltersCount() }}
-            </span>
-              }
-              <app-svg [name]="Icons.LIST_FILTER"/>
-            </div>
-            <span>Filters</span>
-          </div>
-        </div>
-      </ng-template>
-      <app-account-filter></app-account-filter>
-    </p-panel>-->
-
+  <app-account-filter-dialog/>
+  <div class="flex flex-col gap-4">
+    @if (accountStore.activeFiltersCount() > 0) {
+      <app-account-filter-panel/>
+    }
     <app-account-table
-      (delete)="deleteAccount($event)"
+      (deleted)="deleteAccount($event)"
+      (edited)="editAccount($event)"
     ></app-account-table>
   </div>
 </div>
 
-<p-dialog
-  [header]="accountStore.selectedAccount() ? 'Modifica account' : 'Aggiungi un nuovo account'"
-  [modal]="true"
-  [(visible)]="isDialogVisible"
-  (onHide)="accountStore.closeForm()"
->
-  <app-account-form
-    (save)="saveAccount($event)"
-    (cancel)="accountStore.closeForm()">
-  </app-account-form>
-</p-dialog>
-
-<!-- <app-dialog
-  [show]="accountStore.isFormOpen()"
->
-  <div class="flex flex-col gap-y-6">
-    <h3 class="font-bold text-lg py-4">
-      @if (accountStore.selectedAccount()) {
-        Modifica account
-      } @else {
-        Aggiungi un nuovo account
-      }
-    </h3>
-    <app-account-form
-      (save)="saveAccount($event)"
-      (cancel)="accountStore.closeForm()">
-    </app-account-form>
-  </div>
-</app-dialog> -->
-
-<!--<app-confirm-dialog
-  #confirmDialog
-  title="Delete account"
-  message="Are you sure you want to delete this account? All associated transactions will be deleted.">
-</app-confirm-dialog>-->
-
+<app-account-form-dialog
+  [accounts]="accountStore.accounts()"
+  [categories]="accountStore.categories()"
+  (save)="createAccount($event)"
+/>
 <p-toast/>
-
-<!--<app-toast></app-toast>-->

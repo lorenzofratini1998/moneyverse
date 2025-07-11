@@ -65,8 +65,7 @@ public class CategoryMapper {
                 .toList())
         .withStyle(
             StyleDto.builder()
-                .withBackgroundColor(category.getStyle().getBackgroundColor())
-                .withTextColor(category.getStyle().getTextColor())
+                .withColor(category.getStyle().getColor())
                 .withIcon(category.getStyle().getIcon())
                 .build())
         .build();
@@ -89,8 +88,7 @@ public class CategoryMapper {
         .withDescription(category.getDescription())
         .withStyle(
             StyleDto.builder()
-                .withBackgroundColor(category.getStyle().getBackgroundColor())
-                .withTextColor(category.getStyle().getTextColor())
+                .withColor(category.getStyle().getColor())
                 .withIcon(category.getStyle().getIcon())
                 .build())
         .build();

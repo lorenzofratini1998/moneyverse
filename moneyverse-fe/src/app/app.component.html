@@ -2,7 +2,7 @@
   <div class="relative w-full h-full overflow-y-auto">
     @if (loadingService.loading()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <span class="loading loading-bars loading-xl"></span>
+        <p-progress-spinner ariaLabel="loading"/>
       </div>
     }
     <router-outlet/>

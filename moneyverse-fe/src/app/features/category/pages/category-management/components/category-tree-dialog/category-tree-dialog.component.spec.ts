@@ -1,18 +1,18 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {CategoryTreeComponent} from './category-tree.component';
+import {CategoryTreeDialogComponent} from './category-tree-dialog.component';
 
 describe('CategoryTreeComponent', () => {
-  let component: CategoryTreeComponent;
-  let fixture: ComponentFixture<CategoryTreeComponent>;
+  let component: CategoryTreeDialogComponent;
+  let fixture: ComponentFixture<CategoryTreeDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoryTreeComponent]
+      imports: [CategoryTreeDialogComponent]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(CategoryTreeComponent);
+    fixture = TestBed.createComponent(CategoryTreeDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

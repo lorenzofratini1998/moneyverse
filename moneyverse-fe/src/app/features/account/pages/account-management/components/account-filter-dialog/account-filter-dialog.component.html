@@ -1,0 +1,89 @@
+<p-dialog [(visible)]="_isOpen"
+          [modal]="true"
+          [resizable]="false"
+          [draggable]="false"
+          (onHide)="close()"
+          [style]="{ width: '50rem' }">
+  <ng-template #header>
+    <span>Filters</span>
+  </ng-template>
+  <ng-template #content>
+    <form [formGroup]="filterForm" class="py-2 flex flex-col gap-4 justify-center items-center">
+      <div class="flex w-full items-center justify-between">
+        <div class="flex items-center">
+          <p-checkbox formControlName="isDefault" [binary]="true" [indeterminate]="isDefault === null" id="isDefault"/>
+          <label for="isDefault" class="ml-2">Default</label>
+        </div>
+        <div class="flex items-center gap-2">
+          <p-toggle-switch [(ngModel)]="isBalanceTargetEnabled" [ngModelOptions]="{standalone: true}"/>
+          <label>Balance Target Filter</label>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <p-float-label variant="on">
+          <p-multi-select
+            id="account_categories_filter"
+            [options]="accountStore.categories()"
+            formControlName="accountCategories"
+            optionLabel="name"
+            optionValue="name"
+            display="chip"
+            class="w-full"
+            [appendTo]="'body'"
+          />
+          <label for="account_categories_filter" class="text-sm font-medium">Categories</label>
+        </p-float-label>
+
+        <p-float-label variant="on">
+          <p-multi-select
+            id="currencies_filter"
+            [options]="currencyStore.currencies()"
+            formControlName="currencies"
+            optionLabel="code"
+            optionValue="code"
+            display="chip"
+            class="w-full"
+            [appendTo]="'body'"
+          >
+            <ng-template let-currency #item>
+          <span class="flex items-center">
+            {{ currency.name }} ({{ currency.code }})
+          </span>
+            </ng-template>
+          </p-multi-select>
+          <label for="currencies_filter" class="text-sm font-medium">Currencies</label>
+        </p-float-label>
+      </div>
+      <app-range-slider
+        title="Balance Range"
+        [min]="getBalanceMin()"
+        [max]="getBalanceMax()"
+        [step]="0.01"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="2"
+        (onRangeChange)="onBalanceRangeChange($event)"
+        class="w-full"
+      />
+
+      @if (isBalanceTargetEnabled) {
+        <app-range-slider
+          title="Balance Target Range"
+          [min]="getBalanceTargetMin()"
+          [max]="getBalanceTargetMax()"
+          [step]="0.01"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          (onRangeChange)="onBalanceTargetRangeChange($event)"
+          class="w-full"
+        />
+      }
+
+    </form>
+  </ng-template>
+  <ng-template #footer>
+    <div class="flex justify-center items-center gap-4 w-full">
+      <button type="button" class="btn btn-ghost" (click)="reset()">Reset</button>
+      <button type="submit" class="btn btn-primary" (click)="apply()">Apply</button>
+    </div>
+  </ng-template>
+</p-dialog>

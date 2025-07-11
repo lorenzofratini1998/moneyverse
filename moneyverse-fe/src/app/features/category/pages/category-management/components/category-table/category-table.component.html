@@ -1,82 +1,114 @@
-<div class="overflow-x-auto">
-  <table class="table w-full">
-    <thead>
+<p-table
+  #categoryTable
+  [value]="categories()"
+  class="w-full"
+  stripedRows
+  [paginator]="true"
+  [rows]="10"
+  [rowsPerPageOptions]="[5, 10, 25, 50]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+>
+  <ng-template #header>
     <tr>
-      <th>Name</th>
-      <th>Description</th>
-      <th>Parent</th>
-      <th></th>
+      <th id="categoryName" pSortableColumn="categoryName">
+        Name
+        <p-sortIcon field="categoryName"/>
+      </th>
+      <th id="description">
+        Description
+      </th>
+      <th id="parentCategory" pSortableColumn="parentCategory">
+        Parent
+        <p-sortIcon field="parentCategory"/>
+        <p-columnFilter field="parentCategory" matchMode="in" display="menu" [showMatchModes]="false"
+                        [showOperator]="false" [showAddButton]="false" class="ml-auto">
+          <ng-template #filter let-value let-filter="filterCallback">
+            <p-multiSelect [filter]="false" [(ngModel)]="searchValue" [options]="parentCategories()" placeholder="Any"
+                           (onChange)="filter($event.value)" optionLabel="categoryName" optionValue="categoryId"
+                           class="min-width: 14rem"
+                           [panelStyle]="{ minWidth: '16rem' }">
+              <ng-template let-option #item>
+                <span>{{ option.categoryName }}</span>
+              </ng-template>
+            </p-multiSelect>
+          </ng-template>
+        </p-columnFilter>
+      </th>
+      <th id="actions"></th>
     </tr>
-    </thead>
-    <tbody>
-      @for (category of paginatedCategories(); track category.categoryId) {
-        <tr>
-          <td>
-            <app-category-badge
-              [backgroundColor]="category.style.backgroundColor"
-              [textColor]="category.style.textColor"
-              [icon]="category.style.icon"
-              [text]="category.categoryName"
-            />
-          </td>
-          <td>{{ category.description }}</td>
-          <td>
-            @if (category.parentCategory) {
-              @if (getParentCategory(category.parentCategory); as parent) {
-                <app-category-badge
-                  [backgroundColor]="parent.style.backgroundColor"
-                  [textColor]="parent.style.textColor"
-                  [icon]="parent.style.icon"
-                  [text]="parent.categoryName"
-                />
-              }
-            } @else {
-              -
-            }
-          </td>
-          <td class="p-0">
-            @if (!category.parentCategory && category.children && category.children.length > 0) {
-              <button
-                class="btn btn-ghost btn-success btn-xs"
-                (click)="categoryStore.showCategoryTree(category)"
-              >
-                <app-svg [name]="Icons.NETWORK"/>
-              </button>
-            }
-            <button
-              class="btn btn-ghost btn-xs"
-              (click)="categoryStore.openForm(category)"
-            >
-              <app-svg [name]="Icons.PENCIL"/>
-            </button>
-            <button
-              class="btn btn-ghost btn-error btn-xs"
-              (click)="deleteCategory(category)"
-            >
-              <app-svg [name]="Icons.TRASH"/>
-            </button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</div>
+  </ng-template>
+  <ng-template #body let-category>
+    <tr>
+      <td>
+        <p-chip class="!px-2 !py-1"
+                [style]="colorService.getStyle(category.style.color)">
+          <app-svg [name]="category.style.icon"/>
+          <span>{{ category.categoryName }}</span>
+        </p-chip>
+      </td>
+      <td>{{ category.description }}</td>
+      <td>
+        @if (category.parentCategory) {
+          @if (getParentCategory(category.parentCategory); as parent) {
+            <p-chip class="!px-2 !py-1"
+                    [style]="colorService.getStyle(parent.style.color)">
+              <app-svg [name]="parent.style.icon"/>
+              <span>{{ parent.categoryName }}</span>
+            </p-chip>
+          }
+        } @else {
+          -
+        }
+      </td>
+      <td class="p-0">
+        <button
+          pButton
+          type="button"
+          text
+          rounded
+          severity="secondary"
+          (click)="categoryForm.open(category)"
+        >
+          <app-svg [name]="Icons.PENCIL"/>
+        </button>
+        <button
+          pButton
+          type="button"
+          text
+          rounded
+          severity="danger"
+          (click)="onDelete($event,category)"
+        >
+          <app-svg [name]="Icons.TRASH"/>
+        </button>
+        @if (!category.parentCategory && category.children && category.children.length > 0) {
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="success"
+            (click)="categoryTree.open(category)"
+          >
+            <app-svg [name]="Icons.NETWORK"/>
+          </button>
+        }
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="4">No categories found.</td>
+    </tr>
+  </ng-template>
+</p-table>
 
-<app-pagination
-  [currentPage]="currentPage()"
-  [itemsPerPage]="itemsPerPage()"
-  [totalItems]="categoryStore.categories().length"
-  (pageChange)="handlePageChange($event)"
-  (itemsPerPageChange)="handleItemsPerPageChange($event)"
+<app-category-form-dialog
+  #categoryForm
+  (save)="onEdit($event)"
 />
 
-<app-dialog
-  [show]="categoryStore.selectedCategory() !== null && categoryStore.isTreeOpen()"
-  (close)="categoryStore.closeCategoryTree()"
->
-  @if (categoryStore.selectedCategory(); as root) {
-    <app-category-tree
-      [category]="root"
-    ></app-category-tree>
-  }
-</app-dialog>
+<app-category-tree-dialog/>
+
+<p-confirm-dialog/>

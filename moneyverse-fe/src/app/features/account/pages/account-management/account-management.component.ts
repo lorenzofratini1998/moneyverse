@@ -3,34 +3,30 @@ import {IconsEnum} from '../../../../shared/models/icons.model';
 import {AccountStore} from '../../account.store';
 import {AccountService} from '../../account.service';
 import {AuthService} from '../../../../core/auth/auth.service';
-//import {MessageService} from '../../../../shared/services/message.service';
+
 import {switchMap, take} from 'rxjs';
-import {AccountFormComponent} from './components/account-form/account-form.component';
-import {Account, AccountRequest} from '../../account.model';
+import {AccountFormDialogComponent} from './components/account-form-dialog/account-form-dialog.component';
+import {Account, AccountForm, AccountFormData, AccountRequest} from '../../account.model';
 import {ToastEnum} from '../../../../shared/components/toast/toast.component';
 import {SvgComponent} from '../../../../shared/components/svg/svg.component';
 import {AccountTableComponent} from './components/account-table/account-table.component';
-import {AccountFilterComponent} from './components/account-filter/account-filter.component';
+import {AccountFilterDialogComponent} from './components/account-filter-dialog/account-filter-dialog.component';
 import {ConfirmDialogComponent} from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import {Dialog} from 'primeng/dialog';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {Toast} from 'primeng/toast';
-import {Panel} from 'primeng/panel';
-import {Drawer} from 'primeng/drawer';
-import {ButtonDirective} from 'primeng/button';
+import {AccountFilterPanelComponent} from './components/account-filter-panel/account-filter-panel.component';
+import {Button} from 'primeng/button';
 
 @Component({
   selector: 'app-account-management',
   imports: [
-    AccountFormComponent,
+    AccountFormDialogComponent,
     SvgComponent,
     AccountTableComponent,
-    AccountFilterComponent,
-    Dialog,
+    AccountFilterDialogComponent,
     Toast,
-    Panel,
-    Drawer,
-    ButtonDirective
+    AccountFilterPanelComponent,
+    Button
   ],
   templateUrl: './account-management.component.html',
   styleUrl: './account-management.component.scss',
@@ -42,29 +38,20 @@ export class AccountManagementComponent {
   private readonly accountService = inject(AccountService);
   private readonly authService = inject(AuthService);
   private readonly messageService = inject(MessageService);
-  private readonly confirmationService = inject(ConfirmationService);
-  isFilterOpen = false;
 
-  @ViewChild(AccountFormComponent) accountForm!: AccountFormComponent;
+  @ViewChild(AccountFormDialogComponent) accountForm!: AccountFormDialogComponent;
   @ViewChild(ConfirmDialogComponent) confirmDialog!: ConfirmDialogComponent;
-  console: any;
+  @ViewChild(AccountFilterDialogComponent) accountFilterComponent!: AccountFilterDialogComponent;
 
-  saveAccount(accountData: any): void {
+  createAccount(formData: AccountFormData): void {
     this.authService.getUserId().pipe(
       take(1),
-      switchMap(userId => {
-          if (this.accountStore.selectedAccount() !== null) {
-            return this.accountService.updateAccount(this.accountStore.selectedAccount()!.accountId, this.createUpdateAccountRequest(accountData))
-          } else {
-            return this.accountService.createAccount(this.createAccountRequest(accountData, userId))
-          }
-        }
-      )
+      switchMap(userId => this.accountService.createAccount(this.createAccountRequest(formData, userId)))
     ).subscribe({
       next: () => {
         this.messageService.add({
           severity: ToastEnum.SUCCESS,
-          detail: this.accountStore.selectedAccount() !== null ? 'Account updated successfully.' : 'Account created successfully.'
+          detail: 'Account created successfully.'
         });
         this.accountForm.reset();
         this.accountStore.refreshAccounts();
@@ -72,33 +59,51 @@ export class AccountManagementComponent {
       error: () => {
         this.messageService.add({
           severity: ToastEnum.ERROR,
-          detail: this.accountStore.selectedAccount() !== null ? 'Error during the account update.' : 'Error during the account creation.'
+          detail: 'Error during the account creation.'
         });
       }
     })
   }
 
-  createAccountRequest(accountData: any, userId: string): AccountRequest {
+  private createAccountRequest(formData: AccountFormData, userId: string): AccountRequest {
     return {
       userId: userId,
-      accountName: accountData.accountName,
-      accountDescription: accountData.accountDescription,
-      accountCategory: accountData.accountCategory,
-      balance: accountData.balance,
-      balanceTarget: accountData.target,
-      currency: accountData.currency
+      accountName: formData.accountName,
+      accountDescription: formData.accountDescription,
+      accountCategory: formData.accountCategory,
+      balance: formData.balance,
+      balanceTarget: formData.balanceTarget,
+      currency: formData.currency
     }
   }
 
-  createUpdateAccountRequest(accountData: any): Partial<AccountRequest> {
+  editAccount(accountForm: AccountForm) {
+    this.accountService.updateAccount(accountForm.accountId!, this.createUpdateAccountRequest(accountForm.formData)).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: ToastEnum.SUCCESS,
+          detail: 'Account updated successfully.'
+        });
+        this.accountStore.refreshAccounts();
+      },
+      error: () => {
+        this.messageService.add({
+          severity: ToastEnum.ERROR,
+          detail: 'Error during the account update.'
+        });
+      }
+    })
+  }
+
+  private createUpdateAccountRequest(formData: AccountFormData): Partial<AccountRequest> {
     const updateRequest: Partial<AccountRequest> = {};
-    updateRequest.accountName = accountData.accountName;
-    updateRequest.balance = Number(accountData.balance);
-    updateRequest.balanceTarget = Number(accountData.target);
-    updateRequest.accountCategory = accountData.accountCategory;
-    updateRequest.accountDescription = accountData.accountDescription;
-    updateRequest.currency = accountData.currency;
-    updateRequest.isDefault = accountData.isDefault;
+    updateRequest.accountName = formData.accountName;
+    updateRequest.balance = Number(formData.balance);
+    updateRequest.balanceTarget = Number(formData.balanceTarget);
+    updateRequest.accountCategory = formData.accountCategory;
+    updateRequest.accountDescription = formData.accountDescription;
+    updateRequest.currency = formData.currency;
+    updateRequest.isDefault = formData.isDefault;
     return updateRequest;
   }
 
@@ -118,19 +123,5 @@ export class AccountManagementComponent {
         });
       }
     })
-  }
-
-  toggleFilter() {
-    this.isFilterOpen = !this.isFilterOpen;
-  }
-
-  get isDialogVisible(): boolean {
-    return this.accountStore.isFormOpen();
-  }
-
-  set isDialogVisible(value: boolean) {
-    if (!value) {
-      this.accountStore.closeForm();
-    }
   }
 }

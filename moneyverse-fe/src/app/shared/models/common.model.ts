@@ -1,5 +1,4 @@
 export interface Style {
-  backgroundColor: string,
-  textColor: string,
+  color: string
   icon: string
 }

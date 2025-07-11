@@ -1,6 +1,6 @@
-<div class="flex gap-2">
-  <span class="text-sm font-medium">{{ title() }}</span>
-  <div class="flex items-center gap-4">
+<div class="flex items-center">
+  <span class="text-sm font-medium w-1/4">{{ title() }}</span>
+  <div class="flex items-center gap-4 w-3/4">
     <p-input-number
       [(ngModel)]="currentValues()[0]"
       (ngModelChange)="onInputNumberChange($event, 0)"
@@ -10,7 +10,7 @@
       [minFractionDigits]="minFractionDigits()"
       [maxFractionDigits]="maxFractionDigits()"
       class="flex-shrink-0"
-      [inputStyle]="{ width: '6rem' }"
+      [inputStyle]="{ width: '8rem' }"
     />
 
     <p-slider
@@ -20,7 +20,6 @@
       [max]="max()"
       [step]="step()"
       class="flex-grow"
-      styleClass="w-28"
     />
 
     <p-input-number
@@ -32,7 +31,7 @@
       [minFractionDigits]="minFractionDigits()"
       [maxFractionDigits]="maxFractionDigits()"
       class="flex-shrink-0"
-      [inputStyle]="{ width: '6rem' }"
+      [inputStyle]="{ width: '8rem' }"
     />
   </div>
 </div>

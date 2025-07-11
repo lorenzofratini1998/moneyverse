@@ -5,10 +5,11 @@ import {AuthService} from './core/auth/auth.service';
 import {LanguageService} from './shared/services/language.service';
 import {ThemeService} from './shared/services/theme.service';
 import {LoadingService} from './shared/services/loading.service';
+import {ProgressSpinner} from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterModule],
+  imports: [RouterModule, ProgressSpinner],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   providers: [PreferenceService]

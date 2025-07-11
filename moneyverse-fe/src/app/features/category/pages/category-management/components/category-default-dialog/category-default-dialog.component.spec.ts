@@ -1,18 +1,18 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {DefaultCategoryModalComponent} from './default-category-modal.component';
+import {CategoryDefaultDialogComponent} from './category-default-dialog.component';
 
 describe('DefaultCategoryModalComponent', () => {
-  let component: DefaultCategoryModalComponent;
-  let fixture: ComponentFixture<DefaultCategoryModalComponent>;
+  let component: CategoryDefaultDialogComponent;
+  let fixture: ComponentFixture<CategoryDefaultDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DefaultCategoryModalComponent]
+      imports: [CategoryDefaultDialogComponent]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(DefaultCategoryModalComponent);
+    fixture = TestBed.createComponent(CategoryDefaultDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

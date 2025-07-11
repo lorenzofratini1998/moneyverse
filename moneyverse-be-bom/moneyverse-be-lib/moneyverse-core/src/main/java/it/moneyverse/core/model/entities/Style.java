@@ -6,29 +6,18 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class Style {
 
-  @Column(name = "BACKGROUND_COLOR")
-  private String backgroundColor;
-
-  @Column(name = "TEXT_COLOR")
-  private String textColor;
+  @Column(name = "COLOR")
+  private String color;
 
   @Column(name = "ICON")
   private String icon;
 
-  public String getBackgroundColor() {
-    return backgroundColor;
+  public String getColor() {
+    return color;
   }
 
-  public void setBackgroundColor(String backgroundColor) {
-    this.backgroundColor = backgroundColor;
-  }
-
-  public String getTextColor() {
-    return textColor;
-  }
-
-  public void setTextColor(String textColor) {
-    this.textColor = textColor;
+  public void setColor(String color) {
+    this.color = color;
   }
 
   public String getIcon() {

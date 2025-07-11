@@ -79,7 +79,7 @@ export const CategoryStore = signalStore(
   withComputed((store) => ({
     hasSelection: computed(() => store.selectedCategory() !== null),
     canEdit: computed(() => store.isFormOpen()),
-    categories: computed(() => store.categories())
+    categories: computed(() => store.categories()),
   })),
 
   withHooks({

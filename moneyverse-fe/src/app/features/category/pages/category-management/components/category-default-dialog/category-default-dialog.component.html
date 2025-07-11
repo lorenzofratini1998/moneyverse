@@ -1,0 +1,39 @@
+<p-dialog
+  [modal]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [(visible)]="_isOpen"
+  (onHide)="close()"
+>
+  <ng-template #header>
+    <h3 class="font-bold text-lg py-4">The following expenditure categories will be created</h3>
+  </ng-template>
+  <ng-template #content>
+    <div class="py-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (category of defaultCategories$(); track category.categoryId) {
+          <p-chip class="!px-2 !py-1"
+                  [style]="colorService.getStyle(category.style.color)">
+            <app-svg [name]="category.style.icon"/>
+            <span>{{ category.categoryName }}</span>
+          </p-chip>
+        }
+      </div>
+    </div>
+    <div class="py-2 flex justify-center gap-3">
+      <p-button
+        (onClick)="onClose()"
+        [rounded]="true"
+        [outlined]="true"
+        severity="secondary">
+        <span>Cancel</span>
+      </p-button>
+      <p-button
+        (onClick)="onConfirm()"
+        [rounded]="true"
+        severity="contrast">
+        <span>Confirm</span>
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

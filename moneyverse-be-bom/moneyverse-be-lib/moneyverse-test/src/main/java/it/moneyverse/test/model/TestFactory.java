@@ -166,14 +166,13 @@ public class TestFactory {
 
   public static Style fakeStyle() {
     Style style = new Style();
-    style.setBackgroundColor("#FEE2E2");
-    style.setTextColor("#EF4444");
+    style.setColor("red");
     style.setIcon("circle-dollar-sign");
     return style;
   }
 
   public static StyleRequestDto fakeStyleRequest() {
-    return new StyleRequestDto("#FEE2E2", "#EF4444", "circle-dollar-sign");
+    return new StyleRequestDto("red", "circle-dollar-sign");
   }
 
   private TestFactory() {}

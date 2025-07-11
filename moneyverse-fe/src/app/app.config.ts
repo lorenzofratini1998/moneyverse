@@ -24,7 +24,7 @@ import {LoadingService} from './shared/services/loading.service';
 import {finalize} from 'rxjs';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {providePrimeNG} from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import {MoneyversePreset} from '../assets/themes/moneyverse-preset';
 
 echarts.use([TitleComponent, TooltipComponent, LegendComponent, GridComponent, PieChart, BarChart, LineChart, SVGRenderer]);
 
@@ -64,7 +64,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: Aura,
+        preset: MoneyversePreset,
         options: {
           prefix: 'p',
           darkModeSelector: '.p-dark',

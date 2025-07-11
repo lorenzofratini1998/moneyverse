@@ -1,122 +1,3 @@
-<!--<div class="overflow-x-auto">
-  <table class="table w-full">
-    <thead>
-    <tr>
-      <th (click)="sortData('accountName')"
-          (keydown.enter)="sortData('accountName')"
-          (keydown.space)="sortData('accountName'); $event.preventDefault()"
-          class="cursor-pointer hover:bg-gray-100"
-          [class.bg-gray-200]="sortColumn() === 'accountName'"
-      >
-        @if (sortColumn() === 'accountName') {
-          {{ sortDirection() === 'asc' ? '↑' : '↓' }}
-        }
-        Name
-      </th>
-      <th>
-        Description
-      </th>
-      <th (click)="sortData('accountCategory')"
-          (keydown.enter)="sortData('accountCategory')"
-          (keydown.space)="sortData('accountCategory'); $event.preventDefault()"
-          class="cursor-pointer hover:bg-gray-100"
-          [class.bg-gray-200]="sortColumn() === 'accountCategory'"
-      >
-        @if (sortColumn() === 'accountCategory') {
-          {{ sortDirection() === 'asc' ? '↑' : '↓' }}
-        }
-        Category
-      </th>
-      <th (click)="sortData('currency')"
-          (keydown.enter)="sortData('currency')"
-          (keydown.space)="sortData('currency'); $event.preventDefault()"
-          class="cursor-pointer hover:bg-gray-100"
-          [class.bg-gray-200]="sortColumn() === 'currency'"
-      >
-        @if (sortColumn() === 'currency') {
-          {{ sortDirection() === 'asc' ? '↑' : '↓' }}
-        }
-        Currency
-      </th>
-      <th (click)="sortData('balance')"
-          (keydown.enter)="sortData('balance')"
-          (keydown.space)="sortData('balance'); $event.preventDefault()"
-          class="cursor-pointer hover:bg-gray-100"
-          [class.bg-gray-200]="sortColumn() === 'balance'"
-      >
-        @if (sortColumn() === 'balance') {
-          {{ sortDirection() === 'asc' ? '↑' : '↓' }}
-        }
-        Balance
-      </th>
-      <th (click)="sortData('balanceTarget')"
-          (keydown.enter)="sortData('balanceTarget')"
-          (keydown.space)="sortData('balanceTarget'); $event.preventDefault()"
-          class="cursor-pointer hover:bg-gray-100"
-          [class.bg-gray-200]="sortColumn() === 'balanceTarget'"
-      >
-        @if (sortColumn() === 'balanceTarget') {
-          {{ sortDirection() === 'asc' ? '↑' : '↓' }}
-        }
-        Balance Target
-      </th>
-      <th>Default</th>
-      <th></th>
-    </tr>
-    </thead>
-    <tbody>
-      @for (account of paginatedAccounts(); track account.accountId) {
-        <tr>
-          <td>{{ account.accountName }}</td>
-          <td>{{ account.accountDescription }}</td>
-          <td>{{ account.accountCategory }}</td>
-          <td>{{ account.currency }}</td>
-          <td>{{ account.balance | currency: account.currency }}</td>
-          <td>
-            @if (account.balanceTarget > 0) {
-              {{ account.balanceTarget | currency: account.currency }}
-            } @else {
-              —
-            }
-          </td>
-          <td>
-            <div class="badge"
-                 [ngClass]="account.default ? 'badge-soft badge-success' : 'badge-soft badge-error'">
-              @if (account.default) {
-                <app-svg [name]="Icons.CHECK"/>
-              } @else {
-                <app-svg [name]="Icons.X"/>
-              }
-            </div>
-          </td>
-          <td class="p-0">
-            <button
-              class="btn btn-ghost btn-xs"
-              (click)="accountStore.openForm(account)"
-            >
-              <app-svg [name]="Icons.PENCIL"/>
-            </button>
-            <button
-              class="btn btn-ghost btn-error btn-xs"
-              (click)="onDeleteAccount($event, account)"
-            >
-              <app-svg [name]="Icons.TRASH"/>
-            </button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</div>
-
-<app-pagination
-  [currentPage]="currentPage()"
-  [itemsPerPage]="itemsPerPage()"
-  [totalItems]="accountStore.filteredAccounts().length"
-  (pageChange)="handlePageChange($event)"
-  (itemsPerPageChange)="handleItemsPerPageChange($event)"
-/>-->
-
 <p-table
   #accountTable
   [value]="accountStore.filteredAccounts()"
@@ -127,17 +8,7 @@
   [rowsPerPageOptions]="[5, 10, 25, 50]"
   [showCurrentPageReport]="true"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-  editMode="row"
-  dataKey="accountId"
 >
-  <ng-template #caption>
-    <button class="btn btn-primary" (click)="clear(accountTable)">
-      <app-svg [name]="Icons.FUNNEL_X"/>
-      <span>Clear</span>
-      <span>{{ searchValue }}</span>
-    </button>
-
-  </ng-template>
   <ng-template #header>
     <tr>
       <th id="accountName" pSortableColumn="accountName">
@@ -150,175 +21,43 @@
       <th id="accountCategory" pSortableColumn="accountCategory">
         Category
         <p-sortIcon field="accountCategory"/>
-        <p-columnFilter field="accountCategory"
-                        matchMode="in"
-                        display="menu"
-                        [showMatchModes]="false"
-                        [showOperator]="false"
-                        [showAddButton]="false"
-        >
-          <ng-template #filter let-value let-filter="filterCallback">
-            <p-multi-select [(ngModel)]="searchValue"
-                            [options]="accountStore.categories()"
-                            placeholder="Any"
-                            optionLabel="name"
-                            (onChange)="filter($event.value)"
-                            class="min-width: 14rem"
-                            [panelStyle]="{ minWidth: '16rem' }"
-            />
-          </ng-template>
-        </p-columnFilter>
       </th>
       <th id="currency" pSortableColumn="currency">
         Currency
         <p-sortIcon field="currency"/>
-        <p-columnFilter field="currency"
-                        matchMode="in"
-                        display="menu"
-                        [showMatchModes]="false"
-                        [showOperator]="false"
-                        [showAddButton]="false"
-        >
-          <ng-template #filter let-value let-filter="filterCallback">
-            <p-multi-select [(ngModel)]="searchValue"
-                            [options]="currencyStore.currencies()"
-                            placeholder="Any"
-                            optionLabel="code"
-                            (onChange)="filter($event.value)"
-                            class="min-width: 14rem"
-                            [panelStyle]="{ minWidth: '16rem' }"
-            />
-          </ng-template>
-        </p-columnFilter>
       </th>
       <th id="balance" pSortableColumn="balance">
         Balance
         <p-sortIcon field="balance"/>
-        <p-columnFilter type="numeric" field="balance" display="menu" [showOperator]="false" class="ml-auto">
-          <ng-template #filter let-value let-filter="filterCallback">
-            <p-input-number
-              [ngModel]="value"
-              (ngModelChange)="filter($event)"
-              mode="decimal"
-              [minFractionDigits]="2"
-              [maxFractionDigits]="2"
-              [showButtons]="false"
-              placeholder="Enter amount"
-              [style]="{ width: '100%' }"
-            />
-          </ng-template>
-        </p-columnFilter>
       </th>
       <th id="balanceTarget" pSortableColumn="balanceTarget">
         Balance Target
         <p-sortIcon field="balanceTarget"/>
-        <p-columnFilter type="numeric" field="balanceTarget" display="menu" [showOperator]="false" class="ml-auto">
-          <ng-template #filter let-value let-filter="filterCallback">
-            <p-input-number
-              [ngModel]="value"
-              (ngModelChange)="filter($event)"
-              mode="decimal"
-              [minFractionDigits]="2"
-              [maxFractionDigits]="2"
-              [showButtons]="false"
-              placeholder="Enter amount"
-              [style]="{ width: '100%' }"
-            />
-          </ng-template>
-        </p-columnFilter>
       </th>
       <th id="default">
         Default
-        <p-columnFilter type="boolean" field="default" display="menu"/>
       </th>
       <th id="actions"></th>
     </tr>
   </ng-template>
-  <ng-template #body let-account let-editing="editing" let-ri="rowIndex">
-    <tr [pEditableRow]="account">
+  <ng-template #body let-account>
+    <tr>
+      <td>{{ account.accountName }}</td>
+      <td>{{ account.accountDescription }}</td>
       <td>
-        <p-cellEditor>
-          <ng-template #input>
-            <input
-              pInputText
-              type="text"
-              [(ngModel)]="account.accountName"
-            />
-          </ng-template>
-          <ng-template #output>
-            {{ account.accountName }}
-          </ng-template>
-        </p-cellEditor>
+        <p-tag
+          [value]="account.accountCategory"
+          [rounded]="true"
+        />
       </td>
       <td>
-        <p-cellEditor>
-          <ng-template #input>
-            <input
-              pInputText
-              type="text"
-              [(ngModel)]="account.accountDescription"
-            />
-          </ng-template>
-          <ng-template #output>
-            {{ account.accountDescription }}
-          </ng-template>
-        </p-cellEditor>
+        <p-tag
+          [value]="account.currency"
+          [rounded]="true"
+          severity="secondary"
+        />
       </td>
-      <td>
-        <p-cellEditor>
-          <ng-template #input>
-            <p-select
-              [options]="accountStore.categories()"
-              appendTo="body"
-              optionLabel="name"
-              optionValue="name"
-              [(ngModel)]="account.accountCategory"
-            />
-          </ng-template>
-          <ng-template #output>
-            <p-tag
-              [value]="account.accountCategory"
-              [rounded]="true"
-              severity="secondary"
-            />
-          </ng-template>
-        </p-cellEditor>
-      </td>
-      <td>
-        <p-cellEditor>
-          <ng-template #input>
-            <p-select
-              [options]="currencyStore.currencies()"
-              appendTo="body"
-              optionLabel="code"
-              optionValue="code"
-              [(ngModel)]="account.currency"
-            />
-          </ng-template>
-          <ng-template #output>
-            <p-tag
-              [value]="account.currency"
-              [rounded]="true"
-              severity="secondary"
-            />
-          </ng-template>
-        </p-cellEditor>
-      </td>
-      <td>
-        <p-cellEditor>
-          <ng-template #input>
-            <p-input-number
-              [(ngModel)]="account.balance"
-              mode="currency"
-              [currency]="account.currency"
-              locale="en-US"
-            />
-          </ng-template>
-          <ng-template #output>
-            {{ account.balance | currency: account.currency }}
-          </ng-template>
-        </p-cellEditor>
-      </td>
+      <td>{{ account.balance | currency: account.currency }}</td>
       <td>
         @if (account.balanceTarget > 0) {
           {{ account.balanceTarget | currency: account.currency }}
@@ -338,46 +77,26 @@
       </td>
       <td>
         <div class="flex items-center justify-center gap-2">
-          @if (!editing) {
-            <button
-              pButton
-              pRipple
-              type="button"
-              pInitEditableRow
-              text
-              rounded
-              severity="secondary"
-            >
-              <app-svg [name]="Icons.PENCIL"/>
-            </button>
-          }
-          @if (editing) {
-            <button
-              pButton
-              pRipple
-              type="button"
-              pSaveEditableRow
-              text
-              rounded
-              severity="secondary"
-              (click)="onRowEditSave(account)"
-            >
-              <app-svg [name]="Icons.CHECK"/>
-            </button>
-          }
-          @if (editing) {
-            <button
-              pButton
-              pRipple
-              type="button"
-              pCancelEditableRow
-              text
-              rounded
-              severity="secondary"
-            >
-              <app-svg [name]="Icons.X"/>
-            </button>
-          }
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="secondary"
+            (click)="accountForm.open(account)"
+          >
+            <app-svg [name]="Icons.PENCIL"/>
+          </button>
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="danger"
+            (click)="onDelete($event,account)"
+          >
+            <app-svg [name]="Icons.TRASH"/>
+          </button>
         </div>
       </td>
     </tr>
@@ -388,5 +107,12 @@
     </tr>
   </ng-template>
 </p-table>
+
+<app-account-form-dialog
+  #accountForm
+  [accounts]="accountStore.accounts()"
+  [categories]="accountStore.categories()"
+  (save)="onEdit($event)"
+/>
 
 <p-confirm-dialog/>

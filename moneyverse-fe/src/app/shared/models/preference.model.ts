@@ -1,33 +1,8 @@
-import {CurrencyDto} from './currencyDto';
-
 export enum PreferenceKey {
   LANGUAGE = 'LANGUAGE',
   CURRENCY = 'CURRENCY',
-  DATE_FORMAT = 'DATE_FORMAT'
-}
-
-type PreferenceMapping = {
-  [PreferenceKey.LANGUAGE]: LanguageDto;
-  [PreferenceKey.CURRENCY]: CurrencyDto;
-  [PreferenceKey.DATE_FORMAT]: DateFormat;
-};
-
-export interface PreferenceField<T> {
-  key: string;
-  value: T | undefined;
-  editable: boolean;
-}
-
-export type MandatoryPreferences = {
-  [K in PreferenceKey]: PreferenceField<PreferenceMapping[K]>;
-};
-
-export interface PreferenceConfig {
-  key: PreferenceKey;
-  inputId: string;
-  label: string;
-  optionLabel: string;
-  options: any;
+  DATE_FORMAT = 'DATE_FORMAT',
+  THEME = 'THEME'
 }
 
 export interface DateFormat {

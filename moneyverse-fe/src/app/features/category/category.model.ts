@@ -14,6 +14,18 @@ export interface CategoryRequest {
   userId?: string,
   categoryName?: string,
   description?: string,
-  parentId?: Category,
+  parentId?: string,
   style?: Style
+}
+
+export interface CategoryFormData {
+  categoryName: string,
+  parentCategory?: string,
+  description?: string,
+  style: Style
+}
+
+export interface CategoryForm {
+  categoryId?: string,
+  formData: CategoryFormData
 }

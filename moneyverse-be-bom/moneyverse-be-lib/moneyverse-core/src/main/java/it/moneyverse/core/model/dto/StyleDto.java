@@ -9,28 +9,20 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize(builder = StyleDto.Builder.class)
 public class StyleDto {
 
-  private final String backgroundColor;
-  private final String textColor;
+  private final String color;
   private final String icon;
 
   public StyleDto(Builder builder) {
-    this.backgroundColor = builder.backgroundColor;
-    this.textColor = builder.textColor;
+    this.color = builder.color;
     this.icon = builder.icon;
   }
 
   public static class Builder {
-    private String backgroundColor;
-    private String textColor;
+    private String color;
     private String icon;
 
-    public Builder withBackgroundColor(String backgroundColor) {
-      this.backgroundColor = backgroundColor;
-      return this;
-    }
-
-    public Builder withTextColor(String textColor) {
-      this.textColor = textColor;
+    public Builder withColor(String color) {
+      this.color = color;
       return this;
     }
 
@@ -48,12 +40,8 @@ public class StyleDto {
     return new Builder();
   }
 
-  public String getBackgroundColor() {
-    return backgroundColor;
-  }
-
-  public String getTextColor() {
-    return textColor;
+  public String getColor() {
+    return color;
   }
 
   public String getIcon() {

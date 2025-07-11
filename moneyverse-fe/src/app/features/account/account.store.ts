@@ -5,8 +5,6 @@ import {AccountService} from './account.service';
 import {AuthService} from '../../core/auth/auth.service';
 
 export interface AccountStoreState {
-  selectedAccount: Account | null;
-  isFormOpen: boolean;
   accountCriteria: AccountCriteria;
   accountCategories: AccountCategory[];
   filteredAccounts: Account[];
@@ -15,8 +13,6 @@ export interface AccountStoreState {
 }
 
 const initialState: AccountStoreState = {
-  selectedAccount: null,
-  isFormOpen: false,
   accountCriteria: {},
   accountCategories: [],
   filteredAccounts: [],
@@ -34,20 +30,6 @@ export const AccountStore = signalStore(
     const authService = inject(AuthService);
 
     return {
-      openForm(account?: Account) {
-        patchState(store, {
-          selectedAccount: account ?? null,
-          isFormOpen: true
-        });
-      },
-
-      closeForm() {
-        patchState(store, {
-          selectedAccount: null,
-          isFormOpen: false
-        })
-      },
-
       updateCriteria(criteria: Partial<AccountCriteria>) {
         patchState(store, (state) => ({
           accountCriteria: {...state.accountCriteria, ...criteria}
@@ -110,8 +92,6 @@ export const AccountStore = signalStore(
   }),
 
   withComputed((store) => ({
-    hasSelection: computed(() => store.selectedAccount() !== null),
-    canEdit: computed(() => store.isFormOpen()),
     categories: computed(() => store.accountCategories()),
     filteredAccounts: computed(() => store.filteredAccounts()),
     accounts: computed(() => store.accounts()),
@@ -127,6 +107,7 @@ export const AccountStore = signalStore(
       if (criteria.balanceTarget &&
         (criteria.balanceTarget.lower !== null ||
           criteria.balanceTarget.upper !== null)) count++;
+      if (criteria.isDefault !== undefined) count++;
 
       return count;
     }),

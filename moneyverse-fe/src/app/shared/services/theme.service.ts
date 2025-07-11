@@ -1,5 +1,6 @@
-import {inject, Injectable, signal, effect} from '@angular/core';
+import {effect, inject, Injectable, signal} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
+import {PreferenceKey} from '../models/preference.model';
 
 export type Theme = 'light' | 'dark';
 
@@ -18,15 +19,19 @@ export class ThemeService {
 
   toggleTheme() {
     if (this.currentTheme() == 'light') {
-      this.setTheme('dark');
+      this.theme = 'dark';
     } else {
-      this.setTheme('light');
+      this.theme = 'light';
     }
   }
 
-  setTheme(theme: Theme) {
+  set theme(theme: Theme) {
     this.currentTheme.set(theme);
-    this.saveThemePreference(theme);
+    this.store(theme);
+  }
+
+  get theme(): Theme {
+    return this.currentTheme();
   }
 
   private updateThemes(theme: Theme) {
@@ -41,21 +46,17 @@ export class ThemeService {
     }
   }
 
-  getCurrentTheme(): Theme {
-    return this.currentTheme();
-  }
-
   initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    const savedTheme = localStorage.getItem(PreferenceKey.THEME) as Theme;
     if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-      this.setTheme(savedTheme);
+      this.theme = savedTheme;
     } else {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      this.setTheme(prefersDark ? 'dark' : 'light');
+      this.theme = prefersDark ? 'dark' : 'light';
     }
   }
 
-  private saveThemePreference(theme: Theme) {
-    localStorage.setItem('theme', theme);
+  private store(theme: Theme) {
+    localStorage.setItem(PreferenceKey.THEME, theme);
   }
 }

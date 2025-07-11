@@ -1,18 +1,18 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {AccountFilterComponent} from './account-filter.component';
+import {AccountFilterDialogComponent} from './account-filter-dialog.component';
 
 describe('AccountFilterComponent', () => {
-  let component: AccountFilterComponent;
-  let fixture: ComponentFixture<AccountFilterComponent>;
+  let component: AccountFilterDialogComponent;
+  let fixture: ComponentFixture<AccountFilterDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AccountFilterComponent]
+      imports: [AccountFilterDialogComponent]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(AccountFilterComponent);
+    fixture = TestBed.createComponent(AccountFilterDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
