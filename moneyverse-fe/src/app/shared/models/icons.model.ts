@@ -48,6 +48,7 @@ import {
   LayersIcon,
   LightbulbIcon,
   ListFilterIcon,
+  ListIcon,
   LogOutIcon,
   MoonIcon,
   NetworkIcon,
@@ -155,7 +156,8 @@ export enum IconsEnum {
   CPU = "cpu",
   SMARTPHONE = "smartphone",
   CAR = "car",
-  SHIRT = "shirt"
+  SHIRT = "shirt",
+  LIST = "list",
 }
 
 export const ICONS: Record<string, any> = {
@@ -235,5 +237,6 @@ export const ICONS: Record<string, any> = {
   [IconsEnum.CPU]: CpuIcon,
   [IconsEnum.SMARTPHONE]: SmartphoneIcon,
   [IconsEnum.CAR]: CarIcon,
-  [IconsEnum.SHIRT]: ShirtIcon
+  [IconsEnum.SHIRT]: ShirtIcon,
+  [IconsEnum.LIST]: ListIcon,
 };

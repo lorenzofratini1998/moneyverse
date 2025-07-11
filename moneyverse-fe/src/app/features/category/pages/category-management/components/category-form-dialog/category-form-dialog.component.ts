@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, output, signal, ViewChild} from '@angular/core';
+import {Component, inject, input, output, signal, ViewChild} from '@angular/core';
 import {SvgComponent} from "../../../../../../shared/components/svg/svg.component";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Category, CategoryFormData} from '../../../../category.model';
@@ -53,18 +53,7 @@ export class CategoryFormDialogComponent {
   protected _isOpen = false;
 
   constructor() {
-    effect(() => {
-      if (this.isOpen() !== this._isOpen) {
-        this._isOpen = this.isOpen();
-      }
-    });
     this.categoryForm = this.createForm();
-    effect(() => {
-      const _categoryToEdit = this._categoryToEdit();
-      if (_categoryToEdit) {
-        this.patchForm(_categoryToEdit)
-      }
-    });
   }
 
   private createForm(): FormGroup {
@@ -103,11 +92,17 @@ export class CategoryFormDialogComponent {
     this._isOpen = true;
     if (category) {
       this._categoryToEdit.set(category);
+      this.patchForm(category);
+    } else {
+      this._categoryToEdit.set(null);
+      this.reset();
     }
   }
 
   close() {
     this._isOpen = false;
+    this._categoryToEdit.set(null);
+    this.reset();
   }
 
   preview() {
@@ -161,6 +156,8 @@ export class CategoryFormDialogComponent {
       textColor: '#EF4444',
       icon: this.Icons.CIRCLE_DOLLAR_SIGN,
     });
+    this.categoryForm.markAsPristine();
+    this.categoryForm.markAsUntouched();
   }
 
   protected cancel(): void {

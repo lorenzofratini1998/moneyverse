@@ -1,0 +1,29 @@
+:host ::ng-deep {
+  .p-knob {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+  }
+
+  .p-knob svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .p-knob-text {
+    font-size: xx-small;
+    font-weight: bold;
+  }
+
+  .p-knob-range {
+    stroke-linecap: round;
+  }
+
+  .p-knob-value {
+    stroke-linecap: round;
+    stroke-width: 2px;
+  }
+}

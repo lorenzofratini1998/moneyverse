@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, output, signal} from '@angular/core';
+import {Component, inject, input, output, signal} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Account, AccountCategory, AccountFormData} from '../../../../account.model';
 import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
@@ -50,28 +50,7 @@ export class AccountFormDialogComponent {
   accountForm: FormGroup;
 
   constructor() {
-    effect(() => {
-      if (this.isOpen() !== this._isOpen) {
-        this._isOpen = this.isOpen();
-      }
-    });
     this.accountForm = this.createForm();
-    effect(() => {
-      const _accountToEdit = this._accountToEdit();
-      if (_accountToEdit !== null) {
-        this.patchForm(_accountToEdit);
-        const currentCurrency = this.accountForm.get('currency')?.value;
-        this.accountForm.get('currency')?.disable({onlySelf: true});
-        this.accountForm.get('currency')?.setValue(currentCurrency, {emitEvent: false});
-      }
-    })
-
-    effect(() => {
-      const currency = this.preferenceStore.userCurrency();
-      if (!this._accountToEdit()) {
-        this.currency = currency;
-      }
-    })
   }
 
   protected set currency(currency: string) {
@@ -82,11 +61,17 @@ export class AccountFormDialogComponent {
     this._isOpen = true;
     if (account) {
       this._accountToEdit.set(account);
+      this.patchForm(account);
+    } else {
+      this._accountToEdit.set(null);
+      this.reset();
     }
   }
 
   close() {
     this._isOpen = false;
+    this._accountToEdit.set(null);
+    this.reset();
   }
 
   private createForm(): FormGroup {
@@ -151,6 +136,8 @@ export class AccountFormDialogComponent {
       currency: this.preferenceStore.userCurrency(),
       isDefault: null
     });
+    this.accountForm.markAsPristine();
+    this.accountForm.markAsUntouched();
   }
 
   protected cancel(): void {

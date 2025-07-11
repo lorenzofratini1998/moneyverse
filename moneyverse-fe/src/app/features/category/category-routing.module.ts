@@ -3,6 +3,7 @@ import {CategoryContainerComponent} from './pages/category-container/category-co
 import {CategoryManagementComponent} from './pages/category-management/category-management.component';
 import {NgModule} from '@angular/core';
 import {CategoryDashboardComponent} from './pages/category-dashboard/category-dashboard.component';
+import {BudgetManagementComponent} from './pages/budget-management/budget-management.component';
 
 const routes: Routes = [
   {
@@ -26,6 +27,10 @@ const routes: Routes = [
       {
         path: 'manage',
         component: CategoryManagementComponent
+      },
+      {
+        path: 'budgeting',
+        component: BudgetManagementComponent
       }
     ]
   }

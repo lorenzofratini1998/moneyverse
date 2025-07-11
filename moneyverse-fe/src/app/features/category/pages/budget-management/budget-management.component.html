@@ -1,0 +1,108 @@
+<header class="flex justify-between items-center">
+  <h1 class="text-3xl font-bold">Budgeting</h1>
+
+  <p-button
+    (onClick)="budgetForm.open()"
+    [rounded]="true"
+    severity="contrast">
+    <app-svg [name]="IconsEnum.PLUS"/>
+    <span>New Budget</span>
+  </p-button>
+</header>
+
+<p-card class="w-full p-4" styleClass="bg-base-200 dark:bg-base-800">
+  <ng-template #header>
+    <div class="flex gap-4 w-1/2 p-4">
+      <p-float-label variant="on" class="w-full">
+        <p-select id="selectedCategory"
+                  [options]="categoryStore.categories()"
+                  [(ngModel)]="selectedCategory"
+                  optionLabel="categoryName"
+                  class="w-full"/>
+        <label for="selectedCategory">Category</label>
+      </p-float-label>
+
+      @if (periods().length > 0) {
+        <p-float-label variant="on" class="w-full">
+          <p-select id="selectedPeriod"
+                    [options]="periods()"
+                    [(ngModel)]="selectedPeriod"
+                    optionLabel="label"
+                    class="w-full"/>
+          <label for="selectedPeriod">Period</label>
+        </p-float-label>
+      }
+    </div>
+  </ng-template>
+  <ng-template #content>
+    @if (selectedBudget; as budget) {
+      <div class="flex justify-between items-center p-4">
+        <div class="card w-full flex justify-center">
+          <p-knob
+            [ngModel]="budget.amount >= budget.budgetLimit ? budget.budgetLimit : budget.amount"
+            [min]="0"
+            [max]="budget.budgetLimit"
+            [readonly]="true"
+            [size]="300"
+            [strokeWidth]="6"
+            [valueColor]="getKnobValueColor(budget.amount, budget.budgetLimit)"
+            [rangeColor]="getKnobRangeColor(budget.amount, budget.budgetLimit)"
+            [valueTemplate]="currencyPipe.transform(budget.budgetLimit - budget.amount, budget.currency)"/>
+        </div>
+
+        <p-card class="w-full">
+          <ng-template #title>
+            <div class="flex justify-between items-center">
+              <span>Budget: {{ currencyPipe.transform(budget.budgetLimit, budget.currency) }}</span>
+              <div class="flex items-center gap-2">
+                <button
+                  pButton
+                  type="button"
+                  text
+                  rounded
+                  severity="info"
+                >
+                  <app-svg [name]="Icons.LIST"/>
+                </button>
+                <button
+                  pButton
+                  type="button"
+                  text
+                  rounded
+                  severity="secondary"
+                  (click)="budgetForm.open(budget)"
+                >
+                  <app-svg [name]="Icons.PENCIL"/>
+                </button>
+                <button
+                  pButton
+                  type="button"
+                  text
+                  rounded
+                  severity="danger"
+                  (click)="onDelete($event, budget)"
+                >
+                  <app-svg [name]="Icons.TRASH"/>
+                </button>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template #content>
+            <progress class="progress" [value]="budget.amount" [max]="budget.budgetLimit"></progress>
+            <div class="flex justify-between py-1">
+              <span class="text-sm">{{ currencyPipe.transform(budget.amount, budget.currency) }} spent</span>
+              <span class="text-sm">{{ currencyPipe.transform(budget.budgetLimit - budget.amount, budget.currency) }}
+                left</span>
+            </div>
+
+          </ng-template>
+        </p-card>
+      </div>
+    }
+  </ng-template>
+</p-card>
+
+<app-budget-form-dialog (submitted)="onSave($event)"/>
+<p-confirm-dialog/>
+<p-toast/>
+

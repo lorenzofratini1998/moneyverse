@@ -29,3 +29,36 @@ export interface CategoryForm {
   categoryId?: string,
   formData: CategoryFormData
 }
+
+export interface Budget {
+  budgetId: string,
+  category: Category,
+  startDate: Date,
+  endDate: Date,
+  amount: number,
+  budgetLimit: number,
+  currency: string
+}
+
+export interface BudgetRequest {
+  categoryId?: string,
+  startDate: Date,
+  endDate: Date,
+  amount?: number,
+  budgetLimit: number,
+  currency: string
+}
+
+export interface BudgetFormData {
+  startDate: Date,
+  endDate: Date,
+  category: string,
+  budgetLimit: number,
+  amount?: number,
+  currency: string
+}
+
+export interface BudgetForm {
+  budgetId?: string,
+  formData: BudgetFormData
+}
