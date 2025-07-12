@@ -11,14 +11,14 @@
 >
   <ng-template #header>
     <tr>
-      <th id="categoryName" pSortableColumn="categoryName">
+      <th id="categoryName" pSortableColumn="categoryName" style="width: 20%">
         Name
         <p-sortIcon field="categoryName"/>
       </th>
-      <th id="description">
+      <th id="description" style="width: 45%">
         Description
       </th>
-      <th id="parentCategory" pSortableColumn="parentCategory">
+      <th id="parentCategory" pSortableColumn="parentCategory" style="width: 20%">
         Parent
         <p-sortIcon field="parentCategory"/>
         <p-columnFilter field="parentCategory" matchMode="in" display="menu" [showMatchModes]="false"
@@ -35,7 +35,7 @@
           </ng-template>
         </p-columnFilter>
       </th>
-      <th id="actions"></th>
+      <th id="actions" style="width: 15%"></th>
     </tr>
   </ng-template>
   <ng-template #body let-category>
@@ -61,39 +61,41 @@
           -
         }
       </td>
-      <td class="p-0">
-        <button
-          pButton
-          type="button"
-          text
-          rounded
-          severity="secondary"
-          (click)="categoryForm.open(category)"
-        >
-          <app-svg [name]="Icons.PENCIL"/>
-        </button>
-        <button
-          pButton
-          type="button"
-          text
-          rounded
-          severity="danger"
-          (click)="onDelete($event,category)"
-        >
-          <app-svg [name]="Icons.TRASH"/>
-        </button>
-        @if (!category.parentCategory && category.children && category.children.length > 0) {
+      <td>
+        <div class="flex justify-end items-center gap-2">
+          @if (!category.parentCategory && category.children && category.children.length > 0) {
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="success"
+              (click)="categoryTree.open(category)"
+            >
+              <app-svg [name]="Icons.NETWORK"/>
+            </button>
+          }
           <button
             pButton
             type="button"
             text
             rounded
-            severity="success"
-            (click)="categoryTree.open(category)"
+            severity="secondary"
+            (click)="categoryForm.open(category)"
           >
-            <app-svg [name]="Icons.NETWORK"/>
+            <app-svg [name]="Icons.PENCIL"/>
           </button>
-        }
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="danger"
+            (click)="onDelete($event,category)"
+          >
+            <app-svg [name]="Icons.TRASH"/>
+          </button>
+        </div>
       </td>
     </tr>
   </ng-template>

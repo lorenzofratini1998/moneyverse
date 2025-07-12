@@ -1,4 +1,4 @@
-import {Component, inject, input, output, signal, ViewChild} from '@angular/core';
+import {Component, inject, output, signal, ViewChild} from '@angular/core';
 import {SvgComponent} from "../../../../../../shared/components/svg/svg.component";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Category, CategoryFormData} from '../../../../category.model';
@@ -49,7 +49,6 @@ export class CategoryFormDialogComponent {
   save = output<CategoryFormData>();
   categoryForm: FormGroup;
 
-  isOpen = input<boolean>(false);
   protected _isOpen = false;
 
   constructor() {
@@ -152,8 +151,7 @@ export class CategoryFormDialogComponent {
       categoryName: '',
       parentCategory: null,
       description: '',
-      backgroundColor: '#FEE2E2',
-      textColor: '#EF4444',
+      color: 'red',
       icon: this.Icons.CIRCLE_DOLLAR_SIGN,
     });
     this.categoryForm.markAsPristine();

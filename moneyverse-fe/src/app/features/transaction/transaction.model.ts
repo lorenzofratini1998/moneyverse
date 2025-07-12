@@ -1,11 +1,31 @@
 import {Category} from '../category/category.model';
 import {Account} from '../account/account.model';
+import {Style} from '../../shared/models/common.model';
 
 export interface Tag {
   tagId: string,
   userId: string,
   tagName: string,
   description: string
+  style: Style
+}
+
+export interface TagRequest {
+  userId?: string,
+  tagName?: string,
+  description?: string
+  style?: Style
+}
+
+export interface TagFormData {
+  tagName: string,
+  description?: string,
+  style: Style
+}
+
+export interface TagForm {
+  tagId?: string,
+  formData: TagFormData
 }
 
 export interface Transaction {

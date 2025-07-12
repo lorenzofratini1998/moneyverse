@@ -1,5 +1,7 @@
 package it.moneyverse.transaction.utils.mapper;
 
+import it.moneyverse.core.model.dto.StyleDto;
+import it.moneyverse.core.utils.mappers.StyleMapper;
 import it.moneyverse.transaction.model.dto.TagDto;
 import it.moneyverse.transaction.model.dto.TagRequestDto;
 import it.moneyverse.transaction.model.dto.TagUpdateRequestDto;
@@ -34,6 +36,11 @@ public class TagMapper {
         .withUserId(tag.getUserId())
         .withTagName(tag.getTagName())
         .withDescription(tag.getDescription())
+        .withStyle(
+            StyleDto.builder()
+                .withColor(tag.getStyle().getColor())
+                .withIcon(tag.getStyle().getIcon())
+                .build())
         .build();
   }
 
@@ -45,6 +52,7 @@ public class TagMapper {
     tag.setUserId(request.userId());
     tag.setTagName(request.tagName());
     tag.setDescription(request.description());
+    tag.setStyle(StyleMapper.toStyle(request.style()));
     return tag;
   }
 
@@ -57,6 +65,9 @@ public class TagMapper {
     }
     if (request.description() != null) {
       tag.setDescription(request.description());
+    }
+    if (request.style() != null) {
+      tag.setStyle(StyleMapper.toStyle(request.style()));
     }
     return tag;
   }

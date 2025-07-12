@@ -73,7 +73,6 @@ export class CategoryManagementComponent {
           severity: ToastEnum.SUCCESS,
           detail: 'Category created successfully.'
         });
-        this.categoryForm.reset();
         this.categoryStore.refreshCategories();
       },
       error: () => {

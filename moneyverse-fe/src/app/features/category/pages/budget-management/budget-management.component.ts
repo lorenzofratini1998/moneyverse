@@ -163,12 +163,11 @@ export class BudgetManagementComponent {
       amount: budgetForm.amount,
       currency: budgetForm.currency
     }).subscribe({
-      next: (budget) => {
+      next: () => {
         this.messageService.add({
           severity: ToastEnum.SUCCESS,
           detail: 'Budget updated successfully.'
         });
-        this.budgetForm.reset();
         this.loadBudgets();
       },
       error: () => {
@@ -193,7 +192,6 @@ export class BudgetManagementComponent {
           severity: ToastEnum.SUCCESS,
           detail: 'Budget created successfully.'
         });
-        this.budgetForm.reset();
         this.loadBudgets();
       },
       error: () => {

@@ -1,6 +1,7 @@
 package it.moneyverse.transaction.model.entities;
 
 import it.moneyverse.core.model.entities.Auditable;
+import it.moneyverse.core.model.entities.Style;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -29,6 +30,8 @@ public class Tag extends Auditable implements Serializable {
 
   @Column(name = "DESCRIPTION")
   private String description;
+
+  @Embedded private Style style;
 
   @ManyToMany(mappedBy = "tags")
   private Set<Transaction> transactions = new HashSet<>();
@@ -67,5 +70,13 @@ public class Tag extends Auditable implements Serializable {
 
   public Set<Transaction> getTransactions() {
     return transactions;
+  }
+
+  public Style getStyle() {
+    return style;
+  }
+
+  public void setStyle(Style style) {
+    this.style = style;
   }
 }

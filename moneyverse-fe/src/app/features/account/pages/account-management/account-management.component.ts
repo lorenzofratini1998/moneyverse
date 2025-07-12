@@ -53,7 +53,6 @@ export class AccountManagementComponent {
           severity: ToastEnum.SUCCESS,
           detail: 'Account created successfully.'
         });
-        this.accountForm.reset();
         this.accountStore.refreshAccounts();
       },
       error: () => {

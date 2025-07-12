@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.moneyverse.core.model.dto.StyleDto;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -18,12 +19,14 @@ public class TagDto implements Serializable {
   private final UUID userId;
   private final String tagName;
   private final String description;
+  private final StyleDto style;
 
   public TagDto(Builder builder) {
     this.tagId = builder.tagId;
     this.userId = builder.userId;
     this.tagName = builder.tagName;
     this.description = builder.description;
+    this.style = builder.style;
   }
 
   public static Builder builder() {
@@ -35,6 +38,7 @@ public class TagDto implements Serializable {
     private UUID userId;
     private String tagName;
     private String description;
+    private StyleDto style;
 
     public Builder withTagId(UUID tagId) {
       this.tagId = tagId;
@@ -53,6 +57,11 @@ public class TagDto implements Serializable {
 
     public Builder withDescription(String description) {
       this.description = description;
+      return this;
+    }
+
+    public Builder withStyle(StyleDto style) {
+      this.style = style;
       return this;
     }
 
@@ -75,5 +84,9 @@ public class TagDto implements Serializable {
 
   public UUID getUserId() {
     return userId;
+  }
+
+  public StyleDto getStyle() {
+    return style;
   }
 }

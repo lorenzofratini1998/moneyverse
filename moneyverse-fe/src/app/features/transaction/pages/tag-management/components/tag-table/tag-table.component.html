@@ -1,0 +1,78 @@
+<p-table
+  #tagTable
+  [value]="transactionStore.tags()"
+  class="w-full"
+  stripedRows
+  [paginator]="true"
+  [rows]="5"
+  [rowsPerPageOptions]="[5, 10, 25, 50]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+>
+  <ng-template #header>
+    <tr>
+      <th id="tagName" pSortableColumn="tagName" style="width: 20%">
+        Name
+        <p-sortIcon field="tagName"/>
+      </th>
+      <th id="description" style="width: 45%">
+        Description
+      </th>
+      <th id="actions" style="width: 15%"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-tag>
+    <tr>
+      <td>
+        <p-chip class="!px-2 !py-1"
+                [style]="colorService.getStyle(tag.style.color)">
+          <app-svg [name]="tag.style.icon"/>
+          <span>{{ tag.tagName }}</span>
+        </p-chip>
+      </td>
+      <td>{{ tag.description }}</td>
+      <td>
+        <div class="flex justify-end items-center gap-2">
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="info"
+          >
+            <app-svg [name]="Icons.LIST"/>
+          </button>
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="secondary"
+            (click)="tagForm.open(tag)"
+          >
+            <app-svg [name]="Icons.PENCIL"/>
+          </button>
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="danger"
+            (click)="onDelete($event,tag)"
+          >
+            <app-svg [name]="Icons.TRASH"/>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="3">No tags found.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<app-tag-form-dialog (save)="onEdit($event)"/>
+<p-confirm-dialog/>
+<p-toast/>

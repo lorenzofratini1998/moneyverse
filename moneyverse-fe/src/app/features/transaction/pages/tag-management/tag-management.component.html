@@ -1,0 +1,18 @@
+<header class="flex justify-between items-center">
+  <h1 class="text-3xl font-bold">Tag Management</h1>
+  <p-button
+    (onClick)="tagForm.open()"
+    [rounded]="true"
+    severity="contrast">
+    <app-svg [name]="IconsEnum.PLUS"/>
+    <span>New Tag</span>
+  </p-button>
+</header>
+
+<app-tag-table
+  class="p-4"
+  (deleted)="onDelete($event)"
+  (edited)="onEdit($event)"/>
+
+<app-tag-form-dialog (save)="createTag($event)"/>
+<p-toast/>

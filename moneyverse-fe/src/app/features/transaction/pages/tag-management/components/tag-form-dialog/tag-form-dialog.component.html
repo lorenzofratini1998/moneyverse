@@ -1,0 +1,79 @@
+<p-dialog
+  [modal]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [(visible)]="_isOpen"
+  (onHide)="close()"
+  styleClass="w-11/12 md:w-1/2 lg:w-1/3"
+>
+  <ng-template #header>
+    <h3 class="font-bold text-lg py-4">
+      @if (_tagToEdit()) {
+        Edit Tag
+      } @else {
+        Add Tag
+      }
+    </h3>
+  </ng-template>
+  <ng-template #content>
+    <div class="py-2">
+      <form
+        [formGroup]="tagForm"
+      >
+        <div class="flex flex-col gap-4 w-full">
+          <div class="flex flex-col items-center justify-center gap-3">
+            <p-chip class="!px-2 !py-1"
+                    [style]="colorService.getStyle(colorPicker?.selectedColor?.name ?? colorService.default().name)">
+              <app-svg [name]="iconPicker?.selectedIcon ?? icon.value"/>
+              <span>{{ preview() }}</span>
+            </p-chip>
+            <div class="flex gap-2">
+              <app-color-picker
+                [color]="tagToEdit()?.style?.color ?? colorService.default().name"
+                (selected)="updateColor($event)"
+              />
+              <app-icon-picker
+                [icon]="tagToEdit()?.style?.icon ?? 'circle-dollar-sign'"
+                (selected)="updateIcon($event)"
+              />
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-col w-full gap-1">
+              <p-float-label variant="on">
+                <input pInputText type="text" id="tagName" formControlName="tagName" class="w-full"/>
+                <label for="tagName">Tag Name</label>
+              </p-float-label>
+              @if (tagName?.invalid && (tagName?.touched || tagName?.dirty)) {
+                <p-message severity="error" size="small" variant="simple">Tag name is required.</p-message>
+              }
+            </div>
+            <p-float-label variant="on">
+              <input pInputText type="text" id="description" formControlName="description" class="w-full"/>
+              <label for="description">Description</label>
+            </p-float-label>
+          </div>
+        </div>
+      </form>
+    </div>
+  </ng-template>
+  <ng-template #footer>
+    <div class="flex justify-center gap-2 w-full">
+      <p-button
+        (onClick)="cancel()"
+        [rounded]="true"
+        [outlined]="true"
+        severity="secondary">
+        <app-svg [name]="Icons.X"/>
+        <span>Cancel</span>
+      </p-button>
+      <p-button
+        (onClick)="saveTag()"
+        [rounded]="true"
+        severity="contrast">
+        <app-svg [name]="Icons.CHECK"/>
+        <span>Save</span>
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

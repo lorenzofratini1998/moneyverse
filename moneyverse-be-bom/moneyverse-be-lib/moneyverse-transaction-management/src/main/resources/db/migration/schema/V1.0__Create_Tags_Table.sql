@@ -4,6 +4,8 @@ CREATE TABLE tags
     user_id     UUID         NOT NULL,
     tag_name    VARCHAR(255) NOT NULL,
     description VARCHAR(255),
+    color VARCHAR(255),
+    icon  VARCHAR(255),
     created_by  VARCHAR(255) NOT NULL,
     created_at  TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_by  VARCHAR(255),

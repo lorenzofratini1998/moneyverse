@@ -3,7 +3,6 @@ import {canActivateAuthRole, canUseApplication} from './core/auth/auth.guard';
 import {OnboardingComponent} from './features/onboarding/onboarding.component';
 import {OverviewComponent} from './features/overview/overview.component';
 import {MainLayoutComponent} from './core/layout/main-layout/main-layout.component';
-import {TransactionComponent} from './features/transaction-management/transaction/transaction.component';
 
 export const routes: Routes = [
     {
@@ -38,7 +37,8 @@ export const routes: Routes = [
         },
         {
           path: 'transactions',
-          component: TransactionComponent
+          loadChildren: () =>
+            import('./features/transaction/transaction.module').then(m => m.TransactionModule)
         }
       ]
     },

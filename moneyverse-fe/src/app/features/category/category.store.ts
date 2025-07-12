@@ -5,17 +5,11 @@ import {CategoryService} from './category.service';
 import {AuthService} from '../../core/auth/auth.service';
 
 export interface CategoryStoreState {
-  selectedCategory: Category | null;
-  isFormOpen: boolean;
-  isTreeOpen: boolean;
   categories: Category[];
   error: string | null;
 }
 
 const initialState: CategoryStoreState = {
-  selectedCategory: null,
-  isFormOpen: false,
-  isTreeOpen: false,
   categories: [],
   error: null
 };
@@ -30,34 +24,6 @@ export const CategoryStore = signalStore(
     const authService = inject(AuthService);
 
     return {
-      openForm(category?: Category) {
-        patchState(store, {
-          selectedCategory: category ?? null,
-          isFormOpen: true
-        });
-      },
-
-      closeForm() {
-        patchState(store, {
-          selectedCategory: null,
-          isFormOpen: false
-        })
-      },
-
-      showCategoryTree(category?: Category) {
-        patchState(store, {
-          selectedCategory: category ?? null,
-          isTreeOpen: true
-        })
-      },
-
-      closeCategoryTree() {
-        patchState(store, {
-          selectedCategory: null,
-          isTreeOpen: false
-        })
-      },
-
       loadCategories() {
         categoryService.getCategoriesByUser(authService.getAuthenticatedUser().userId)
           .subscribe({
@@ -77,8 +43,6 @@ export const CategoryStore = signalStore(
   }),
 
   withComputed((store) => ({
-    hasSelection: computed(() => store.selectedCategory() !== null),
-    canEdit: computed(() => store.isFormOpen()),
     categories: computed(() => store.categories()),
   })),
 

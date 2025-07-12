@@ -1,13 +1,12 @@
 <button
   class="btn btn-primary"
-  (click)="transactionStore.openForm()"
 >
   <app-svg [name]="Icons.PLUS"/>
   <span>New Transaction</span>
 </button>
 
 <app-dialog
-  [show]="transactionStore.isFormOpen()"
+  [show]="false"
 >
   <div class="flex flex-col gap-y-6">
     <h3 class="font-bold text-lg py-4">
@@ -17,7 +16,6 @@
       [accounts]="accounts$()"
       [categories]="categories$()"
       [currencies]=" currencies$()"
-      (cancel)="transactionStore.closeForm()"
       (save)="saveTransaction($event)"
     />
   </div>

@@ -68,8 +68,12 @@ public class TagManagementService implements TagService {
   @Transactional
   public TagDto updateTag(UUID tagId, TagUpdateRequestDto request) {
     Tag tag = findTagById(tagId);
-    if (request.tagName() != null) {
-      checkIfTagAlreadyExist(request.tagName(), tag.getUserId());
+    if (request.tagName() != null
+        && tagRepository.existsByTagNameAndUserIdAndTagIdNot(
+            request.tagName(), tag.getUserId(), tagId)) {
+      throw new ResourceAlreadyExistsException(
+          "Tag %s cannot be updated for user %s because another tag with the same name already exists"
+              .formatted(request.tagName(), tag.getUserId()));
     }
     LOGGER.info("Updating tag {}", tagId);
     tag = TagMapper.partialUpdate(tag, request);
@@ -97,7 +101,7 @@ public class TagManagementService implements TagService {
   }
 
   private void checkIfTagAlreadyExist(String tagName, UUID userId) {
-    if (Boolean.TRUE.equals(tagRepository.existsByTagNameAndUserId(tagName, userId))) {
+    if (tagRepository.existsByTagNameAndUserId(tagName, userId)) {
       throw new ResourceAlreadyExistsException(
           "Tag %s already exists for user %s".formatted(tagName, userId));
     }

@@ -83,7 +83,7 @@ export class TransactionComponent {
       })
     ).subscribe({
       next: () => {
-        this.transactionStore.closeForm();
+        //this.transactionStore.closeForm();
         this.messageService.showMessage({
           type: ToastEnum.SUCCESS,
           message: 'Transaction created successfully.'
