@@ -7,6 +7,7 @@ import it.moneyverse.budget.model.entities.Category_;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.model.repositories.DefaultCategoryRepository;
 import it.moneyverse.budget.runtime.messages.BudgetEventPublisher;
+import it.moneyverse.budget.runtime.messages.CategoryEventPublisher;
 import it.moneyverse.budget.utils.mapper.CategoryMapper;
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
@@ -32,17 +33,20 @@ public class CategoryManagementService implements CategoryService {
   private final CategoryRepository categoryRepository;
   private final DefaultCategoryRepository defaultCategoryRepository;
   private final UserServiceClient userServiceClient;
-  private final BudgetEventPublisher eventPublisher;
+  private final BudgetEventPublisher budgetEventPublisher;
+  private final CategoryEventPublisher categoryEventPublisher;
 
   public CategoryManagementService(
       CategoryRepository categoryRepository,
       DefaultCategoryRepository defaultCategoryRepository,
       UserServiceClient userServiceClient,
-      BudgetEventPublisher eventPublisher) {
+      BudgetEventPublisher budgetEventPublisher,
+      CategoryEventPublisher categoryEventPublisher) {
     this.categoryRepository = categoryRepository;
     this.defaultCategoryRepository = defaultCategoryRepository;
     this.userServiceClient = userServiceClient;
-    this.eventPublisher = eventPublisher;
+    this.budgetEventPublisher = budgetEventPublisher;
+    this.categoryEventPublisher = categoryEventPublisher;
   }
 
   @Override
@@ -158,7 +162,7 @@ public class CategoryManagementService implements CategoryService {
       category.getParentCategory().getSubCategories().remove(category);
     }
     categoryRepository.delete(category);
-    eventPublisher.publishEvent(category, EventTypeEnum.DELETE);
+    categoryEventPublisher.publish(category, EventTypeEnum.DELETE);
     LOGGER.info(
         "Deleted category '{}' for user '{}'", category.getCategoryId(), category.getUserId());
   }

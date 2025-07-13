@@ -66,7 +66,7 @@ public class TransferManagementService implements TransferService {
                 request,
                 TransactionFactory.createDebitTransaction(request, normalizedAmount),
                 TransactionFactory.createCreditTransaction(request, normalizedAmount)));
-    transactionEventPublisher.publishEvent(transfer, EventTypeEnum.CREATE);
+    transactionEventPublisher.publish(transfer, EventTypeEnum.CREATE);
     return TransferMapper.toTransferDto(transfer);
   }
 
@@ -78,7 +78,7 @@ public class TransferManagementService implements TransferService {
     Transfer originalTransfer = transfer.copy();
     LOGGER.info("Updating transfer {}", transferId);
     transfer = updateTransfer(transfer, request);
-    transactionEventPublisher.publishEvent(transfer, originalTransfer, EventTypeEnum.UPDATE);
+    transactionEventPublisher.publish(transfer, originalTransfer, EventTypeEnum.UPDATE);
     return TransferMapper.toTransferDto(transfer);
   }
 
@@ -103,7 +103,7 @@ public class TransferManagementService implements TransferService {
     Transfer transfer = findTransfer(transferId);
     LOGGER.info("Deleting transfer {}", transferId);
     transferRepository.delete(transfer);
-    transactionEventPublisher.publishEvent(transfer, EventTypeEnum.DELETE);
+    transactionEventPublisher.publish(transfer, EventTypeEnum.DELETE);
   }
 
   @Override
@@ -138,7 +138,7 @@ public class TransferManagementService implements TransferService {
     List<Transfer> transfers = transferRepository.findTransferByAccountId(accountId);
     transferRepository.deleteAll(transfers);
     for (Transfer transfer : transfers) {
-      transactionEventPublisher.publishEvent(transfer, EventTypeEnum.DELETE);
+      transactionEventPublisher.publish(transfer, EventTypeEnum.DELETE);
     }
   }
 }

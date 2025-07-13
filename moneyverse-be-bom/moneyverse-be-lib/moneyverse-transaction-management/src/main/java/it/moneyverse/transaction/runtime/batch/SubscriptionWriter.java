@@ -47,6 +47,6 @@ public class SubscriptionWriter implements ItemWriter<List<Subscription>> {
             .flatMap(subscription -> subscription.getTransactions().stream())
             .filter(transaction -> transaction.getDate().equals(LocalDate.now()))
             .toList();
-    transactionEventPublisher.publishEvent(batchTransactions, EventTypeEnum.CREATE);
+    transactionEventPublisher.publish(batchTransactions, EventTypeEnum.CREATE);
   }
 }

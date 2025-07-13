@@ -1,7 +1,5 @@
 package it.moneyverse.account.runtime.messages;
 
-import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
-
 import it.moneyverse.account.services.AccountService;
 import it.moneyverse.core.model.beans.TransactionCreationTopic;
 import it.moneyverse.core.model.beans.TransactionDeletionTopic;
@@ -9,6 +7,8 @@ import it.moneyverse.core.model.beans.TransactionUpdateTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.events.TransactionEvent;
 import it.moneyverse.core.model.events.UserEvent;
+import it.moneyverse.core.model.repositories.ProcessedEventRepository;
+import it.moneyverse.core.runtime.messages.AbstractConsumer;
 import it.moneyverse.core.utils.JsonUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,12 +24,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class AccountConsumer {
+public class AccountConsumer extends AbstractConsumer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountConsumer.class);
   private final AccountService accountService;
 
-  public AccountConsumer(AccountService accountService) {
+  public AccountConsumer(
+      AccountService accountService, ProcessedEventRepository processedEventRepository) {
+    super(processedEventRepository);
     this.accountService = accountService;
   }
 
@@ -56,8 +58,11 @@ public class AccountConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    accountService.incrementAccountBalance(
-        event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+    if (!eventAlreadyProcessed(record.key())) {
+      accountService.incrementAccountBalance(
+          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   @RetryableTopic
@@ -70,8 +75,11 @@ public class AccountConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    accountService.decrementAccountBalance(
-        event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+    if (!eventAlreadyProcessed(record.key())) {
+      accountService.decrementAccountBalance(
+          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   @Transactional
@@ -85,18 +93,22 @@ public class AccountConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    LOGGER.info(
-        "Undoing transaction {} on account {}",
-        event.getPreviousTransaction().getTransactionId(),
-        event.getPreviousTransaction().getAccountId());
-    applyTransaction(
-        event.getPreviousTransaction().getAccountId(),
-        event.getPreviousTransaction().getAmount().negate(),
-        event.getPreviousTransaction().getCurrency(),
-        event.getPreviousTransaction().getDate());
-    LOGGER.info(
-        "Applying transaction {} on account {}", event.getTransactionId(), event.getAccountId());
-    applyTransaction(event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+    if (!eventAlreadyProcessed(record.key())) {
+      LOGGER.info(
+          "Undoing transaction {} on account {}",
+          event.getPreviousTransaction().getTransactionId(),
+          event.getPreviousTransaction().getAccountId());
+      applyTransaction(
+          event.getPreviousTransaction().getAccountId(),
+          event.getPreviousTransaction().getAmount().negate(),
+          event.getPreviousTransaction().getCurrency(),
+          event.getPreviousTransaction().getDate());
+      LOGGER.info(
+          "Applying transaction {} on account {}", event.getTransactionId(), event.getAccountId());
+      applyTransaction(
+          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   private void applyTransaction(

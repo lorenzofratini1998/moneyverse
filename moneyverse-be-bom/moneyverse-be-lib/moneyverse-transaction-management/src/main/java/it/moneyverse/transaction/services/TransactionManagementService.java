@@ -72,7 +72,7 @@ public class TransactionManagementService implements TransactionService {
             request.transactions().stream()
                 .map(transaction -> createTransaction(request.userId(), transaction))
                 .toList());
-    transactionEventPublisher.publishEvent(transactions, EventTypeEnum.CREATE);
+    transactionEventPublisher.publish(transactions, EventTypeEnum.CREATE);
     return TransactionMapper.toTransactionDto(transactions);
   }
 
@@ -143,7 +143,7 @@ public class TransactionManagementService implements TransactionService {
         "Updated transaction {} for user {}",
         transaction.getTransactionId(),
         transaction.getUserId());
-    transactionEventPublisher.publishEvent(transaction, originalTransaction, EventTypeEnum.UPDATE);
+    transactionEventPublisher.publish(transaction, originalTransaction, EventTypeEnum.UPDATE);
     return TransactionMapper.toTransactionDto(transaction);
   }
 
@@ -156,7 +156,7 @@ public class TransactionManagementService implements TransactionService {
         "Deleted transaction: {} for user {}",
         transaction.getTransactionId(),
         transaction.getUserId());
-    transactionEventPublisher.publishEvent(transaction, EventTypeEnum.DELETE);
+    transactionEventPublisher.publish(transaction, EventTypeEnum.DELETE);
   }
 
   @Override
@@ -179,7 +179,7 @@ public class TransactionManagementService implements TransactionService {
     LOGGER.info("Deleting transactions by account id {}", accountId);
     List<Transaction> transactions = transactionRepository.findTransactionByAccountId(accountId);
     transactionRepository.deleteAll(transactions);
-    transactionEventPublisher.publishEvent(transactions, EventTypeEnum.DELETE);
+    transactionEventPublisher.publish(transactions, EventTypeEnum.DELETE);
   }
 
   @Override
@@ -195,7 +195,7 @@ public class TransactionManagementService implements TransactionService {
         });
     transactionRepository.saveAll(transactions);
     for (Transaction transaction : transactions) {
-      transactionEventPublisher.publishEvent(transaction, EventTypeEnum.UPDATE);
+      transactionEventPublisher.publish(transaction, EventTypeEnum.UPDATE);
     }
   }
 
@@ -208,7 +208,7 @@ public class TransactionManagementService implements TransactionService {
     transactions.forEach(transaction -> transaction.setBudgetId(null));
     transactionRepository.saveAll(transactions);
     for (Transaction transaction : transactions) {
-      transactionEventPublisher.publishEvent(transaction, EventTypeEnum.UPDATE);
+      transactionEventPublisher.publish(transaction, EventTypeEnum.UPDATE);
     }
   }
 }

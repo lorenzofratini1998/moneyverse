@@ -5,6 +5,7 @@ import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.grpc.lib.AccountRequest;
 import it.moneyverse.grpc.lib.AccountResponse;
 import it.moneyverse.grpc.lib.AccountServiceGrpc;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,8 @@ class AccountManagementGrpcService extends AccountServiceGrpc.AccountServiceImpl
                                 .setBalance(account.getBalance().doubleValue())
                                 .setBalanceTarget(account.getBalanceTarget().doubleValue())
                                 .setAccountCategory(account.getAccountCategory().getName())
-                                .setAccountDescription(account.getAccountDescription())
+                                .setAccountDescription(
+                                    Optional.ofNullable(account.getAccountDescription()).orElse(""))
                                 .setCurrency(account.getCurrency())
                                 .setIsDefault(account.isDefault())
                                 .build())

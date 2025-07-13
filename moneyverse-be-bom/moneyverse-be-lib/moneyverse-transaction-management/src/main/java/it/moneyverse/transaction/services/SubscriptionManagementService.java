@@ -65,7 +65,7 @@ public class SubscriptionManagementService implements SubscriptionService {
       addTransactions(subscription);
     }
     subscription = subscriptionRepository.save(subscription);
-    transactionEventPublisher.publishEvent(subscription, EventTypeEnum.CREATE);
+    transactionEventPublisher.publish(subscription, EventTypeEnum.CREATE);
     return SubscriptionMapper.toSubscriptionDto(subscription);
   }
 
@@ -123,7 +123,7 @@ public class SubscriptionManagementService implements SubscriptionService {
     Subscription subscription = getSubscriptionById(subscriptionId);
     LOGGER.info("Deleting subscription {}", subscriptionId);
     subscriptionRepository.delete(subscription);
-    transactionEventPublisher.publishEvent(subscription, EventTypeEnum.DELETE);
+    transactionEventPublisher.publish(subscription, EventTypeEnum.DELETE);
   }
 
   @Override
@@ -144,8 +144,7 @@ public class SubscriptionManagementService implements SubscriptionService {
     }
     subscription = subscriptionRepository.save(subscription);
     if (request.categoryId() != null) {
-      transactionEventPublisher.publishEvent(
-          subscription, originalSubscription, EventTypeEnum.UPDATE);
+      transactionEventPublisher.publish(subscription, originalSubscription, EventTypeEnum.UPDATE);
     }
     return SubscriptionMapper.toSubscriptionDto(subscription);
   }
@@ -177,7 +176,7 @@ public class SubscriptionManagementService implements SubscriptionService {
         subscriptionRepository.findSubscriptionByAccountId(accountId);
     subscriptionRepository.deleteAll(subscriptions);
     subscriptions.forEach(
-        subscription -> transactionEventPublisher.publishEvent(subscription, EventTypeEnum.DELETE));
+        subscription -> transactionEventPublisher.publish(subscription, EventTypeEnum.DELETE));
   }
 
   @Override

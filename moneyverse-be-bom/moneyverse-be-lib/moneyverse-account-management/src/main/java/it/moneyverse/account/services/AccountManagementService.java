@@ -135,7 +135,7 @@ public class AccountManagementService implements AccountService {
   public void deleteAccount(UUID accountId) {
     Account account = findAccountById(accountId);
     accountRepository.delete(account);
-    eventPublisher.publishEvent(account, EventTypeEnum.DELETE);
+    eventPublisher.publish(account, EventTypeEnum.DELETE);
     LOGGER.info("Deleted account {} for user {}", account.getAccountId(), account.getUserId());
   }
 

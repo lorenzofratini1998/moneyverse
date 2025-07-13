@@ -1,12 +1,12 @@
 package it.moneyverse.budget.runtime.messages;
 
-import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
-
 import it.moneyverse.budget.services.BudgetService;
 import it.moneyverse.core.model.beans.TransactionCreationTopic;
 import it.moneyverse.core.model.beans.TransactionDeletionTopic;
 import it.moneyverse.core.model.beans.TransactionUpdateTopic;
 import it.moneyverse.core.model.events.TransactionEvent;
+import it.moneyverse.core.model.repositories.ProcessedEventRepository;
+import it.moneyverse.core.runtime.messages.AbstractConsumer;
 import it.moneyverse.core.utils.JsonUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,12 +22,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class BudgetConsumer {
+public class BudgetConsumer extends AbstractConsumer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BudgetConsumer.class);
   private final BudgetService budgetService;
 
-  public BudgetConsumer(BudgetService budgetService) {
+  public BudgetConsumer(
+      BudgetService budgetService, ProcessedEventRepository processedEventRepository) {
+    super(processedEventRepository);
     this.budgetService = budgetService;
   }
 
@@ -41,8 +43,11 @@ public class BudgetConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    budgetService.incrementBudgetAmount(
-        event.getBudgetId(), event.getAmount(), event.getCurrency(), event.getDate());
+    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+      budgetService.incrementBudgetAmount(
+          event.getBudgetId(), event.getAmount().abs(), event.getCurrency(), event.getDate());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   @RetryableTopic
@@ -55,8 +60,14 @@ public class BudgetConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    budgetService.decrementBudgetAmount(
-        event.getBudgetId(), event.getAmount(), event.getCurrency(), event.getDate());
+    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+      budgetService.decrementBudgetAmount(
+          event.getBudgetId(),
+          event.getAmount().abs().negate(),
+          event.getCurrency(),
+          event.getDate());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   @Transactional
@@ -70,18 +81,22 @@ public class BudgetConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    LOGGER.info(
-        "Undoing transaction {} on budget {}",
-        event.getPreviousTransaction().getTransactionId(),
-        event.getPreviousTransaction().getBudgetId());
-    applyTransaction(
-        event.getPreviousTransaction().getBudgetId(),
-        event.getPreviousTransaction().getAmount().negate(),
-        event.getPreviousTransaction().getCurrency(),
-        event.getPreviousTransaction().getDate());
-    LOGGER.info(
-        "Applying transaction {} on budget {}", event.getTransactionId(), event.getBudgetId());
-    applyTransaction(event.getBudgetId(), event.getAmount(), event.getCurrency(), event.getDate());
+    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+      LOGGER.info(
+          "Undoing transaction {} on budget {}",
+          event.getPreviousTransaction().getTransactionId(),
+          event.getPreviousTransaction().getBudgetId());
+      applyTransaction(
+          event.getPreviousTransaction().getBudgetId(),
+          event.getPreviousTransaction().getAmount().abs().negate(),
+          event.getPreviousTransaction().getCurrency(),
+          event.getPreviousTransaction().getDate());
+      LOGGER.info(
+          "Applying transaction {} on budget {}", event.getTransactionId(), event.getBudgetId());
+      applyTransaction(
+          event.getBudgetId(), event.getAmount().abs(), event.getCurrency(), event.getDate());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   private void applyTransaction(UUID budgetId, BigDecimal amount, String currency, LocalDate date) {

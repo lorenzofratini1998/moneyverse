@@ -1,7 +1,5 @@
 package it.moneyverse.transaction.runtime.messages;
 
-import static it.moneyverse.core.utils.ConsumerUtils.logMessage;
-
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
 import it.moneyverse.core.model.beans.BudgetDeletionTopic;
 import it.moneyverse.core.model.beans.CategoryDeletionTopic;
@@ -10,6 +8,8 @@ import it.moneyverse.core.model.events.AccountEvent;
 import it.moneyverse.core.model.events.BudgetEvent;
 import it.moneyverse.core.model.events.CategoryEvent;
 import it.moneyverse.core.model.events.UserEvent;
+import it.moneyverse.core.model.repositories.ProcessedEventRepository;
+import it.moneyverse.core.runtime.messages.AbstractConsumer;
 import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.transaction.services.TransactionService;
 import java.util.UUID;
@@ -21,11 +21,13 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionConsumer {
+public class TransactionConsumer extends AbstractConsumer {
 
   private final TransactionService transactionService;
 
-  public TransactionConsumer(TransactionService transactionService) {
+  public TransactionConsumer(
+      TransactionService transactionService, ProcessedEventRepository processedEventRepository) {
+    super(processedEventRepository);
     this.transactionService = transactionService;
   }
 
@@ -52,7 +54,10 @@ public class TransactionConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     AccountEvent event = JsonUtils.fromJson(record.value(), AccountEvent.class);
-    transactionService.deleteAllTransactionsByAccountId(event.getAccountId());
+    if (!eventAlreadyProcessed(record.key()) && event.getAccountId() != null) {
+      transactionService.deleteAllTransactionsByAccountId(event.getAccountId());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   @RetryableTopic
@@ -65,7 +70,10 @@ public class TransactionConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     CategoryEvent event = JsonUtils.fromJson(record.value(), CategoryEvent.class);
-    transactionService.removeCategoryFromTransactions(event.getCategoryId());
+    if (!eventAlreadyProcessed(record.key()) && event.getCategoryId() != null) {
+      transactionService.removeCategoryFromTransactions(event.getCategoryId());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 
   @RetryableTopic
@@ -78,6 +86,9 @@ public class TransactionConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     BudgetEvent event = JsonUtils.fromJson(record.value(), BudgetEvent.class);
-    transactionService.removeBudgetFromTransactions(event.getBudgetId());
+    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+      transactionService.removeBudgetFromTransactions(event.getBudgetId());
+      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+    }
   }
 }

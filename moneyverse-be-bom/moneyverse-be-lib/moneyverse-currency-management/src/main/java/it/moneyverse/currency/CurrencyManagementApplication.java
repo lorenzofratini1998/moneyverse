@@ -11,7 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
       UserServiceGrpcClientAutoConfiguration.class,
       CurrencyServiceGrpcClientAutoConfiguration.class,
       KafkaAutoConfiguration.class,
-      RedisAutoConfiguration.class
+      RedisAutoConfiguration.class,
+      OutboxAutoConfiguration.class
     })
 public class CurrencyManagementApplication {
 

@@ -105,7 +105,7 @@ public class BudgetManagementService implements BudgetService {
   public void deleteBudget(UUID budgetId) {
     Budget budget = findBudgetById(budgetId);
     budgetRepository.delete(budget);
-    eventPublisher.publishEvent(budget, EventTypeEnum.DELETE);
+    eventPublisher.publish(budget, EventTypeEnum.DELETE);
     LOGGER.info("Deleted budget {} for user {}", budgetId, budget.getCategory().getUserId());
   }
 

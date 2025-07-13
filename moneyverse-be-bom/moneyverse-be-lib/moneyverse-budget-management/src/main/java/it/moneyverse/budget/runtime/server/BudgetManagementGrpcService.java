@@ -5,6 +5,7 @@ import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.grpc.lib.*;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ class BudgetManagementGrpcService extends BudgetServiceGrpc.BudgetServiceImplBas
                         .setCategoryId(category.getCategoryId().toString())
                         .setCategoryName(category.getCategoryName())
                         .setUserId(category.getUserId().toString())
-                        .setDescription(category.getDescription())
+                        .setDescription(Optional.ofNullable(category.getDescription()).orElse(""))
                         .build())
             .orElseGet(
                 () -> {
