@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface TransactionCustomRepository {
   List<Transaction> findTransactions(UUID userId, TransactionCriteria param);
+
+  Long count(UUID userId, TransactionCriteria param);
 }

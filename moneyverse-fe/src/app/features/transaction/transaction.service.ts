@@ -2,9 +2,20 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
 import {Observable} from 'rxjs';
-import {EnrichedTransaction, Tag, TagRequest, Transaction, TransactionRequest} from './transaction.model';
-import {Category} from '../category/category.model';
-import {Account} from '../account/account.model';
+import {
+  Subscription,
+  SubscriptionRequest,
+  Tag,
+  TagRequest,
+  Transaction,
+  TransactionCriteria,
+  TransactionRequest,
+  TransactionRequestItem,
+  Transfer,
+  TransferRequest
+} from './transaction.model';
+import {PageResponse} from '../../shared/models/common.model';
+import {buildHttpParams} from '../../shared/utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -13,22 +24,21 @@ export class TransactionService {
   private readonly httpClient = inject(HttpClient);
   private readonly baseUrl = environment.services.transactionManagementUrl
 
-  public getTransactionsByUser(userId: string): Observable<Transaction[]> {
-    return this.httpClient.get<Transaction[]>(`${this.baseUrl}/transactions/users/${userId}`);
+  public getTransactionsByUser(userId: string, criteria: TransactionCriteria = {}): Observable<PageResponse<Transaction>> {
+    const params = buildHttpParams(criteria);
+    return this.httpClient.get<PageResponse<Transaction>>(`${this.baseUrl}/transactions/users/${userId}`, {params});
   }
 
   public createTransaction(request: TransactionRequest): Observable<Transaction> {
     return this.httpClient.post<Transaction>(`${this.baseUrl}/transactions`, request);
   }
 
-  enrichTransaction(
-    transaction: Transaction,
-    accounts: Account[],
-    categories: Category[]
-  ): EnrichedTransaction {
-    const account = accounts.find(a => a.accountId === transaction.accountId)!;
-    const category = categories.find(c => c.categoryId === transaction.categoryId)!;
-    return {...transaction, account, category};
+  public updateTransaction(transactionId: string, request: TransactionRequestItem): Observable<Transaction> {
+    return this.httpClient.put<Transaction>(`${this.baseUrl}/transactions/${transactionId}`, request);
+  }
+
+  public deleteTransaction(transactionId: string): Observable<void> {
+    return this.httpClient.delete<void>(`${this.baseUrl}/transactions/${transactionId}`);
   }
 
   createTag(request: TagRequest): Observable<Tag> {
@@ -49,5 +59,41 @@ export class TransactionService {
 
   deleteTag(tagId: string): Observable<void> {
     return this.httpClient.delete<void>(`${this.baseUrl}/tags/${tagId}`);
+  }
+
+  createTransfer(request: TransferRequest): Observable<Transfer> {
+    return this.httpClient.post<Transfer>(`${this.baseUrl}/transfers`, request);
+  }
+
+  updateTransfer(transferId: string, request: TransferRequest): Observable<Transfer> {
+    return this.httpClient.put<Transfer>(`${this.baseUrl}/transfers/${transferId}`, request);
+  }
+
+  deleteTransfer(transferId: string): Observable<void> {
+    return this.httpClient.delete<void>(`${this.baseUrl}/transfers/${transferId}`);
+  }
+
+  getTransactionsByTransferId(transferId: string): Observable<Transfer> {
+    return this.httpClient.get<Transfer>(`${this.baseUrl}/transfers/${transferId}`);
+  }
+
+  createSubscription(request: SubscriptionRequest): Observable<Subscription> {
+    return this.httpClient.post<Subscription>(`${this.baseUrl}/subscriptions`, request);
+  }
+
+  getSubscription(subscriptionId: string): Observable<Subscription> {
+    return this.httpClient.get<Subscription>(`${this.baseUrl}/subscriptions/${subscriptionId}`);
+  }
+
+  getSubscriptionsByUser(userId: string): Observable<Subscription[]> {
+    return this.httpClient.get<Subscription[]>(`${this.baseUrl}/subscriptions/users/${userId}`);
+  }
+
+  deleteSubscription(subscriptionId: string): Observable<void> {
+    return this.httpClient.delete<void>(`${this.baseUrl}/subscriptions/${subscriptionId}`);
+  }
+
+  updateSubscription(subscriptionId: string, request: SubscriptionRequest): Observable<Subscription> {
+    return this.httpClient.put<Subscription>(`${this.baseUrl}/subscriptions/${subscriptionId}`, request);
   }
 }

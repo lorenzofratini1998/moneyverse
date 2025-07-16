@@ -1,0 +1,75 @@
+<p-dialog
+  [modal]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [(visible)]="_isOpen"
+  (onHide)="close()"
+  styleClass="w-144"
+>
+  <ng-template #header>
+    <h3 class="font-bold text-lg py-4">
+      @if (optionValue() === TransactionFormDialogOptions.EXPENSE || optionValue() === TransactionFormDialogOptions.INCOME) {
+        @if (selectedItem()) {
+          Edit Transaction
+        } @else {
+          Add Transaction
+        }
+      } @else if (optionValue() === TransactionFormDialogOptions.TRANSFER) {
+        @if (selectedItem()) {
+          Edit Transfer
+        } @else {
+          Add Transfer
+        }
+      } @else if (optionValue() === TransactionFormDialogOptions.SUBSCRIPTION) {
+        @if (selectedItem()) {
+          Edit Subscription transaction
+        } @else {
+          Add Subscription transaction
+        }
+      }
+    </h3>
+  </ng-template>
+  <ng-template #content>
+    <div class="flex flex-col justify-center items-center gap-4 w-full">
+      <p-select-button [(ngModel)]="selectedOption"
+                       [options]="options()"
+                       optionLabel="label"
+                       optionValue="value"
+                       [unselectable]="true"
+      >
+        <ng-template #item let-item>
+          <app-svg [name]="item.icon"></app-svg>
+          <span>{{ item.label }}</span>
+        </ng-template>
+      </p-select-button>
+      <form [formGroup]="formGroup">
+        @if (optionValue() === TransactionFormDialogOptions.EXPENSE || optionValue() === TransactionFormDialogOptions.INCOME || optionValue() === TransactionFormDialogOptions.SUBSCRIPTION) {
+          <app-expense-income-form [formGroup]="transactionForm" [transactionToEdit]="selectedItem()"
+                                   [transactionFormOption]="optionValue()"/>
+        } @else if (optionValue() === TransactionFormDialogOptions.TRANSFER) {
+          <app-transfer-form [formGroup]="transferForm" [transferToEdit]="selectedItem()"/>
+        }
+      </form>
+    </div>
+  </ng-template>
+  <ng-template #footer>
+    <div class="flex justify-center gap-2 w-full">
+      <p-button [rounded]="true"
+                [outlined]="true"
+                severity="secondary"
+                (onClick)="close()"
+      >
+        <app-svg [name]="Icons.X"/>
+        <span>Cancel</span>
+      </p-button>
+      <p-button (onClick)="onSave()"
+                [rounded]="true"
+                severity="contrast"
+                type="submit"
+      >
+        <app-svg [name]="Icons.CHECK"/>
+        <span>Save</span>
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

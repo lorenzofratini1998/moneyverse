@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
 import {Account, AccountCategory, AccountCriteria, AccountRequest} from './account.model';
 import {Observable} from 'rxjs';
+import {buildHttpParams} from '../../shared/utils/utils';
 
 
 @Injectable({
@@ -17,11 +18,11 @@ export class AccountService {
   }
 
   public getAccounts(userId: string, criteria: AccountCriteria = {}): Observable<Account[]> {
-    const params = this.buildParams(criteria);
+    const params = buildHttpParams(criteria);
     return this.httpClient.get<Account[]>(`${this.baseUrl}/accounts/users/${userId}`, {params});
   }
 
-  private buildParams(criteria: AccountCriteria): HttpParams {
+  /*private buildParams(criteria: AccountCriteria): HttpParams {
     let params = new HttpParams();
 
     function recurse(obj: any, prefix: string = '') {
@@ -38,10 +39,9 @@ export class AccountService {
         }
       });
     }
-
     recurse(criteria);
     return params;
-  }
+  }*/
 
   public createAccount(request: AccountRequest): Observable<Account> {
     return this.httpClient.post<Account>(`${this.baseUrl}/accounts`, request);

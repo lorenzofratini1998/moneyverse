@@ -40,6 +40,15 @@ public class TransactionCustomRepositoryImpl implements TransactionCustomReposit
     return query.getResultList();
   }
 
+  @Override
+  public Long count(UUID userId, TransactionCriteria param) {
+    CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+    Root<Transaction> root = cq.from(Transaction.class);
+    Predicate predicate = new TransactionPredicateBuilder(cb, root).build(userId, param);
+    cq.select(cb.count(root)).where(predicate);
+    return em.createQuery(cq).getSingleResult();
+  }
+
   private Order getOrder(
       SortCriteria<TransactionSortAttributeEnum> sortCriteria, Root<Transaction> account) {
     return sortCriteria.getDirection() == Sort.Direction.ASC

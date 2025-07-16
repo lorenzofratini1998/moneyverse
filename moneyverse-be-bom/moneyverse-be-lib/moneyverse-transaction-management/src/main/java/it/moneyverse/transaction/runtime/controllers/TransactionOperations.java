@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.runtime.controllers;
 
+import it.moneyverse.core.model.dto.PagedResponseDto;
 import it.moneyverse.transaction.model.dto.*;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -9,7 +10,7 @@ public interface TransactionOperations {
 
   List<TransactionDto> createTransaction(@Valid TransactionRequestDto request);
 
-  List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
+  PagedResponseDto<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
 
   TransactionDto getTransaction(UUID transactionId);
 

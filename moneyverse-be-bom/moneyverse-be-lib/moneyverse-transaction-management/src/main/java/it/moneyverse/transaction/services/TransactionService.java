@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.services;
 
+import it.moneyverse.core.model.dto.PagedResponseDto;
 import it.moneyverse.transaction.model.dto.*;
 import java.util.List;
 import java.util.UUID;
@@ -8,7 +9,7 @@ public interface TransactionService {
 
   List<TransactionDto> createTransactions(TransactionRequestDto request);
 
-  List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
+  PagedResponseDto<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria);
 
   TransactionDto getTransaction(UUID transactionId);
 

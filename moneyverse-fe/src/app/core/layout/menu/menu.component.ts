@@ -76,6 +76,11 @@ export class MenuComponent {
           path: '/transactions/tags',
           icon: 'tag',
           translationKey: 'menu.transactions.tags'
+        },
+        {
+          path: '/transactions/subscriptions',
+          icon: 'calendar-sync',
+          translationKey: 'menu.transactions.subscriptions'
         }
       ]
     }

@@ -1,16 +1,16 @@
 import {Component, inject, ViewChild} from '@angular/core';
 import {Button} from 'primeng/button';
-import {SvgComponent} from '../../../../../shared/components/svg/svg.component';
-import {IconsEnum} from '../../../../../shared/models/icons.model';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {TagFormDialogComponent} from './components/tag-form-dialog/tag-form-dialog.component';
-import {Tag, TagForm, TagFormData, TagRequest} from '../../../transaction.model';
-import {AuthService} from '../../../../../core/auth/auth.service';
-import {TransactionService} from '../../../transaction.service';
 import {switchMap, take} from 'rxjs';
 import {Toast} from 'primeng/toast';
 import {TagTableComponent} from './components/tag-table/tag-table.component';
-import {TransactionStore} from '../../../transaction.store';
+import {SvgComponent} from '../../../../shared/components/svg/svg.component';
+import {IconsEnum} from '../../../../shared/models/icons.model';
+import {AuthService} from '../../../../core/auth/auth.service';
+import {TransactionStore} from '../../transaction.store';
+import {TransactionService} from '../../transaction.service';
+import {Tag, TagForm, TagFormData, TagRequest} from '../../transaction.model';
 
 @Component({
   selector: 'app-tag-management',

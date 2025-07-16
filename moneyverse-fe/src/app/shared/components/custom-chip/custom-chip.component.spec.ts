@@ -1,18 +1,18 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {TransactionFormComponent} from './transaction-form.component';
+import {CustomChipComponent} from './custom-chip.component';
 
-describe('TransactionFormComponent', () => {
-  let component: TransactionFormComponent;
-  let fixture: ComponentFixture<TransactionFormComponent>;
+describe('CustomChipComponent', () => {
+  let component: CustomChipComponent;
+  let fixture: ComponentFixture<CustomChipComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TransactionFormComponent]
+      imports: [CustomChipComponent]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(TransactionFormComponent);
+    fixture = TestBed.createComponent(CustomChipComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

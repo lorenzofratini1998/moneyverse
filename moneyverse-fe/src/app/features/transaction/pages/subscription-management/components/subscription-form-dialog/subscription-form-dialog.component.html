@@ -1,0 +1,203 @@
+<p-dialog
+  [modal]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [(visible)]="_isOpen"
+  (onHide)="close()"
+  styleClass="w-144"
+>
+  <ng-template #header>
+    <h3 class="font-bold text-lg py-4">
+      @if (_subscriptionToEdit()) {
+        Edit Subscription
+      } @else {
+        Add Subscription
+      }
+    </h3>
+  </ng-template>
+  <ng-template #content>
+    <form [formGroup]="formGroup">
+      <div class="grid grid-cols-6 gap-4 py-2">
+        @if (_subscriptionToEdit()) {
+          <div class="col-span-3 flex items-center gap-2">
+            <div class="flex items-center gap-2">
+              <span>Active</span>
+              <p-toggle-switch
+                formControlName="active"
+              />
+            </div>
+          </div>
+          <div class="col-span-3 flex items-center gap-2">
+            <div class="flex flex-col gap-1">
+              <p-float-label variant="on" class="w-full">
+                <p-date-picker formControlName="nextExecutionDate"
+                               id="nextExecutionDate"
+                               [showIcon]="true"
+                               [appendTo]="'body'"
+                               dateFormat="dd/mm/yy"
+                               [firstDayOfWeek]="1"
+                />
+                <label for="startDate" class="flex gap-1">
+                  <span>Next Payment</span>
+                  <span class="text-red-500">*</span>
+                </label>
+              </p-float-label>
+              @if (isInvalid(formGroup, 'nextExecutionDate') && formGroup.get('isActive')?.value) {
+                <p-message severity="error" size="small" variant="simple">Next payment is required.</p-message>
+              }
+            </div>
+          </div>
+        }
+        <div class="col-span-3 flex flex-col w-full gap-1">
+          <p-float-label variant="on">
+            <input pInputText type="text" id="subscriptionName" formControlName="subscriptionName" class="w-full"/>
+            <label for="subscriptionName" class="flex gap-1">
+              <span>Subscription Name</span>
+              <span class="text-red-500">*</span>
+            </label>
+          </p-float-label>
+          @if (isInvalid(formGroup, 'subscriptionName')) {
+            <p-message severity="error" size="small" variant="simple">Subscription name is required.</p-message>
+          }
+        </div>
+        <div class="col-span-3 flex flex-col w-full gap-1">
+          <p-input-group>
+            <p-float-label variant="on" class="w-3/5">
+              <p-input-number id="amount"
+                              formControlName="amount"
+                              [min]="0"
+                              mode="currency"
+                              [currency]="formGroup.get('currency')?.value"
+                              [locale]="languageService.getCurrentLanguage().replace('_', '-')"
+                              class="w-full"
+              />
+              <label for="amount" class="flex gap-1">
+                <span>Amount</span>
+                <span class="text-red-500">*</span>
+              </label>
+            </p-float-label>
+            <p-select id="currency"
+                      formControlName="currency"
+                      [options]="currencyStore.currencies()"
+                      optionValue="code"
+                      optionLabel="code"
+                      [appendTo]="'body'"
+                      class="w-2/5"
+            />
+          </p-input-group>
+          @if (isInvalid(formGroup, 'amount')) {
+            <p-message severity="error" size="small" variant="simple">Amount is required.</p-message>
+          }
+        </div>
+        <div formGroupName="recurrence" class="col-span-6 w-full">
+          <div class="grid grid-cols-3 gap-4">
+            <!-- Recurrence Rule -->
+            <div class="flex flex-col gap-1">
+              <p-float-label variant="on">
+                <p-select id="recurrenceRule"
+                          formControlName="recurrenceRule"
+                          [options]="recurrenceRuleOptions"
+                          optionLabel="label"
+                          optionValue="value"
+                          [appendTo]="'body'"
+                          class="w-full"
+                />
+                <label for="recurrenceRule" class="flex gap-1">
+                  <span>Recurrence</span>
+                  <span class="text-red-500">*</span>
+                </label>
+              </p-float-label>
+              @if (isInvalid(formGroup, 'recurrence.recurrenceRule')) {
+                <p-message severity="error" size="small" variant="simple">Recurrence is required.</p-message>
+              }
+            </div>
+
+            <!-- Start Date -->
+            <div class="flex flex-col gap-1">
+              <p-float-label variant="on" class="w-full">
+                <p-date-picker formControlName="startDate"
+                               id="startDate"
+                               [showIcon]="true"
+                               [appendTo]="'body'"
+                               dateFormat="dd/mm/yy"
+                               [firstDayOfWeek]="1"
+                />
+                <label for="startDate" class="flex gap-1">
+                  <span>Start Date</span>
+                  <span class="text-red-500">*</span>
+                </label>
+              </p-float-label>
+              @if (isInvalid(formGroup, 'recurrence.startDate')) {
+                <p-message severity="error" size="small" variant="simple">Start date is required.</p-message>
+              }
+            </div>
+
+            <!-- End Date -->
+            <p-float-label variant="on" class="w-full">
+              <p-date-picker formControlName="endDate"
+                             id="endDate"
+                             [showIcon]="true"
+                             [appendTo]="'body'"
+                             dateFormat="dd/mm/yy"
+                             [firstDayOfWeek]="1"
+              />
+              <label for="endDate">End Date</label>
+            </p-float-label>
+          </div>
+        </div>
+        <div class="col-span-3 flex flex-col w-full gap-1">
+          <p-float-label variant="on">
+            <p-select id="account"
+                      formControlName="account"
+                      [options]="accountStore.accounts()"
+                      optionLabel="accountName"
+                      optionValue="accountId"
+                      [appendTo]="'body'"
+                      class="w-full"
+            />
+            <label for="account" class="flex gap-1">
+              <span>Account</span>
+              <span class="text-red-500">*</span>
+            </label>
+          </p-float-label>
+          @if (isInvalid(formGroup, 'account')) {
+            <p-message severity="error" size="small" variant="simple">Account is required.</p-message>
+          }
+        </div>
+        <div class="col-span-3">
+          <p-float-label variant="on">
+            <p-select id="category"
+                      formControlName="category"
+                      [options]="categoryStore.categories()"
+                      optionLabel="categoryName"
+                      optionValue="categoryId"
+                      [appendTo]="'body'"
+                      class="w-full"
+            />
+            <label for="category">Category</label>
+          </p-float-label>
+        </div>
+      </div>
+    </form>
+  </ng-template>
+  <ng-template #footer>
+    <div class="flex justify-center gap-2 w-full">
+      <p-button [rounded]="true"
+                [outlined]="true"
+                severity="secondary"
+                (onClick)="close()"
+      >
+        <app-svg [name]="Icons.X"/>
+        <span>Cancel</span>
+      </p-button>
+      <p-button (onClick)="onSave()"
+                [rounded]="true"
+                severity="contrast"
+                type="submit"
+      >
+        <app-svg [name]="Icons.CHECK"/>
+        <span>Save</span>
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

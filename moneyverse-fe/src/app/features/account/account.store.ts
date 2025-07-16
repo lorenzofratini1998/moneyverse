@@ -95,6 +95,7 @@ export const AccountStore = signalStore(
     categories: computed(() => store.accountCategories()),
     filteredAccounts: computed(() => store.filteredAccounts()),
     accounts: computed(() => store.accounts()),
+    defaultAccount: computed(() => store.accounts().find(acc => acc.default)),
     activeFiltersCount: computed(() => {
       const criteria = store.accountCriteria();
       let count = 0;
@@ -111,6 +112,9 @@ export const AccountStore = signalStore(
 
       return count;
     }),
+    accountsMap: computed(() => {
+      return new Map(store.accounts().map(account => [account.accountId, account]));
+    })
   })),
 
   withHooks({

@@ -4,6 +4,8 @@ import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.enums.SortAttribute;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.PageCriteria;
+import it.moneyverse.core.model.dto.PageMetadataDto;
+import it.moneyverse.core.model.dto.PagedResponseDto;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.UserServiceClient;
@@ -83,7 +85,8 @@ public class TransactionManagementService implements TransactionService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TransactionDto> getTransactions(UUID userId, TransactionCriteria criteria) {
+  public PagedResponseDto<TransactionDto> getTransactions(
+      UUID userId, TransactionCriteria criteria) {
     if (criteria.getPage() == null) {
       PageCriteria pageCriteria = new PageCriteria();
       pageCriteria.setOffset(0);
@@ -96,8 +99,21 @@ public class TransactionManagementService implements TransactionService {
               SortAttribute.getDefault(TransactionSortAttributeEnum.class), Sort.Direction.DESC));
     }
     LOGGER.info("Finding transactions with filters: {}", criteria);
-    return TransactionMapper.toTransactionDto(
-        transactionRepository.findTransactions(userId, criteria));
+    List<TransactionDto> transactions =
+        TransactionMapper.toTransactionDto(
+            transactionRepository.findTransactions(userId, criteria));
+    long totalElements = transactionRepository.count(userId, criteria);
+    return PagedResponseDto.<TransactionDto>builder()
+        .withMetadata(
+            PageMetadataDto.builder()
+                .withTotalElements(totalElements)
+                .withNumber(criteria.getPage().getOffset())
+                .withSize(criteria.getPage().getLimit())
+                .withTotalPages(
+                    (int) Math.ceil(totalElements * 1.0 / criteria.getPage().getLimit()))
+                .build())
+        .withContent(transactions)
+        .build();
   }
 
   @Override

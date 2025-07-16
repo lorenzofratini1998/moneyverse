@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.runtime.controllers;
 
+import it.moneyverse.core.model.dto.PagedResponseDto;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.services.SubscriptionService;
 import it.moneyverse.transaction.services.TagService;
@@ -46,7 +47,7 @@ public class TransactionManagementController
   @GetMapping("/transactions/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
-  public List<TransactionDto> getTransactions(
+  public PagedResponseDto<TransactionDto> getTransactions(
       @PathVariable UUID userId, TransactionCriteria criteria) {
     return transactionService.getTransactions(userId, criteria);
   }
@@ -80,7 +81,7 @@ public class TransactionManagementController
   }
 
   @Override
-  @PostMapping("/transfer")
+  @PostMapping("/transfers")
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId())")
   public TransferDto createTransfer(@RequestBody TransferRequestDto request) {
@@ -88,7 +89,7 @@ public class TransactionManagementController
   }
 
   @Override
-  @PutMapping("/transfer/{transferId}")
+  @PutMapping("/transfers/{transferId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
       "@transferRepository.existsByTransferIdAndUserId(#transferId, @securityService.getAuthenticatedUserId())")
@@ -98,7 +99,7 @@ public class TransactionManagementController
   }
 
   @Override
-  @DeleteMapping("/transfer/{transferId}")
+  @DeleteMapping("/transfers/{transferId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PreAuthorize(
       "@transferRepository.existsByTransferIdAndUserId(#transferId, @securityService.getAuthenticatedUserId())")
@@ -107,7 +108,7 @@ public class TransactionManagementController
   }
 
   @Override
-  @GetMapping("/transfer/{transferId}")
+  @GetMapping("/transfers/{transferId}")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize(
       "@transferRepository.existsByTransferIdAndUserId(#transferId, @securityService.getAuthenticatedUserId())")

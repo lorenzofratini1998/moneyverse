@@ -44,6 +44,7 @@ export const CategoryStore = signalStore(
 
   withComputed((store) => ({
     categories: computed(() => store.categories()),
+    categoriesMap: computed(() => new Map(store.categories().map(category => [category.categoryId, category]))),
   })),
 
   withHooks({

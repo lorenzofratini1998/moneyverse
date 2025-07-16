@@ -3,12 +3,18 @@
     <h1 class="text-3xl font-bold">Account Management</h1>
     <div class="flex gap-x-3">
       <p-button
+        (onClick)="accountStore.refreshAccounts()"
+        [rounded]="true"
+        variant="text"
+        severity="secondary">
+        <app-svg [name]="Icons.REFRESH"/>
+      </p-button>
+      <p-button
         (onClick)="accountFilterComponent.open()"
         [rounded]="true"
-        [outlined]="true"
+        variant="text"
         severity="contrast">
         <app-svg [name]="Icons.FUNNEL"/>
-        <span>Filters</span>
       </p-button>
       <p-button
         (onClick)="accountForm.open()"

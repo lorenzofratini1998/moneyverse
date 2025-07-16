@@ -1,0 +1,90 @@
+<form [formGroup]="formGroup">
+  <div class="grid grid-cols-4 gap-4 py-2">
+    <div class="col-span-2 flex flex-col w-full gap-1">
+      <p-float-label variant="on">
+        <p-date-picker formControlName="date"
+                       id="date"
+                       [showIcon]="true"
+                       [appendTo]="'body'"
+                       dateFormat="dd/mm/yy"
+                       [firstDayOfWeek]="1"
+
+        />
+        <label for="date" class="flex gap-1">
+          <span>Date</span>
+          <span class="text-red-500">*</span>
+        </label>
+      </p-float-label>
+      @if (isInvalid(formGroup, 'date')) {
+        <p-message severity="error" size="small" variant="simple">Date is required.</p-message>
+      }
+    </div>
+    <div class="col-span-2 flex flex-col w-full gap-1">
+      <p-input-group>
+        <p-float-label variant="on" class="w-3/5">
+          <p-input-number id="amount"
+                          formControlName="amount"
+                          [min]="0"
+                          mode="currency"
+                          [currency]="formGroup.get('currency')?.value"
+                          [locale]="languageService.getCurrentLanguage().replace('_', '-')"
+                          class="w-full"
+          />
+          <label for="amount" class="flex gap-1">
+            <span>Amount</span>
+            <span class="text-red-500">*</span>
+          </label>
+        </p-float-label>
+        <p-select id="currency"
+                  formControlName="currency"
+                  [options]="currencyStore.currencies()"
+                  optionValue="code"
+                  optionLabel="code"
+                  [appendTo]="'body'"
+                  class="w-2/5"
+        />
+      </p-input-group>
+      @if (isInvalid(formGroup, 'amount')) {
+        <p-message severity="error" size="small" variant="simple">Amount is required.</p-message>
+      }
+    </div>
+    <div class="col-span-2 flex flex-col w-full gap-1">
+      <p-float-label variant="on">
+        <p-select id="fromAccount"
+                  formControlName="fromAccount"
+                  [options]="accountStore.accounts()"
+                  optionLabel="accountName"
+                  optionValue="accountId"
+                  [appendTo]="'body'"
+                  class="w-full"
+        />
+        <label for="fromAccount" class="flex gap-1">
+          <span>Account From</span>
+          <span class="text-red-500">*</span>
+        </label>
+      </p-float-label>
+      @if (isInvalid(formGroup, 'fromAccount')) {
+        <p-message severity="error" size="small" variant="simple">Account From is required.</p-message>
+      }
+    </div>
+    <div class="col-span-2 flex flex-col w-full gap-1">
+      <p-float-label variant="on">
+        <p-select id="toAccount"
+                  formControlName="toAccount"
+                  [options]="accountStore.accounts()"
+                  optionLabel="accountName"
+                  optionValue="accountId"
+                  [appendTo]="'body'"
+                  class="w-full"
+        />
+        <label for="toAccount" class="flex gap-1">
+          <span>Account To</span>
+          <span class="text-red-500">*</span>
+        </label>
+      </p-float-label>
+      @if (isInvalid(formGroup, 'toAccount')) {
+        <p-message severity="error" size="small" variant="simple">Account To is required.</p-message>
+      }
+    </div>
+  </div>
+</form>

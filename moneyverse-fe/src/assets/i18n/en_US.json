@@ -16,7 +16,8 @@
     "transactions": {
       "title": "Transactions",
       "manage": "Manage Transactions",
-      "tags": "Tags"
+      "tags": "Tags",
+      "subscriptions": "Subscriptions"
     },
     "logout": "Logout"
   },

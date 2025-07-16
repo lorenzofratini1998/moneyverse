@@ -41,21 +41,13 @@
   <ng-template #body let-category>
     <tr>
       <td>
-        <p-chip class="!px-2 !py-1"
-                [style]="colorService.getStyle(category.style.color)">
-          <app-svg [name]="category.style.icon"/>
-          <span>{{ category.categoryName }}</span>
-        </p-chip>
+        <app-custom-chip [style]="category.style" [message]="category.categoryName"/>
       </td>
       <td>{{ category.description }}</td>
       <td>
         @if (category.parentCategory) {
           @if (getParentCategory(category.parentCategory); as parent) {
-            <p-chip class="!px-2 !py-1"
-                    [style]="colorService.getStyle(parent.style.color)">
-              <app-svg [name]="parent.style.icon"/>
-              <span>{{ parent.categoryName }}</span>
-            </p-chip>
+            <app-custom-chip [style]="parent.style" [message]="parent.categoryName"/>
           }
         } @else {
           -

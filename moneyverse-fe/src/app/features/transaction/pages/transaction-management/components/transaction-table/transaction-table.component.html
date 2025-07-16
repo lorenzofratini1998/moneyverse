@@ -1,0 +1,137 @@
+<p-table
+  #transactionTable
+  [value]="pageResponse().content"
+  class="w-full"
+  stripedRows
+  [paginator]="true"
+  [rows]="rowPerPage()"
+  [rowsPerPageOptions]="[10, 25, 50, 100]"
+  [showCurrentPageReport]="true"
+  [totalRecords]="pageResponse().metadata.totalElements"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  (onPage)="onPage($event)"
+  (onSort)="onSort($event)"
+  [lazy]="true"
+  [customSort]="true"
+  dataKey="transactionId"
+  sortField="date"
+  [sortOrder]="-1"
+>
+  <ng-template #header>
+    <tr>
+      <th id="date" pSortableColumn="date">
+        Date
+        <p-sortIcon field="date"/>
+      </th>
+      <th id="description">
+        Description
+      </th>
+      <th id="amount" pSortableColumn="amount">
+        Amount
+        <p-sortIcon field="amount"/>
+      </th>
+      <th id="normalizedAmount">
+        Normalized Amount
+      </th>
+      <th id="category">
+        Category
+      </th>
+      <th id="account">
+        Account
+      </th>
+      <th id="tags">
+        Tags
+      </th>
+      <th id="actions"></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-transaction>
+    <tr>
+      <td>{{ transaction.date | date: preferenceStore.userDateFormat() }}</td>
+      <td>
+        @if (transaction.subscriptionId) {
+          <div class="flex items-center gap-2">
+            <app-svg [name]="Icons.CALENDAR_SYNC"/>
+            <span>{{ transaction.description }}</span>
+          </div>
+        } @else if (transaction.transferId) {
+          <div class="flex items-center gap-2">
+            <app-svg [name]="Icons.ARROW_LEFT_RIGHT"/>
+            <span>{{ transaction.description }}</span>
+          </div>
+        } @else {
+          <span>{{ transaction.description }}</span>
+        }
+      </td>
+      <td>{{ transaction.amount | currency: transaction.currency }}</td>
+      <td>{{ transaction.normalizedAmount | currency: preferenceStore.userCurrency() }}</td>
+      <td>
+        @if (categoriesMap().get(transaction.categoryId); as category) {
+          <app-custom-chip [style]="category.style" [message]="category.categoryName"/>
+        }
+      </td>
+      <td>
+        @if (accountsMap().get(transaction.accountId); as account) {
+          <span>{{ account.accountName }}</span>
+        }
+      </td>
+      <td>
+        @if (transaction.tags && transaction.tags.length > 0) {
+          @for (tag of transaction.tags; track tag.tagId) {
+            <div class="flex flex-wrap gap-2">
+              <app-custom-chip [style]="tag.style" [message]="tag.tagName"/>
+            </div>
+          }
+        } @else {
+          <span>-</span>
+        }
+      </td>
+      <td>
+        <div class="flex justify-end items-center gap-2">
+          @if (transaction.transferId) {
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="info"
+              (click)="onClickDetails(transaction)"
+            >
+              <app-svg [name]="Icons.SEARCH"/>
+            </button>
+          }
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="secondary"
+            (click)="onClickEdit(transaction)"
+          >
+            <app-svg [name]="Icons.PENCIL"/>
+          </button>
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="danger"
+            (click)="onDelete($event,transaction)"
+          >
+            <app-svg [name]="Icons.TRASH"/>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="8">No transactions found.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<app-transaction-form-dialog (saved)="onEdit($event)"/>
+<app-transfer-table-dialog/>
+<p-confirm-dialog/>
+<p-toast/>

@@ -2,17 +2,17 @@ import {Component, inject, output, signal, ViewChild} from '@angular/core';
 import {Dialog} from 'primeng/dialog';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Chip} from 'primeng/chip';
-import {SvgComponent} from '../../../../../../../shared/components/svg/svg.component';
-import {ColorPickerComponent} from '../../../../../../../shared/components/color-picker/color-picker.component';
-import {IconPickerComponent} from '../../../../../../../shared/components/icon-picker/icon-picker.component';
 import {InputText} from 'primeng/inputtext';
 import {FloatLabel} from 'primeng/floatlabel';
 import {Message} from 'primeng/message';
 import {Button} from 'primeng/button';
-import {IconsEnum} from '../../../../../../../shared/models/icons.model';
-import {ColorService} from '../../../../../../../shared/services/color.service';
-import {Tag, TagFormData} from '../../../../../transaction.model';
-import {Color} from '../../../../../../../shared/models/color.model';
+import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
+import {ColorPickerComponent} from '../../../../../../shared/components/color-picker/color-picker.component';
+import {IconPickerComponent} from '../../../../../../shared/components/icon-picker/icon-picker.component';
+import {IconsEnum} from '../../../../../../shared/models/icons.model';
+import {ColorService} from '../../../../../../shared/services/color.service';
+import {Tag, TagFormData} from '../../../../transaction.model';
+import {Color} from '../../../../../../shared/models/color.model';
 
 @Component({
   selector: 'app-tag-form-dialog',

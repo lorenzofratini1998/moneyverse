@@ -121,7 +121,7 @@ public class BudgetManagementService implements BudgetService {
   @Transactional
   public void decrementBudgetAmount(
       UUID budgetId, BigDecimal amount, String currency, LocalDate date) {
-    updateBudgetAmount(budgetId, amount, currency, date, BigDecimal::subtract);
+    updateBudgetAmount(budgetId, amount.abs(), currency, date, BigDecimal::subtract);
     LOGGER.info("Decremented budget {} by {}", budgetId, amount);
   }
 

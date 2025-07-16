@@ -1,0 +1,20 @@
+<header class="flex justify-between items-center">
+  <h1 class="text-3xl font-bold">Transaction Management</h1>
+  <p-button
+    (onClick)="transactionFormDialog.open()"
+    [rounded]="true"
+    severity="contrast">
+    <app-svg [name]="IconsEnum.PLUS"/>
+    <span>New Transaction</span>
+  </p-button>
+</header>
+
+<app-transaction-table
+  class="p-4"
+  (edited)="onEdit($event)"
+  (deletedTransaction)="onDeleteTransaction($event)"
+  (deletedTransfer)="onDeleteTransfer($event)"
+/>
+
+<app-transaction-form-dialog (saved)="onCreate($event)"/>
+<p-toast/>

@@ -13,18 +13,16 @@ public record SubscriptionUpdateRequestDto(
     BigDecimal amount,
     BigDecimal totalAmount,
     String currency,
-    String recurrenceRule,
-    LocalDate startDate,
-    LocalDate endDate,
+    RecurrenceDto recurrence,
     LocalDate nextExecutionDate,
     Boolean isActive) {
   @AssertTrue(message = "Recurrence rule is not valid")
   public boolean isRecurrenceRuleValid() {
     try {
-      if (recurrenceRule == null) {
+      if (recurrence == null || recurrence.recurrenceRule() == null) {
         return true;
       }
-      new RRule<>(recurrenceRule);
+      new RRule<>(recurrence.recurrenceRule());
       return true;
     } catch (Exception e) {
       return false;

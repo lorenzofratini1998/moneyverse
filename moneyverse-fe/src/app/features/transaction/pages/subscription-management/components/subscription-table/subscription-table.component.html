@@ -1,0 +1,150 @@
+<p-table
+  [value]="subscriptions()"
+  class="w-full"
+  stripedRows
+  [paginator]="true"
+  [rows]="5"
+  [rowsPerPageOptions]="[5, 10, 25, 50]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  dataKey="subscriptionId"
+  (onRowExpand)="onRowExpand($event)"
+  (onRowCollapse)="onRowCollapse($event)"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 5%"></th>
+      <th id="subscriptionName">Name</th>
+      <th id="amount" pSortableColumn="amount">
+        <span>Amount</span>
+        <p-sortIcon field="amount"/>
+      </th>
+      <th id="account">Account</th>
+      <th id="category">Category</th>
+      <th id="recurrence">Recurrence</th>
+      <th id="startDate">Start Date</th>
+      <th id="endDate">End Date</th>
+      <th id="nextExecutionDate" pSortableColumn="nextExecutionDate">
+        <span>Next Payment</span>
+        <p-sortIcon field="nextExecutionDate"/>
+      </th>
+      <th id="isActive">Active</th>
+      <th id="actions"></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-subscription let-expanded="expanded">
+    <tr>
+      <td>
+        <p-button type="button"
+                  pRipple
+                  [pRowToggler]="subscription"
+                  [text]="true"
+                  [rounded]="true"
+        >
+          <app-svg [name]="expanded ? Icons.CHEVRON_DOWN : Icons.CHEVRON_RIGHT"/>
+        </p-button>
+      </td>
+      <td>{{ subscription.subscriptionName }}</td>
+      <td>{{ subscription.amount | currency: subscription.currency }}</td>
+      <td>{{ accountStore.accountsMap().get(subscription.accountId)?.accountName }}</td>
+      @if (categoryStore.categoriesMap().get(subscription.categoryId); as category) {
+        <td>
+          <app-custom-chip [style]="category.style" [message]="category.categoryName"/>
+        </td>
+      }
+      <td>
+        @if (formatRecurrence(subscription.recurrenceRule); as recurrence) {
+          <p-tag [value]="recurrence" [severity]="getSeverity(recurrence)"></p-tag>
+        }
+      </td>
+      <td>{{ subscription.startDate | date: preferenceStore.userDateFormat() }}</td>
+      <td>{{ subscription.endDate | date: preferenceStore.userDateFormat() }}</td>
+      <td>{{ subscription.nextExecutionDate | date: preferenceStore.userDateFormat() }}</td>
+      <td>
+        <div class="badge"
+             [ngClass]="subscription.active ? 'badge-soft badge-success' : 'badge-soft badge-error'">
+          @if (subscription.active) {
+            <app-svg [name]="Icons.CHECK"/>
+          } @else {
+            <app-svg [name]="Icons.X"/>
+          }
+        </div>
+      </td>
+      <td>
+        <div class="flex justify-end items-center gap-2">
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="secondary"
+            (click)="subscriptionForm.open(subscription)"
+          >
+            <app-svg [name]="Icons.PENCIL"/>
+          </button>
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="danger"
+            (click)="onDelete($event, subscription)"
+          >
+            <app-svg [name]="Icons.TRASH"/>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #expandedrow let-subscription>
+    <tr>
+      <td colspan="12">
+        <div class="p-4">
+          <h5 class="font bold">Transactions for {{ subscription.subscriptionName }}</h5>
+          <p-table [value]="subscriptionTransactions()"
+                   dataKey="transactionId"
+                   [rows]="5"
+                   [paginator]="true"
+                   [showFirstLastIcon]="false"
+                   [showCurrentPageReport]="true"
+                   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th id="date">Date</th>
+                <th id="description">Description</th>
+                <th id="amount">Amount</th>
+                <th id="normalizedAmount">Normalized Amount</th>
+                <th id="account">Account</th>
+                <th id="category">Category</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-transaction>
+              <tr>
+                <td>{{ transaction.date | date: preferenceStore.userDateFormat() }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>{{ transaction.amount | currency: transaction.currency }}</td>
+                <td>{{ transaction.normalizedAmount | currency: preferenceStore.userCurrency() }}</td>
+                <td>{{ accountStore.accountsMap().get(transaction.accountId)?.accountName }}</td>
+                @if (categoryStore.categoriesMap().get(transaction.categoryId); as category) {
+                  <td>
+                    <app-custom-chip [style]="category.style" [message]="category.categoryName"/>
+                  </td>
+                }
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="12">There are no subscriptions.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<app-subscription-form-dialog (saved)="onEdit($event)"/>
+
+<p-confirm-dialog/>

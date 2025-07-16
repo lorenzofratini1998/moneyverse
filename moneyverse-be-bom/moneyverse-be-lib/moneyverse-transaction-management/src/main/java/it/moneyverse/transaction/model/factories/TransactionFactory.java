@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.model.factories;
 
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Transaction;
@@ -10,12 +11,12 @@ import java.util.UUID;
 public class TransactionFactory {
 
   public static Transaction createDebitTransaction(
-      TransferRequestDto request, BigDecimal normalizedAmount) {
+      TransferRequestDto request, BigDecimal normalizedAmount, AccountDto toAccount) {
     Transaction transaction = new Transaction();
     transaction.setUserId(request.userId());
     transaction.setAccountId(request.fromAccount());
     transaction.setDate(request.date());
-    transaction.setDescription("Transfer to " + request.toAccount());
+    transaction.setDescription("Transfer to " + toAccount.getAccountName());
     transaction.setCurrency(request.currency());
     transaction.setAmount(request.amount().negate());
     transaction.setNormalizedAmount(normalizedAmount.negate());
@@ -23,12 +24,12 @@ public class TransactionFactory {
   }
 
   public static Transaction createCreditTransaction(
-      TransferRequestDto request, BigDecimal normalizedAmount) {
+      TransferRequestDto request, BigDecimal normalizedAmount, AccountDto fromAccount) {
     Transaction transaction = new Transaction();
     transaction.setUserId(request.userId());
     transaction.setAccountId(request.toAccount());
     transaction.setDate(request.date());
-    transaction.setDescription("Transfer from " + request.fromAccount());
+    transaction.setDescription("Transfer from " + fromAccount.getAccountName());
     transaction.setCurrency(request.currency());
     transaction.setAmount(request.amount());
     transaction.setNormalizedAmount(normalizedAmount);

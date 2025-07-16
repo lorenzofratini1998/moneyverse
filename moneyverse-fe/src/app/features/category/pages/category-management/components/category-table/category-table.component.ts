@@ -6,12 +6,11 @@ import {TableModule} from 'primeng/table';
 import {MultiSelect} from 'primeng/multiselect';
 import {FormsModule} from '@angular/forms';
 import {ButtonDirective} from 'primeng/button';
-import {Chip} from 'primeng/chip';
 import {CategoryFormDialogComponent} from '../category-form-dialog/category-form-dialog.component';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {ConfirmDialog} from 'primeng/confirmdialog';
 import {CategoryTreeDialogComponent} from '../category-tree-dialog/category-tree-dialog.component';
-import {ColorService} from '../../../../../../shared/services/color.service';
+import {CustomChipComponent} from '../../../../../../shared/components/custom-chip/custom-chip.component';
 
 @Component({
   selector: 'app-category-table',
@@ -21,10 +20,10 @@ import {ColorService} from '../../../../../../shared/services/color.service';
     MultiSelect,
     FormsModule,
     ButtonDirective,
-    Chip,
     CategoryFormDialogComponent,
     ConfirmDialog,
-    CategoryTreeDialogComponent
+    CategoryTreeDialogComponent,
+    CustomChipComponent
   ],
   templateUrl: './category-table.component.html',
   styleUrl: './category-table.component.scss',
@@ -32,7 +31,6 @@ import {ColorService} from '../../../../../../shared/services/color.service';
 })
 export class CategoryTableComponent {
   protected readonly Icons = IconsEnum;
-  protected readonly colorService = inject(ColorService);
   private readonly confirmationService = inject(ConfirmationService);
   categories = input.required<Category[]>();
 

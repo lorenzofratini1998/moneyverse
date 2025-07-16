@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.utils.mapper;
 
+import it.moneyverse.transaction.model.dto.RecurrenceDto;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
 import it.moneyverse.transaction.model.dto.SubscriptionUpdateRequestDto;
@@ -93,14 +94,17 @@ public class SubscriptionMapper {
     if (request.currency() != null) {
       subscription.setCurrency(request.currency());
     }
-    if (request.recurrenceRule() != null) {
-      subscription.setRecurrenceRule(request.recurrenceRule());
-    }
-    if (request.startDate() != null) {
-      subscription.setStartDate(request.startDate());
-    }
-    if (request.endDate() != null) {
-      subscription.setEndDate(request.endDate());
+    if (request.recurrence() != null) {
+      RecurrenceDto recurrence = request.recurrence();
+      if (recurrence.recurrenceRule() != null) {
+        subscription.setRecurrenceRule(recurrence.recurrenceRule());
+      }
+      if (recurrence.startDate() != null) {
+        subscription.setStartDate(recurrence.startDate());
+      }
+      if (recurrence.endDate() != null) {
+        subscription.setEndDate(recurrence.endDate());
+      }
     }
     if (request.nextExecutionDate() != null) {
       subscription.setNextExecutionDate(request.nextExecutionDate());

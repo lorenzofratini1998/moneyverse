@@ -15,6 +15,9 @@ public class TransferFactory {
     transfer.setDate(request.date());
     transfer.setAmount(request.amount());
     transfer.setCurrency(request.currency());
+
+    debitTransaction.setTransfer(transfer);
+    creditTransaction.setTransfer(transfer);
     return transfer;
   }
 

@@ -2,8 +2,10 @@ package it.moneyverse.transaction.services;
 
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.services.CurrencyServiceClient;
 import it.moneyverse.core.services.UserServiceClient;
+import it.moneyverse.transaction.exceptions.AccountTransferException;
 import it.moneyverse.transaction.model.dto.TransferDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
 import it.moneyverse.transaction.model.dto.TransferUpdateRequestDto;
@@ -52,7 +54,12 @@ public class TransferManagementService implements TransferService {
   @Override
   @Transactional
   public TransferDto createTransfer(TransferRequestDto request) {
-    transactionValidator.validate(request);
+    if (request.fromAccount().equals(request.toAccount())) {
+      throw new AccountTransferException("The source and destination accounts must be different.");
+    }
+    currencyServiceClient.checkIfCurrencyExists(request.currency());
+    AccountDto fromAccount = accountServiceClient.getAccountById(request.fromAccount());
+    AccountDto toAccount = accountServiceClient.getAccountById(request.toAccount());
     LOGGER.info(
         "Creating transfer from account {} to account {}",
         request.fromAccount(),
@@ -64,8 +71,9 @@ public class TransferManagementService implements TransferService {
         transferRepository.save(
             TransferFactory.createTransfer(
                 request,
-                TransactionFactory.createDebitTransaction(request, normalizedAmount),
-                TransactionFactory.createCreditTransaction(request, normalizedAmount)));
+                TransactionFactory.createDebitTransaction(request, normalizedAmount, toAccount),
+                TransactionFactory.createCreditTransaction(
+                    request, normalizedAmount, fromAccount)));
     transactionEventPublisher.publish(transfer, EventTypeEnum.CREATE);
     return TransferMapper.toTransferDto(transfer);
   }

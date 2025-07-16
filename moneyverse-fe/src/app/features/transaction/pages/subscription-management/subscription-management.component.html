@@ -1,0 +1,18 @@
+<header class="flex justify-between items-center">
+  <h1 class="text-3xl font-bold">Subscriptions Management</h1>
+  <p-button
+    (onClick)="subscriptionForm.open()"
+    [rounded]="true"
+    severity="contrast">
+    <app-svg [name]="IconsEnum.PLUS"/>
+    <span>New Subscription</span>
+  </p-button>
+</header>
+
+<app-subscription-table [subscriptions]="subscriptions()" class="p-4"
+                        (edited)="editSubscription($event)"
+                        (deleted)="deleteSubscription($event)"
+/>
+
+<app-subscription-form-dialog (saved)="createSubscription($event)"/>
+<p-toast/>

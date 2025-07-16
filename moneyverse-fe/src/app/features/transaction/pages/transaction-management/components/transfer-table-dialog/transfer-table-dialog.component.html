@@ -1,0 +1,45 @@
+<p-dialog
+  [modal]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [(visible)]="_isOpen"
+  (onHide)="close()"
+>
+  <ng-template pTemplate="header">
+    <h3 class="font bold text-lg py-4">
+      @if (transfer(); as transfer) {
+        Transfer from {{ accountsMap().get(transfer.transactionFrom.accountId)?.accountName }} to {{ accountsMap().get(transfer.transactionTo.accountId)?.accountName }}
+      }
+    </h3>
+  </ng-template>
+  <ng-template pTemplate="content">
+    <p-table
+      [value]="transactions()"
+      class="w-full"
+      [lazy]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="date">Date</th>
+          <th id="description">Description</th>
+          <th id="amount">Amount</th>
+          <th id="normalizedAmount">Normalized Amount</th>
+          <th id="account">Account</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-transaction>
+        <tr>
+          <td>{{ transaction.date }}</td>
+          <td>{{ transaction.description }}</td>
+          <td>{{ transaction.amount | currency: transaction.currency }}</td>
+          <td>{{ transaction.normalizedAmount | currency: preferenceStore.userCurrency() }}</td>
+          <td>
+            @if (accountsMap().get(transaction.accountId); as account) {
+              <span>{{ account.accountName }}</span>
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </ng-template>
+</p-dialog>

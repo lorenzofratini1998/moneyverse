@@ -1,18 +1,18 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {TransactionComponent} from './transaction.component';
+import {TransferFormComponent} from './transfer-form.component';
 
-describe('TransactionComponent', () => {
-  let component: TransactionComponent;
-  let fixture: ComponentFixture<TransactionComponent>;
+describe('TransferFormComponent', () => {
+  let component: TransferFormComponent;
+  let fixture: ComponentFixture<TransferFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TransactionComponent]
+      imports: [TransferFormComponent]
     })
       .compileComponents();
 
-    fixture = TestBed.createComponent(TransactionComponent);
+    fixture = TestBed.createComponent(TransferFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,16 +1,16 @@
 import {Component, inject, output, ViewChild} from '@angular/core';
-import {IconsEnum} from '../../../../../../../shared/models/icons.model';
-import {ColorService} from '../../../../../../../shared/services/color.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
-import {TransactionStore} from '../../../../../transaction.store';
 import {TagFormDialogComponent} from '../tag-form-dialog/tag-form-dialog.component';
-import {Tag, TagForm, TagFormData} from '../../../../../transaction.model';
 import {TableModule} from 'primeng/table';
 import {Chip} from 'primeng/chip';
-import {SvgComponent} from '../../../../../../../shared/components/svg/svg.component';
 import {ButtonDirective} from 'primeng/button';
 import {ConfirmDialog} from 'primeng/confirmdialog';
 import {Toast} from 'primeng/toast';
+import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
+import {IconsEnum} from '../../../../../../shared/models/icons.model';
+import {ColorService} from '../../../../../../shared/services/color.service';
+import {TransactionStore} from '../../../../transaction.store';
+import {Tag, TagForm, TagFormData} from '../../../../transaction.model';
 
 @Component({
   selector: 'app-tag-table',
