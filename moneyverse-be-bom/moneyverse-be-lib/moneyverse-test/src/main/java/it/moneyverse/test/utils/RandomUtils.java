@@ -2,6 +2,10 @@ package it.moneyverse.test.utils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -72,6 +76,19 @@ public class RandomUtils {
 
   public static String randomCurrency() {
     return randomString(3).toUpperCase();
+  }
+
+  public static <T> List<T> randomSubList(List<T> list) {
+    int size = randomInteger(0, list.size());
+    Collections.shuffle(list);
+    return new ArrayList<>(list.subList(0, size));
+  }
+
+  public static LocalTime randomLocalTime() {
+    int hours = randomInteger(0, 23);
+    int minutes = randomInteger(0, 59);
+    int seconds = randomInteger(1, 59);
+    return LocalTime.of(hours, minutes, seconds);
   }
 
   public static boolean flipCoin() {

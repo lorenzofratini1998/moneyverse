@@ -3,10 +3,7 @@ package it.moneyverse.test.utils.properties;
 import static it.moneyverse.test.operations.keycloak.KeycloakSetupContextConstants.TEST_REALM;
 
 import it.moneyverse.core.utils.properties.*;
-import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
-import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
-import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
-import it.moneyverse.test.extensions.testcontainers.RedisContainer;
+import it.moneyverse.test.extensions.testcontainers.*;
 import it.moneyverse.test.utils.RandomUtils;
 import java.nio.file.Path;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -87,6 +84,14 @@ public class TestPropertyRegistry {
     registry.add(
         KafkaProperties.KafkaConsumerProperties.GROUP_ID,
         () -> RandomUtils.randomUUID().toString());
+    return this;
+  }
+
+  public TestPropertyRegistry withClickhouse(ClickhouseContainer container) {
+    registry.add(ClickhouseProperties.DRIVER_CLASS_NAME, container::getDriverClassName);
+    registry.add(ClickhouseProperties.URL, container::getJdbcUrl);
+    registry.add(ClickhouseProperties.USERNAME, container::getUsername);
+    registry.add(ClickhouseProperties.PASSWORD, container::getPassword);
     return this;
   }
 }

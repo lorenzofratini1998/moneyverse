@@ -100,6 +100,11 @@
       <!--
       WARNING!! Testcontainers still depends on JUnit 4. I cannot remove this dependency using the exclusion tag due to a bug. See https://github.com/testcontainers/testcontainers-java/issues/970 for further details
       -->
+      </dependency>
+      <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>clickhouse</artifactId>
+          <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>

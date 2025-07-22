@@ -9,7 +9,7 @@ import it.moneyverse.core.runtime.messages.AbstractEventPublisher;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
-import it.moneyverse.transaction.model.events.TransactionEventFactory;
+import it.moneyverse.transaction.model.factories.TransactionEventFactory;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;

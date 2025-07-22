@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.platform.commons.util.ReflectionUtils;
 
@@ -218,7 +216,11 @@ public class SQLScriptService implements ScriptService {
       return;
     }
 
-    if (value instanceof String
+    if (value instanceof Collection<?>) {
+      appendCollection((Collection<?>) value, values);
+    } else if (value.getClass().isArray()) {
+      appendCollection(Arrays.asList((Object[]) value), values);
+    } else if (value instanceof String
         || value instanceof Enum
         || value instanceof UUID
         || value instanceof LocalDateTime
@@ -230,6 +232,21 @@ public class SQLScriptService implements ScriptService {
     } else {
       throw new IllegalArgumentException("Unsupported data type: " + value.getClass().getName());
     }
+  }
+
+  private void appendCollection(Collection<?> collection, StringBuilder values) {
+    values.append("[");
+    Iterator<?> iterator = collection.iterator();
+    while (iterator.hasNext()) {
+      Object item = iterator.next();
+      StringBuilder itemValue = new StringBuilder();
+      appendValue(item, itemValue);
+      values.append(itemValue);
+      if (iterator.hasNext()) {
+        values.append(", ");
+      }
+    }
+    values.append("]");
   }
 
   private String escapeString(String value) {

@@ -7,6 +7,8 @@ import it.moneyverse.core.enums.EventTypeEnum;
 import jakarta.json.bind.annotation.JsonbCreator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,10 +20,12 @@ public class TransactionEvent extends AbstractEvent {
   private final UUID accountId;
   private final UUID categoryId;
   private final UUID budgetId;
+  private final Set<UUID> tags;
   private final BigDecimal amount;
   private final BigDecimal normalizedAmount;
   private final String currency;
   private final LocalDate date;
+  private final LocalDateTime eventTimestamp;
   private final TransactionEvent previousTransaction;
 
   @JsonbCreator
@@ -32,10 +36,12 @@ public class TransactionEvent extends AbstractEvent {
     this.accountId = builder.accountId;
     this.categoryId = builder.categoryId;
     this.budgetId = builder.budgetId;
+    this.tags = builder.tags;
     this.amount = builder.amount;
     this.normalizedAmount = builder.normalizedAmount;
     this.currency = builder.currency;
     this.date = builder.date;
+    this.eventTimestamp = builder.eventTimestamp;
     this.previousTransaction = builder.previousTransaction;
   }
 
@@ -45,10 +51,12 @@ public class TransactionEvent extends AbstractEvent {
     private UUID accountId;
     private UUID categoryId;
     private UUID budgetId;
+    private Set<UUID> tags;
     private BigDecimal amount;
     private BigDecimal normalizedAmount;
     private String currency;
     private LocalDate date;
+    private LocalDateTime eventTimestamp;
     private TransactionEvent previousTransaction;
     private EventTypeEnum eventType;
 
@@ -77,6 +85,11 @@ public class TransactionEvent extends AbstractEvent {
       return this;
     }
 
+    public Builder withTags(Set<UUID> tags) {
+      this.tags = tags;
+      return this;
+    }
+
     public Builder withAmount(BigDecimal amount) {
       this.amount = amount;
       return this;
@@ -94,6 +107,11 @@ public class TransactionEvent extends AbstractEvent {
 
     public Builder withDate(LocalDate date) {
       this.date = date;
+      return this;
+    }
+
+    public Builder withEventTimestamp(LocalDateTime eventTimestamp) {
+      this.eventTimestamp = eventTimestamp;
       return this;
     }
 
@@ -142,6 +160,10 @@ public class TransactionEvent extends AbstractEvent {
     return budgetId;
   }
 
+  public Set<UUID> getTags() {
+    return tags;
+  }
+
   public BigDecimal getAmount() {
     return amount;
   }
@@ -156,6 +178,10 @@ public class TransactionEvent extends AbstractEvent {
 
   public LocalDate getDate() {
     return date;
+  }
+
+  public LocalDateTime getEventTimestamp() {
+    return eventTimestamp;
   }
 
   public TransactionEvent getPreviousTransaction() {
