@@ -5,14 +5,13 @@ import it.moneyverse.analytics.model.dto.AmountDto;
 import it.moneyverse.analytics.model.dto.CountDto;
 import it.moneyverse.analytics.model.dto.FilterDto;
 import it.moneyverse.analytics.model.projections.AccountAnalyticsKpiProjection;
-import java.math.BigDecimal;
-
 import it.moneyverse.analytics.utils.AnalyticsUtils;
+import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AccountAnalyticsKpiStrategy
-    implements AccountAnalyticsStrategy<AccountAnalyticsKpiDto, AccountAnalyticsKpiProjection> {
+    implements AnalyticsStrategy<AccountAnalyticsKpiDto, AccountAnalyticsKpiProjection> {
 
   @Override
   public AccountAnalyticsKpiDto calculate(

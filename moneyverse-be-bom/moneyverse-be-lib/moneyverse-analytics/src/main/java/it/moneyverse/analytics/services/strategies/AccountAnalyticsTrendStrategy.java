@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AccountAnalyticsTrendStrategy
-    implements AccountAnalyticsStrategy<
+    implements AnalyticsStrategy<
         List<AccountAnalyticsTrendDto>, List<AccountAnalyticsTrendProjection>> {
   @Override
   public List<AccountAnalyticsTrendDto> calculate(

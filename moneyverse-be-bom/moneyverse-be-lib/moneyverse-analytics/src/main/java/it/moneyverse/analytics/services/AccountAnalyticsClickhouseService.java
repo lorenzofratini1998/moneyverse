@@ -9,7 +9,7 @@ import it.moneyverse.analytics.model.projections.AccountAnalyticsKpiProjection;
 import it.moneyverse.analytics.model.projections.AccountAnalyticsTrendProjection;
 import it.moneyverse.analytics.model.repositories.AccountAnalyticsDataAccess;
 import it.moneyverse.analytics.services.processors.QueryDataProcessor;
-import it.moneyverse.analytics.services.strategies.AccountAnalyticsStrategy;
+import it.moneyverse.analytics.services.strategies.AnalyticsStrategy;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,25 +22,24 @@ public class AccountAnalyticsClickhouseService implements AccountAnalyticsServic
       LoggerFactory.getLogger(AccountAnalyticsClickhouseService.class);
 
   private final AccountAnalyticsDataAccess dataAccess;
-  private final AccountAnalyticsStrategy<AccountAnalyticsKpiDto, AccountAnalyticsKpiProjection>
+  private final AnalyticsStrategy<AccountAnalyticsKpiDto, AccountAnalyticsKpiProjection>
       kpiCalculationStrategy;
-  private final AccountAnalyticsStrategy<
+  private final AnalyticsStrategy<
           List<AccountAnalyticsDistributionDto>, List<AccountAnalyticsAmountDistributionProjection>>
       distributionCalculationStrategy;
-  private final AccountAnalyticsStrategy<
+  private final AnalyticsStrategy<
           List<AccountAnalyticsTrendDto>, List<AccountAnalyticsTrendProjection>>
       trendStrategy;
 
   public AccountAnalyticsClickhouseService(
       AccountAnalyticsDataAccess dataAccess,
-      AccountAnalyticsStrategy<AccountAnalyticsKpiDto, AccountAnalyticsKpiProjection>
+      AnalyticsStrategy<AccountAnalyticsKpiDto, AccountAnalyticsKpiProjection>
           kpiCalculationStrategy,
-      AccountAnalyticsStrategy<
+      AnalyticsStrategy<
               List<AccountAnalyticsDistributionDto>,
               List<AccountAnalyticsAmountDistributionProjection>>
           distributionCalculationStrategy,
-      AccountAnalyticsStrategy<
-              List<AccountAnalyticsTrendDto>, List<AccountAnalyticsTrendProjection>>
+      AnalyticsStrategy<List<AccountAnalyticsTrendDto>, List<AccountAnalyticsTrendProjection>>
           trendStrategy) {
     this.dataAccess = dataAccess;
     this.kpiCalculationStrategy = kpiCalculationStrategy;

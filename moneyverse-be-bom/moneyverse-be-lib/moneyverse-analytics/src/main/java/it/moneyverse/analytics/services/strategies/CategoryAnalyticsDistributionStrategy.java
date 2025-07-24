@@ -1,9 +1,9 @@
 package it.moneyverse.analytics.services.strategies;
 
-import it.moneyverse.analytics.model.dto.AccountAnalyticsDistributionDto;
 import it.moneyverse.analytics.model.dto.AmountDto;
+import it.moneyverse.analytics.model.dto.CategoryAnalyticsDistributionDto;
 import it.moneyverse.analytics.model.dto.FilterDto;
-import it.moneyverse.analytics.model.projections.AccountAnalyticsAmountDistributionProjection;
+import it.moneyverse.analytics.model.projections.CategoryAnalyticsDistributionProjection;
 import it.moneyverse.analytics.utils.AnalyticsUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -12,42 +12,43 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountAnalyticsAmountDistributionStrategy
+public class CategoryAnalyticsDistributionStrategy
     implements AnalyticsStrategy<
-        List<AccountAnalyticsDistributionDto>, List<AccountAnalyticsAmountDistributionProjection>> {
+        List<CategoryAnalyticsDistributionDto>, List<CategoryAnalyticsDistributionProjection>> {
 
   @Override
-  public List<AccountAnalyticsDistributionDto> calculate(
-      List<AccountAnalyticsAmountDistributionProjection> currentData,
-      List<AccountAnalyticsAmountDistributionProjection> compareData,
+  public List<CategoryAnalyticsDistributionDto> calculate(
+      List<CategoryAnalyticsDistributionProjection> currentData,
+      List<CategoryAnalyticsDistributionProjection> compareData,
       FilterDto parameters) {
+    List<CategoryAnalyticsDistributionDto> result = new ArrayList<>();
 
-    List<AccountAnalyticsDistributionDto> result = new ArrayList<>();
+    for (CategoryAnalyticsDistributionProjection current : currentData) {
+      UUID categoryId = current.categoryId();
+      CategoryAnalyticsDistributionProjection compare = findByCategoryId(compareData, categoryId);
 
-    for (AccountAnalyticsAmountDistributionProjection current : currentData) {
-      UUID accountId = current.accountId();
-      AccountAnalyticsAmountDistributionProjection compare =
-          findByAccountId(compareData, accountId);
-
-      AccountAnalyticsDistributionDto compareDto =
+      CategoryAnalyticsDistributionDto compareDto =
           (parameters.comparePeriod() != null && compare != null)
-              ? AccountAnalyticsDistributionDto.builder()
+              ? CategoryAnalyticsDistributionDto.builder()
                   .withPeriod(parameters.comparePeriod())
-                  .withAccountId(accountId)
+                  .withCategoryId(categoryId)
                   .withTotalIncome(getAmount(compare.totalIncome()))
                   .withTotalExpense(getAmount(compare.totalExpense()))
+                  .withTotalAmount(getAmount(compare.totalAmount()))
                   .build()
               : null;
 
-      AccountAnalyticsDistributionDto dto =
-          AccountAnalyticsDistributionDto.builder()
+      CategoryAnalyticsDistributionDto dto =
+          CategoryAnalyticsDistributionDto.builder()
               .withPeriod(parameters.period())
-              .withAccountId(accountId)
+              .withCategoryId(categoryId)
               .withTotalIncome(
                   getAmount(current.totalIncome(), compare != null ? compare.totalIncome() : null))
               .withTotalExpense(
                   getAmount(
                       current.totalExpense(), compare != null ? compare.totalExpense() : null))
+              .withTotalAmount(
+                  getAmount(current.totalAmount(), compare != null ? compare.totalAmount() : null))
               .withCompare(compareDto)
               .build();
 
@@ -57,10 +58,10 @@ public class AccountAnalyticsAmountDistributionStrategy
     return result;
   }
 
-  private AccountAnalyticsAmountDistributionProjection findByAccountId(
-      List<AccountAnalyticsAmountDistributionProjection> data, UUID accountId) {
+  private CategoryAnalyticsDistributionProjection findByCategoryId(
+      List<CategoryAnalyticsDistributionProjection> data, UUID categoryId) {
     if (data == null) return null;
-    return data.stream().filter(p -> p.accountId().equals(accountId)).findFirst().orElse(null);
+    return data.stream().filter(p -> p.categoryId().equals(categoryId)).findFirst().orElse(null);
   }
 
   private AmountDto getAmount(BigDecimal currentAmount) {
