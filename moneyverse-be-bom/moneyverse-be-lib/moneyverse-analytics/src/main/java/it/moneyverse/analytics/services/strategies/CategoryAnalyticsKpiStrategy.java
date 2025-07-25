@@ -6,7 +6,6 @@ import it.moneyverse.analytics.model.dto.CountDto;
 import it.moneyverse.analytics.model.dto.FilterDto;
 import it.moneyverse.analytics.model.projections.CategoryAnalyticsKpiProjection;
 import it.moneyverse.analytics.utils.AnalyticsUtils;
-import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -40,36 +39,22 @@ public class CategoryAnalyticsKpiStrategy
   }
 
   private CountDto getCount(CategoryAnalyticsKpiProjection current) {
-    return getCount(current, null);
+    return AnalyticsUtils.getCount(current, null, CategoryAnalyticsKpiProjection::activeCategories);
   }
 
   private CountDto getCount(
       CategoryAnalyticsKpiProjection current, CategoryAnalyticsKpiProjection compare) {
-    Integer currentCount = current.activeCategories();
-    Integer compareCount = compare != null ? compare.activeCategories() : null;
-    Integer variation = null;
-
-    if (compareCount != null && compareCount != 0) {
-      variation = currentCount - compareCount;
-    }
-
-    return CountDto.builder().withCount(currentCount).withVariation(variation).build();
+    return AnalyticsUtils.getCount(
+        current, compare, CategoryAnalyticsKpiProjection::activeCategories);
   }
 
   private AmountDto getAmount(CategoryAnalyticsKpiProjection current) {
-    return getAmount(current, null);
+    return AnalyticsUtils.getAmount(current, CategoryAnalyticsKpiProjection::uncategorizedAmount);
   }
 
   private AmountDto getAmount(
       CategoryAnalyticsKpiProjection current, CategoryAnalyticsKpiProjection compare) {
-    BigDecimal currentAmount = current.uncategorizedAmount();
-    BigDecimal compareAmount = compare != null ? compare.uncategorizedAmount() : null;
-    BigDecimal variation = null;
-
-    if (compareAmount != null && !compareAmount.equals(BigDecimal.ZERO)) {
-      variation = AnalyticsUtils.calculateTrend(currentAmount, compareAmount);
-    }
-
-    return AmountDto.builder().withAmount(currentAmount).withVariation(variation).build();
+    return AnalyticsUtils.getAmount(
+        current, compare, CategoryAnalyticsKpiProjection::uncategorizedAmount);
   }
 }

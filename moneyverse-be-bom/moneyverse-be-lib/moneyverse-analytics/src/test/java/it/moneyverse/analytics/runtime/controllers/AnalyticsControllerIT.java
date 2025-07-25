@@ -162,4 +162,55 @@ public class AnalyticsControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
   }
+
+  @Test
+  void testCalculateTransactionKpi() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final FilterDto parameters =
+        AnalyticsTestFactory.createFilter(userId, testContext.getTransactionEvents());
+
+    ResponseEntity<TransactionAnalyticsKpiDto> response =
+        restTemplate.exchange(
+            basePath + "/transactions/kpi",
+            HttpMethod.POST,
+            new HttpEntity<>(parameters, headers),
+            TransactionAnalyticsKpiDto.class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+  }
+
+  @Test
+  void testCalculateTransactionDistribution() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final FilterDto parameters =
+        AnalyticsTestFactory.createFilter(userId, testContext.getTransactionEvents());
+
+    ResponseEntity<TransactionAnalyticsDistributionDto> response =
+        restTemplate.exchange(
+            basePath + "/transactions/distribution",
+            HttpMethod.POST,
+            new HttpEntity<>(parameters, headers),
+            TransactionAnalyticsDistributionDto.class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+  }
+
+  @Test
+  void testCalculateTransactionTrend() {
+    final UUID userId = testContext.getRandomUser().getUserId();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userId));
+    final FilterDto parameters =
+        AnalyticsTestFactory.createFilter(userId, testContext.getTransactionEvents());
+
+    ResponseEntity<TransactionAnalyticsTrendDto> response =
+        restTemplate.exchange(
+            basePath + "/transactions/trend",
+            HttpMethod.POST,
+            new HttpEntity<>(parameters, headers),
+            TransactionAnalyticsTrendDto.class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+  }
 }
