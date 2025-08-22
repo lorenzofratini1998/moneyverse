@@ -6,6 +6,8 @@ import it.moneyverse.analytics.model.dto.FilterDto;
 import it.moneyverse.analytics.model.dto.TransactionAnalyticsDistributionDto;
 import it.moneyverse.analytics.model.projections.TransactionAnalyticsDistributionProjection;
 import it.moneyverse.analytics.utils.AnalyticsUtils;
+import it.moneyverse.core.model.dto.BoundCriteria;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +54,9 @@ public class TransactionAnalyticsDistributionStrategy
             ? compare.stream()
                 .collect(
                     Collectors.toMap(
-                        TransactionAnalyticsDistributionProjection::range, Function.identity()))
+                        projection ->
+                            createRangeKey(projection.lowerBound(), projection.upperBound()),
+                        Function.identity()))
             : Collections.emptyMap();
 
     return current.stream()
@@ -66,8 +70,21 @@ public class TransactionAnalyticsDistributionStrategy
                       compareItem,
                       TransactionAnalyticsDistributionProjection::numberOfTransactions);
 
-              return DistributionRangeDto.builder().withRange(d.range()).withCount(count).build();
+              BoundCriteria boundCriteria = new BoundCriteria();
+              boundCriteria.setLower(d.lowerBound());
+              boundCriteria.setUpper(d.upperBound());
+
+              return DistributionRangeDto.builder()
+                  .withRange(boundCriteria)
+                  .withCount(count)
+                  .build();
             })
         .toList();
+  }
+
+  private String createRangeKey(BigDecimal lower, BigDecimal upper) {
+    String lowerStr = lower != null ? lower.toString() : "null";
+    String upperStr = upper != null ? upper.toString() : "null";
+    return lowerStr + "-" + upperStr;
   }
 }

@@ -1,223 +1,193 @@
-import {Component, computed, inject, output, signal, ViewChild} from '@angular/core';
+import {Component, computed, effect, inject, output, signal, viewChild} from '@angular/core';
 import {IconsEnum} from '../../../../../../shared/models/icons.model';
-import {Dialog} from 'primeng/dialog';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SelectButton} from 'primeng/selectbutton';
 import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
-import {Button} from 'primeng/button';
-import {ExpenseIncomeFormComponent} from '../expense-income-form/expense-income-form.component';
-import {Transaction, TransactionFormData, Transfer, TransferFormData} from '../../../../transaction.model';
-import {TransferFormComponent} from '../transfer-form/transfer-form.component';
+import {Transaction, Transfer} from '../../../../transaction.model';
 import {PreferenceStore} from '../../../../../../shared/stores/preference.store';
+import {FormDialogComponent} from '../../../../../../shared/components/dialogs/form-dialog/form-dialog.component';
+import {DynamicDialogConfig} from 'primeng/dynamicdialog';
+import {ExpenseIncomeFormComponent} from '../expense-income-form/expense-income-form.component';
+import {TransferFormComponent} from '../transfer-form/transfer-form.component';
+import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
+import {TransactionFormData, TransferFormData} from '../../models/form.model';
 
-export enum TransactionFormDialogOptions {
+export enum TransactionFormDialogOptionsEnum {
   EXPENSE = "Expense",
   INCOME = "Income",
   TRANSFER = "Transfer",
   SUBSCRIPTION = "Subscription",
 }
 
+type TransactionFormDialogOption = {
+  label: string,
+  value: TransactionFormDialogOptionsEnum,
+  icon: IconsEnum,
+  disabled: boolean,
+  selected: boolean
+}
+
+const dialogOptions: TransactionFormDialogOption[] = [
+  {
+    label: 'Expense',
+    value: TransactionFormDialogOptionsEnum.EXPENSE,
+    icon: IconsEnum.CIRCLE_MINUS,
+    disabled: false,
+    selected: true
+  },
+  {
+    label: 'Income',
+    value: TransactionFormDialogOptionsEnum.INCOME,
+    icon: IconsEnum.CIRCLE_PLUS,
+    disabled: false,
+    selected: false
+  },
+  {
+    label: 'Transfer',
+    value: TransactionFormDialogOptionsEnum.TRANSFER,
+    icon: IconsEnum.ARROW_LEFT_RIGHT,
+    disabled: false,
+    selected: false
+  },
+  {
+    label: 'Subscription',
+    value: TransactionFormDialogOptionsEnum.SUBSCRIPTION,
+    icon: IconsEnum.CIRCLE_PLUS,
+    disabled: false,
+    selected: false
+  }
+]
+
 @Component({
   selector: 'app-transaction-form-dialog',
   imports: [
-    Dialog,
     FormsModule,
     SelectButton,
     SvgComponent,
     ReactiveFormsModule,
-    Button,
+    FormDialogComponent,
     ExpenseIncomeFormComponent,
     TransferFormComponent
   ],
-  templateUrl: './transaction-form-dialog.component.html',
-  styleUrl: './transaction-form-dialog.component.scss'
+  templateUrl: './transaction-form-dialog.component.html'
 })
 export class TransactionFormDialogComponent {
 
-  saved = output<TransactionFormData | TransferFormData>();
+  onSubmit = output<TransactionFormData | TransferFormData>();
 
-  protected readonly preferenceStore = inject(PreferenceStore);
-  protected readonly TransactionFormDialogOptions = TransactionFormDialogOptions;
-  protected readonly Icons = IconsEnum;
-  protected options = signal<Array<{
-    label: string,
-    value: TransactionFormDialogOptions,
-    icon: IconsEnum,
-    disabled: boolean,
-    selected: boolean
-  }>>([
-    {
-      label: 'Expense',
-      value: TransactionFormDialogOptions.EXPENSE,
-      icon: IconsEnum.CIRCLE_MINUS,
-      disabled: false,
-      selected: true
-    },
-    {
-      label: 'Income',
-      value: TransactionFormDialogOptions.INCOME,
-      icon: IconsEnum.CIRCLE_PLUS,
-      disabled: false,
-      selected: false
-    },
-    {
-      label: 'Transfer',
-      value: TransactionFormDialogOptions.TRANSFER,
-      icon: IconsEnum.ARROW_LEFT_RIGHT,
-      disabled: false,
-      selected: false
-    },
-    {
-      label: 'Subscription',
-      value: TransactionFormDialogOptions.SUBSCRIPTION,
-      icon: IconsEnum.CALENDAR_SYNC,
-      disabled: true,
-      selected: false
-    },
-  ]);
-  private readonly fb = inject(FormBuilder);
-  private selectedItem$ = signal<any>(null);
-  selectedItem = this.selectedItem$.asReadonly();
+  protected expenseIncomeForm = viewChild(ExpenseIncomeFormComponent);
+  protected transferForm = viewChild(TransferFormComponent);
 
-  protected formGroup: FormGroup = this.fb.group({
-    transaction: this.fb.group({
-      date: [null, Validators.required],
-      amount: [null, Validators.required],
-      description: [null, Validators.required],
-      account: [null, Validators.required],
-      category: [null],
-      currency: [null, Validators.required],
-      tags: [null]
-    }),
-    transfer: this.fb.group({
-      date: [null, Validators.required],
-      amount: [null, Validators.required],
-      currency: [this.preferenceStore.userCurrency(), Validators.required],
-      fromAccount: [null, Validators.required],
-      toAccount: [null, Validators.required],
-    })
+  isExpenseOrIncome = computed(() => this.dialogOption() === TransactionFormDialogOptionsEnum.EXPENSE || this.dialogOption() === TransactionFormDialogOptionsEnum.INCOME);
+  isTransfer = computed(() => this.dialogOption() === TransactionFormDialogOptionsEnum.TRANSFER);
+  isSubscription = computed(() => this.dialogOption() === TransactionFormDialogOptionsEnum.SUBSCRIPTION);
+
+  transactionToEdit = computed(() => this.formDialog().selectedItem() as Transaction | null);
+  transferToEdit = computed(() => this.formDialog().selectedItem() as Transfer | null);
+
+  protected formDialog = viewChild.required(FormDialogComponent<Transaction | Transfer, TransactionFormData | TransferFormData>);
+
+  protected currentForm = computed(() => {
+    const form = this.isExpenseOrIncome() || this.isSubscription() ? this.expenseIncomeForm() : this.transferForm();
+    return form as AbstractFormComponent<Transaction | Transfer, TransactionFormData | TransferFormData>;
   });
 
-  protected _isOpen = false;
-  optionValue = signal<TransactionFormDialogOptions>(TransactionFormDialogOptions.EXPENSE);
 
-  @ViewChild(ExpenseIncomeFormComponent) expenseIncomeFormComponent!: ExpenseIncomeFormComponent;
-  @ViewChild(TransferFormComponent) transferFormComponent!: TransferFormComponent;
+  private readonly header = computed(() => {
+    const prefix = this.formDialog().selectedItem() ? 'Edit' : 'Add';
+    const option = this.dialogOption();
 
-  open(selectedItem?: Transaction | Transfer | null, option?: TransactionFormDialogOptions) {
-    this._isOpen = true;
-    this.selectedItem$.set(selectedItem ?? null);
-    const isEditMode = !!selectedItem;
+    const headerMap: Record<TransactionFormDialogOptionsEnum, string> = {
+      [TransactionFormDialogOptionsEnum.EXPENSE]: `${prefix} Transaction`,
+      [TransactionFormDialogOptionsEnum.INCOME]: `${prefix} Transaction`,
+      [TransactionFormDialogOptionsEnum.TRANSFER]: `${prefix} Transfer`,
+      [TransactionFormDialogOptionsEnum.SUBSCRIPTION]: `${prefix} Subscription`
+    };
 
-    const options: TransactionFormDialogOptions[] = isEditMode
-      ? Object.values(TransactionFormDialogOptions)
+    return headerMap[option] || `${prefix} Item`;
+  });
+
+  config = computed<DynamicDialogConfig>(() => ({
+    header: this.header(),
+    styleClass: 'w-[90vw] lg:w-[75vw] xl:w-[60vw] lg:max-w-[700px]'
+  }))
+
+  constructor() {
+    effect(() => {
+      const expenseIncomeForm = this.expenseIncomeForm();
+      if (expenseIncomeForm) {
+        expenseIncomeForm.onSubmit
+          .subscribe(data => this.onSubmit.emit(data));
+      }
+    });
+    effect(() => {
+      const transferForm = this.transferForm();
+      if (transferForm) {
+        transferForm.onSubmit
+          .subscribe(data => this.onSubmit.emit(data));
+      }
+    });
+  }
+
+  open(selectedItem?: Transaction | Transfer, option?: TransactionFormDialogOptionsEnum) {
+    if (option) {
+      this.dialogOption.set(option);
+    } else if (!selectedItem) {
+      this.dialogOption.set(TransactionFormDialogOptionsEnum.EXPENSE);
+    }
+    this.formDialog().open(selectedItem);
+  }
+
+  protected readonly preferenceStore = inject(PreferenceStore);
+  protected readonly Icons = IconsEnum;
+  private readonly allOptions = signal<TransactionFormDialogOption[]>(dialogOptions);
+
+  dialogOption = signal<TransactionFormDialogOptionsEnum>(TransactionFormDialogOptionsEnum.EXPENSE);
+
+  protected options = computed(() => {
+    const isEditMode = !!this.formDialog().selectedItem();
+    const currentOption = this.dialogOption();
+
+    const availableOptions = isEditMode
+      ? Object.values(TransactionFormDialogOptionsEnum)
       : [
-        TransactionFormDialogOptions.EXPENSE,
-        TransactionFormDialogOptions.INCOME,
-        TransactionFormDialogOptions.TRANSFER,
+        TransactionFormDialogOptionsEnum.EXPENSE,
+        TransactionFormDialogOptionsEnum.INCOME,
+        TransactionFormDialogOptionsEnum.TRANSFER
       ];
 
-    const enabledOptions = (() => {
-      switch (option) {
-        case TransactionFormDialogOptions.EXPENSE:
-        case TransactionFormDialogOptions.INCOME:
-          return [TransactionFormDialogOptions.EXPENSE, TransactionFormDialogOptions.INCOME];
-        case TransactionFormDialogOptions.TRANSFER:
-          return [TransactionFormDialogOptions.TRANSFER];
-        default:
-          return options;
-      }
-    })();
+    const enabledOptions = this.getEnabledOptions(isEditMode, currentOption);
 
-    this.options.set(
-      this.options()
-        .filter(opt => options.includes(opt.value))
-        .map(opt => ({
-          ...opt,
-          disabled: !enabledOptions.includes(opt.value)
-        }))
-    );
+    return this.allOptions()
+      .filter(opt => availableOptions.includes(opt.value))
+      .map(opt => ({
+        ...opt,
+        disabled: !enabledOptions.includes(opt.value),
+        selected: opt.value === currentOption
+      }));
+  });
 
-    if (option) {
-      this.optionValue.set(option);
+  private getEnabledOptions(
+    isEditMode: boolean,
+    currentOption?: TransactionFormDialogOptionsEnum
+  ): TransactionFormDialogOptionsEnum[] {
+    const {EXPENSE, INCOME, TRANSFER, SUBSCRIPTION} = TransactionFormDialogOptionsEnum;
+
+    if (!isEditMode) {
+      return [EXPENSE, INCOME, TRANSFER];
+    }
+
+    switch (currentOption) {
+      case EXPENSE:
+      case INCOME:
+        return [EXPENSE, INCOME];
+      case TRANSFER:
+        return [TRANSFER];
+      case SUBSCRIPTION:
+        return [SUBSCRIPTION];
+      default:
+        return [EXPENSE, INCOME, TRANSFER];
     }
   }
 
-  close() {
-    this._isOpen = false;
-    this.selectedItem$.set(null);
-    this.expenseIncomeFormComponent.reset();
-    this.transferFormComponent.reset();
-  }
-
-  protected resetForms() {
-    switch (this.optionValue()) {
-      case TransactionFormDialogOptions.EXPENSE:
-      case TransactionFormDialogOptions.INCOME:
-        this.transferFormComponent.reset();
-        break;
-      case TransactionFormDialogOptions.TRANSFER:
-        this.expenseIncomeFormComponent.reset();
-        break;
-    }
-  }
-
-  get transactionForm(): FormGroup {
-    return this.formGroup.get('transaction') as FormGroup;
-  }
-
-  get transferForm(): FormGroup {
-    return this.formGroup.get('transfer') as FormGroup;
-  }
-
-  onSave(): void {
-    switch (this.optionValue()) {
-      case TransactionFormDialogOptions.EXPENSE:
-      case TransactionFormDialogOptions.INCOME:
-        this.onSaveTransaction();
-        break;
-      case TransactionFormDialogOptions.TRANSFER:
-        this.onSaveTransfer();
-        break;
-    }
-  }
-
-  private onSaveTransaction() {
-    if (this.transactionForm.valid) {
-      const transactionFormData = this.transactionForm.value as TransactionFormData;
-      this.saved.emit({
-        ...transactionFormData,
-        amount: this.optionValue() === TransactionFormDialogOptions.EXPENSE
-          ? -Math.abs(transactionFormData.amount)
-          : Math.abs(transactionFormData.amount)
-      });
-      this.close();
-    } else {
-      Object.values(this.transactionForm.controls).forEach(control => {
-        control.markAsTouched();
-        control.markAsDirty();
-      });
-    }
-  }
-
-  private onSaveTransfer() {
-    if (this.transferForm.valid) {
-      const transferFormData = this.transferForm.value as TransferFormData;
-      this.saved.emit(transferFormData);
-      this.close();
-    } else {
-      Object.values(this.transferForm.controls).forEach(control => {
-        control.markAsTouched();
-        control.markAsDirty();
-      });
-    }
-  }
-
-  get selectedOption() {
-    return this.optionValue();
-  }
-
-  set selectedOption(value: TransactionFormDialogOptions) {
-    this.optionValue.set(value);
-  }
 }

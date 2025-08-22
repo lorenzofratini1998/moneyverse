@@ -1,20 +1,16 @@
-<app-onboarding-header></app-onboarding-header>
-
-<div class="flex flex-col justify-center items-center">
-  <div class="card bg-base-100 w-96 shadow-sm">
-    <div class="card-body">
-      <h2 class="card-title">Configure your preferences</h2>
+<div class="flex justify-center">
+  <p-card styleClass="w-md element md:w-lg">
+    <ng-template #title>
+      <h2>Configure your preferences</h2>
+    </ng-template>
+    <ng-template #subtitle>
       <p>Let's configure you preferences</p>
-      <app-onboarding-form
-        [currencies]="currencies$()"
-        [languages]="languages$()"
-        [dateFormats]="dateFormats$()"
-        [userCurrency]="userCurrency$()"
-        [userLanguage]="userLanguage$()"
-        [userDateFormat]="userDateFormat$()"
-        (formSubmit)="save($event)"
-      ></app-onboarding-form>
-    </div>
-  </div>
+    </ng-template>
+    <app-onboarding-form
+      [languages]="systemService.languages()"
+      [dateFormats]="dateFormats"
+      [userPreferences]="userPreferences()"
+      (onSubmit)="submit($event)"
+    ></app-onboarding-form>
+  </p-card>
 </div>
-<app-toast></app-toast>

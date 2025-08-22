@@ -40,6 +40,15 @@ public class UserManagementController implements UserOperations, PreferenceOpera
   }
 
   @Override
+  @PutMapping("/users/{userId}/preferences")
+  @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")
+  public List<UserPreferenceDto> updateUserPreference(
+      @PathVariable UUID userId, @RequestBody List<UserPreferenceRequest> request) {
+    return preferenceService.updateUserPreference(userId, request);
+  }
+
+  @Override
   @GetMapping("/users/{userId}/preferences")
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("@securityService.isAuthenticatedUserOwner(#userId)")

@@ -1,0 +1,21 @@
+<p-drawer [visible]="isOpen()"
+          (visibleChange)="isOpen.set($event)"
+          [closable]="false"
+          [blockScroll]="true"
+          position="right"
+          [style]="{width: '25rem'}">
+  <ng-template #header>
+    <h4>Filters</h4>
+  </ng-template>
+
+  <ng-template #content>
+    <app-dashboard-filter-form/>
+  </ng-template>
+
+  <ng-template #footer>
+    <div class="flex items-center justify-center gap-4">
+      <app-cancel-button label="Reset" (click)="reset()"/>
+      <app-submit-button label="Apply" (click)="submit()"/>
+    </div>
+  </ng-template>
+</p-drawer>

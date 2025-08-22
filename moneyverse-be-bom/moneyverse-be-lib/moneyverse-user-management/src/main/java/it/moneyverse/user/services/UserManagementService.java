@@ -83,6 +83,7 @@ public class UserManagementService implements UserService {
                 LanguageDto.builder()
                     .withLanguageId(language.getLanguageId())
                     .withIsoCode(language.getIsoCode())
+                    .withLocale(language.getLocale())
                     .withCountry(language.getCountry())
                     .withIcon(language.getIcon())
                     .withDefault(language.isDefault())

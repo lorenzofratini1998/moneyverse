@@ -1,5 +1,3 @@
-import {Category} from '../category/category.model';
-import {Account} from '../account/account.model';
 import {Style} from '../../shared/models/common.model';
 import {BoundCriteria, DateCriteria, PageCriteria, SortCriteria} from '../../shared/models/criteria.model';
 
@@ -16,17 +14,6 @@ export interface TagRequest {
   tagName?: string,
   description?: string
   style?: Style
-}
-
-export interface TagFormData {
-  tagName: string,
-  description?: string,
-  style: Style
-}
-
-export interface TagForm {
-  tagId?: string,
-  formData: TagFormData
 }
 
 export interface Transaction {
@@ -60,27 +47,21 @@ export interface TransactionRequest {
   transactions: TransactionRequestItem[]
 }
 
-export interface TransactionFormData {
-  account: string,
-  category?: string,
-  date: Date,
-  description: string,
-  amount: number,
-  currency: string,
-  tags?: Tag[]
-}
-
-export interface TransactionForm {
-  transactionId?: string,
-  formData: TransactionFormData
+export enum TransactionCriteriaTypeEnum {
+  EXPENSE = 'EXPENSE',
+  INCOME = 'INCOME'
 }
 
 export interface TransactionCriteria {
+  type?: TransactionCriteriaTypeEnum,
   accounts?: string[],
   categories?: string[],
   date?: DateCriteria,
   amount?: BoundCriteria,
   tags?: string[],
+  budget?: string,
+  subscription?: boolean,
+  transfer?: boolean,
   page?: PageCriteria,
   sort?: SortCriteria
 }
@@ -107,19 +88,6 @@ export interface TransferRequest {
   amount?: number,
   date?: Date,
   currency?: string
-}
-
-export interface TransferFormData {
-  fromAccount: string,
-  toAccount: string,
-  amount: number,
-  date: Date,
-  currency: string
-}
-
-export interface TransferForm {
-  transferId?: string,
-  formData: TransferFormData
 }
 
 export interface Subscription {
@@ -151,22 +119,6 @@ export interface SubscriptionRequest {
   nextExecutionDate?: Date
 }
 
-export interface SubscriptionFormData {
-  accountId: string,
-  categoryId?: string,
-  amount: number,
-  subscriptionName: string,
-  currency: string
-  recurrence: RecurrenceRule
-  isActive: boolean,
-  nextExecutionDate: Date
-}
-
-export interface SubscriptionForm {
-  subscriptionId?: string,
-  formData: SubscriptionFormData
-}
-
 export interface RecurrenceRule {
   recurrenceRule: string,
   startDate: Date,
@@ -190,11 +142,3 @@ export const recurrenceRuleOptions: RecurrenceRuleOption[] = [
   {label: RecurrenceRuleEnum.MONTHLY, value: 'FREQ=MONTHLY', default: true},
   {label: RecurrenceRuleEnum.YEARLY, value: 'FREQ=YEARLY', default: false}
 ];
-
-export function isTransferFormData(data: any): data is TransferFormData {
-  return 'fromAccount' in data && 'toAccount' in data;
-}
-
-export function isTransferForm(data: any): data is TransferForm {
-  return 'transferId' in data && 'formData' in data;
-}

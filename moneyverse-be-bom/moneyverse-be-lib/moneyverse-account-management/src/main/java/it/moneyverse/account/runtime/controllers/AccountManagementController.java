@@ -3,12 +3,15 @@ package it.moneyverse.account.runtime.controllers;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.services.AccountService;
 import it.moneyverse.core.model.dto.AccountDto;
+import it.moneyverse.core.model.events.SseEmitterRepository;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
@@ -16,9 +19,12 @@ import org.springframework.web.bind.annotation.*;
 public class AccountManagementController implements AccountOperations {
 
   private final AccountService accountService;
+  private final SseEmitterRepository sseEmitterRepository;
 
-  public AccountManagementController(AccountService accountService) {
+  public AccountManagementController(
+      AccountService accountService, SseEmitterRepository sseEmitterRepository) {
     this.accountService = accountService;
+    this.sseEmitterRepository = sseEmitterRepository;
   }
 
   @Override
@@ -70,5 +76,19 @@ public class AccountManagementController implements AccountOperations {
   @ResponseStatus(HttpStatus.OK)
   public List<AccountCategoryDto> getAccountCategories() {
     return accountService.getAccountCategories();
+  }
+
+  @Override
+  @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @ResponseStatus(HttpStatus.OK)
+  public SseEmitter subscribe(@RequestParam UUID userId) {
+    SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+    sseEmitterRepository.add(userId, emitter);
+
+    emitter.onCompletion(() -> sseEmitterRepository.remove(userId, emitter));
+    emitter.onTimeout(() -> sseEmitterRepository.remove(userId, emitter));
+    emitter.onError((error) -> sseEmitterRepository.remove(userId, emitter));
+
+    return emitter;
   }
 }

@@ -1,54 +1,34 @@
-import {Component, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, viewChild} from '@angular/core';
 import {Category} from '../../../../category.model';
-import {IconsEnum} from '../../../../../../shared/models/icons.model';
-import {Dialog} from 'primeng/dialog';
-import {CategoryStore} from '../../../../category.store';
-import {PrimeTemplate, TreeNode} from 'primeng/api';
-import {OrganizationChart} from 'primeng/organizationchart';
-import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
+import {DialogComponent} from '../../../../../../shared/components/dialogs/dialog/dialog.component';
+import {DynamicDialogConfig} from 'primeng/dynamicdialog';
+import {CategoryTreeComponent} from '../category-tree/category-tree.component';
 
 @Component({
   selector: 'app-category-tree-dialog',
   imports: [
-    Dialog,
-    OrganizationChart,
-    PrimeTemplate,
-    SvgComponent
+    DialogComponent,
+    CategoryTreeComponent
   ],
-  templateUrl: './category-tree-dialog.component.html',
-  styleUrl: './category-tree-dialog.component.scss'
+  template: `
+    <app-dialog [config]="config()">
+      <div class="card flex justify-center" content>
+        @if (dialog().selectedItem(); as selectedItem) {
+          <app-category-tree [root]="selectedItem"/>
+        }
+      </div>
+    </app-dialog>
+  `
 })
 export class CategoryTreeDialogComponent {
-  protected readonly IconsEnum = IconsEnum;
-  protected readonly categoryStore = inject(CategoryStore);
-  isOpen = input<boolean>(false);
-  protected _isOpen = false;
+  protected dialog = viewChild.required<DialogComponent<Category>>(DialogComponent<Category>);
 
-  protected treeNodes = signal<TreeNode[]>([]);
+  config = computed<DynamicDialogConfig>(() => ({
+    header: 'Category Tree',
+    styleClass: 'w-11/12 md:w-1/2 lg:w-1/3'
+  }));
 
-  constructor() {
-    effect(() => {
-      if (this.isOpen() !== this._isOpen) {
-        this._isOpen = this.isOpen();
-      }
-    });
-  }
-
-  open(category: Category) {
-    this._isOpen = true;
-    this.treeNodes.set([this.buildTree(category)]);
-  }
-
-  private buildTree(category: Category): TreeNode<Category> {
-    return {
-      label: category.categoryName,
-      expanded: true,
-      data: category,
-      children: category.children?.map(child => this.buildTree(child)) ?? []
-    };
-  }
-
-  close() {
-    this._isOpen = false;
+  open(item?: Category) {
+    this.dialog().open(item);
   }
 }

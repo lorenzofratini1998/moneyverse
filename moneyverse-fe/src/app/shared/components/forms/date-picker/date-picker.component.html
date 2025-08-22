@@ -1,0 +1,29 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <p-date-picker [id]="id()"
+                   [selectionMode]="selectionMode()"
+                   [readonlyInput]="readonlyInput()"
+                   [ngModel]="value"
+                   (ngModelChange)="onDateChange($event)"
+                   [showIcon]="showIcon()"
+                   appendTo="body"
+                   [dateFormat]="dateFormat()"
+                   [fluid]="true"
+                   [class]="showError ? 'ng-dirty ng-invalid' : ''"
+                   [disabled]="disabled()"
+                   [required]="required()"
+                   [firstDayOfWeek]="1"
+                   [placeholder]="placeholder()"
+                   [view]="view()"
+    />
+    <app-label [for]="id()"
+               [name]="label()"
+               [required]="required()"
+               [disabled]="disabled()"
+               componentType="calendar"
+    />
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+  }
+</div>

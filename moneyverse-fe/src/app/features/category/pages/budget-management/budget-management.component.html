@@ -1,108 +1,57 @@
 <header class="flex justify-between items-center">
-  <h1 class="text-3xl font-bold">Budgeting</h1>
-
-  <p-button
-    (onClick)="budgetForm.open()"
-    [rounded]="true"
-    severity="contrast">
-    <app-svg [name]="IconsEnum.PLUS"/>
-    <span>New Budget</span>
-  </p-button>
+  <h1>Budgeting</h1>
+  <div class="flex gap-4">
+    <p-button
+      (onClick)="budgetStore.loadBudgets(true)"
+      [rounded]="true"
+      variant="text"
+      severity="secondary">
+      <app-svg [name]="icons.REFRESH"/>
+    </p-button>
+    <p-button
+      (onClick)="budgetFormDialog.open()"
+      [rounded]="true">
+      <app-svg [name]="icons.PLUS"/>
+      <span>New Budget</span>
+    </p-button>
+  </div>
 </header>
 
-<p-card class="w-full p-4" styleClass="bg-base-200 dark:bg-base-800">
+<p-card class="w-full p-4">
   <ng-template #header>
-    <div class="flex gap-4 w-1/2 p-4">
-      <p-float-label variant="on" class="w-full">
-        <p-select id="selectedCategory"
-                  [options]="categoryStore.categories()"
-                  [(ngModel)]="selectedCategory"
-                  optionLabel="categoryName"
-                  class="w-full"/>
-        <label for="selectedCategory">Category</label>
-      </p-float-label>
-
-      @if (periods().length > 0) {
-        <p-float-label variant="on" class="w-full">
-          <p-select id="selectedPeriod"
-                    [options]="periods()"
-                    [(ngModel)]="selectedPeriod"
-                    optionLabel="label"
-                    class="w-full"/>
-          <label for="selectedPeriod">Period</label>
-        </p-float-label>
-      }
+    <div class="w-1/2 m-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <app-select
+          [ngModel]="selectedCategory()"
+          (ngModelChange)="selectedCategory.set($event)"
+          [options]="budgetStore.budgetCategories()"
+          label="Category"
+          optionLabel="categoryName"
+          optionValue="categoryId"/>
+        @if (periods().length > 0) {
+          <app-select
+            [ngModel]="selectedPeriod()"
+            (ngModelChange)="selectedPeriod.set($event)"
+            [options]="periods()"
+            optionLabel="label"
+            id="selectedPeriod-select"
+            label="Period"/>
+        }
+      </div>
     </div>
   </ng-template>
   <ng-template #content>
-    @if (selectedBudget; as budget) {
-      <div class="flex justify-between items-center p-4">
-        <div class="card w-full flex justify-center">
-          <p-knob
-            [ngModel]="budget.amount >= budget.budgetLimit ? budget.budgetLimit : budget.amount"
-            [min]="0"
-            [max]="budget.budgetLimit"
-            [readonly]="true"
-            [size]="300"
-            [strokeWidth]="6"
-            [valueColor]="getKnobValueColor(budget.amount, budget.budgetLimit)"
-            [rangeColor]="getKnobRangeColor(budget.amount, budget.budgetLimit)"
-            [valueTemplate]="currencyPipe.transform(budget.budgetLimit - budget.amount, budget.currency)"/>
-        </div>
+    @if (selectedBudget(); as budget) {
+      <app-budget-detail [budget]="budget"
+                         (onEdit)="budgetFormDialog.open($event)"
+                         (onDelete)="deleteBudget($event)"
+      />
 
-        <p-card class="w-full">
-          <ng-template #title>
-            <div class="flex justify-between items-center">
-              <span>Budget: {{ currencyPipe.transform(budget.budgetLimit, budget.currency) }}</span>
-              <div class="flex items-center gap-2">
-                <button
-                  pButton
-                  type="button"
-                  text
-                  rounded
-                  severity="info"
-                >
-                  <app-svg [name]="Icons.LIST"/>
-                </button>
-                <button
-                  pButton
-                  type="button"
-                  text
-                  rounded
-                  severity="secondary"
-                  (click)="budgetForm.open(budget)"
-                >
-                  <app-svg [name]="Icons.PENCIL"/>
-                </button>
-                <button
-                  pButton
-                  type="button"
-                  text
-                  rounded
-                  severity="danger"
-                  (click)="onDelete($event, budget)"
-                >
-                  <app-svg [name]="Icons.TRASH"/>
-                </button>
-              </div>
-            </div>
-          </ng-template>
-          <ng-template #content>
-            <progress class="progress" [value]="budget.amount" [max]="budget.budgetLimit"></progress>
-            <div class="flex justify-between py-1">
-              <span class="text-sm">{{ currencyPipe.transform(budget.amount, budget.currency) }} spent</span>
-              <span class="text-sm">{{ currencyPipe.transform(budget.budgetLimit - budget.amount, budget.currency) }}
-                left</span>
-            </div>
-
-          </ng-template>
-        </p-card>
-      </div>
+      <app-budget-transactions-table [budget]="budget"/>
     }
   </ng-template>
 </p-card>
 
-<app-budget-form-dialog (submitted)="onSave($event)"/>
-<p-confirm-dialog/>
-<p-toast/>
+<app-budget-form-dialog #budgetFormDialog
+                        (onSubmit)="submit($event)"/>
 

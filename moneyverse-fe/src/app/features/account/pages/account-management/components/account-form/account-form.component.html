@@ -1,0 +1,44 @@
+<form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid gap-4" [class]="selectedItem() ? 'grid-cols-4' : 'grid-cols-1'">
+    <div [class]="selectedItem() ? 'col-span-3' : 'col-span-1'">
+      <app-input-text formControlName="accountName"
+                      id="account-name-input"
+                      label="Account Name"
+                      [required]="true"
+                      class="w-full"/>
+    </div>
+    @if (selectedItem()) {
+      <div class="col-span-1 flex items-center justify-center">
+        <div class="flex items-center gap-2">
+          <label for="isDefault-toggle" class="text-sm font-medium">Default</label>
+          <p-toggle-switch formControlName="isDefault"
+                           id="isDefault-toggle"
+          />
+        </div>
+      </div>
+    }
+  </div>
+  <div class="grid grid-cols-1">
+    <app-text-area formControlName="accountDescription"
+                   id="accountDescription"
+                   label="Description"
+                   class="w-full"/>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-account-category-select formControlName="accountCategory"
+                                 [required]="true"/>
+    <app-currency-select formControlName="currency"
+                         [required]="true"/>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-amount-input-number formControlName="balance"
+                             [currency]="getControlValue('currency')"
+                             id="balance"
+                             label="Balance"/>
+
+    <app-amount-input-number formControlName="target"
+                             [currency]="getControlValue('currency')"
+                             id="target"
+                             label="Target Balance"/>
+  </div>
+</form>

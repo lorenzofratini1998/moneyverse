@@ -4,7 +4,10 @@ import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.core.services.UserServiceClient;
+import it.moneyverse.transaction.enums.TransferSseEventEnum;
 import it.moneyverse.transaction.exceptions.AccountTransferException;
 import it.moneyverse.transaction.model.dto.TransferDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
@@ -35,6 +38,8 @@ public class TransferManagementService implements TransferService {
   private final UserServiceClient userServiceClient;
   private final TransactionEventPublisher transactionEventPublisher;
   private final TransactionValidator transactionValidator;
+  private final SecurityService securityService;
+  private final SseEventService eventService;
 
   public TransferManagementService(
       TransferRepository transferRepository,
@@ -42,13 +47,17 @@ public class TransferManagementService implements TransferService {
       AccountServiceClient accountServiceClient,
       TransactionEventPublisher transactionEventPublisher,
       TransactionValidator transactionValidator,
-      UserServiceClient userServiceClient) {
+      UserServiceClient userServiceClient,
+      SecurityService securityService,
+      SseEventService eventService) {
     this.transferRepository = transferRepository;
     this.currencyServiceClient = currencyServiceClient;
     this.accountServiceClient = accountServiceClient;
     this.transactionEventPublisher = transactionEventPublisher;
     this.transactionValidator = transactionValidator;
     this.userServiceClient = userServiceClient;
+    this.securityService = securityService;
+    this.eventService = eventService;
   }
 
   @Override
@@ -75,7 +84,12 @@ public class TransferManagementService implements TransferService {
                 TransactionFactory.createCreditTransaction(
                     request, normalizedAmount, fromAccount)));
     transactionEventPublisher.publish(transfer, EventTypeEnum.CREATE);
-    return TransferMapper.toTransferDto(transfer);
+    TransferDto result = TransferMapper.toTransferDto(transfer);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransferSseEventEnum.TRANSFER_CREATED.name(),
+        result);
+    return result;
   }
 
   @Override
@@ -86,8 +100,13 @@ public class TransferManagementService implements TransferService {
     Transfer originalTransfer = transfer.copy();
     LOGGER.info("Updating transfer {}", transferId);
     transfer = updateTransfer(transfer, request);
+    TransferDto result = TransferMapper.toTransferDto(transfer);
     transactionEventPublisher.publish(transfer, originalTransfer, EventTypeEnum.UPDATE);
-    return TransferMapper.toTransferDto(transfer);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransferSseEventEnum.TRANSFER_UPDATED.name(),
+        result);
+    return result;
   }
 
   private Transfer updateTransfer(Transfer transfer, TransferUpdateRequestDto request) {
@@ -112,6 +131,10 @@ public class TransferManagementService implements TransferService {
     LOGGER.info("Deleting transfer {}", transferId);
     transferRepository.delete(transfer);
     transactionEventPublisher.publish(transfer, EventTypeEnum.DELETE);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransferSseEventEnum.TRANSFER_DELETED.name(),
+        transferId);
   }
 
   @Override
@@ -148,5 +171,9 @@ public class TransferManagementService implements TransferService {
     for (Transfer transfer : transfers) {
       transactionEventPublisher.publish(transfer, EventTypeEnum.DELETE);
     }
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransferSseEventEnum.TRANSFER_DELETED.name(),
+        accountId);
   }
 }

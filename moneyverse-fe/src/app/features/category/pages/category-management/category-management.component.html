@@ -1,39 +1,11 @@
-<div>
-  <header class="mb-8 flex justify-between items-center">
-    <h1 class="text-3xl font-bold">Category Management</h1>
-    <div class="flex gap-4">
-      @if (categoryStore.categories().length === 0) {
-        <p-button
-          (onClick)="defaultCategoryModal.open()"
-          [rounded]="true"
-          severity="secondary">
-          <app-svg [name]="IconsEnum.BOX"/>
-          <span>Add Default Categories</span>
-        </p-button>
-      }
-      <p-button
-        (onClick)="categoryForm.open()"
-        [rounded]="true"
-        severity="contrast">
-        <app-svg [name]="IconsEnum.PLUS"/>
-        <span>New Category</span>
-      </p-button>
-    </div>
-  </header>
+<app-management [config]="managementConfig()">
+  <app-category-filter-panel/>
 
   <app-category-table
-    [categories]="categoryStore.categories()"
-    (deleted)="deleteCategory($event)"
-    (edited)="editCategory($event)"
-  ></app-category-table>
-</div>
+    [categories]="categoryFilterStore.categories()"
+    (onDelete)="deleteCategory($event)"
+    (onEdit)="categoryFormDialog().open($event)"/>
 
-<app-category-default-dialog
-  (submitted)="createDefaultCategories()"
-/>
-
-<app-category-form-dialog
-  (save)="createCategory($event)"
-/>
-
-<p-toast/>
+  <app-category-default-dialog (onSubmit)="createDefaultCategories()"/>
+  <app-category-form-dialog (onSubmit)="submit($event)"/>
+</app-management>

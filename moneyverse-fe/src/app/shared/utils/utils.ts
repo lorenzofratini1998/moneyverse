@@ -1,23 +1,27 @@
 import {HttpParams} from '@angular/common/http';
 
 export function buildHttpParams(criteria: any): HttpParams {
-  let params = new HttpParams();
+  return new HttpParams({
+    fromObject: flattenAndStringify(criteria),
+  });
+}
 
-  function recurse(obj: any, prefix: string = '') {
-    Object.entries(obj).forEach(([key, value]) => {
-      if (value == null) return;
-      const paramName = prefix
-        ? `${prefix}.${key}`
-        : key;
+function flattenAndStringify(obj: any, prefix = ''): Record<string, string> {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value == null) return acc;
 
-      if (typeof value === 'object' && !Array.isArray(value)) {
-        recurse(value, paramName);
-      } else {
-        params = params.set(paramName, value.toString());
-      }
-    });
-  }
+    const paramName = prefix ? `${prefix}.${key}` : key;
 
-  recurse(criteria);
-  return params;
+    if (value instanceof Date) {
+      acc[paramName] = value.toISOString().split('T')[0];
+    } else if (typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(acc, flattenAndStringify(value, paramName));
+    } else if (Array.isArray(value)) {
+      acc[paramName] = value.join(',');
+    } else {
+      acc[paramName] = value.toString();
+    }
+
+    return acc;
+  }, {} as Record<string, string>);
 }

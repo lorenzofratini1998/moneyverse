@@ -32,6 +32,9 @@ public class TransactionPredicateBuilder {
     withDate(param);
     withAmount(param);
     withTags(param);
+    withBudget(param);
+    withIsSubscription(param);
+    withIsTransfer(param);
     return cb.and(predicates.toArray(new Predicate[0]));
   }
 
@@ -110,5 +113,24 @@ public class TransactionPredicateBuilder {
                       .toArray(Predicate[]::new);
               predicates.add(cb.and(tagPredicates));
             });
+  }
+
+  private void withBudget(TransactionCriteria criteria) {
+    criteria
+        .getBudget()
+        .ifPresent(budget -> predicates.add(cb.equal(root.get(Transaction_.BUDGET_ID), budget)));
+  }
+
+  private void withIsSubscription(TransactionCriteria criteria) {
+    criteria
+        .getSubscription()
+        .ifPresent(
+            subscription -> predicates.add(cb.isNotNull(root.get(Transaction_.SUBSCRIPTION))));
+  }
+
+  private void withIsTransfer(TransactionCriteria criteria) {
+    criteria
+        .getTransfer()
+        .ifPresent(transfer -> predicates.add(cb.isNotNull(root.get(Transaction_.TRANSFER))));
   }
 }

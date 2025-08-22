@@ -1,45 +1,36 @@
-import {Component, effect, inject, input, output} from '@angular/core';
-import {NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {LockKeyholeIcon, LucideAngularModule} from 'lucide-angular';
-import {DateFormat, LanguageDto, UserPreferenceDto} from '../../../../../../shared/models/preference.model';
+import {Component, effect, inject, signal} from '@angular/core';
+import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
+import {ReactiveFormsModule} from '@angular/forms';
+import {InputTextComponent} from '../../../../../../shared/components/forms/input-text/input-text.component';
+import {LucideAngularModule} from 'lucide-angular';
+import {SelectComponent} from '../../../../../../shared/components/forms/select/select.component';
+import {DATE_FORMATS, UserPreferenceFormData} from '../../../../../../shared/models/preference.model';
+import {SystemService} from '../../../../../../core/services/system.service';
+import {PreferenceFormHandler} from '../services/preference-form.handler';
+import {SubmitButtonComponent} from '../../../../../../shared/components/forms/submit-button/submit-button.component';
 
 @Component({
   selector: 'app-preference-form',
   imports: [
     ReactiveFormsModule,
-    LucideAngularModule
+    InputTextComponent,
+    LucideAngularModule,
+    SelectComponent,
+    SubmitButtonComponent
   ],
-  templateUrl: './preference-form.component.html',
-  styleUrl: './preference-form.component.scss'
+  templateUrl: './preference-form.component.html'
 })
-export class PreferenceFormComponent {
+export class PreferenceFormComponent extends AbstractFormComponent<any, UserPreferenceFormData> {
 
-  protected readonly LockKeyholeIcon = LockKeyholeIcon;
-  private readonly fb = inject(NonNullableFormBuilder);
-  userCurrency = input.required<UserPreferenceDto>();
-  userLanguage = input.required<UserPreferenceDto>();
-  userDateFormat = input.required<UserPreferenceDto>();
-  languages = input.required<LanguageDto[]>();
-  dateFormats = input.required<DateFormat[]>();
-  formSubmit = output<any>();
+  protected override readonly formHandler = inject(PreferenceFormHandler);
+  protected readonly systemService = inject(SystemService);
 
-  preferenceForm = this.fb.group({
-    currency: [{value: '', disabled: true}, Validators.required],
-    language: ['', Validators.required],
-    dateFormat: ['', Validators.required]
-  });
+  dateFormats = signal(DATE_FORMATS);
 
   constructor() {
+    super();
     effect(() => {
-      this.preferenceForm.patchValue({
-        currency: this.userCurrency()?.value ?? '',
-        language: this.userLanguage()?.value ?? '',
-        dateFormat: this.userDateFormat()?.value ?? ''
-      });
+      this.patch('Test');
     });
-  }
-
-  save() {
-    this.formSubmit.emit(this.preferenceForm.value);
   }
 }

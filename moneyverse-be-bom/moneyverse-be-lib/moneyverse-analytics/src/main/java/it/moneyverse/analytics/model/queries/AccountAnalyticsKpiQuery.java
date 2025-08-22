@@ -2,6 +2,7 @@ package it.moneyverse.analytics.model.queries;
 
 import it.moneyverse.analytics.enums.QueryPeriodTypeEnum;
 import it.moneyverse.analytics.model.projections.AccountAnalyticsKpiProjection;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ public class AccountAnalyticsKpiQuery extends AbstractFilterQuery<AccountAnalyti
   private static class Columns {
     public static final String TOTAL_EXPENSE = "TOTAL_EXPENSE";
     public static final String TOTAL_INCOME = "TOTAL_INCOME";
+    public static final String TOTAL_AMOUNT = "TOTAL_AMOUNT";
     public static final String ACTIVE_ACCOUNTS = "ACTIVE_ACCOUNTS";
     public static final String MOST_USED_ACTIVE_ACCOUNT = "MOST_USED_ACTIVE_ACCOUNT";
     public static final String LEAST_USED_ACTIVE_ACCOUNT = "LEAST_USED_ACTIVE_ACCOUNT";
@@ -73,6 +75,7 @@ public class AccountAnalyticsKpiQuery extends AbstractFilterQuery<AccountAnalyti
         SELECT
          abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
          sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
+         sum(NORMALIZED_AMOUNT) AS TOTAL_AMOUNT,
          uniqExact(ACCOUNT_ID) AS ACTIVE_ACCOUNTS,
          (SELECT ACCOUNT_ID FROM current_account_stats ORDER BY transaction_count DESC LIMIT 1) AS MOST_USED_ACTIVE_ACCOUNT,
          (SELECT ACCOUNT_ID FROM current_account_stats ORDER BY transaction_count LIMIT 1) AS LEAST_USED_ACTIVE_ACCOUNT,
@@ -85,6 +88,7 @@ public class AccountAnalyticsKpiQuery extends AbstractFilterQuery<AccountAnalyti
         SELECT
          abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
          sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
+         sum(NORMALIZED_AMOUNT) AS TOTAL_AMOUNT,
          uniqExact(ACCOUNT_ID) AS ACTIVE_ACCOUNTS,
          (SELECT ACCOUNT_ID FROM compare_account_stats ORDER BY transaction_count DESC LIMIT 1) AS MOST_USED_ACTIVE_ACCOUNT,
          (SELECT ACCOUNT_ID FROM compare_account_stats ORDER BY transaction_count LIMIT 1) AS LEAST_USED_ACTIVE_ACCOUNT,
@@ -100,9 +104,14 @@ public class AccountAnalyticsKpiQuery extends AbstractFilterQuery<AccountAnalyti
         new AccountAnalyticsKpiProjection(
             rs.getBigDecimal(Columns.TOTAL_EXPENSE),
             rs.getBigDecimal(Columns.TOTAL_INCOME),
+            rs.getBigDecimal(Columns.TOTAL_AMOUNT),
             rs.getInt(Columns.ACTIVE_ACCOUNTS),
-            UUID.fromString(rs.getString(Columns.MOST_USED_ACTIVE_ACCOUNT)),
-            UUID.fromString(rs.getString(Columns.LEAST_USED_ACTIVE_ACCOUNT)),
+            Optional.ofNullable(rs.getString(Columns.MOST_USED_ACTIVE_ACCOUNT))
+                .map(UUID::fromString)
+                .orElse(null),
+            Optional.ofNullable(rs.getString(Columns.LEAST_USED_ACTIVE_ACCOUNT))
+                .map(UUID::fromString)
+                .orElse(null),
             QueryPeriodTypeEnum.valueOf(rs.getString(Columns.PERIOD_TYPE)));
   }
 }

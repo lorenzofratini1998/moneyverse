@@ -9,5 +9,7 @@ public record CategoryAnalyticsTrendProjection(
     UUID categoryId,
     LocalDate startDate,
     LocalDate endDate,
+    BigDecimal totalExpense,
+    BigDecimal totalIncome,
     BigDecimal totalAmount,
     QueryPeriodTypeEnum periodType) {}

@@ -6,12 +6,15 @@ import it.moneyverse.budget.services.CategoryService;
 import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
+import it.moneyverse.core.model.events.SseEmitterRepository;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
@@ -20,10 +23,15 @@ public class BudgetManagementController implements CategoryOperations, BudgetOpe
 
   private final CategoryService categoryService;
   private final BudgetService budgetService;
+  private final SseEmitterRepository sseEmitterRepository;
 
-  public BudgetManagementController(CategoryService categoryService, BudgetService budgetService) {
+  public BudgetManagementController(
+      CategoryService categoryService,
+      BudgetService budgetService,
+      SseEmitterRepository sseEmitterRepository) {
     this.categoryService = categoryService;
     this.budgetService = budgetService;
+    this.sseEmitterRepository = sseEmitterRepository;
   }
 
   @Override
@@ -139,5 +147,18 @@ public class BudgetManagementController implements CategoryOperations, BudgetOpe
       "@budgetRepository.existsByCategory_UserIdAndBudgetId(@securityService.getAuthenticatedUserId(), #budgetId)")
   public void deleteBudget(@PathVariable UUID budgetId) {
     budgetService.deleteBudget(budgetId);
+  }
+
+  @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @ResponseStatus(HttpStatus.OK)
+  public SseEmitter subscribe(@RequestParam UUID userId) {
+    SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+    sseEmitterRepository.add(userId, emitter);
+
+    emitter.onCompletion(() -> sseEmitterRepository.remove(userId, emitter));
+    emitter.onTimeout(() -> sseEmitterRepository.remove(userId, emitter));
+    emitter.onError((error) -> sseEmitterRepository.remove(userId, emitter));
+
+    return emitter;
   }
 }

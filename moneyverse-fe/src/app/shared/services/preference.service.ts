@@ -1,10 +1,9 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {firstValueFrom, map, Observable, of, tap} from 'rxjs';
-import {LanguageDto, PreferenceDto, UserPreferenceDto, UserPreferenceRequestDto} from '../models/preference.model';
+import {firstValueFrom, map, Observable} from 'rxjs';
+import {Language, Preference, UserPreference, UserPreferenceRequest} from '../models/preference.model';
 import {environment} from '../../../environments/environment';
 import {StorageService} from './storage.service';
-import {STORAGE_KEY_PREFERENCES_LANGS} from '../models/constants.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,25 +13,19 @@ export class PreferenceService {
   private readonly storageService = inject(StorageService);
   private readonly baseUrl = environment.services.userManagementUrl;
 
-  public getUserPreferences(userId: string): Observable<UserPreferenceDto[]> {
-    return this.httpClient.get<UserPreferenceDto[]>(`${this.baseUrl}/users/${userId}/preferences`);
+  public getUserPreferences(userId: string): Observable<UserPreference[]> {
+    return this.httpClient.get<UserPreference[]>(`${this.baseUrl}/users/${userId}/preferences`);
   }
 
-  public getUserPreference(userId: string, preferenceName: string): Observable<UserPreferenceDto> {
-    const userPreference = this.storageService.getItem<UserPreferenceDto>(preferenceName);
-    if (userPreference) {
-      return of(userPreference)
-    }
-    return this.httpClient.get<UserPreferenceDto>(`${this.baseUrl}/users/${userId}/preferences/${preferenceName}`).pipe(
-      tap(userPreference => this.storageService.setItem(preferenceName, userPreference))
-    );
+  public getUserPreference(userId: string, preferenceName: string): Observable<UserPreference> {
+    return this.httpClient.get<UserPreference>(`${this.baseUrl}/users/${userId}/preferences/${preferenceName}`);
   }
 
   public getPreferences(mandatory: boolean = false) {
     if (mandatory) {
-      return this.httpClient.get<PreferenceDto[]>(`${this.baseUrl}/preferences?mandatory=true`);
+      return this.httpClient.get<Preference[]>(`${this.baseUrl}/preferences?mandatory=true`);
     }
-    return this.httpClient.get<PreferenceDto[]>(`${this.baseUrl}/preferences`);
+    return this.httpClient.get<Preference[]>(`${this.baseUrl}/preferences`);
   }
 
   public async checkMissingPreferences(userId: string): Promise<boolean> {
@@ -55,16 +48,16 @@ export class PreferenceService {
   }
 
 
-  public getLanguages(): Observable<LanguageDto[]> {
-    const languages = this.storageService.getItem<LanguageDto[]>(STORAGE_KEY_PREFERENCES_LANGS);
-    if (languages) {
-      return of(languages);
-    }
-    return this.httpClient.get<LanguageDto[]>(`${this.baseUrl}/languages`).pipe(tap(langs => this.storageService.setItem(STORAGE_KEY_PREFERENCES_LANGS, langs)));
+  public getLanguages(): Observable<Language[]> {
+    return this.httpClient.get<Language[]>(`${this.baseUrl}/languages`);
   }
 
-  public saveUserPreferences(userId: string, userPreferences: UserPreferenceRequestDto[]): Observable<UserPreferenceDto[]> {
-    return this.httpClient.post<UserPreferenceDto[]>(`${this.baseUrl}/users/${userId}/preferences`, userPreferences);
+  public saveUserPreferences(userId: string, userPreferences: UserPreferenceRequest[]): Observable<UserPreference[]> {
+    return this.httpClient.post<UserPreference[]>(`${this.baseUrl}/users/${userId}/preferences`, userPreferences);
+  }
+
+  public updateUserPreferences(userId: string, request: UserPreferenceRequest[]): Observable<UserPreference[]> {
+    return this.httpClient.put<UserPreference[]>(`${this.baseUrl}/users/${userId}/preferences`, request);
   }
 
 

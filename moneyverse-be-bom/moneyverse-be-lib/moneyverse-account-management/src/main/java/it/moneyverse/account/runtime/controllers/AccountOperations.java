@@ -5,6 +5,7 @@ import it.moneyverse.core.model.dto.AccountDto;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public interface AccountOperations {
 
@@ -19,4 +20,6 @@ public interface AccountOperations {
   void deleteAccount(UUID accountId);
 
   List<AccountCategoryDto> getAccountCategories();
+
+  SseEmitter subscribe(UUID userId);
 }

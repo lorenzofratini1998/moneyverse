@@ -40,13 +40,12 @@ public class AccountAnalyticsKpiStrategy
   }
 
   private AmountDto getAmount(AccountAnalyticsKpiProjection current) {
-    return AnalyticsUtils.getAmount(current, p -> p.totalIncome().subtract(p.totalExpense()));
+    return AnalyticsUtils.getAmount(current, AccountAnalyticsKpiProjection::totalAmount);
   }
 
   private AmountDto getAmount(
       AccountAnalyticsKpiProjection current, AccountAnalyticsKpiProjection compare) {
-    return AnalyticsUtils.getAmount(
-        current, compare, p -> p.totalIncome().subtract(p.totalExpense()));
+    return AnalyticsUtils.getAmount(current, compare, AccountAnalyticsKpiProjection::totalAmount);
   }
 
   private CountDto getCount(AccountAnalyticsKpiProjection current) {

@@ -1,0 +1,43 @@
+<button
+  [id]="id()"
+  type="button"
+  class="w-5 h-5 rounded-full cursor-pointer transition-all duration-200 hover:scale-110 flex items-center justify-center"
+  [class.ring-red-500]="showError"
+  [class.opacity-50]="disabled()"
+  [class.border-gray-300]="!showError"
+  [class.border-red-500]="showError"
+  [disabled]="disabled()"
+  (click)="toggle($event)"
+  (blur)="onBlur($event)"
+>
+  <app-svg [name]="value ?? defaultIcon"/>
+</button>
+
+@if (showError) {
+  <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+}
+
+<p-popover #op>
+  <div tabindex="0" class="shadow-md grid grid-cols-6 gap-2 p-3 max-h-64 overflow-y-auto">
+    @for (icon of icons; track icon) {
+      <label class="relative group">
+        <input
+          type="radio"
+          [value]="icon"
+          [checked]="icon === value"
+          [name]="'icon-picker-' + id()"
+          [id]="'icon_' + icon + '_' + id()"
+          class="sr-only peer"
+          [disabled]="disabled()"
+          (change)="onIconSelect(icon)"
+        >
+        <div
+          class="w-6 h-6 rounded-full cursor-pointer transition-all duration-200 hover:scale-110 peer-checked:ring-1 peer-checked:ring-offset-1 peer-checked:ring-blue-500 group-hover:bg-gray-100 dark:group-hover:bg-gray-700 flex items-center justify-center"
+          [class.opacity-50]="disabled()"
+        >
+          <app-svg [name]="icon"/>
+        </div>
+      </label>
+    }
+  </div>
+</p-popover>

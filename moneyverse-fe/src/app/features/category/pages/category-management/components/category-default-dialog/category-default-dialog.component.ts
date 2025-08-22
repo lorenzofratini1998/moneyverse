@@ -1,57 +1,37 @@
-import {Component, effect, inject, input, output} from '@angular/core';
-import {CategoryService} from '../../../../category.service';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {Component, computed, inject, output, viewChild} from '@angular/core';
 import {LucideAngularModule} from 'lucide-angular';
-import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
-import {ColorService} from '../../../../../../shared/services/color.service';
-import {Dialog} from 'primeng/dialog';
-import {Chip} from 'primeng/chip';
 import {Button} from 'primeng/button';
+import {DialogComponent} from '../../../../../../shared/components/dialogs/dialog/dialog.component';
+import {DynamicDialogConfig} from 'primeng/dynamicdialog';
+import {CategoryDefaultGridComponent} from '../category-default-grid/category-default-grid.component';
+import {CategoryStore} from '../../../../services/category.store';
 
 @Component({
   selector: 'app-category-default-dialog',
   imports: [
     LucideAngularModule,
-    SvgComponent,
-    Dialog,
-    Chip,
-    Button
+    Button,
+    DialogComponent,
+    CategoryDefaultGridComponent
   ],
   templateUrl: './category-default-dialog.component.html'
 })
 export class CategoryDefaultDialogComponent {
-  private readonly categoryService = inject(CategoryService);
-  protected readonly colorService = inject(ColorService);
+  onSubmit = output<any>();
 
-  isOpen = input<boolean>(false);
-  protected _isOpen = false;
+  protected dialog = viewChild.required<DialogComponent>(DialogComponent);
+  protected categoryStore = inject(CategoryStore);
 
-  submitted = output<any>();
+  config = computed<DynamicDialogConfig>(() => ({
+    header: 'The following expenditure categories will be created'
+  }));
 
-  defaultCategories$ = toSignal(this.categoryService.getDefaultCategories(), {initialValue: []});
-
-  constructor() {
-    effect(() => {
-      if (this.isOpen() !== this._isOpen) {
-        this._isOpen = this.isOpen();
-      }
-    });
+  open(): void {
+    this.dialog().open();
   }
 
-  open() {
-    this._isOpen = true;
-  }
-
-  close() {
-    this._isOpen = false;
-  }
-
-  onClose(): void {
-    this.close();
-  }
-
-  onConfirm(): void {
-    this.submitted.emit({});
-    this.close();
+  confirm(): void {
+    this.onSubmit.emit({});
+    this.dialog().close();
   }
 }

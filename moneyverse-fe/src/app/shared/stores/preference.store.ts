@@ -1,11 +1,11 @@
 import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
-import {PreferenceKey, UserPreferenceDto} from '../models/preference.model';
+import {PreferenceKey, UserPreference} from '../models/preference.model';
 import {AuthService} from '../../core/auth/auth.service';
 import {computed, inject} from '@angular/core';
 import {PreferenceService} from '../services/preference.service';
 
 interface PreferenceState {
-  preferences: Partial<Record<PreferenceKey, UserPreferenceDto>>;
+  preferences: Partial<Record<PreferenceKey, UserPreference>>;
 }
 
 export const PreferenceStore = signalStore(
@@ -15,37 +15,83 @@ export const PreferenceStore = signalStore(
     preferences: {}
   })),
 
-  withMethods((store) => ({
-    loadPreference(key: PreferenceKey) {
-      if (store.preferences[key]) {
-        return;
+  withMethods((store) => {
+    const preferenceService = inject(PreferenceService);
+    const authService = inject(AuthService);
+
+    return {
+      loadPreference(key: PreferenceKey) {
+        if (store.preferences[key]) {
+          return;
+        }
+
+        preferenceService.getUserPreference(authService.getAuthenticatedUser().userId, key)
+          .subscribe({
+            next: (preference) => {
+              const updated = {...store.preferences(), [key]: preference};
+              patchState(store, {preferences: updated});
+            },
+            error: (err) => {
+              console.error(`Preference load failed for ${key}`, err);
+            }
+          });
+      },
+
+      loadPreferences() {
+        preferenceService.getUserPreferences(authService.getAuthenticatedUser().userId)
+          .subscribe({
+            next: (preferences) => {
+              const preferencesMap = preferences.reduce((acc, pref) => {
+                const key = pref.preference.name as PreferenceKey;
+                acc[key] = pref;
+                return acc;
+              }, {} as Partial<Record<PreferenceKey, UserPreference>>)
+
+              patchState(store, {preferences: preferencesMap});
+            }
+          })
+      },
+
+      updateUserPreferences(preferences: UserPreference[]) {
+        const currentPreferences = store.preferences();
+        const updatedPreferences = preferences.reduce((acc, pref) => {
+          const key = pref.preference.name as PreferenceKey;
+          acc[key] = pref;
+          return acc;
+        }, {...currentPreferences});
+
+        patchState(store, {preferences: updatedPreferences});
+      },
+
+      updatePreference(key: PreferenceKey, preference: UserPreference) {
+        const updated = {...store.preferences(), [key]: preference};
+        patchState(store, {preferences: updated});
+      },
+
+      removePreference(key: PreferenceKey) {
+        const updated = {...store.preferences()};
+        delete updated[key];
+        patchState(store, {preferences: updated});
+      },
+
+      reset() {
+        patchState(store, {preferences: {}});
       }
-      const preferenceService = inject(PreferenceService);
-      const authService = inject(AuthService);
-      preferenceService.getUserPreference(authService.getAuthenticatedUser().userId, key)
-        .subscribe({
-          next: (preference) => {
-            const updated = {...store.preferences(), [key]: preference};
-            patchState(store, {preferences: updated});
-          },
-          error: (err) => {
-            console.error(`Preference load failed for ${key}`, err);
-          }
-        });
-    },
-  })),
+    }
+  }),
 
   withComputed((store) => ({
     userCurrency: computed(() => store.preferences()[PreferenceKey.CURRENCY]?.value ?? 'EUR'),
     userDateFormat: computed(() => store.preferences()[PreferenceKey.DATE_FORMAT]?.value ?? 'yyyy-MM-dd'),
-    userLanguage: computed(() => store.preferences()[PreferenceKey.LANGUAGE]?.value ?? 'en_US')
+    userLanguage: computed(() => store.preferences()[PreferenceKey.LANGUAGE]?.value ?? 'en'),
+    hasPreference: computed(() => (key: PreferenceKey) => !!store.preferences()[key]),
+    allPreferences: computed(() => store.preferences()),
+    preferencesCount: computed(() => Object.keys(store.preferences()).length)
   })),
 
   withHooks({
     onInit: (store) => {
-      store.loadPreference(PreferenceKey.CURRENCY);
-      store.loadPreference(PreferenceKey.LANGUAGE);
-      store.loadPreference(PreferenceKey.DATE_FORMAT);
+      store.loadPreferences();
     }
   })
 )

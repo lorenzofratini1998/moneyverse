@@ -25,6 +25,28 @@ export class AuthService {
     };
   }
 
+  get token() {
+    const token = this.keycloak.token;
+    if (!token) {
+      throw new Error('Token is not available');
+    }
+    return token;
+  }
+
+  get authenticatedUser(): UserModel {
+    const tokenParsed = this.keycloak.tokenParsed;
+    if (!tokenParsed) {
+      throw new Error('Token is not available');
+    }
+    return {
+      userId: tokenParsed.sub ?? '',
+      firstName: tokenParsed['given_name'] ?? '',
+      lastName: tokenParsed['family_name'] ?? '',
+      fullName: tokenParsed['name'] ?? '',
+      email: tokenParsed['email'] ?? ''
+    }
+  }
+
   public async logout(): Promise<void> {
     await this.keycloak.logout();
   }

@@ -1,6 +1,7 @@
 package it.moneyverse.account.services;
 
 import it.moneyverse.account.enums.AccountSortAttributeEnum;
+import it.moneyverse.account.enums.AccountSseEventEnum;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
@@ -37,19 +38,24 @@ public class AccountManagementService implements AccountService {
   private final CurrencyServiceClient currencyServiceClient;
   private final AccountEventPublisher eventPublisher;
   private final UserServiceClient userServiceClient;
+  private final SecurityService securityService;
+  private final SseEventService eventService;
 
   public AccountManagementService(
       AccountRepository accountRepository,
       AccountCategoryRepository accountCategoryRepository,
       CurrencyServiceClient currencyServiceClient,
       AccountEventPublisher eventPublisher,
-      UserServiceClient userServiceClient) {
+      UserServiceClient userServiceClient,
+      SecurityService securityService,
+      SseEventService eventService) {
     this.accountRepository = accountRepository;
     this.accountCategoryRepository = accountCategoryRepository;
     this.currencyServiceClient = currencyServiceClient;
     this.eventPublisher = eventPublisher;
-
     this.userServiceClient = userServiceClient;
+    this.securityService = securityService;
+    this.eventService = eventService;
   }
 
   @Override
@@ -68,6 +74,7 @@ public class AccountManagementService implements AccountService {
     }
     AccountDto result = AccountMapper.toAccountDto(accountRepository.save(account));
     LOGGER.info("Saved account {} for user {}", result.getAccountId(), request.userId());
+    eventService.publishEvent(request.userId(), AccountSseEventEnum.ACCOUNT_CREATED.name(), result);
     return result;
   }
 
@@ -121,6 +128,10 @@ public class AccountManagementService implements AccountService {
     }
     AccountDto result = AccountMapper.toAccountDto(account);
     LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUserId());
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        AccountSseEventEnum.ACCOUNT_UPDATED.name(),
+        result);
     return result;
   }
 
@@ -137,6 +148,10 @@ public class AccountManagementService implements AccountService {
     accountRepository.delete(account);
     eventPublisher.publish(account, EventTypeEnum.DELETE);
     LOGGER.info("Deleted account {} for user {}", account.getAccountId(), account.getUserId());
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        AccountSseEventEnum.ACCOUNT_DELETED.name(),
+        account);
   }
 
   @Transactional
@@ -160,7 +175,6 @@ public class AccountManagementService implements AccountService {
   public void incrementAccountBalance(
       UUID accountId, BigDecimal amount, String currency, LocalDate date) {
     updateAccountBalance(accountId, amount, currency, date, BigDecimal::add);
-    LOGGER.info("Account balance for account {} increased by {}", accountId, amount);
   }
 
   @Override
@@ -184,6 +198,11 @@ public class AccountManagementService implements AccountService {
             : currencyServiceClient.convertAmount(amount, currency, account.getCurrency(), date);
     account.setBalance(operation.apply(account.getBalance(), effectiveAmount));
     accountRepository.save(account);
+    LOGGER.info("Account balance for account {} increased by {}", accountId, amount);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        AccountSseEventEnum.ACCOUNT_UPDATED.name(),
+        account);
   }
 
   private Account findAccountById(UUID accountId) {

@@ -1,110 +1,82 @@
-import {Component, effect, inject, input, Input, output} from '@angular/core';
-import {DatePicker} from "primeng/datepicker";
-import {FloatLabel} from "primeng/floatlabel";
-import {FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {InputNumber} from "primeng/inputnumber";
-import {InputText} from "primeng/inputtext";
-import {Message} from "primeng/message";
-import {MultiSelect} from "primeng/multiselect";
-import {Select} from "primeng/select";
-import {IconsEnum} from '../../../../../../shared/models/icons.model';
-import {AccountStore} from '../../../../../account/account.store';
-import {CategoryStore} from '../../../../../category/category.store';
-import {CurrencyStore} from '../../../../../../shared/stores/currency.store';
-import {TransactionStore} from '../../../../transaction.store';
-import {PreferenceStore} from '../../../../../../shared/stores/preference.store';
-import {LanguageService} from '../../../../../../shared/services/language.service';
-import {Transaction, TransactionFormData} from '../../../../transaction.model';
-import {today} from '../../../../../../shared/utils/date-utils';
-import {isInvalid} from '../../../../../../shared/utils/form-utils';
-import {InputGroup} from 'primeng/inputgroup';
-import {TransactionFormDialogOptions} from '../transaction-form-dialog/transaction-form-dialog.component';
+import {Component, computed, effect, inject, input} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {TagStore} from '../../../tag-management/services/tag.store';
+import {Transaction} from '../../../../transaction.model';
+import {TransactionFormDialogOptionsEnum} from '../transaction-form-dialog/transaction-form-dialog.component';
+import {DatePickerComponent} from '../../../../../../shared/components/forms/date-picker/date-picker.component';
+import {
+  AmountInputNumberComponent
+} from '../../../../../../shared/components/forms/amount-input-number/amount-input-number.component';
+import {
+  CurrencySelectComponent
+} from '../../../../../../shared/components/forms/currency-select/currency-select.component';
+import {TextAreaComponent} from '../../../../../../shared/components/forms/text-area/text-area.component';
+import {
+  AccountSelectComponent
+} from '../../../../../../shared/components/forms/account-select/account-select.component';
+import {
+  CategorySelectComponent
+} from '../../../../../../shared/components/forms/category-select/category-select.component';
+import {
+  TagMultiSelectComponent
+} from '../../../../../../shared/components/forms/tag-multi-select/tag-multi-select.component';
+import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
+import {ExpenseIncomeFormHandler} from '../../services/expense-income-form.handler';
+import {TransactionFormData} from "../../models/form.model";
 
 @Component({
   selector: 'app-expense-income-form',
   imports: [
-    DatePicker,
-    FloatLabel,
     FormsModule,
-    InputNumber,
-    InputText,
-    Message,
-    MultiSelect,
     ReactiveFormsModule,
-    Select,
-    InputGroup
+    DatePickerComponent,
+    AmountInputNumberComponent,
+    CurrencySelectComponent,
+    TextAreaComponent,
+    AccountSelectComponent,
+    CategorySelectComponent,
+    TagMultiSelectComponent
   ],
-  templateUrl: './expense-income-form.component.html',
-  styleUrl: './expense-income-form.component.scss'
+  templateUrl: './expense-income-form.component.html'
 })
-export class ExpenseIncomeFormComponent {
+export class ExpenseIncomeFormComponent extends AbstractFormComponent<Transaction, TransactionFormData> {
 
-  @Input({required: true}) formGroup!: FormGroup;
-  transactionFormOption = input<TransactionFormDialogOptions | null>(null);
   transactionToEdit = input<Transaction | null>(null);
+  transactionFormOption = input<TransactionFormDialogOptionsEnum | null>(null);
 
-  protected readonly Icons = IconsEnum;
-  protected readonly isInvalid = isInvalid;
+  protected override readonly formHandler = inject(ExpenseIncomeFormHandler)
+  protected readonly tagStore = inject(TagStore);
 
-  protected readonly accountStore = inject(AccountStore);
-  protected readonly categoryStore = inject(CategoryStore);
-  protected readonly currencyStore = inject(CurrencyStore);
-  protected readonly transactionStore = inject(TransactionStore);
-  protected readonly preferenceStore = inject(PreferenceStore);
-  protected readonly languageService = inject(LanguageService);
-
-  save = output<TransactionFormData>();
+  isSubscription = computed(() => this.transactionFormOption() === TransactionFormDialogOptionsEnum.SUBSCRIPTION);
+  isExpense = computed(() => this.transactionFormOption() === TransactionFormDialogOptionsEnum.EXPENSE);
 
   constructor() {
+    super();
     effect(() => {
       const _transactionToEdit = this.transactionToEdit();
       if (_transactionToEdit) {
-        this.patchForm(_transactionToEdit);
+        this.patch(_transactionToEdit);
       } else {
         this.reset();
       }
     })
   }
 
-  private patchForm(transaction: Transaction) {
-    this.formGroup.patchValue({
-      date: new Date(transaction.date),
-      amount: Math.abs(transaction.amount),
-      description: transaction.description,
-      account: transaction.accountId,
-      category: transaction.categoryId,
-      currency: transaction.currency,
-      tags: transaction.tags
-    });
-
-    if (this.isSubscription) {
-      this.formGroup.get('date')?.disable();
-      this.formGroup.get('description')?.disable();
-      this.formGroup.get('currency')?.disable();
-      this.formGroup.get('category')?.disable();
+  override patch(transaction: Transaction): void {
+    super.patch(transaction);
+    const controls = ['data', 'description', 'currency', 'category']
+    if (this.isSubscription()) {
+      this.disableControls(controls);
     } else {
-      this.formGroup.get('date')?.enable();
-      this.formGroup.get('description')?.enable();
-      this.formGroup.get('currency')?.enable();
-      this.formGroup.get('category')?.enable();
+      this.enableControls(controls);
     }
   }
 
-  reset() {
-    this.formGroup.reset({
-      date: today(),
-      amount: null,
-      description: null,
-      account: this.accountStore.defaultAccount()?.accountId,
-      category: null,
-      currency: this.preferenceStore.userCurrency(),
-      tags: null
-    });
-    this.formGroup.markAsPristine();
-    this.formGroup.markAsUntouched();
-  }
-
-  get isSubscription(): boolean {
-    return this.transactionFormOption() === TransactionFormDialogOptions.SUBSCRIPTION;
+  protected override prepareData(): TransactionFormData {
+    const data = super.prepareData();
+    return {
+      ...data,
+      amount: this.isExpense() ? -Math.abs(data.amount) : Math.abs(data.amount)
+    }
   }
 }

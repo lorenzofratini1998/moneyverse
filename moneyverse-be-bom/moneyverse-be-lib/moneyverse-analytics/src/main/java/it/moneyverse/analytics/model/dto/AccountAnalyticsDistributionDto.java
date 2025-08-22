@@ -3,7 +3,6 @@ package it.moneyverse.analytics.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -15,6 +14,7 @@ public class AccountAnalyticsDistributionDto implements Serializable {
   private final UUID accountId;
   private final AmountDto totalIncome;
   private final AmountDto totalExpense;
+  private final AmountDto totalAmount;
   private final AccountAnalyticsDistributionDto compare;
 
   public static class Builder {
@@ -22,6 +22,7 @@ public class AccountAnalyticsDistributionDto implements Serializable {
     private UUID accountId;
     private AmountDto totalIncome;
     private AmountDto totalExpense;
+    private AmountDto totalAmount;
     private AccountAnalyticsDistributionDto compare;
 
     public Builder withPeriod(PeriodDto period) {
@@ -44,6 +45,11 @@ public class AccountAnalyticsDistributionDto implements Serializable {
       return this;
     }
 
+    public Builder withTotalAmount(AmountDto totalAmount) {
+      this.totalAmount = totalAmount;
+      return this;
+    }
+
     public Builder withCompare(AccountAnalyticsDistributionDto compare) {
       this.compare = compare;
       return this;
@@ -63,6 +69,7 @@ public class AccountAnalyticsDistributionDto implements Serializable {
     this.accountId = builder.accountId;
     this.totalIncome = builder.totalIncome;
     this.totalExpense = builder.totalExpense;
+    this.totalAmount = builder.totalAmount;
     this.compare = builder.compare;
   }
 
@@ -80,6 +87,10 @@ public class AccountAnalyticsDistributionDto implements Serializable {
 
   public AmountDto getTotalExpense() {
     return totalExpense;
+  }
+
+  public AmountDto getTotalAmount() {
+    return totalAmount;
   }
 
   public AccountAnalyticsDistributionDto getCompare() {

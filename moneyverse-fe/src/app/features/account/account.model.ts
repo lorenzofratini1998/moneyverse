@@ -18,21 +18,6 @@ export interface AccountCategory {
   description: string
 }
 
-export interface AccountFormData {
-  accountName: string,
-  accountDescription?: string,
-  accountCategory: string,
-  currency: string,
-  balance: number,
-  balanceTarget?: number
-  isDefault?: boolean
-}
-
-export interface AccountForm {
-  accountId?: string,
-  formData: AccountFormData
-}
-
 export interface AccountRequest {
   userId?: string;
   accountName?: string;
@@ -42,16 +27,6 @@ export interface AccountRequest {
   accountDescription?: string;
   currency?: string;
   isDefault?: boolean
-}
-
-export interface AccountSummary {
-  totalBalance: number;
-  categories: AccountCategorySummary[];
-}
-
-export interface AccountCategorySummary {
-  categoryName: string;
-  categoryBalance: number;
 }
 
 export interface AccountCriteria {

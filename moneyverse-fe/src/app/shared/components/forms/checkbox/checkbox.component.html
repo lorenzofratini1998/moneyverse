@@ -1,0 +1,13 @@
+<div class="flex items-center">
+  <label [for]="id()" class="mr-2">{{ label() }}</label>
+  <p-checkbox
+    [inputId]="id()"
+    [binary]="binary()"
+    [indeterminate]="value === null"
+    [ngModel]="value"
+    (onChange)="onCheckboxChange($event)">
+  </p-checkbox>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+  }
+</div>

@@ -1,0 +1,14 @@
+<div class="card">
+  <div>
+    <span class="block text-muted-color font-medium truncate" [title]="label()">{{ label() }}</span>
+    <div class="font-medium text-xl truncate" [class]="variation() ? 'flex items-center gap-1' : ''" [title]="value()">
+      <span>{{ value() }}</span>
+      @if (variation(); as variation) {
+        <span [class.text-green-500]="variation > 0" [class.text-red-500]="variation < 0"
+              class="text-sm whitespace-nowrap">
+              {{ variation | percent: '1.2-2' }}
+            </span>
+      }
+    </div>
+  </div>
+</div>

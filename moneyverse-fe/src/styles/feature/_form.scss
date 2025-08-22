@@ -1,0 +1,18 @@
+.form-control-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.form-dialog-content-container {
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+.form-dialog-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}

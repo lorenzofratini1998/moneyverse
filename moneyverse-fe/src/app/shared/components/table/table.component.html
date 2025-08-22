@@ -1,0 +1,96 @@
+<p-table
+  [alwaysShowPaginator]="config().alwaysShowPaginator ?? true"
+  [currentPageReportTemplate]="config().currentPageReportTemplate ?? '{currentPage} of {totalPages}'"
+  [customSort]="config().customSort ?? false"
+  [dataKey]="config().dataKey?.toString() ?? undefined"
+  [lazy]="config().lazy ?? false"
+  [paginator]="config().paginator ?? false"
+  [rows]="config().rows ?? undefined"
+  [rowsPerPageOptions]="config().rowsPerPageOptions ?? undefined"
+  [scrollable]="config().scrollable ?? false"
+  [scrollHeight]="config().scrollHeight ?? undefined"
+  [showCurrentPageReport]="config().showCurrentPageReport ?? false"
+  [sortField]="config().sortField ?? undefined"
+  [sortOrder]="config().sortOrder ?? 1"
+  [stripedRows]="config().stripedRows ?? false"
+  [styleClass]="config().styleClass ?? undefined"
+  [tableStyle]="config().tableStyle ?? undefined"
+  [totalRecords]="config().totalRecords ?? 0"
+  [value]="data()"
+  (onPage)="onPage.emit($event)"
+  (onSort)="onSort.emit($event)"
+  (onRowExpand)="onRowExpand.emit($event)"
+  (onRowCollapse)="onRowCollapse.emit($event)"
+>
+  <ng-template #header>
+    <tr>
+      @if (rowExpandTemplate()) {
+        <th style="width: 5%"></th>
+      }
+      @for (col of columns(); track col.field) {
+        <th [id]="col.field"
+            [pSortableColumn]="col.sortable ? col.field.toString() : undefined"
+            [class]="col.class ?? ''">
+          {{ col.header }}
+          @if (data().length > 1 && col.sortable) {
+            <p-sortIcon [field]="col.field.toString()"/>
+          }
+        </th>
+      }
+      @if (actions()) {
+        <th id="actions"></th>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-item let-expanded="expanded">
+    <tr>
+      @if (rowExpandTemplate()) {
+        <td>
+          <p-button
+            pRipple
+            [pRowToggler]="item"
+            [text]="true"
+            [rounded]="true"
+          >
+            <app-svg [name]="expanded ? icons.CHEVRON_DOWN : icons.CHEVRON_RIGHT"/>
+          </p-button>
+        </td>
+      }
+      @for (col of columns(); track col.field) {
+        <td>
+          @if (col.cellTemplate || getTemplateForField(col.field); as template) {
+            <ng-container *ngTemplateOutlet="template; context: { $implicit: item }"></ng-container>
+          } @else {
+            {{ item[col.field] }}
+          }
+        </td>
+      }
+      @if (actions()) {
+        <td>
+          <div class="flex justify-end items-center gap-2">
+            <ng-container *ngTemplateOutlet="actions(); context: { $implicit: item }"></ng-container>
+          </div>
+        </td>
+      }
+    </tr>
+  </ng-template>
+
+  @if (rowExpandTemplate()) {
+    <ng-template #expandedrow let-item>
+      <tr>
+        <td [attr.colspan]="columns().length + (actions() ? 1 : 0) + 1">
+          <ng-container *ngTemplateOutlet="rowExpandTemplate(); context: { $implicit: item }"></ng-container>
+        </td>
+      </tr>
+    </ng-template>
+  }
+
+  <ng-template #emptymessage>
+    <tr>
+      <td [attr.colspan]="columns().length + (actions() ? 1 : 0)">
+        No data available.
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

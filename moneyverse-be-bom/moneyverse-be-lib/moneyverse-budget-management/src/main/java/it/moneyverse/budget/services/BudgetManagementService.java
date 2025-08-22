@@ -1,5 +1,6 @@
 package it.moneyverse.budget.services;
 
+import it.moneyverse.budget.enums.BudgetSseEventEnum;
 import it.moneyverse.budget.model.dto.BudgetCriteria;
 import it.moneyverse.budget.model.dto.BudgetRequestDto;
 import it.moneyverse.budget.model.dto.BudgetUpdateRequestDto;
@@ -14,6 +15,8 @@ import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -33,16 +36,22 @@ public class BudgetManagementService implements BudgetService {
   private final BudgetRepository budgetRepository;
   private final CurrencyServiceClient currencyServiceClient;
   private final BudgetEventPublisher eventPublisher;
+  private final SecurityService securityService;
+  private final SseEventService eventService;
 
   public BudgetManagementService(
       CategoryRepository categoryRepository,
       BudgetRepository budgetRepository,
       CurrencyServiceClient currencyServiceClient,
-      BudgetEventPublisher eventPublisher) {
+      BudgetEventPublisher eventPublisher,
+      SecurityService securityService,
+      SseEventService eventService) {
     this.categoryRepository = categoryRepository;
     this.budgetRepository = budgetRepository;
     this.currencyServiceClient = currencyServiceClient;
     this.eventPublisher = eventPublisher;
+    this.securityService = securityService;
+    this.eventService = eventService;
   }
 
   @Override
@@ -53,7 +62,12 @@ public class BudgetManagementService implements BudgetService {
     checkIfBudgetAlreadyExists(request.categoryId(), request.startDate(), request.endDate());
     LOGGER.info("Creating budget for category '{}'", request.categoryId());
     Budget budget = BudgetMapper.toBudget(request, category);
-    return BudgetMapper.toBudgetDto(budgetRepository.save(budget));
+    BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        BudgetSseEventEnum.BUDGET_CREATED.name(),
+        result.getBudgetId());
+    return result;
   }
 
   private Category findCategoryById(UUID categoryId) {
@@ -97,6 +111,10 @@ public class BudgetManagementService implements BudgetService {
     BudgetDto result = BudgetMapper.toBudgetDto(budgetRepository.save(budget));
     LOGGER.info(
         "Updated budget {} for user {}", result.getBudgetId(), budget.getCategory().getUserId());
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        BudgetSseEventEnum.BUDGET_UPDATED.name(),
+        result.getBudgetId());
     return result;
   }
 
@@ -107,6 +125,10 @@ public class BudgetManagementService implements BudgetService {
     budgetRepository.delete(budget);
     eventPublisher.publish(budget, EventTypeEnum.DELETE);
     LOGGER.info("Deleted budget {} for user {}", budgetId, budget.getCategory().getUserId());
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        BudgetSseEventEnum.BUDGET_DELETED.name(),
+        budgetId);
   }
 
   @Override
@@ -138,6 +160,8 @@ public class BudgetManagementService implements BudgetService {
             : currencyServiceClient.convertAmount(amount, currency, budget.getCurrency(), date);
     budget.setAmount(operation.apply(budget.getAmount(), effectiveAmount));
     budgetRepository.save(budget);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(), BudgetSseEventEnum.BUDGET_DELETED.name(), budget);
   }
 
   private Budget findBudgetById(UUID budgetId) {

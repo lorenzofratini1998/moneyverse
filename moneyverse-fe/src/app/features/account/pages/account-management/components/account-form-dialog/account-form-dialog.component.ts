@@ -1,152 +1,46 @@
-import {Component, inject, input, output, signal} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Account, AccountCategory, AccountFormData} from '../../../../account.model';
-import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
-import {IconsEnum} from '../../../../../../shared/models/icons.model';
-import {CurrencyStore} from '../../../../../../shared/stores/currency.store';
-import {PreferenceStore} from '../../../../../../shared/stores/preference.store';
-import {FloatLabel} from 'primeng/floatlabel';
-import {InputText} from 'primeng/inputtext';
-import {Message} from 'primeng/message';
-import {Select} from 'primeng/select';
-import {InputNumber} from 'primeng/inputnumber';
-import {LanguageService} from '../../../../../../shared/services/language.service';
-import {ToggleSwitch} from 'primeng/toggleswitch';
-import {Dialog} from 'primeng/dialog';
-import {Button} from 'primeng/button';
+import {Component, computed, effect, output, viewChild} from '@angular/core';
+import {ReactiveFormsModule} from '@angular/forms';
+import {Account} from '../../../../account.model';
+import {AccountFormComponent} from '../account-form/account-form.component';
+import {FormDialogComponent} from '../../../../../../shared/components/dialogs/form-dialog/form-dialog.component';
+import {DynamicDialogConfig} from 'primeng/dynamicdialog';
+import {AccountFormData} from '../../models/form.model';
 
 @Component({
   selector: 'app-account-form-dialog',
   imports: [
     ReactiveFormsModule,
-    SvgComponent,
-    FloatLabel,
-    InputText,
-    Message,
-    Select,
-    InputNumber,
-    ToggleSwitch,
-    Dialog,
-    Button,
+    FormDialogComponent,
+    AccountFormComponent
   ],
-  templateUrl: './account-form-dialog.component.html',
-  styleUrl: './account-form-dialog.component.scss'
+  template: `
+    <app-form-dialog
+      [form]="form()"
+      [config]="config()">
+      <app-account-form [selectedItem]="formDialog().selectedItem()"/>
+    </app-form-dialog>
+  `
 })
 export class AccountFormDialogComponent {
-  protected readonly Icons = IconsEnum;
-  protected readonly currencyStore = inject(CurrencyStore);
-  protected readonly preferenceStore = inject(PreferenceStore);
-  protected readonly languageService = inject(LanguageService);
-  private readonly fb = inject(FormBuilder);
-  accounts = input.required<Account[]>();
-  categories = input.required<AccountCategory[]>();
-  isOpen = input<boolean>(false);
-  protected _accountToEdit = signal<Account | null>(null);
-  protected _isOpen = false;
 
-  accountToEdit = this._accountToEdit.asReadonly();
-  save = output<AccountFormData>();
+  onSubmit = output<AccountFormData>();
 
-  accountForm: FormGroup;
+  protected form = viewChild.required(AccountFormComponent);
+  protected formDialog = viewChild.required(FormDialogComponent<Account, AccountFormData>);
+
+  config = computed<DynamicDialogConfig>(() => ({
+    header: this.formDialog().selectedItem() ? 'Edit Account' : 'Add Account',
+    styleClass: 'w-[90vw] sm:w-[80vw] md:w-[60vw] lg:w-[40vw] lg:max-w-[550px]'
+  }));
 
   constructor() {
-    this.accountForm = this.createForm();
+    effect(() => {
+      this.form().onSubmit.subscribe(data => this.onSubmit.emit(data));
+    })
   }
 
-  protected set currency(currency: string) {
-    this.accountForm.get('currency')?.setValue(currency);
+  open(item?: Account) {
+    this.formDialog().open(item);
   }
 
-  open(account?: Account) {
-    this._isOpen = true;
-    if (account) {
-      this._accountToEdit.set(account);
-      this.patchForm(account);
-    } else {
-      this._accountToEdit.set(null);
-      this.reset();
-    }
-  }
-
-  close() {
-    this._isOpen = false;
-    this._accountToEdit.set(null);
-    this.reset();
-  }
-
-  private createForm(): FormGroup {
-    return this.fb.group({
-      accountName: ['', Validators.required],
-      accountDescription: [null],
-      accountCategory: ['', Validators.required],
-      balance: [0.00],
-      target: [null],
-      currency: ['', Validators.required],
-      isDefault: [null]
-    });
-  }
-
-  private patchForm(account: Account): void {
-    this.accountForm.patchValue({
-        accountName: account.accountName,
-        accountDescription: account.accountDescription,
-        accountCategory: account.accountCategory,
-        balance: account.balance.toFixed(2),
-        target: account.balanceTarget ? account.balanceTarget.toFixed(2) : null,
-        currency: account.currency,
-        isDefault: account.default
-      }
-    )
-    if (this.accounts().length <= 1) {
-      const currentDefault = this.accountForm.get('isDefault')?.value;
-      this.accountForm.get('isDefault')?.disable({onlySelf: true});
-      this.accountForm.get('isDefault')?.setValue(currentDefault, {emitEvent: false});
-    }
-  }
-
-  protected saveAccount(): void {
-    if (this.accountForm.valid) {
-      const formValue = this.accountForm.getRawValue();
-      this.save.emit({
-        accountName: formValue.accountName,
-        accountDescription: formValue.accountDescription,
-        accountCategory: formValue.accountCategory,
-        balance: formValue.balance ?? 0.0,
-        balanceTarget: formValue.target,
-        currency: formValue.currency,
-        isDefault: formValue.isDefault
-      });
-      this.close();
-    } else {
-      Object.keys(this.accountForm.controls).forEach(key => {
-        const control = this.accountForm.get(key);
-        control?.markAsTouched();
-        control?.markAsDirty();
-      });
-    }
-  }
-
-  reset() {
-    this.accountForm.reset({
-      accountName: '',
-      accountDescription: null,
-      accountCategory: '',
-      balance: 0.0,
-      target: null,
-      currency: this.preferenceStore.userCurrency(),
-      isDefault: null
-    });
-    this.accountForm.markAsPristine();
-    this.accountForm.markAsUntouched();
-  }
-
-  protected cancel(): void {
-    this.reset();
-    this.close();
-  }
-
-  protected isInvalid(controlName: string) {
-    const control = this.accountForm.get(controlName);
-    return !!control && control.invalid && (control.dirty || control.touched);
-  }
 }

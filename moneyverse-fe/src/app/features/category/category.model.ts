@@ -18,16 +18,9 @@ export interface CategoryRequest {
   style?: Style
 }
 
-export interface CategoryFormData {
-  categoryName: string,
-  parentCategory?: string,
-  description?: string,
-  style: Style
-}
-
-export interface CategoryForm {
-  categoryId?: string,
-  formData: CategoryFormData
+export interface CategoryCriteria {
+  name?: string,
+  parentCategories?: string[]
 }
 
 export interface Budget {
@@ -47,18 +40,4 @@ export interface BudgetRequest {
   amount?: number,
   budgetLimit: number,
   currency: string
-}
-
-export interface BudgetFormData {
-  startDate: Date,
-  endDate: Date,
-  category: string,
-  budgetLimit: number,
-  amount?: number,
-  currency: string
-}
-
-export interface BudgetForm {
-  budgetId?: string,
-  formData: BudgetFormData
 }

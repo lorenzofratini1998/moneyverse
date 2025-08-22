@@ -13,6 +13,6 @@ export const environment = {
     accountManagementUrl: 'http://localhost:8082/accountsManagement/api/v1',
     budgetManagementUrl: 'http://localhost:8083/budgetsManagement/api/v1',
     transactionManagementUrl: 'http://localhost:8084/transactionsManagement/api/v1',
-    dashboardUrl: 'http://localhost:8084/dashboard/api/v1'
+    analyticsUrl: 'http://localhost:8085/analytics/api/v1'
   }
 }

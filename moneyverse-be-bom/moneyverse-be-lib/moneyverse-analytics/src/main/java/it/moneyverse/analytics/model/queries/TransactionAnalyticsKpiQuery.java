@@ -55,9 +55,9 @@ public class TransactionAnalyticsKpiQuery
         SELECT
             count(TRANSACTION_ID) AS NUMBER_OF_TRANSACTIONS,
             sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
-            sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0) AS TOTAL_EXPENSE,
-            avg(NORMALIZED_AMOUNT) AS AVERAGE_AMOUNT,
-            quantile(0.9)(NORMALIZED_AMOUNT) AS PERCENTILE_90,
+            abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
+            if(count() > 0, avg(NORMALIZED_AMOUNT), 0) AS AVERAGE_AMOUNT,
+            if(count() > 0, quantile(0.9)(NORMALIZED_AMOUNT), 0) AS PERCENTILE_90,
             'CURRENT' AS PERIOD_TYPE
         FROM filtered_transactions
         WHERE DATE BETWEEN :startDate AND :endDate
@@ -67,9 +67,9 @@ public class TransactionAnalyticsKpiQuery
         SELECT
             count(TRANSACTION_ID) AS NUMBER_OF_TRANSACTIONS,
             sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
-            sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0) AS TOTAL_EXPENSE,
-            avg(NORMALIZED_AMOUNT) AS AVERAGE_AMOUNT,
-            quantile(0.9)(NORMALIZED_AMOUNT) AS PERCENTILE_90,
+            abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
+            if(count() > 0, avg(NORMALIZED_AMOUNT), 0) AS AVERAGE_AMOUNT,
+            if(count() > 0, quantile(0.9)(NORMALIZED_AMOUNT), 0) AS PERCENTILE_90,
             'COMPARE' AS PERIOD_TYPE
         FROM filtered_transactions
         WHERE :hasComparePeriod = 1 AND DATE BETWEEN :compareStartDate AND :compareEndDate

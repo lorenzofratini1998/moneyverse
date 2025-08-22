@@ -1,9 +1,6 @@
 package it.moneyverse.analytics.services.strategies;
 
-import it.moneyverse.analytics.model.dto.AmountDto;
-import it.moneyverse.analytics.model.dto.CategoryAnalyticsTrendDto;
-import it.moneyverse.analytics.model.dto.FilterDto;
-import it.moneyverse.analytics.model.dto.PeriodDto;
+import it.moneyverse.analytics.model.dto.*;
 import it.moneyverse.analytics.model.projections.CategoryAnalyticsTrendProjection;
 import it.moneyverse.analytics.utils.AnalyticsUtils;
 import java.math.BigDecimal;
@@ -20,73 +17,125 @@ public class CategoryAnalyticsTrendStrategy
       List<CategoryAnalyticsTrendProjection> currentData,
       List<CategoryAnalyticsTrendProjection> compareData,
       FilterDto parameters) {
+
+    if (currentData == null || currentData.isEmpty()) {
+      return Collections.emptyList();
+    }
+
     Map<UUID, List<CategoryAnalyticsTrendProjection>> currentDataMap =
         groupByCategoryId(currentData);
     Map<UUID, List<CategoryAnalyticsTrendProjection>> compareDataMap =
         groupByCategoryId(compareData);
-    List<CategoryAnalyticsTrendDto> result = new ArrayList<>();
 
-    for (UUID categoryId : currentDataMap.keySet()) {
-      List<AmountDto> compareAmounts = null;
-      if (parameters.comparePeriod() != null && compareDataMap.containsKey(categoryId)) {
-        compareAmounts =
-            compareDataMap.get(categoryId).stream()
-                .map(
-                    p ->
-                        AmountDto.builder()
-                            .withPeriod(new PeriodDto(p.startDate(), p.endDate()))
-                            .withAmount(p.totalAmount())
-                            .build())
-                .toList();
-      }
-      CategoryAnalyticsTrendDto compareDto =
-          compareAmounts != null
-              ? CategoryAnalyticsTrendDto.builder()
-                  .withPeriod(parameters.comparePeriod())
-                  .withCategoryId(categoryId)
-                  .withData(compareAmounts)
-                  .build()
-              : null;
+    return currentDataMap.keySet().stream()
+        .map(
+            categoryId ->
+                buildCategoryTrendDto(categoryId, currentDataMap, compareDataMap, parameters))
+        .collect(Collectors.toList());
+  }
 
-      Map<PeriodDto, BigDecimal> compareMap =
-          compareDataMap.getOrDefault(categoryId, Collections.emptyList()).stream()
-              .collect(
-                  Collectors.toMap(
-                      p -> new PeriodDto(p.startDate(), p.endDate()),
-                      CategoryAnalyticsTrendProjection::totalAmount));
+  private CategoryAnalyticsTrendDto buildCategoryTrendDto(
+      UUID categoryId,
+      Map<UUID, List<CategoryAnalyticsTrendProjection>> currentDataMap,
+      Map<UUID, List<CategoryAnalyticsTrendProjection>> compareDataMap,
+      FilterDto parameters) {
+    List<CategoryAnalyticsTrendProjection> currentData = currentDataMap.get(categoryId);
+    List<CategoryAnalyticsTrendProjection> compareData =
+        compareDataMap.getOrDefault(categoryId, Collections.emptyList());
 
-      List<AmountDto> currentAmounts =
-          currentDataMap.get(categoryId).stream()
-              .map(
-                  p -> {
-                    PeriodDto period = new PeriodDto(p.startDate(), p.endDate());
-                    BigDecimal amount = p.totalAmount();
-                    return AmountDto.builder()
-                        .withPeriod(period)
-                        .withAmount(amount)
-                        .withVariation(
-                            AnalyticsUtils.calculateTrend(
-                                amount, compareMap.getOrDefault(period, null)))
-                        .build();
-                  })
-              .toList();
+    CategoryAnalyticsTrendDto compareDto =
+        buildCompareDtoIfNeeded(categoryId, compareData, parameters);
+    List<ExpenseIncomeDto> currentAmounts =
+        buildCurrentAmountsWithVariations(currentData, compareData);
 
-      CategoryAnalyticsTrendDto currentDto =
-          CategoryAnalyticsTrendDto.builder()
-              .withPeriod(parameters.period())
-              .withCategoryId(categoryId)
-              .withData(currentAmounts)
-              .withCompare(compareDto)
-              .build();
-      result.add(currentDto);
+    return CategoryAnalyticsTrendDto.builder()
+        .withPeriod(parameters.period())
+        .withCategoryId(categoryId)
+        .withData(currentAmounts)
+        .withCompare(compareDto)
+        .build();
+  }
+
+  private CategoryAnalyticsTrendDto buildCompareDtoIfNeeded(
+      UUID categoryId, List<CategoryAnalyticsTrendProjection> compareData, FilterDto parameters) {
+    if (parameters.comparePeriod() == null || compareData.isEmpty()) {
+      return null;
     }
-    return result;
+
+    List<ExpenseIncomeDto> compareAmounts =
+        compareData.stream()
+            .map(this::convertProjectionToExpenseIncomeDto)
+            .collect(Collectors.toList());
+
+    return CategoryAnalyticsTrendDto.builder()
+        .withPeriod(parameters.comparePeriod())
+        .withCategoryId(categoryId)
+        .withData(compareAmounts)
+        .build();
+  }
+
+  private List<ExpenseIncomeDto> buildCurrentAmountsWithVariations(
+      List<CategoryAnalyticsTrendProjection> currentData,
+      List<CategoryAnalyticsTrendProjection> compareData) {
+    List<ExpenseIncomeDto> amounts = new ArrayList<>();
+
+    for (int i = 0; i < currentData.size(); i++) {
+      CategoryAnalyticsTrendProjection current = currentData.get(i);
+      CategoryAnalyticsTrendProjection compare = i < compareData.size() ? compareData.get(i) : null;
+
+      amounts.add(createExpenseIncomeDtoWithVariation(current, compare));
+    }
+
+    return amounts;
+  }
+
+  private ExpenseIncomeDto createExpenseIncomeDtoWithVariation(
+      CategoryAnalyticsTrendProjection current, CategoryAnalyticsTrendProjection compare) {
+    BigDecimal currentExpense =
+        current.totalExpense() != null ? current.totalExpense() : BigDecimal.ZERO;
+    BigDecimal currentIncome =
+        current.totalIncome() != null ? current.totalIncome() : BigDecimal.ZERO;
+    BigDecimal currentTotal =
+        current.totalAmount() != null ? current.totalAmount() : BigDecimal.ZERO;
+
+    BigDecimal compareExpense =
+        compare != null && compare.totalExpense() != null ? compare.totalExpense() : null;
+    BigDecimal compareIncome =
+        compare != null && compare.totalIncome() != null ? compare.totalIncome() : null;
+    BigDecimal compareTotal =
+        compare != null && compare.totalAmount() != null ? compare.totalAmount() : null;
+
+    BigDecimal expenseVariation = AnalyticsUtils.calculateTrend(currentExpense, compareExpense);
+    BigDecimal incomeVariation = AnalyticsUtils.calculateTrend(currentIncome, compareIncome);
+    BigDecimal totalVariation = AnalyticsUtils.calculateTrend(currentTotal, compareTotal);
+
+    return ExpenseIncomeDto.builder()
+        .withPeriod(new PeriodDto(current.startDate(), current.endDate()))
+        .withExpense(buildAmountDto(currentExpense, expenseVariation))
+        .withIncome(buildAmountDto(currentIncome, incomeVariation))
+        .withTotal(buildAmountDto(currentTotal, totalVariation))
+        .build();
+  }
+
+  private ExpenseIncomeDto convertProjectionToExpenseIncomeDto(
+      CategoryAnalyticsTrendProjection projection) {
+    return ExpenseIncomeDto.builder()
+        .withPeriod(new PeriodDto(projection.startDate(), projection.endDate()))
+        .withExpense(buildAmountDto(projection.totalExpense(), null))
+        .withIncome(buildAmountDto(projection.totalIncome(), null))
+        .withTotal(buildAmountDto(projection.totalAmount(), null))
+        .build();
+  }
+
+  private AmountDto buildAmountDto(BigDecimal amount, BigDecimal variation) {
+    return AmountDto.builder().withAmount(amount).withVariation(variation).build();
   }
 
   private Map<UUID, List<CategoryAnalyticsTrendProjection>> groupByCategoryId(
       List<CategoryAnalyticsTrendProjection> data) {
-    if (data == null) return Collections.emptyMap();
-    return data.stream()
-        .collect(Collectors.groupingBy(CategoryAnalyticsTrendProjection::categoryId));
+    return data == null
+        ? Collections.emptyMap()
+        : data.stream()
+            .collect(Collectors.groupingBy(CategoryAnalyticsTrendProjection::categoryId));
   }
 }

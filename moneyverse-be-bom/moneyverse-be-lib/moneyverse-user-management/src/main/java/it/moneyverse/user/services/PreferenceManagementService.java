@@ -1,6 +1,7 @@
 package it.moneyverse.user.services;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceUpdateException;
 import it.moneyverse.core.model.dto.PreferenceDto;
 import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.core.services.CurrencyServiceClient;
@@ -10,6 +11,7 @@ import it.moneyverse.user.model.entities.UserPreference;
 import it.moneyverse.user.model.repositories.PreferenceRepository;
 import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.utils.mapper.PreferenceMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -62,6 +64,29 @@ public class PreferenceManagementService implements PreferenceService {
     return PreferenceMapper.toUserPreference(userId, request, preference);
   }
 
+  @Override
+  @Transactional
+  public List<UserPreferenceDto> updateUserPreference(
+      UUID userId, List<UserPreferenceRequest> request) {
+    userService.checkIfUserExists(userId);
+    LOGGER.info("Updating preference for user with id {}", userId);
+
+    List<UserPreference> userPreferences = new ArrayList<>();
+    for (UserPreferenceRequest userPreferenceRequest : request) {
+      Preference preference = getPreferenceById(userPreferenceRequest.preferenceId());
+      if (!preference.getUpdatable()) {
+        throw new ResourceUpdateException(
+            "Preference %s is not updatable.".formatted(preference.getName()));
+      }
+      UserPreference userPreference =
+          getUserPreferenceByUserIdAndPreferenceName(userId, preference.getName());
+      userPreference.setValue(userPreferenceRequest.value());
+      userPreferences.add(userPreference);
+    }
+
+    return PreferenceMapper.toUserPreferenceDto(userPreferenceRepository.saveAll(userPreferences));
+  }
+
   private Preference getPreferenceById(UUID preferenceId) {
     return preferenceRepository
         .findById(preferenceId)
@@ -91,9 +116,13 @@ public class PreferenceManagementService implements PreferenceService {
   @Override
   @Transactional(readOnly = true)
   public UserPreferenceDto getUserPreference(UUID userId, String key) {
+    return PreferenceMapper.toUserPreferenceDto(
+        getUserPreferenceByUserIdAndPreferenceName(userId, key));
+  }
+
+  private UserPreference getUserPreferenceByUserIdAndPreferenceName(UUID userId, String key) {
     return userPreferenceRepository
         .findUserPreferenceByUserIdAndPreference_Name(userId, key)
-        .map(PreferenceMapper::toUserPreferenceDto)
         .orElseThrow(
             () ->
                 new ResourceNotFoundException(

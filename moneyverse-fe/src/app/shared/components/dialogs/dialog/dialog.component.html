@@ -1,0 +1,27 @@
+<p-dialog
+  [modal]="config().modal ?? true"
+  [resizable]="config().resizable ?? false"
+  [draggable]="config().draggable ?? false"
+  [maximizable]="config().maximizable ?? false"
+  appendTo="body"
+  [visible]="isOpen()"
+  (visibleChange)="!$event && close()"
+  (onHide)="close()"
+  [maskStyleClass]="config().maskStyleClass ?? 'backdrop-blur-sm'"
+  [blockScroll]="true"
+  [styleClass]="config().styleClass"
+>
+
+  <ng-template #header>
+    <ng-content select="[header]"></ng-content>
+  </ng-template>
+
+  <ng-template #content>
+    <ng-content select="[content]"></ng-content>
+  </ng-template>
+
+  <ng-template #footer>
+    <ng-content select="[footer]"></ng-content>
+  </ng-template>
+
+</p-dialog>

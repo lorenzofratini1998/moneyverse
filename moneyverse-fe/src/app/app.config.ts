@@ -17,16 +17,28 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {provideEchartsCore} from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import {SVGRenderer} from 'echarts/renderers';
-import {GridComponent, LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components';
-import {BarChart, LineChart, PieChart} from 'echarts/charts';
+import {
+  GridComponent,
+  LegendComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent
+} from 'echarts/components';
+import {BarChart, GaugeChart, LineChart, PieChart} from 'echarts/charts';
 import {provideAngularSvgIcon} from 'angular-svg-icon';
 import {LoadingService} from './shared/services/loading.service';
 import {finalize} from 'rxjs';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {providePrimeNG} from 'primeng/config';
-import {MoneyversePreset} from '../assets/themes/moneyverse-preset';
+import {MoneyversePreset} from '../styles/themes/moneyverse-preset';
+import {ConfirmationService, MessageService} from 'primeng/api';
+import {LucideAngularModule} from 'lucide-angular';
+import {UserDateFormatPipe} from './shared/pipes/user-date-format.pipe';
+import {CurrencyPipe} from '@angular/common';
 
-echarts.use([TitleComponent, TooltipComponent, LegendComponent, GridComponent, PieChart, BarChart, LineChart, SVGRenderer]);
+echarts.use([TitleComponent, TooltipComponent, LegendComponent, GridComponent, ToolboxComponent, MarkLineComponent, MarkAreaComponent, PieChart, BarChart, LineChart, GaugeChart, SVGRenderer]);
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
   new TranslateHttpLoader(http);
@@ -53,27 +65,21 @@ export const appConfig: ApplicationConfig = {
       loadingInterceptor
     ])),
     importProvidersFrom([TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: httpLoaderFactory,
-        deps: [HttpClient],
-      },
-    })]),
+        loader: {
+          provide: TranslateLoader,
+          useFactory: httpLoaderFactory,
+          deps: [HttpClient],
+        },
+      })],
+      LucideAngularModule.pick({}),
+    ),
     provideEchartsCore({echarts}),
     provideAngularSvgIcon(),
     provideAnimationsAsync(),
-    providePrimeNG({
-      theme: {
-        preset: MoneyversePreset,
-        options: {
-          prefix: 'p',
-          darkModeSelector: '.p-dark',
-          cssLayer: {
-            name: 'primeng',
-            order: 'theme, base, primeng'
-          }
-        }
-      }
-    })
+    providePrimeNG({theme: {preset: MoneyversePreset, options: {darkModeSelector: '.app-dark'}}}),
+    MessageService,
+    ConfirmationService,
+    UserDateFormatPipe,
+    CurrencyPipe
   ]
 };

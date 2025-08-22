@@ -1,49 +1,49 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, linkedSignal, viewChild} from '@angular/core';
 import {Transfer} from '../../../../transaction.model';
 import {TableModule} from 'primeng/table';
-import {CurrencyPipe} from '../../../../../../shared/pipes/currency.pipe';
-import {Account} from '../../../../../account/account.model';
-import {AccountStore} from '../../../../../account/account.store';
-import {PreferenceStore} from '../../../../../../shared/stores/preference.store';
-import {Dialog} from 'primeng/dialog';
+import {DialogComponent} from '../../../../../../shared/components/dialogs/dialog/dialog.component';
+import {TransferTableComponent} from '../transfer-table/transfer-table.component';
+import {AccountStore} from '../../../../../account/services/account.store';
+import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
 
 @Component({
   selector: 'app-transfer-table-dialog',
   imports: [
     TableModule,
-    CurrencyPipe,
-    Dialog
+    DialogComponent,
+    TransferTableComponent,
+    SvgComponent
   ],
-  templateUrl: './transfer-table-dialog.component.html',
-  styleUrl: './transfer-table-dialog.component.scss'
+  template: `
+    <app-dialog [config]="config()">
+      <div header>
+        <h3 class="flex items-center gap-2">
+          <app-svg name="arrow-left-right" class="size-6"/>
+          <span>{{ config().header ?? '' }}</span>
+        </h3>
+      </div>
+      @if (dialog().selectedItem(); as selectedItem) {
+        <div content>
+          <app-transfer-table [transfer]="selectedItem"/>
+        </div>
+      }
+    </app-dialog>
+  `,
 })
 export class TransferTableDialogComponent {
 
-  protected readonly preferenceStore = inject(PreferenceStore);
+  protected dialog = viewChild.required<DialogComponent<Transfer>>(DialogComponent<Transfer>);
+
   private readonly accountStore = inject(AccountStore);
 
-  protected _isOpen = false
-  protected transfer = signal<Transfer | null>(null);
+  private accountFrom = computed(() => this.accountStore.accountsMap().get(this.dialog().selectedItem()?.transactionFrom.accountId!)?.accountName);
+  private accountTo = computed(() => this.accountStore.accountsMap().get(this.dialog().selectedItem()?.transactionTo.accountId!)?.accountName);
 
-  protected transactions = computed(() => {
-    const _transfer = this.transfer();
-    if (!_transfer) {
-      return [];
-    }
-    return [_transfer.transactionFrom, _transfer.transactionTo];
-  })
+  config = linkedSignal(() => ({
+    header: `Transfer from ${this.accountFrom()} to ${this.accountTo()}`,
+  }))
 
-  accountsMap = computed<Map<string, Account>>(() => {
-    return new Map(this.accountStore.accounts().map(account => [account.accountId, account]));
-  })
-
-  open(transfer: Transfer) {
-    this.transfer.set(transfer);
-    this._isOpen = true;
-  }
-
-  close() {
-    this._isOpen = false;
-    this.transfer.set(null);
+  open(item?: Transfer) {
+    this.dialog().open(item);
   }
 }

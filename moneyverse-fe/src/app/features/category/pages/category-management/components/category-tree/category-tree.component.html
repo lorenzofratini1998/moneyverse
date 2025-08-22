@@ -1,0 +1,8 @@
+<p-organization-chart [value]="nodes()" [collapsible]="true">
+  <ng-template let-node pTemplate="default">
+    <div class="flex items-center gap-2">
+      <app-svg [name]="node.data.style.icon"/>
+      <span>{{ node.data.categoryName }}</span>
+    </div>
+  </ng-template>
+</p-organization-chart>

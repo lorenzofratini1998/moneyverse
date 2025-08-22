@@ -1,0 +1,44 @@
+@if (item().items) {
+  <li>
+    <div class="layout-menuitem-parent">
+      <div class="layout-menuitem-content">
+        <app-svg [name]="item().icon!" class="size-6"/>
+        <a
+          [routerLink]="item().routerLink"
+          routerLinkActive="active-route"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="flex-1 font-medium"
+        >
+          {{ item().label! | translate }}
+        </a>
+      </div>
+      <button
+        (click)="toggleSubmenu()"
+        class="layout-submenu-toggler-btn"
+        [attr.aria-expanded]="isExpanded()"
+      >
+        <i class="pi pi-angle-down layout-submenu-toggler"
+           [class.expanded]="isExpanded()"></i>
+      </button>
+    </div>
+
+    <ul class="layout-submenu" [class.expanded]="isExpanded()" [class.collapsed]="!isExpanded()">
+      @for (child of item().items; track $index) {
+        <app-menu-item [item]="child" [isChild]="true"></app-menu-item>
+      }
+    </ul>
+  </li>
+} @else {
+  <li>
+    <a
+      [routerLink]="item().routerLink"
+      routerLinkActive="active-route"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="layout-menuitem-link"
+      [class.parent-level]="!isChild"
+    >
+      <app-svg [name]="item().icon!" class="size-6"/>
+      <span class="font-medium">{{ item().label! | translate }}</span>
+    </a>
+  </li>
+}

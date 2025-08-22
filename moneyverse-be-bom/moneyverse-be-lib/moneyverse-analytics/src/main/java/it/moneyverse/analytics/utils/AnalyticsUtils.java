@@ -9,10 +9,14 @@ import java.util.function.Function;
 public class AnalyticsUtils {
 
   public static BigDecimal calculateTrend(BigDecimal current, BigDecimal compare) {
-    if (compare == null || compare.equals(BigDecimal.ZERO)) {
+    if (current == null || compare == null || compare.compareTo(BigDecimal.ZERO) == 0) {
       return null;
     }
-    return current.subtract(compare).divide(compare.abs(), 4, RoundingMode.HALF_UP);
+    try {
+      return current.subtract(compare).divide(compare, 4, RoundingMode.HALF_UP);
+    } catch (ArithmeticException e) {
+      return null;
+    }
   }
 
   public static <T> CountDto getCount(T current, T compare, Function<T, Integer> extractor) {

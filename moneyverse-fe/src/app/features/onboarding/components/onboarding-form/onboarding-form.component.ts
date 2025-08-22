@@ -1,44 +1,81 @@
-import {Component, effect, inject, input, output} from '@angular/core';
-import {NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CurrencyDto} from "../../../../shared/models/currencyDto";
-import {DateFormat, LanguageDto, UserPreferenceDto} from "../../../../shared/models/preference.model";
+import {Component, computed, effect, inject, input, output} from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  DateFormat,
+  Language,
+  PreferenceKey,
+  UserPreference,
+  UserPreferenceFormData
+} from "../../../../shared/models/preference.model";
+import {CurrencySelectComponent} from '../../../../shared/components/forms/currency-select/currency-select.component';
+import {SelectComponent} from '../../../../shared/components/forms/select/select.component';
+import {SubmitButtonComponent} from '../../../../shared/components/forms/submit-button/submit-button.component';
 
 @Component({
   selector: 'app-onboarding-form',
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CurrencySelectComponent,
+    SelectComponent,
+    SubmitButtonComponent
   ],
   templateUrl: './onboarding-form.component.html'
 })
 export class OnboardingFormComponent {
 
-  private readonly fb = inject(NonNullableFormBuilder);
-  currencies = input.required<CurrencyDto[]>()
-  languages = input.required<LanguageDto[]>()
-  dateFormats = input.required<DateFormat[]>()
-  userCurrency = input<UserPreferenceDto>()
-  userLanguage = input<UserPreferenceDto>()
-  userDateFormat = input<UserPreferenceDto>()
-  formSubmit = output<any>();
+  languages = input.required<Language[]>();
+  dateFormats = input.required<DateFormat[]>();
+  userPreferences = input.required<UserPreference[]>();
 
-  onboardingForm = this.fb.group({
-    CURRENCY: ['', Validators.required],
-    LANGUAGE: ['', Validators.required],
-    DATE_FORMAT: ['', Validators.required]
-  })
+  onSubmit = output<UserPreferenceFormData>();
+
+  userCurrency = computed(() => this.userPreferences().find(pref => pref.preference.name === PreferenceKey.CURRENCY));
+  userLanguage = computed(() => this.userPreferences().find(pref => pref.preference.name === PreferenceKey.LANGUAGE));
+  userDateFormat = computed(() => this.userPreferences().find(pref => pref.preference.name === PreferenceKey.DATE_FORMAT));
+
+  protected readonly formGroup: FormGroup;
+  private readonly fb = inject(FormBuilder);
+
 
   constructor() {
-    effect(() => {
-      this.onboardingForm.patchValue({
-        CURRENCY: this.userCurrency()?.value ?? this.currencies().find(curr => curr.default)?.code ?? '',
-        LANGUAGE: this.userLanguage()?.value ?? this.languages().find(lang => lang.default)?.isoCode ?? '',
-        DATE_FORMAT: this.userDateFormat()?.value ?? this.dateFormats().find(format => format.default)?.value ?? ''
-      });
-    });
+    this.formGroup = this.createForm();
+    effect(() => this.patchForm());
   }
 
-  save() {
-    this.formSubmit.emit(this.onboardingForm.value);
+  patchForm(): void {
+    this.formGroup.patchValue({
+      currency: this.userCurrency()?.value ?? null,
+      language: this.userLanguage()?.value ?? null,
+      dateFormat: this.userDateFormat()?.value ?? null
+    })
+  }
+
+  protected createForm(): FormGroup {
+    return this.fb.group({
+      currency: [null, Validators.required],
+      language: [null, Validators.required],
+      dateFormat: [null, Validators.required]
+    })
+  }
+
+  submit() {
+    const formValue = this.formGroup.value;
+    if (this.formGroup.valid) {
+      this.onSubmit.emit({
+        currency: {
+          key: PreferenceKey.CURRENCY,
+          value: formValue.currency
+        },
+        language: {
+          key: PreferenceKey.LANGUAGE,
+          value: formValue.language
+        },
+        dateFormat: {
+          key: PreferenceKey.DATE_FORMAT,
+          value: formValue.dateFormat
+        }
+      })
+    }
   }
 }
 

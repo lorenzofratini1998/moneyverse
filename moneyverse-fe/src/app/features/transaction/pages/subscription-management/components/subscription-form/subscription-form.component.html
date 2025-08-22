@@ -1,0 +1,77 @@
+<form [formGroup]="formGroup" class="space-y-4">
+
+  @if (selectedItem()) {
+    <div class="grid grid-cols-1">
+      <div class="flex justify-center items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label for="active-toggle" class="text-sm font-medium">Active</label>
+          <p-toggle-switch id="active-toggle" formControlName="active"/>
+        </div>
+        <app-date-picker
+          formControlName="nextExecutionDate"
+          id="nextExecutionDate-date-picker"
+          label="Next Payment"
+          [disabled]="!formGroup.get('active')?.value"/>
+      </div>
+    </div>
+  }
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-input-text
+      formControlName="subscriptionName"
+      id="subscriptionName-input"
+      label="Subscription Name"
+      [required]="true"/>
+
+    <div class="grid grid-cols-2 gap-4">
+      <app-amount-input-number
+        formControlName="amount"
+        id="amount-input"
+        label="Amount"
+        [currency]="formGroup.get('currency')?.value"
+        [required]="true"/>
+
+      <app-currency-select
+        formControlName="currency"
+        id="currency-select"
+        [required]="true"/>
+    </div>
+  </div>
+
+  <!-- Recurrence Section -->
+  <div formGroupName="recurrence" class="space-y-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-1">
+        <app-select
+          formControlName="recurrenceRule"
+          id="recurrenceRule-select"
+          label="Recurrence"
+          [options]="recurrenceRuleOptions"
+          [required]="true"/>
+      </div>
+
+      <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+        <app-date-picker
+          formControlName="startDate"
+          id="startDate-date-picker"
+          label="Start Date"
+          [required]="true"/>
+
+        <app-date-picker
+          formControlName="endDate"
+          id="endDate-date-picker"
+          label="End Date"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-account-select
+      formControlName="account"
+      [required]="true"/>
+
+    <app-category-select
+      formControlName="category"/>
+  </div>
+
+</form>

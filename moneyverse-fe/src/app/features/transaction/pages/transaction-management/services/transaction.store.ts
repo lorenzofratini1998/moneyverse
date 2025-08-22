@@ -1,0 +1,207 @@
+import {PageResponse} from '../../../../../shared/models/common.model';
+import {
+  Transaction,
+  TransactionCriteria,
+  TransactionRequest,
+  TransactionRequestItem,
+  TransactionSortAttributeEnum,
+  TransferRequest
+} from '../../../transaction.model';
+import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
+import {TransactionService} from '../../../services/transaction.service';
+import {computed, effect, inject} from '@angular/core';
+import {AuthService} from '../../../../../core/auth/auth.service';
+import {ToastService} from '../../../../../shared/services/toast.service';
+import {Direction} from '../../../../../shared/models/criteria.model';
+import {rxMethod} from '@ngrx/signals/rxjs-interop';
+import {debounceTime, filter, switchMap, tap} from 'rxjs';
+import {TransactionEventService} from './transaction-event.service';
+import {SubscriptionEventService} from '../../subscription-management/services/subscription-event.service';
+
+interface TransactionStoreState {
+  criteria: TransactionCriteria,
+  transactionPage: PageResponse<Transaction>
+}
+
+const initialState: TransactionStoreState = {
+  criteria: {
+    page: {
+      offset: 0,
+      limit: 25
+    },
+    sort: {
+      attribute: TransactionSortAttributeEnum.DATE,
+      direction: Direction.DESC
+    }
+  },
+  transactionPage: {
+    content: [],
+    metadata: {
+      number: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0
+    }
+  }
+}
+
+export const TransactionStore = signalStore(
+  {providedIn: 'root'},
+  withState(initialState),
+
+  withMethods((store) => {
+    const transactionService = inject(TransactionService);
+    const authService = inject(AuthService);
+    const toastService = inject(ToastService);
+
+    const loadTransactions = rxMethod<boolean | void>((trigger) =>
+      trigger.pipe(
+        debounceTime(300),
+        filter((forceRefresh = false) => {
+          const refresh = forceRefresh ?? false;
+          return store.transactionPage().content.length === 0 || refresh;
+        }),
+        switchMap(() => {
+          const userId = authService.authenticatedUser.userId;
+          return transactionService.getTransactionsByUser(userId, store.criteria()).pipe(
+            tap({
+              next: (transactionPage) => patchState(store, {transactionPage: transactionPage}),
+              error: () => toastService.error('Failed to load transactions')
+            })
+          )
+        })
+      )
+    )
+
+    return {
+      loadTransactions,
+
+      createTransaction: rxMethod<TransactionRequest>((request$) =>
+        request$.pipe(
+          switchMap((request => transactionService.createTransaction(request))),
+          tap({
+            next: () => toastService.success('Transaction created successfully'),
+            error: () => toastService.error('Failed to create transaction')
+          })
+        )
+      ),
+
+      updateTransaction: rxMethod<{ transactionId: string, request: TransactionRequestItem }>((request$) =>
+        request$.pipe(
+          switchMap(({transactionId, request}) => transactionService.updateTransaction(transactionId, request)),
+          tap({
+            next: () => toastService.success('Transaction updated successfully'),
+            error: () => toastService.error('Failed to update transaction')
+          })
+        )
+      ),
+
+      deleteTransaction: rxMethod<string>((transactionId$) =>
+        transactionId$.pipe(
+          switchMap(transactionId => transactionService.deleteTransaction(transactionId)),
+          tap({
+            next: () => toastService.success('Transaction deleted successfully'),
+            error: () => toastService.error('Failed to delete transaction')
+          })
+        )
+      ),
+
+      createTransfer: rxMethod<TransferRequest>((request$) =>
+        request$.pipe(
+          switchMap((request => transactionService.createTransfer(request))),
+          tap({
+            next: () => toastService.success('Transfer created successfully'),
+            error: () => toastService.error('Failed to create transfer')
+          })
+        )
+      ),
+
+      updateTransfer: rxMethod<{ transferId: string, request: TransferRequest }>((request$) =>
+        request$.pipe(
+          switchMap(({transferId, request}) => transactionService.updateTransfer(transferId, request)),
+          tap({
+            next: () => toastService.success('Transfer updated successfully'),
+            error: () => toastService.error('Failed to update transfer')
+          })
+        )
+      ),
+
+      deleteTransfer: rxMethod<string>((transferId$) =>
+        transferId$.pipe(
+          switchMap(transferId => transactionService.deleteTransfer(transferId)),
+          tap({
+            next: () => toastService.success('Transfer deleted successfully'),
+            error: () => toastService.error('Failed to delete transfer')
+          })
+        )
+      ),
+
+      updateFilters(criteria: TransactionCriteria) {
+        patchState(store, {
+          criteria: {
+            ...store.criteria(),
+            ...criteria
+          }
+        })
+      },
+
+      resetFilters() {
+        patchState(store, {criteria: {}})
+      }
+    }
+  }),
+
+  withComputed((store) => ({
+    transactionPage: computed(() => store.transactionPage()),
+    criteria: computed(() => store.criteria()),
+    activeFiltersCount: computed(() => {
+      const criteria = store.criteria();
+      let count = 0;
+      if ((criteria.accounts ?? []).length > 0) count++;
+      if ((criteria.tags ?? []).length > 0) count++;
+      if ((criteria.categories ?? []).length > 0) count++;
+      if (criteria.amount && (criteria.amount.lower || criteria.amount.upper)) count++;
+      if (criteria.date && (criteria.date.start || criteria.date.end)) count++;
+      if (criteria.budget) count++;
+      if (criteria.subscription) count++;
+      if (criteria.transfer) count++;
+      return count;
+    })
+  })),
+
+  withHooks((store) => {
+    const transactionEventService = inject(TransactionEventService);
+    const subscriptionEventService = inject(SubscriptionEventService);
+    return {
+      onInit() {
+        store.loadTransactions(true);
+
+        effect(() => {
+          store.criteria();
+          store.loadTransactions(true);
+        });
+
+        transactionEventService.connect().subscribe({
+          error: (error) => console.log('SSE connection error: ', error)
+        })
+        subscriptionEventService.connect().subscribe({
+          error: (error) => console.log('SSE connection error: ', error)
+        })
+        transactionEventService.onTransactionCreated().subscribe(() => store.loadTransactions(true));
+        transactionEventService.onTransactionUpdated().subscribe(() => store.loadTransactions(true));
+        transactionEventService.onTransactionDeleted().subscribe(() => store.loadTransactions(true));
+        transactionEventService.onTransferCreated().subscribe(() => store.loadTransactions(true));
+        transactionEventService.onTransferUpdated().subscribe(() => store.loadTransactions(true));
+        transactionEventService.onTransferDeleted().subscribe(() => store.loadTransactions(true));
+        subscriptionEventService.onSubscriptionCreated().subscribe(() => store.loadTransactions(true));
+        subscriptionEventService.onSubscriptionUpdated().subscribe(() => store.loadTransactions(true));
+        subscriptionEventService.onSubscriptionDeleted().subscribe(() => store.loadTransactions(true));
+      },
+      onDestroy() {
+        transactionEventService.disconnect();
+        subscriptionEventService.disconnect();
+      }
+    }
+  })
+)
+

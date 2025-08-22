@@ -1,5 +1,7 @@
 package it.moneyverse.transaction.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import it.moneyverse.core.utils.JsonUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record SubscriptionRequestDto(
     @NotNull(message = "'User ID' must not be null") UUID userId,
     @NotNull(message = "'Account ID' must not be null") UUID accountId,

@@ -15,6 +15,7 @@ public class AccountAnalyticsAmountDistributionQuery
     public static final String ACCOUNT_ID = "ACCOUNT_ID";
     public static final String TOTAL_EXPENSE = "TOTAL_EXPENSE";
     public static final String TOTAL_INCOME = "TOTAL_INCOME";
+    public static final String TOTAL_AMOUNT = "TOTAL_AMOUNT";
     public static final String PERIOD_TYPE = "PERIOD_TYPE";
 
     private Columns() {}
@@ -55,7 +56,8 @@ public class AccountAnalyticsAmountDistributionQuery
     SELECT
         ACCOUNT_ID,
         sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
-        sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0) AS TOTAL_EXPENSE,
+        abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
+        sum(NORMALIZED_AMOUNT) AS TOTAL_AMOUNT,
         'CURRENT' AS PERIOD_TYPE
     FROM filtered_transactions
     WHERE DATE BETWEEN :startDate AND :endDate
@@ -66,7 +68,8 @@ public class AccountAnalyticsAmountDistributionQuery
     SELECT
         ACCOUNT_ID,
         sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
-        sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0) AS TOTAL_EXPENSE,
+        abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
+        sum(NORMALIZED_AMOUNT) AS TOTAL_AMOUNT,
         'COMPARE' AS PERIOD_TYPE
     FROM filtered_transactions
     WHERE :hasComparePeriod = 1 AND DATE BETWEEN :compareStartDate AND :compareEndDate
@@ -81,6 +84,7 @@ public class AccountAnalyticsAmountDistributionQuery
             UUID.fromString(rs.getString(Columns.ACCOUNT_ID)),
             rs.getBigDecimal(Columns.TOTAL_EXPENSE),
             rs.getBigDecimal(Columns.TOTAL_INCOME),
+            rs.getBigDecimal(Columns.TOTAL_AMOUNT),
             QueryPeriodTypeEnum.valueOf(rs.getString(Columns.PERIOD_TYPE)));
   }
 }

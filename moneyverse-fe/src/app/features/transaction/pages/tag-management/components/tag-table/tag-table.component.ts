@@ -1,74 +1,66 @@
-import {Component, inject, output, ViewChild} from '@angular/core';
-import {ConfirmationService, MessageService} from 'primeng/api';
-import {TagFormDialogComponent} from '../tag-form-dialog/tag-form-dialog.component';
+import {Component, computed, inject, output, signal} from '@angular/core';
 import {TableModule} from 'primeng/table';
-import {Chip} from 'primeng/chip';
-import {ButtonDirective} from 'primeng/button';
-import {ConfirmDialog} from 'primeng/confirmdialog';
-import {Toast} from 'primeng/toast';
-import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
 import {IconsEnum} from '../../../../../../shared/models/icons.model';
-import {ColorService} from '../../../../../../shared/services/color.service';
-import {TransactionStore} from '../../../../transaction.store';
-import {Tag, TagForm, TagFormData} from '../../../../transaction.model';
+import {TagStore} from '../../services/tag.store';
+import {Tag} from '../../../../transaction.model';
+import {ChipComponent} from '../../../../../../shared/components/chip/chip.component';
+import {TableAction, TableColumn, TableConfig} from '../../../../../../shared/models/table.model';
+import {AppConfirmationService} from '../../../../../../shared/services/confirmation.service';
+import {TableComponent} from '../../../../../../shared/components/table/table.component';
+import {CellTemplateDirective} from '../../../../../../shared/directives/cell-template.directive';
+import {TableActionsComponent} from '../../../../../../shared/components/table-actions/table-actions.component';
 
 @Component({
   selector: 'app-tag-table',
   imports: [
     TableModule,
-    Chip,
-    SvgComponent,
-    ButtonDirective,
-    TagFormDialogComponent,
-    ConfirmDialog,
-    Toast
+    ChipComponent,
+    TableComponent,
+    CellTemplateDirective,
+    TableActionsComponent
   ],
-  templateUrl: './tag-table.component.html',
-  styleUrl: './tag-table.component.scss',
-  providers: [ConfirmationService, MessageService]
+  templateUrl: './tag-table.component.html'
 })
 export class TagTableComponent {
-  protected readonly IconsEnum = IconsEnum;
-  protected readonly colorService = inject(ColorService);
-  protected readonly transactionStore = inject(TransactionStore);
-  private readonly confirmationService = inject(ConfirmationService);
+  protected readonly tagStore = inject(TagStore);
+  private readonly confirmationService = inject(AppConfirmationService);
 
-  deleted = output<Tag>();
-  edited = output<TagForm>();
+  onDelete = output<Tag>();
+  onEdit = output<Tag>();
 
-  @ViewChild(TagFormDialogComponent) tagForm!: TagFormDialogComponent;
+  config = computed<TableConfig<Tag>>(() => ({
+    stripedRows: true,
+    paginator: true,
+    rows: 5,
+    rowsPerPageOptions: [5, 10, 25, 50],
+    showCurrentPageReport: true,
+    currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
+    dataKey: 'tagId'
+  }))
 
-  onDelete(event: Event, tag: Tag) {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: 'Are you sure that you want to proceed?',
+  columns = signal<TableColumn<Tag>[]>([
+    {field: 'tagName', header: 'Name', sortable: true},
+    {field: 'description', header: 'Description'},
+  ])
+
+  actions = computed<TableAction<Tag>[]>(() => [
+    {
+      icon: IconsEnum.PENCIL,
+      severity: 'secondary',
+      click: (tag: Tag) => this.onEdit.emit(tag),
+    },
+    {
+      icon: IconsEnum.TRASH,
+      severity: 'danger',
+      click: (tag: Tag) => this.confirmDelete(tag),
+    }
+  ])
+
+  confirmDelete(tag: Tag) {
+    this.confirmationService.confirmDelete({
+      message: `Are you sure that you want to delete the tag "${tag.tagName}"?`,
       header: 'Delete tag',
-      rejectLabel: 'Cancel',
-      rejectButtonProps: {
-        label: 'Cancel',
-        severity: 'secondary',
-        outlined: true,
-        rounded: true
-      },
-      acceptButtonProps: {
-        label: 'Delete',
-        severity: 'danger',
-        rounded: true
-      },
-      accept: () => {
-        this.deleted.emit(tag);
-      },
-      reject: () => {
-      }
+      accept: () => this.onDelete.emit(tag)
     });
   }
-
-  onEdit(formData: TagFormData) {
-    this.edited.emit({
-      tagId: this.tagForm.tagToEdit()?.tagId,
-      formData: formData
-    });
-  }
-
-  protected readonly Icons = IconsEnum;
 }

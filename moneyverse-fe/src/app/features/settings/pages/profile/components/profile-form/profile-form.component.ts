@@ -1,42 +1,38 @@
-import {Component, computed, effect, inject, input, output} from '@angular/core';
-import {NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Component, effect, inject, input} from '@angular/core';
+import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
+import {ReactiveFormsModule} from '@angular/forms';
 import {UserModel} from '../../../../../../core/auth/models/user.model';
+import {InputTextComponent} from '../../../../../../shared/components/forms/input-text/input-text.component';
+import {SubmitButtonComponent} from '../../../../../../shared/components/forms/submit-button/submit-button.component';
+import {ProfileFormHandler} from '../services/profile-form.handler';
+
+export interface ProfileFormData {
+  firstName: string;
+  lastName: string;
+}
 
 @Component({
   selector: 'app-profile-form',
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    InputTextComponent,
+    SubmitButtonComponent
   ],
-  templateUrl: './profile-form.component.html'
+  templateUrl: './profile-form.component.html',
+  styleUrl: './profile-form.component.scss'
 })
-export class ProfileFormComponent {
-  private readonly fb = inject(NonNullableFormBuilder);
+export class ProfileFormComponent extends AbstractFormComponent<UserModel, ProfileFormData> {
 
   user = input.required<UserModel>();
-  formSubmit = output<any>();
-  initialLetters = computed(() => this.user().firstName[0] + this.user().lastName[0]);
 
-  profileForm = this.fb.group({
-    firstName: ["", Validators.required],
-    lastName: ["", Validators.required],
-    email: ["", [Validators.required, Validators.email]],
-  });
+  protected override readonly formHandler = inject(ProfileFormHandler);
 
   constructor() {
+    super();
     effect(() => {
-      this.patchForm(this.user());
+      this.patch(this.user());
     })
   }
 
-  private patchForm(user: UserModel): void {
-    this.profileForm.patchValue({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email
-    })
-  }
 
-  save() {
-    this.formSubmit.emit(this.profileForm.value);
-  }
 }

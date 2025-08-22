@@ -1,174 +1,96 @@
-import {Component, inject, ViewChild} from '@angular/core';
-import {Button} from "primeng/button";
-import {SvgComponent} from "../../../../shared/components/svg/svg.component";
+import {Component, computed, inject, viewChild} from '@angular/core';
 import {IconsEnum} from '../../../../shared/models/icons.model';
-import {
-  isTransferForm,
-  isTransferFormData,
-  Transaction,
-  TransactionForm,
-  TransactionFormData,
-  Transfer,
-  TransferForm,
-  TransferFormData
-} from '../../transaction.model';
-import {Toast} from 'primeng/toast';
-import {ConfirmationService, MessageService} from 'primeng/api';
+import {Transaction, Transfer} from '../../transaction.model';
 import {AuthService} from '../../../../core/auth/auth.service';
-import {TransactionService} from '../../transaction.service';
-import {switchMap, take} from 'rxjs';
 import {TransactionTableComponent} from './components/transaction-table/transaction-table.component';
 import {TransactionFormDialogComponent} from './components/transaction-form-dialog/transaction-form-dialog.component';
-import {TransactionFactory} from './models/transaction.factory';
+import {TransactionStore} from './services/transaction.store';
+import {isTransferFormData, TransactionFormData, TransferFormData} from './models/form.model';
+import {ManagementComponent, ManagementConfig} from '../../../../shared/components/management/management.component';
+import {
+  TransactionFilterPanelComponent
+} from './components/transaction-filter-panel/transaction-filter-panel.component';
+import {TransactionTableService} from './components/transaction-table/transaction-table.service';
 
 @Component({
   selector: 'app-transaction-management',
   imports: [
-    Button,
-    SvgComponent,
-    Toast,
     TransactionTableComponent,
-    TransactionFormDialogComponent
+    TransactionFormDialogComponent,
+    ManagementComponent,
+    TransactionFilterPanelComponent
   ],
-  templateUrl: './transaction-management.component.html',
-  styleUrl: './transaction-management.component.scss',
-  providers: [ConfirmationService, MessageService]
+  templateUrl: './transaction-management.component.html'
 })
 export class TransactionManagementComponent {
 
-  protected readonly IconsEnum = IconsEnum;
-  protected readonly authService = inject(AuthService);
-  protected readonly transactionService = inject(TransactionService);
-  protected readonly messageService = inject(MessageService);
+  protected readonly transactionStore = inject(TransactionStore);
+  protected readonly transactionTableService = inject(TransactionTableService);
+  private readonly authService = inject(AuthService);
 
-  @ViewChild(TransactionFormDialogComponent) transactionFormDialog!: TransactionFormDialogComponent;
-  @ViewChild(TransactionTableComponent) transactionTable!: TransactionTableComponent;
+  transactionFormDialog = viewChild.required(TransactionFormDialogComponent);
 
-  onCreate(formData: TransactionFormData | TransferFormData) {
+  managementConfig = computed<ManagementConfig>(() => ({
+    title: 'Transaction Management',
+    actions: [
+      {
+        icon: IconsEnum.REFRESH,
+        variant: 'text',
+        severity: 'secondary',
+        action: () => this.transactionStore.loadTransactions(true)
+      },
+      {
+        icon: IconsEnum.PLUS,
+        label: 'New Transaction',
+        action: () => this.transactionFormDialog().open()
+      }
+    ]
+  }))
+
+  submit(formData: TransactionFormData | TransferFormData) {
     if (isTransferFormData(formData)) {
-      this.onCreateTransfer(formData);
+      this.submitTransfer(formData);
     } else {
-      this.onCreateTransaction(formData);
+      this.submitTransaction(formData);
     }
   }
 
-  private onCreateTransaction(formData: TransactionFormData) {
-    this.authService.getUserId().pipe(
-      take(1),
-      switchMap(userId => this.transactionService.createTransaction(TransactionFactory.createTransactionRequest(userId, formData)))
-    ).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          detail: 'Transaction created successfully.'
-        });
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          detail: 'Error during the transaction creation.'
-        });
-      }
-    })
-  }
-
-  private onCreateTransfer(formData: TransferFormData) {
-    this.authService.getUserId().pipe(
-      take(1),
-      switchMap(userId => this.transactionService.createTransfer(TransactionFactory.createTransferRequest(userId, formData)))
-    ).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          detail: 'Transfer created successfully.'
-        });
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          detail: 'Error during the transfer creation.'
-        });
-      }
-    })
-  }
-
-  onEdit(formData: TransactionForm | TransferForm) {
-    if (isTransferForm(formData)) {
-      this.onEditTransfer(formData);
+  private submitTransfer(formData: TransferFormData) {
+    const transferId = formData.transferId;
+    if (transferId) {
+      this.transactionStore.updateTransfer({
+        transferId,
+        request: {...formData}
+      })
     } else {
-      this.onEditTransaction(formData);
+      this.transactionStore.createTransfer({
+          userId: this.authService.authenticatedUser.userId,
+          ...formData
+        }
+      )
     }
   }
 
-  private onEditTransaction(formData: TransactionForm) {
-    this.transactionService.updateTransaction(formData.transactionId!, TransactionFactory.createTransactionUpdateRequest(formData.formData)).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          detail: 'Transaction updated successfully.'
-        });
-        this.transactionTable.loadTransactions();
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          detail: 'Error during the transaction update.'
-        });
-      }
-    })
+  private submitTransaction(formData: TransactionFormData) {
+    const transactionId = formData.transactionId;
+    if (transactionId) {
+      this.transactionStore.updateTransaction({
+        transactionId: transactionId,
+        request: {...formData}
+      })
+    } else {
+      this.transactionStore.createTransaction({
+        userId: this.authService.authenticatedUser.userId,
+        transactions: [{...formData}]
+      })
+    }
   }
 
-  private onEditTransfer(formData: TransferForm) {
-    this.transactionService.updateTransfer(formData.transferId!, TransactionFactory.createTransferUpdateRequest(formData.formData)).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          detail: 'Transfer updated successfully.'
-        });
-        this.transactionTable.loadTransactions();
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          detail: 'Error during the transfer update.'
-        });
-      }
-    })
+  deleteTransaction(transaction: Transaction) {
+    this.transactionStore.deleteTransaction(transaction.transactionId);
   }
 
-  onDeleteTransaction(transaction: Transaction) {
-    this.transactionService.deleteTransaction(transaction.transactionId).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          detail: 'Transaction deleted successfully.'
-        });
-        this.transactionTable.loadTransactions();
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          detail: 'Error during the transaction deletion.'
-        });
-      }
-    })
-  }
-
-  onDeleteTransfer(transfer: Transfer) {
-    this.transactionService.deleteTransfer(transfer.transferId).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          detail: 'Transfer deleted successfully.'
-        });
-        this.transactionTable.loadTransactions();
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          detail: 'Error during the transfer deletion.'
-        });
-      }
-    })
+  deleteTransfer(transfer: Transfer) {
+    this.transactionStore.deleteTransfer(transfer.transferId);
   }
 }

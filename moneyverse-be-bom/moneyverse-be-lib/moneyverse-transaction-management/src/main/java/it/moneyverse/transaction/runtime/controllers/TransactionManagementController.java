@@ -1,6 +1,7 @@
 package it.moneyverse.transaction.runtime.controllers;
 
 import it.moneyverse.core.model.dto.PagedResponseDto;
+import it.moneyverse.core.model.events.SseEmitterRepository;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.services.SubscriptionService;
 import it.moneyverse.transaction.services.TagService;
@@ -9,9 +10,11 @@ import it.moneyverse.transaction.services.TransferService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
@@ -23,16 +26,19 @@ public class TransactionManagementController
   private final TransferService transferService;
   private final TagService tagService;
   private final SubscriptionService subscriptionService;
+  private final SseEmitterRepository sseEmitterRepository;
 
   public TransactionManagementController(
       TransactionService transactionService,
       TransferService transferService,
       TagService tagService,
-      SubscriptionService subscriptionService) {
+      SubscriptionService subscriptionService,
+      SseEmitterRepository sseEmitterRepository) {
     this.transactionService = transactionService;
     this.transferService = transferService;
     this.tagService = tagService;
     this.subscriptionService = subscriptionService;
+    this.sseEmitterRepository = sseEmitterRepository;
   }
 
   @Override
@@ -201,5 +207,18 @@ public class TransactionManagementController
   public SubscriptionDto updateSubscription(
       @PathVariable UUID subscriptionId, @RequestBody SubscriptionUpdateRequestDto request) {
     return subscriptionService.updateSubscription(subscriptionId, request);
+  }
+
+  @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @ResponseStatus(HttpStatus.OK)
+  public SseEmitter subscribe(@RequestParam UUID userId) {
+    SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+    sseEmitterRepository.add(userId, emitter);
+
+    emitter.onCompletion(() -> sseEmitterRepository.remove(userId, emitter));
+    emitter.onTimeout(() -> sseEmitterRepository.remove(userId, emitter));
+    emitter.onError((error) -> sseEmitterRepository.remove(userId, emitter));
+
+    return emitter;
   }
 }

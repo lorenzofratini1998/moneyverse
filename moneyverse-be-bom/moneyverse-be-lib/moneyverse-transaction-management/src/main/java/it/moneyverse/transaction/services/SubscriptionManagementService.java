@@ -2,7 +2,10 @@ package it.moneyverse.transaction.services;
 
 import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.core.services.UserServiceClient;
+import it.moneyverse.transaction.enums.SubscriptionSseEventEnum;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
 import it.moneyverse.transaction.model.dto.SubscriptionRequestDto;
 import it.moneyverse.transaction.model.dto.SubscriptionUpdateRequestDto;
@@ -33,6 +36,8 @@ public class SubscriptionManagementService implements SubscriptionService {
   private final TransactionEventPublisher transactionEventPublisher;
   private final SubscriptionRepository subscriptionRepository;
   private final TransactionValidator transactionValidator;
+  private final SecurityService securityService;
+  private final SseEventService eventService;
 
   public SubscriptionManagementService(
       AccountServiceClient accountServiceClient,
@@ -41,7 +46,9 @@ public class SubscriptionManagementService implements SubscriptionService {
       TransactionFactoryService transactionFactoryService,
       TransactionEventPublisher transactionEventPublisher,
       SubscriptionRepository subscriptionRepository,
-      TransactionValidator transactionValidator) {
+      TransactionValidator transactionValidator,
+      SecurityService securityService,
+      SseEventService eventService) {
     this.accountServiceClient = accountServiceClient;
     this.userServiceClient = userServiceClient;
     this.budgetServiceClient = budgetServiceClient;
@@ -49,6 +56,8 @@ public class SubscriptionManagementService implements SubscriptionService {
     this.transactionEventPublisher = transactionEventPublisher;
     this.subscriptionRepository = subscriptionRepository;
     this.transactionValidator = transactionValidator;
+    this.securityService = securityService;
+    this.eventService = eventService;
   }
 
   @Override
@@ -66,7 +75,12 @@ public class SubscriptionManagementService implements SubscriptionService {
     }
     subscription = subscriptionRepository.save(subscription);
     transactionEventPublisher.publish(subscription, EventTypeEnum.CREATE);
-    return SubscriptionMapper.toSubscriptionDto(subscription);
+    SubscriptionDto result = SubscriptionMapper.toSubscriptionDto(subscription);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        SubscriptionSseEventEnum.SUBSCRIPTION_CREATED.name(),
+        result.getSubscriptionId());
+    return result;
   }
 
   private boolean subscriptionHasStarted(SubscriptionRequestDto request) {
@@ -124,6 +138,10 @@ public class SubscriptionManagementService implements SubscriptionService {
     LOGGER.info("Deleting subscription {}", subscriptionId);
     subscriptionRepository.delete(subscription);
     transactionEventPublisher.publish(subscription, EventTypeEnum.DELETE);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        SubscriptionSseEventEnum.SUBSCRIPTION_DELETED.name(),
+        subscription.getSubscriptionId());
   }
 
   @Override
@@ -146,7 +164,12 @@ public class SubscriptionManagementService implements SubscriptionService {
     if (request.categoryId() != null) {
       transactionEventPublisher.publish(subscription, originalSubscription, EventTypeEnum.UPDATE);
     }
-    return SubscriptionMapper.toSubscriptionDto(subscription);
+    SubscriptionDto result = SubscriptionMapper.toSubscriptionDto(subscription);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        SubscriptionSseEventEnum.SUBSCRIPTION_UPDATED.name(),
+        result.getSubscriptionId());
+    return result;
   }
 
   private Subscription getSubscriptionById(UUID subscriptionId) {
@@ -177,6 +200,10 @@ public class SubscriptionManagementService implements SubscriptionService {
     subscriptionRepository.deleteAll(subscriptions);
     subscriptions.forEach(
         subscription -> transactionEventPublisher.publish(subscription, EventTypeEnum.DELETE));
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        SubscriptionSseEventEnum.SUBSCRIPTION_DELETED.name(),
+        accountId);
   }
 
   @Override

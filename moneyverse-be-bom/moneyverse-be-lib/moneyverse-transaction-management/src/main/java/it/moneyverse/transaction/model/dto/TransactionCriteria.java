@@ -16,6 +16,9 @@ public class TransactionCriteria {
   private DateCriteria date;
   private BoundCriteria amount;
   private List<UUID> tags;
+  private UUID budget;
+  private Boolean isSubscription;
+  private Boolean isTransfer;
   private PageCriteria page;
   private SortCriteria<TransactionSortAttributeEnum> sort;
 
@@ -57,6 +60,30 @@ public class TransactionCriteria {
 
   public void setTags(List<UUID> tags) {
     this.tags = tags;
+  }
+
+  public Optional<UUID> getBudget() {
+    return Optional.ofNullable(budget);
+  }
+
+  public void setBudget(UUID budget) {
+    this.budget = budget;
+  }
+
+  public Optional<Boolean> getSubscription() {
+    return Optional.ofNullable(isSubscription);
+  }
+
+  public void setSubscription(Boolean subscription) {
+    isSubscription = subscription;
+  }
+
+  public Optional<Boolean> getTransfer() {
+    return Optional.ofNullable(isTransfer);
+  }
+
+  public void setTransfer(Boolean transfer) {
+    isTransfer = transfer;
   }
 
   public PageCriteria getPage() {

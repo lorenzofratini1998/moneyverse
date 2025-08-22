@@ -1,46 +1,11 @@
-<div>
-  <header class="mb-8 flex justify-between items-center">
-    <h1 class="text-3xl font-bold">Account Management</h1>
-    <div class="flex gap-x-3">
-      <p-button
-        (onClick)="accountStore.refreshAccounts()"
-        [rounded]="true"
-        variant="text"
-        severity="secondary">
-        <app-svg [name]="Icons.REFRESH"/>
-      </p-button>
-      <p-button
-        (onClick)="accountFilterComponent.open()"
-        [rounded]="true"
-        variant="text"
-        severity="contrast">
-        <app-svg [name]="Icons.FUNNEL"/>
-      </p-button>
-      <p-button
-        (onClick)="accountForm.open()"
-        [rounded]="true"
-        severity="contrast">
-        <app-svg [name]="Icons.PLUS"/>
-        <span>New Account</span>
-      </p-button>
-    </div>
-  </header>
+<app-management [config]="managementConfig()">
+  <app-account-filter-panel [accounts]="accountFilterStore.accounts()"/>
 
-  <app-account-filter-dialog/>
-  <div class="flex flex-col gap-4">
-    @if (accountStore.activeFiltersCount() > 0) {
-      <app-account-filter-panel/>
-    }
-    <app-account-table
-      (deleted)="deleteAccount($event)"
-      (edited)="editAccount($event)"
-    ></app-account-table>
-  </div>
-</div>
+  <app-account-table
+    [accounts]="accountFilterStore.accounts()"
+    (onDelete)="deleteAccount($event)"
+    (onEdit)="accountFormDialog().open($event)"
+  />
 
-<app-account-form-dialog
-  [accounts]="accountStore.accounts()"
-  [categories]="accountStore.categories()"
-  (save)="createAccount($event)"
-/>
-<p-toast/>
+  <app-account-form-dialog (onSubmit)="submit($event)"/>
+</app-management>

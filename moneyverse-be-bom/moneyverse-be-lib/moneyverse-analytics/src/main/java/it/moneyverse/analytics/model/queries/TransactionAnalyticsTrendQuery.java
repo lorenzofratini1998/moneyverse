@@ -54,7 +54,7 @@ public class TransactionAnalyticsTrendQuery
     SELECT
         toStartOfMonth(DATE) AS START_DATE,
         toLastDayOfMonth(DATE) AS END_DATE,
-        sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0) AS EXPENSE,
+        abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS EXPENSE,
         sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS INCOME,
         'CURRENT' AS PERIOD_TYPE
     FROM filtered_transactions
@@ -67,7 +67,7 @@ public class TransactionAnalyticsTrendQuery
     SELECT
         toStartOfMonth(DATE) AS START_DATE,
         toLastDayOfMonth(DATE) AS END_DATE,
-        sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0) AS EXPENSE,
+        abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS EXPENSE,
         sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS INCOME,
         'COMPARE' AS PERIOD_TYPE
     FROM filtered_transactions

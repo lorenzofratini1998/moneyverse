@@ -12,6 +12,8 @@ public interface PreferenceOperations {
   List<UserPreferenceDto> createUserPreferences(
       UUID userId, List<@Valid UserPreferenceRequest> request);
 
+  List<UserPreferenceDto> updateUserPreference(UUID userId, List<UserPreferenceRequest> request);
+
   List<UserPreferenceDto> getUserPreferences(UUID userId, Boolean mandatory);
 
   UserPreferenceDto getUserPreference(UUID userId, String key);

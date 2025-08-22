@@ -3,12 +3,13 @@ package it.moneyverse.analytics.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import it.moneyverse.core.model.dto.BoundCriteria;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonDeserialize(builder = DistributionRangeDto.Builder.class)
 public class DistributionRangeDto {
-  private final String range;
+  private final BoundCriteria range;
   private final CountDto count;
 
   public DistributionRangeDto(Builder builder) {
@@ -17,10 +18,10 @@ public class DistributionRangeDto {
   }
 
   public static class Builder {
-    private String range;
+    private BoundCriteria range;
     private CountDto count;
 
-    public Builder withRange(String range) {
+    public Builder withRange(BoundCriteria range) {
       this.range = range;
       return this;
     }
@@ -39,7 +40,7 @@ public class DistributionRangeDto {
     return new Builder();
   }
 
-  public String getRange() {
+  public BoundCriteria getRange() {
     return range;
   }
 

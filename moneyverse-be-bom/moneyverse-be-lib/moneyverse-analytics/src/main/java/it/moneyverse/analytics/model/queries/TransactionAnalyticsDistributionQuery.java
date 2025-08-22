@@ -10,7 +10,8 @@ public class TransactionAnalyticsDistributionQuery
     extends AbstractFilterQuery<TransactionAnalyticsDistributionProjection> {
 
   private static class Columns {
-    public static final String AMOUNT_RANGE = "AMOUNT_RANGE";
+    public static final String LOWER = "LOWER";
+    public static final String UPPER = "UPPER";
     public static final String TRANSACTION_COUNT = "TRANSACTION_COUNT";
     public static final String PERIOD_TYPE = "PERIOD_TYPE";
 
@@ -46,43 +47,67 @@ public class TransactionAnalyticsDistributionQuery
            AND (empty(:currency) OR t.CURRENCY = :currency)
            AND t.EVENT_TYPE != 2
          GROUP BY coalesce(t.ORIGINAL_TRANSACTION_ID, t.TRANSACTION_ID)
+        ),
+
+        range_mapping AS (
+            SELECT * FROM VALUES (
+                'range_key String, lower Nullable(Float64), upper Nullable(Float64), sort_order UInt8',
+                ('< 5', NULL, 5, 1),
+                ('5 - 10', 5, 10, 2),
+                ('10 - 25', 10, 25, 3),
+                ('25 - 50', 25, 50, 4),
+                ('50 - 100', 50, 100, 5),
+                ('100 - 250', 100, 250, 6),
+                ('250 - 500', 250, 500, 7),
+                ('> 500', 500, NULL, 8)
+            )
         )
 
         SELECT
-            multiIf(
-                abs(NORMALIZED_AMOUNT) < 5, '< 5',
-                abs(NORMALIZED_AMOUNT) >= 5 AND abs(NORMALIZED_AMOUNT) < 10, '5 - 10',
-                abs(NORMALIZED_AMOUNT) >= 10 AND abs(NORMALIZED_AMOUNT) < 25, '10 - 25',
-                abs(NORMALIZED_AMOUNT) >= 25 AND abs(NORMALIZED_AMOUNT) < 50, '25 - 50',
-                abs(NORMALIZED_AMOUNT) >= 50 AND abs(NORMALIZED_AMOUNT) < 100, '50 - 100',
-                abs(NORMALIZED_AMOUNT) >= 100 AND abs(NORMALIZED_AMOUNT) < 250, '100 - 250',
-                abs(NORMALIZED_AMOUNT) >= 250 AND abs(NORMALIZED_AMOUNT) < 500, '250 - 500',
-                '> 500'
-            ) AS AMOUNT_RANGE,
-        count() AS TRANSACTION_COUNT,
-        'CURRENT' AS PERIOD_TYPE
-        FROM filtered_transactions
-        WHERE DATE BETWEEN :startDate AND :endDate AND NORMALIZED_AMOUNT < 0
-        GROUP BY AMOUNT_RANGE, PERIOD_TYPE
+             r.lower AS LOWER,
+             r.upper AS UPPER,
+             count() AS TRANSACTION_COUNT,
+             'CURRENT' AS PERIOD_TYPE
+         FROM filtered_transactions f
+         JOIN range_mapping r ON (
+             multiIf(
+                 abs(f.NORMALIZED_AMOUNT) < 5, '< 5',
+                 abs(f.NORMALIZED_AMOUNT) >= 5 AND abs(f.NORMALIZED_AMOUNT) < 10, '5 - 10',
+                 abs(f.NORMALIZED_AMOUNT) >= 10 AND abs(f.NORMALIZED_AMOUNT) < 25, '10 - 25',
+                 abs(f.NORMALIZED_AMOUNT) >= 25 AND abs(f.NORMALIZED_AMOUNT) < 50, '25 - 50',
+                 abs(f.NORMALIZED_AMOUNT) >= 50 AND abs(f.NORMALIZED_AMOUNT) < 100, '50 - 100',
+                 abs(f.NORMALIZED_AMOUNT) >= 100 AND abs(f.NORMALIZED_AMOUNT) < 250, '100 - 250',
+                 abs(f.NORMALIZED_AMOUNT) >= 250 AND abs(f.NORMALIZED_AMOUNT) < 500, '250 - 500',
+                 '> 500'
+             ) = r.range_key
+         )
+         WHERE f.DATE BETWEEN :startDate AND :endDate AND f.NORMALIZED_AMOUNT < 0
+         GROUP BY r.lower, r.upper, r.sort_order
+         ORDER BY r.sort_order
 
-        UNION ALL
+         UNION ALL
 
-        SELECT
-            multiIf(
-                abs(NORMALIZED_AMOUNT) < 5, '< 5',
-                abs(NORMALIZED_AMOUNT) >= 5 AND abs(NORMALIZED_AMOUNT) < 10, '5 - 10',
-                abs(NORMALIZED_AMOUNT) >= 10 AND abs(NORMALIZED_AMOUNT) < 25, '10 - 25',
-                abs(NORMALIZED_AMOUNT) >= 25 AND abs(NORMALIZED_AMOUNT) < 50, '25 - 50',
-                abs(NORMALIZED_AMOUNT) >= 50 AND abs(NORMALIZED_AMOUNT) < 100, '50 - 100',
-                abs(NORMALIZED_AMOUNT) >= 100 AND abs(NORMALIZED_AMOUNT) < 250, '100 - 250',
-                abs(NORMALIZED_AMOUNT) >= 250 AND abs(NORMALIZED_AMOUNT) < 500, '250 - 500',
-                '> 500'
-            ) AS AMOUNT_RANGE,
-        count() AS TRANSACTION_COUNT,
-        'COMPARE' AS PERIOD_TYPE
-        FROM filtered_transactions
-        WHERE :hasComparePeriod = 1 AND DATE BETWEEN :compareStartDate AND :compareEndDate AND NORMALIZED_AMOUNT < 0
-        GROUP BY AMOUNT_RANGE, PERIOD_TYPE
+         SELECT
+             r.lower AS LOWER,
+             r.upper AS UPPER,
+             count() AS TRANSACTION_COUNT,
+             'COMPARE' AS PERIOD_TYPE
+         FROM filtered_transactions f
+         JOIN range_mapping r ON (
+             multiIf(
+                 abs(f.NORMALIZED_AMOUNT) < 5, '< 5',
+                 abs(f.NORMALIZED_AMOUNT) >= 5 AND abs(f.NORMALIZED_AMOUNT) < 10, '5 - 10',
+                 abs(f.NORMALIZED_AMOUNT) >= 10 AND abs(f.NORMALIZED_AMOUNT) < 25, '10 - 25',
+                 abs(f.NORMALIZED_AMOUNT) >= 25 AND abs(f.NORMALIZED_AMOUNT) < 50, '25 - 50',
+                 abs(f.NORMALIZED_AMOUNT) >= 50 AND abs(f.NORMALIZED_AMOUNT) < 100, '50 - 100',
+                 abs(f.NORMALIZED_AMOUNT) >= 100 AND abs(f.NORMALIZED_AMOUNT) < 250, '100 - 250',
+                 abs(f.NORMALIZED_AMOUNT) >= 250 AND abs(f.NORMALIZED_AMOUNT) < 500, '250 - 500',
+                 '> 500'
+             ) = r.range_key
+         )
+         WHERE :hasComparePeriod = 1 AND f.DATE BETWEEN :compareStartDate AND :compareEndDate AND f.NORMALIZED_AMOUNT < 0
+         GROUP BY r.lower, r.upper, r.sort_order
+         ORDER BY r.sort_order
         """;
   }
 
@@ -90,21 +115,10 @@ public class TransactionAnalyticsDistributionQuery
   public RowMapper<TransactionAnalyticsDistributionProjection> getRowMapper() {
     return ((rs, rowNum) ->
         new TransactionAnalyticsDistributionProjection(
-            rs.getString(Columns.AMOUNT_RANGE),
+            "Test",
+            rs.getBigDecimal(Columns.LOWER),
+            rs.getBigDecimal(Columns.UPPER),
             rs.getInt(Columns.TRANSACTION_COUNT),
             QueryPeriodTypeEnum.valueOf(rs.getString(Columns.PERIOD_TYPE))));
   }
 }
-
-/*
-multiIf(
-       abs(NORMALIZED_AMOUNT) < 5, 1,
-       abs(NORMALIZED_AMOUNT) < 10, 2,
-       abs(NORMALIZED_AMOUNT) < 25, 3,
-       abs(NORMALIZED_AMOUNT) < 50, 4,
-       abs(NORMALIZED_AMOUNT) < 100, 5,
-       abs(NORMALIZED_AMOUNT) < 250, 6,
-       abs(NORMALIZED_AMOUNT) < 500, 7,
-       8
-   ) AS SORT_ORDER,
-*/

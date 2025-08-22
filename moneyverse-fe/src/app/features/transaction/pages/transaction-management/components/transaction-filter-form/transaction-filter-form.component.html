@@ -1,0 +1,33 @@
+<form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-select-button formControlName="type"
+                       [options]="expenseIncomeOptions"/>
+    <div class="grid grid-cols-2 gap-4">
+      <app-checkbox formControlName="subscription"
+                    label="Subscription"
+                    [binary]="true"/>
+      <app-checkbox formControlName="transfer"
+                    label="Transfer"
+                    [binary]="true"/>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <app-account-multi-select formControlName="accounts"/>
+    <app-category-multi-select formControlName="categories"/>
+    <app-tag-multi-select formControlName="tags"/>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div formGroupName="date" class="grid grid-cols-2 gap-2">
+      <app-date-picker formControlName="start"
+                       id="date-start-date-picker"
+                       label="Date start"/>
+      <app-date-picker formControlName="end"
+                       id="date-end-date-picker"
+                       label="Date end"/>
+    </div>
+    <div formGroupName="amount" class="grid grid-cols-2 gap-2">
+      <app-input-number formControlName="lower" label="Amount min."/>
+      <app-input-number formControlName="upper" label="Amount max."/>
+    </div>
+  </div>
+</form>

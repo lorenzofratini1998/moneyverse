@@ -1,10 +1,10 @@
 import {patchState, signalStore, withHooks, withMethods, withState} from '@ngrx/signals';
-import {CurrencyDto} from '../models/currencyDto';
+import {Currency} from '../models/currency';
 import {inject} from '@angular/core';
 import {CurrencyService} from '../services/currency.service';
 
 interface CurrencyState {
-  currencies: CurrencyDto[];
+  currencies: Currency[];
 }
 
 export const CurrencyStore = signalStore(

@@ -12,9 +12,10 @@ export interface DateFormat {
   group: string
 }
 
-export interface LanguageDto {
+export interface Language {
   languageId: string;
   isoCode: string,
+  locale: string,
   country: string,
   icon: string,
   default: boolean,
@@ -37,7 +38,7 @@ export const DATE_FORMATS: DateFormat[] = [
   {label: 'DD MMM YYYY', value: 'dd MMM yyyy', default: false, group: 'Text'},
 ];
 
-export interface PreferenceDto {
+export interface Preference {
   preferenceId: string;
   name: string;
   mandatory: boolean;
@@ -45,13 +46,26 @@ export interface PreferenceDto {
   defaultValue?: string
 }
 
-export interface UserPreferenceDto {
+export interface UserPreference {
   userId: string,
-  preference: PreferenceDto,
+  preference: Preference,
   value: string
 }
 
-export interface UserPreferenceRequestDto {
+export interface UserPreferenceRequest {
   preferenceId: string,
   value: string
+}
+
+export const STORAGE_MISSING_MANDATORY_PREFERENCES = '__moneyverse_missing_mandatory_preferences';
+
+export interface PreferenceFormData {
+  key: PreferenceKey,
+  value: string
+}
+
+export interface UserPreferenceFormData {
+  currency?: PreferenceFormData,
+  language?: PreferenceFormData,
+  dateFormat?: PreferenceFormData
 }

@@ -1,108 +1,32 @@
-<p-table
-  #categoryTable
-  [value]="categories()"
-  class="w-full"
-  stripedRows
-  [paginator]="true"
-  [rows]="10"
-  [rowsPerPageOptions]="[5, 10, 25, 50]"
-  [showCurrentPageReport]="true"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
->
-  <ng-template #header>
-    <tr>
-      <th id="categoryName" pSortableColumn="categoryName" style="width: 20%">
-        Name
-        <p-sortIcon field="categoryName"/>
-      </th>
-      <th id="description" style="width: 45%">
-        Description
-      </th>
-      <th id="parentCategory" pSortableColumn="parentCategory" style="width: 20%">
-        Parent
-        <p-sortIcon field="parentCategory"/>
-        <p-columnFilter field="parentCategory" matchMode="in" display="menu" [showMatchModes]="false"
-                        [showOperator]="false" [showAddButton]="false" class="ml-auto">
-          <ng-template #filter let-value let-filter="filterCallback">
-            <p-multiSelect [filter]="false" [(ngModel)]="searchValue" [options]="parentCategories()" placeholder="Any"
-                           (onChange)="filter($event.value)" optionLabel="categoryName" optionValue="categoryId"
-                           class="min-width: 14rem"
-                           [panelStyle]="{ minWidth: '16rem' }">
-              <ng-template let-option #item>
-                <span>{{ option.categoryName }}</span>
-              </ng-template>
-            </p-multiSelect>
-          </ng-template>
-        </p-columnFilter>
-      </th>
-      <th id="actions" style="width: 15%"></th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-category>
-    <tr>
-      <td>
-        <app-custom-chip [style]="category.style" [message]="category.categoryName"/>
-      </td>
-      <td>{{ category.description }}</td>
-      <td>
-        @if (category.parentCategory) {
-          @if (getParentCategory(category.parentCategory); as parent) {
-            <app-custom-chip [style]="parent.style" [message]="parent.categoryName"/>
-          }
-        } @else {
-          -
-        }
-      </td>
-      <td>
-        <div class="flex justify-end items-center gap-2">
-          @if (!category.parentCategory && category.children && category.children.length > 0) {
-            <button
-              pButton
-              type="button"
-              text
-              rounded
-              severity="success"
-              (click)="categoryTree.open(category)"
-            >
-              <app-svg [name]="Icons.NETWORK"/>
-            </button>
-          }
-          <button
-            pButton
-            type="button"
-            text
-            rounded
-            severity="secondary"
-            (click)="categoryForm.open(category)"
-          >
-            <app-svg [name]="Icons.PENCIL"/>
-          </button>
-          <button
-            pButton
-            type="button"
-            text
-            rounded
-            severity="danger"
-            (click)="onDelete($event,category)"
-          >
-            <app-svg [name]="Icons.TRASH"/>
-          </button>
-        </div>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="4">No categories found.</td>
-    </tr>
-  </ng-template>
-</p-table>
+<app-table [data]="categories()"
+           [columns]="columns()"
+           [config]="config()"
+           [actions]="actions">
 
-<app-category-form-dialog
-  #categoryForm
-  (save)="onEdit($event)"
-/>
+  <ng-template cellTemplate field="categoryName" let-category>
+    <app-chip [color]="category.style.color"
+              [icon]="category.style.icon"
+              [message]="category.categoryName"/>
+  </ng-template>
 
-<app-category-tree-dialog/>
+  <ng-template cellTemplate field="parentCategory" let-category>
+    @if (category.parentCategory) {
+      @if (getParentCategory(category.parentCategory); as parent) {
+        <app-chip [color]="parent.style.color"
+                  [icon]="parent.style.icon"
+                  [message]="parent.categoryName"/>
+      }
+    } @else {
+      -
+    }
+  </ng-template>
 
-<p-confirm-dialog/>
+  <ng-template #actions let-category>
+    <app-table-actions
+      [row]="category"
+      [actions]="this.actions()">
+    </app-table-actions>
+  </ng-template>
+</app-table>
+
+<app-category-tree-dialog #categoryTreeDialog/>

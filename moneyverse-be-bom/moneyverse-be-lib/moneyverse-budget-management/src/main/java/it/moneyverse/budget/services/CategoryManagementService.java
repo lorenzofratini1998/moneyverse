@@ -1,12 +1,12 @@
 package it.moneyverse.budget.services;
 
+import it.moneyverse.budget.enums.CategorySseEventEnum;
 import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.entities.Category_;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.model.repositories.DefaultCategoryRepository;
-import it.moneyverse.budget.runtime.messages.BudgetEventPublisher;
 import it.moneyverse.budget.runtime.messages.CategoryEventPublisher;
 import it.moneyverse.budget.utils.mapper.CategoryMapper;
 import it.moneyverse.core.enums.EventTypeEnum;
@@ -14,6 +14,8 @@ import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.core.services.UserServiceClient;
 import java.util.List;
 import java.util.UUID;
@@ -33,20 +35,23 @@ public class CategoryManagementService implements CategoryService {
   private final CategoryRepository categoryRepository;
   private final DefaultCategoryRepository defaultCategoryRepository;
   private final UserServiceClient userServiceClient;
-  private final BudgetEventPublisher budgetEventPublisher;
   private final CategoryEventPublisher categoryEventPublisher;
+  private final SecurityService securityService;
+  private final SseEventService eventService;
 
   public CategoryManagementService(
       CategoryRepository categoryRepository,
       DefaultCategoryRepository defaultCategoryRepository,
       UserServiceClient userServiceClient,
-      BudgetEventPublisher budgetEventPublisher,
-      CategoryEventPublisher categoryEventPublisher) {
+      CategoryEventPublisher categoryEventPublisher,
+      SecurityService securityService,
+      SseEventService eventService) {
     this.categoryRepository = categoryRepository;
     this.defaultCategoryRepository = defaultCategoryRepository;
     this.userServiceClient = userServiceClient;
-    this.budgetEventPublisher = budgetEventPublisher;
     this.categoryEventPublisher = categoryEventPublisher;
+    this.securityService = securityService;
+    this.eventService = eventService;
   }
 
   @Override
@@ -64,6 +69,10 @@ public class CategoryManagementService implements CategoryService {
             : CategoryMapper.toCategory(request, parentCategory);
     CategoryDto result = CategoryMapper.toCategoryDto(categoryRepository.save(category));
     LOGGER.info("Created category '{}' for user '{}'", result, request.userId());
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        CategorySseEventEnum.CATEGORY_CREATED.name(),
+        result);
     return result;
   }
 
@@ -94,6 +103,10 @@ public class CategoryManagementService implements CategoryService {
             .map(defaultCategory -> CategoryMapper.toCategory(userId, defaultCategory))
             .toList());
     LOGGER.info("Created default categories for user: '{}'", userId);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        CategorySseEventEnum.CATEGORY_CREATED.name(),
+        userId);
   }
 
   @Override
@@ -122,6 +135,10 @@ public class CategoryManagementService implements CategoryService {
             : CategoryMapper.partialUpdate(category, request);
     CategoryDto result = CategoryMapper.toCategoryDto(categoryRepository.save(category));
     LOGGER.info("Updated category '{}' for user '{}'", categoryId, category.getUserId());
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        CategorySseEventEnum.CATEGORY_UPDATED.name(),
+        result);
     return result;
   }
 
@@ -165,6 +182,10 @@ public class CategoryManagementService implements CategoryService {
     categoryEventPublisher.publish(category, EventTypeEnum.DELETE);
     LOGGER.info(
         "Deleted category '{}' for user '{}'", category.getCategoryId(), category.getUserId());
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        CategorySseEventEnum.CATEGORY_DELETED.name(),
+        category);
   }
 
   @Override

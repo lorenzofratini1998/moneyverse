@@ -1,0 +1,28 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <p-select [id]="id()"
+              [options]="categoryStore.categories()"
+              optionLabel="categoryName"
+              optionValue="categoryId"
+              [appendTo]="'body'"
+              [disabled]="disabled()"
+              [required]="required()"
+              [(ngModel)]="value"
+              (onChange)="onSelect($event)"
+              (onBlur)="onBlur($event)"
+              [showClear]="!required()"
+              class="w-full"
+              [class]="showError ? 'ng-dirty ng-invalid' : ''"
+              [fluid]="true"
+              [filter]="filter()"
+    />
+    <app-label [for]="id()"
+               [required]="required()"
+               [name]="label()"
+               componentType="select"
+               [disabled]="disabled()"/>
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+  }
+</div>

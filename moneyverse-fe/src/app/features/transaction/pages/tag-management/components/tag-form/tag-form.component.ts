@@ -1,0 +1,27 @@
+import {Component, inject} from '@angular/core';
+import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
+import {Tag} from '../../../../transaction.model';
+import {TagFormHandler} from '../../services/tag-form.handler';
+import {ReactiveFormsModule} from '@angular/forms';
+import {ColorPickerComponent} from '../../../../../../shared/components/forms/color-picker/color-picker.component';
+import {IconPickerComponent} from '../../../../../../shared/components/forms/icon-picker/icon-picker.component';
+import {InputTextComponent} from '../../../../../../shared/components/forms/input-text/input-text.component';
+import {TextAreaComponent} from '../../../../../../shared/components/forms/text-area/text-area.component';
+import {FormPreviewComponent} from '../../../../../../shared/components/forms/form-preview/form-preview.component';
+import {TagFormData} from "../../models/form.model";
+
+@Component({
+  selector: 'app-tag-form',
+  imports: [
+    ReactiveFormsModule,
+    ColorPickerComponent,
+    IconPickerComponent,
+    InputTextComponent,
+    TextAreaComponent,
+    FormPreviewComponent
+  ],
+  templateUrl: './tag-form.component.html'
+})
+export class TagFormComponent extends AbstractFormComponent<Tag, TagFormData> {
+  protected override readonly formHandler = inject(TagFormHandler);
+}

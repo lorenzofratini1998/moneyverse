@@ -14,6 +14,8 @@ public class CategoryAnalyticsTrendQuery
     public static final String CATEGORY_ID = "CATEGORY_ID";
     public static final String START_DATE = "START_DATE";
     public static final String END_DATE = "END_DATE";
+    public static final String TOTAL_EXPENSE = "TOTAL_EXPENSE";
+    public static final String TOTAL_INCOME = "TOTAL_INCOME";
     public static final String TOTAL_AMOUNT = "TOTAL_AMOUNT";
     public static final String PERIOD_TYPE = "PERIOD_TYPE";
   }
@@ -54,6 +56,8 @@ public class CategoryAnalyticsTrendQuery
         CATEGORY_ID,
         toStartOfMonth(DATE) AS START_DATE,
         toLastDayOfMonth(DATE) AS END_DATE,
+        abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
+        sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
         sum(NORMALIZED_AMOUNT) AS TOTAL_AMOUNT,
         'CURRENT' AS PERIOD_TYPE
     FROM filtered_transactions
@@ -67,6 +71,8 @@ public class CategoryAnalyticsTrendQuery
         CATEGORY_ID,
         toStartOfMonth(DATE) AS START_DATE,
         toLastDayOfMonth(DATE) AS END_DATE,
+        abs(sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT < 0)) AS TOTAL_EXPENSE,
+        sumIf(NORMALIZED_AMOUNT, NORMALIZED_AMOUNT > 0) AS TOTAL_INCOME,
         sum(NORMALIZED_AMOUNT) AS TOTAL_AMOUNT,
         'COMPARE' AS PERIOD_TYPE
     FROM filtered_transactions
@@ -83,6 +89,8 @@ public class CategoryAnalyticsTrendQuery
             UUID.fromString(rs.getString(Columns.CATEGORY_ID)),
             rs.getDate(Columns.START_DATE).toLocalDate(),
             rs.getDate(Columns.END_DATE).toLocalDate(),
+            rs.getBigDecimal(Columns.TOTAL_EXPENSE),
+            rs.getBigDecimal(Columns.TOTAL_INCOME),
             rs.getBigDecimal(Columns.TOTAL_AMOUNT),
             QueryPeriodTypeEnum.valueOf(rs.getString(Columns.PERIOD_TYPE)));
   }

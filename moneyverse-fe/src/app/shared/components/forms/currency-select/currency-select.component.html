@@ -1,0 +1,40 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <p-select [id]="id()"
+              [options]="currencyStore.currencies()"
+              optionValue="code"
+              [(ngModel)]="value"
+              [disabled]="disabled()"
+              [required]="required()"
+              (onChange)="onSelect($event)"
+              (onBlur)="onBlur($event)"
+              [showClear]="!required()"
+              [filter]="filter()"
+              filterBy="code"
+              [appendTo]="'body'"
+              class="w-full"
+              [class]="showError ? 'ng-dirty ng-invalid' : ''"
+              [fluid]="true"
+    >
+      <ng-template #selectedItem let-currency>
+              <span class="flex items-center">
+                {{ currency.code }}
+              </span>
+      </ng-template>
+      <ng-template let-currency #item>
+              <span class="flex items-center">
+                {{ currency.name }} ({{ currency.code }})
+              </span>
+      </ng-template>
+    </p-select>
+    <app-label [for]="id()"
+               [required]="required()"
+               [name]="label()"
+               [disabled]="disabled()"
+               componentType="select"
+    />
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+  }
+</div>

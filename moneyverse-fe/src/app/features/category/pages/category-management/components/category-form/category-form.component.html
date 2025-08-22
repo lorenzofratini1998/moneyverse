@@ -1,0 +1,24 @@
+<form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid grid-cols-1 flex items-center justify-center gap-2">
+    <app-form-preview [color]="getControlValue('color')"
+                      [icon]="getControlValue('icon')"
+                      [message]="getControlValue('categoryName')"/>
+    <div class="col-span-1 flex items-center justify-center gap-2">
+      <app-color-picker formControlName="color"/>
+      <app-icon-picker formControlName="icon"/>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-input-text formControlName="categoryName"
+                    id="category-name-input"
+                    label="Category Name"
+                    [required]="true"/>
+    <app-category-select formControlName="parentCategory"
+                         label="Parent Category"/>
+  </div>
+  <div class="grid grid-cols-1">
+    <app-text-area formControlName="description"
+                   id="category-description-textarea"
+                   label="Description"/>
+  </div>
+</form>

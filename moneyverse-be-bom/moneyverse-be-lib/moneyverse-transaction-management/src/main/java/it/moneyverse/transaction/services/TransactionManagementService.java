@@ -8,8 +8,11 @@ import it.moneyverse.core.model.dto.PageMetadataDto;
 import it.moneyverse.core.model.dto.PagedResponseDto;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.enums.TransactionSortAttributeEnum;
+import it.moneyverse.transaction.enums.TransactionSseEventEnum;
 import it.moneyverse.transaction.model.dto.*;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
@@ -40,6 +43,8 @@ public class TransactionManagementService implements TransactionService {
   private final SubscriptionService subscriptionService;
   private final TagService tagService;
   private final TransactionValidator transactionValidator;
+  private final SecurityService securityService;
+  private final SseEventService eventService;
 
   public TransactionManagementService(
       TransactionRepository transactionRepository,
@@ -52,7 +57,9 @@ public class TransactionManagementService implements TransactionService {
       TransactionFactoryService transactionFactoryService,
       SubscriptionService subscriptionService,
       TagService tagService,
-      TransactionValidator transactionValidator) {
+      TransactionValidator transactionValidator,
+      SecurityService securityService,
+      SseEventService eventService) {
     this.transactionRepository = transactionRepository;
     this.currencyServiceClient = currencyServiceClient;
     this.accountServiceClient = accountServiceClient;
@@ -64,6 +71,8 @@ public class TransactionManagementService implements TransactionService {
     this.subscriptionService = subscriptionService;
     this.tagService = tagService;
     this.transactionValidator = transactionValidator;
+    this.securityService = securityService;
+    this.eventService = eventService;
   }
 
   @Override
@@ -75,7 +84,12 @@ public class TransactionManagementService implements TransactionService {
                 .map(transaction -> createTransaction(request.userId(), transaction))
                 .toList());
     transactionEventPublisher.publish(transactions, EventTypeEnum.CREATE);
-    return TransactionMapper.toTransactionDto(transactions);
+    List<TransactionDto> result = TransactionMapper.toTransactionDto(transactions);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransactionSseEventEnum.TRANSACTION_CREATED.name(),
+        result);
+    return result;
   }
 
   private Transaction createTransaction(UUID userId, TransactionRequestItemDto request) {
@@ -160,7 +174,12 @@ public class TransactionManagementService implements TransactionService {
         transaction.getTransactionId(),
         transaction.getUserId());
     transactionEventPublisher.publish(transaction, originalTransaction, EventTypeEnum.UPDATE);
-    return TransactionMapper.toTransactionDto(transaction);
+    TransactionDto result = TransactionMapper.toTransactionDto(transaction);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransactionSseEventEnum.TRANSACTION_UPDATED.name(),
+        result);
+    return result;
   }
 
   @Override
@@ -173,6 +192,10 @@ public class TransactionManagementService implements TransactionService {
         transaction.getTransactionId(),
         transaction.getUserId());
     transactionEventPublisher.publish(transaction, EventTypeEnum.DELETE);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransactionSseEventEnum.TRANSACTION_DELETED.name(),
+        transactionId);
   }
 
   @Override
@@ -196,6 +219,10 @@ public class TransactionManagementService implements TransactionService {
     List<Transaction> transactions = transactionRepository.findTransactionByAccountId(accountId);
     transactionRepository.deleteAll(transactions);
     transactionEventPublisher.publish(transactions, EventTypeEnum.DELETE);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransactionSseEventEnum.TRANSACTION_DELETED.name(),
+        accountId);
   }
 
   @Override
@@ -213,6 +240,10 @@ public class TransactionManagementService implements TransactionService {
     for (Transaction transaction : transactions) {
       transactionEventPublisher.publish(transaction, EventTypeEnum.UPDATE);
     }
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransactionSseEventEnum.TRANSACTION_UPDATED.name(),
+        categoryId);
   }
 
   @Override
@@ -226,5 +257,9 @@ public class TransactionManagementService implements TransactionService {
     for (Transaction transaction : transactions) {
       transactionEventPublisher.publish(transaction, EventTypeEnum.UPDATE);
     }
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TransactionSseEventEnum.TRANSACTION_UPDATED.name(),
+        budgetId);
   }
 }

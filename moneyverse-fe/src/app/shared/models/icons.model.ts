@@ -1,6 +1,7 @@
 import {
   AmbulanceIcon,
-  AppleIcon, ArrowLeftRightIcon,
+  AppleIcon,
+  ArrowLeftRightIcon,
   AwardIcon,
   BabyIcon,
   BanknoteIcon,
@@ -11,7 +12,8 @@ import {
   BookIcon,
   BoxIcon,
   BriefcaseIcon,
-  BusIcon, CalendarSyncIcon,
+  BusIcon,
+  CalendarSyncIcon,
   CameraIcon,
   CarIcon,
   ChartPieIcon,
@@ -20,7 +22,9 @@ import {
   ChevronRightIcon,
   ChevronUpIcon,
   CircleCheckIcon,
-  CircleDollarSignIcon, CircleMinusIcon, CirclePlusIcon,
+  CircleDollarSignIcon,
+  CircleMinusIcon,
+  CirclePlusIcon,
   CircleUserRound,
   CircleXIcon,
   CoinsIcon,
@@ -52,6 +56,7 @@ import {
   ListFilterIcon,
   ListIcon,
   LogOutIcon,
+  MenuIcon,
   MoonIcon,
   NetworkIcon,
   PencilIcon,
@@ -61,7 +66,9 @@ import {
   PizzaIcon,
   PlusIcon,
   PrinterIcon,
-  PuzzleIcon, RefreshCcwIcon, SearchIcon,
+  PuzzleIcon,
+  RefreshCcwIcon,
+  SearchIcon,
   SettingsIcon,
   ShapesIcon,
   ShieldPlusIcon,
@@ -75,6 +82,8 @@ import {
   TicketIcon,
   Trash2Icon,
   TreesIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
   TriangleAlertIcon,
   UtensilsCrossedIcon,
   WrenchIcon,
@@ -168,6 +177,9 @@ export enum IconsEnum {
   CALENDAR_SYNC = "calendar-sync",
   SEARCH = "search",
   CHEVRON_RIGHT = "chevron-right",
+  TRENDING_UP = "trending-up",
+  TRENDING_DOWN = "trending-down",
+  MENU = "menu",
 }
 
 export const ICONS: Record<string, any> = {
@@ -256,5 +268,8 @@ export const ICONS: Record<string, any> = {
   [IconsEnum.ARROW_LEFT_RIGHT]: ArrowLeftRightIcon,
   [IconsEnum.CALENDAR_SYNC]: CalendarSyncIcon,
   [IconsEnum.SEARCH]: SearchIcon,
-  [IconsEnum.CHEVRON_RIGHT]: ChevronRightIcon
+  [IconsEnum.CHEVRON_RIGHT]: ChevronRightIcon,
+  [IconsEnum.TRENDING_UP]: TrendingUpIcon,
+  [IconsEnum.TRENDING_DOWN]: TrendingDownIcon,
+  [IconsEnum.MENU]: MenuIcon
 };

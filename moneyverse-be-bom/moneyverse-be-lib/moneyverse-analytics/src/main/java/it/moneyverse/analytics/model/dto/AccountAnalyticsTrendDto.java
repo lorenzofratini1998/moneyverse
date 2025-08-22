@@ -13,13 +13,13 @@ import java.util.UUID;
 public class AccountAnalyticsTrendDto implements Serializable {
   private final PeriodDto period;
   private final UUID accountId;
-  private final List<AmountDto> data;
+  private final List<ExpenseIncomeDto> data;
   private final AccountAnalyticsTrendDto compare;
 
   public static class Builder {
     private PeriodDto period;
     private UUID accountId;
-    private List<AmountDto> data;
+    private List<ExpenseIncomeDto> data;
     private AccountAnalyticsTrendDto compare;
 
     public Builder withPeriod(PeriodDto period) {
@@ -32,7 +32,7 @@ public class AccountAnalyticsTrendDto implements Serializable {
       return this;
     }
 
-    public Builder withData(List<AmountDto> data) {
+    public Builder withData(List<ExpenseIncomeDto> data) {
       this.data = data;
       return this;
     }
@@ -66,7 +66,7 @@ public class AccountAnalyticsTrendDto implements Serializable {
     return accountId;
   }
 
-  public List<AmountDto> getData() {
+  public List<ExpenseIncomeDto> getData() {
     return data;
   }
 

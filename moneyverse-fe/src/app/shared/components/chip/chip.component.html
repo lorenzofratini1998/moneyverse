@@ -1,0 +1,7 @@
+<p-chip class="!px-2 !py-1"
+        [style.color]="'var(--style-' + color() + '-text)'"
+        [style.background-color]="'var(--style-' + color() + '-bg)'"
+>
+  <app-svg [name]="icon()"/>
+  <span>{{ message() }}</span>
+</p-chip>

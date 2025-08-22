@@ -2,6 +2,9 @@ package it.moneyverse.transaction.services;
 
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
+import it.moneyverse.transaction.enums.TagSseEventEnum;
 import it.moneyverse.transaction.model.dto.TagDto;
 import it.moneyverse.transaction.model.dto.TagRequestDto;
 import it.moneyverse.transaction.model.dto.TagUpdateRequestDto;
@@ -26,11 +29,18 @@ public class TagManagementService implements TagService {
 
   private final TagRepository tagRepository;
   private final TransactionRepository transactionRepository;
+  private final SecurityService securityService;
+  private final SseEventService eventService;
 
   public TagManagementService(
-      TagRepository tagRepository, TransactionRepository transactionRepository) {
+      TagRepository tagRepository,
+      TransactionRepository transactionRepository,
+      SecurityService securityService,
+      SseEventService eventService) {
     this.tagRepository = tagRepository;
     this.transactionRepository = transactionRepository;
+    this.securityService = securityService;
+    this.eventService = eventService;
   }
 
   @Override
@@ -39,7 +49,12 @@ public class TagManagementService implements TagService {
     checkIfTagAlreadyExist(request.tagName(), request.userId());
     LOGGER.info("Creating tag {} for user {}", request.tagName(), request.userId());
     Tag tag = TagMapper.toTag(request);
-    return TagMapper.toTagDto(tagRepository.save(tag));
+    TagDto result = TagMapper.toTagDto(tagRepository.save(tag));
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TagSseEventEnum.TAG_CREATED.name(),
+        result.getTagId());
+    return result;
   }
 
   @Override
@@ -77,7 +92,12 @@ public class TagManagementService implements TagService {
     }
     LOGGER.info("Updating tag {}", tagId);
     tag = TagMapper.partialUpdate(tag, request);
-    return TagMapper.toTagDto(tagRepository.save(tag));
+    TagDto result = TagMapper.toTagDto(tagRepository.save(tag));
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TagSseEventEnum.TAG_UPDATED.name(),
+        result.getTagId());
+    return result;
   }
 
   @Override
@@ -92,6 +112,10 @@ public class TagManagementService implements TagService {
               transactionRepository.save(transaction);
             });
     tagRepository.delete(tag);
+    eventService.publishEvent(
+        securityService.getAuthenticatedUserId(),
+        TagSseEventEnum.TAG_CREATED.name(),
+        tag.getTagId());
   }
 
   private Tag findTagById(UUID tagId) {

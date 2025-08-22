@@ -1,0 +1,28 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <p-multi-select [id]="id()"
+                    [options]="tagStore.tags()"
+                    optionLabel="tagName"
+                    optionValue="tagId"
+                    [appendTo]="'body'"
+                    [disabled]="disabled()"
+                    [required]="required()"
+                    [(ngModel)]="value"
+                    (onChange)="onSelect($event)"
+                    (onBlur)="onBlur($event)"
+                    [display]="display()"
+                    [filter]="filter()"
+                    [class]="showError ? 'ng-dirty ng-invalid' : ''"
+                    [fluid]="true"
+    />
+    <app-label [for]="id()"
+               [required]="required()"
+               [name]="label()"
+               [disabled]="disabled()"
+               componentType="multiselect"
+    />
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+  }
+</div>

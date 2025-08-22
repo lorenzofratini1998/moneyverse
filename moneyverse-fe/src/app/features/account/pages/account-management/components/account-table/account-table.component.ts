@@ -1,74 +1,80 @@
-import {Component, inject, output, ViewChild} from '@angular/core';
+import {Component, computed, inject, input, output, signal} from '@angular/core';
 import {IconsEnum} from '../../../../../../shared/models/icons.model';
 import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
-import {CurrencyPipe, NgClass} from '@angular/common';
-import {AccountStore} from '../../../../account.store';
-import {Account, AccountForm, AccountFormData} from '../../../../account.model';
+import {Account} from '../../../../account.model';
 import {FormsModule} from '@angular/forms';
-import {ConfirmDialog} from 'primeng/confirmdialog';
-import {ConfirmationService, MessageService} from 'primeng/api';
 import {TableModule} from 'primeng/table';
-import {ButtonDirective} from 'primeng/button';
 import {Tag} from 'primeng/tag';
-import {AccountFormDialogComponent} from '../account-form-dialog/account-form-dialog.component';
+import {TableAction, TableColumn, TableConfig} from '../../../../../../shared/models/table.model';
+import {TableComponent} from '../../../../../../shared/components/table/table.component';
+import {CurrencyPipe} from '../../../../../../shared/pipes/currency.pipe';
+import {TableActionsComponent} from '../../../../../../shared/components/table-actions/table-actions.component';
+import {AppConfirmationService} from '../../../../../../shared/services/confirmation.service';
+import {CellTemplateDirective} from '../../../../../../shared/directives/cell-template.directive';
 
 @Component({
   selector: 'app-account-table',
   imports: [
     SvgComponent,
-    NgClass,
-    CurrencyPipe,
     FormsModule,
-    ConfirmDialog,
     TableModule,
-    ButtonDirective,
     Tag,
+    TableComponent,
     CurrencyPipe,
-    AccountFormDialogComponent
+    CellTemplateDirective,
+    TableActionsComponent,
   ],
   templateUrl: './account-table.component.html',
-  styleUrl: './account-table.component.scss',
-  providers: [ConfirmationService, MessageService]
 })
 export class AccountTableComponent {
+
+  accounts = input.required<Account[]>();
+
+  onDelete = output<Account>();
+  onEdit = output<Account>();
+
   protected readonly Icons = IconsEnum;
-  protected readonly accountStore = inject(AccountStore);
-  private readonly confirmationService = inject(ConfirmationService);
+  private readonly confirmationService = inject(AppConfirmationService);
 
-  deleted = output<Account>();
-  edited = output<AccountForm>();
+  config = computed<TableConfig<Account>>(() => ({
+    currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
+    dataKey: 'accountId',
+    paginator: true,
+    rows: 5,
+    rowsPerPageOptions: [5, 10, 25, 50],
+    showCurrentPageReport: true,
+    stripedRows: true,
+    styleClass: 'mt-4'
+  }));
 
-  @ViewChild(AccountFormDialogComponent) accountForm!: AccountFormDialogComponent;
+  columns = signal<TableColumn<Account>[]>([
+    {field: 'accountName', header: 'Name', sortable: true},
+    {field: 'accountDescription', header: 'Description'},
+    {field: 'accountCategory', header: 'Category', sortable: true},
+    {field: 'currency', header: 'Currency', sortable: true},
+    {field: 'balance', header: 'Balance', sortable: true},
+    {field: 'balanceTarget', header: 'Balance Target', sortable: true},
+    {field: 'default', header: 'Default'}
+  ])
 
-  onDelete(event: Event, account: Account) {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: 'Are you sure you want to delete this account? All associated transactions will be deleted.',
-      header: 'Delete account',
-      rejectLabel: 'Cancel',
-      rejectButtonProps: {
-        label: 'Cancel',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Delete',
-        severity: 'danger',
-      },
-      accept: () => {
-        this.deleteAccount(account);
-      },
-    })
-  }
+  actions = computed<TableAction<Account>[]>(() => [
+    {
+      icon: IconsEnum.PENCIL,
+      severity: 'secondary',
+      click: (account) => this.onEdit.emit(account),
+    },
+    {
+      icon: IconsEnum.TRASH,
+      severity: 'danger',
+      click: (account) => this.confirmDelete(account),
+    }
+  ]);
 
-  private deleteAccount(account: Account): void {
-    this.deleted.emit(account);
-  }
-
-  onEdit(formData: AccountFormData) {
-    this.edited.emit({
-      accountId: this.accountForm.accountToEdit()?.accountId,
-      formData: formData
+  private confirmDelete(account: Account) {
+    this.confirmationService.confirmDelete({
+      message: `Are you sure you want to delete the account "${account.accountName}"? All associated transactions will be deleted.`,
+      header: 'Delete Account',
+      accept: () => this.onDelete.emit(account)
     });
   }
 }

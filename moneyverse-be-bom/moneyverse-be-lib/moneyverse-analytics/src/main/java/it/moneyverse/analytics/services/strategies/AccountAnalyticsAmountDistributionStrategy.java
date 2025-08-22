@@ -36,6 +36,7 @@ public class AccountAnalyticsAmountDistributionStrategy
                   .withAccountId(accountId)
                   .withTotalIncome(getAmount(compare.totalIncome()))
                   .withTotalExpense(getAmount(compare.totalExpense()))
+                  .withTotalAmount(getAmount(compare.totalAmount()))
                   .build()
               : null;
 
@@ -48,6 +49,8 @@ public class AccountAnalyticsAmountDistributionStrategy
               .withTotalExpense(
                   getAmount(
                       current.totalExpense(), compare != null ? compare.totalExpense() : null))
+              .withTotalAmount(
+                  getAmount(current.totalAmount(), compare != null ? compare.totalAmount() : null))
               .withCompare(compareDto)
               .build();
 

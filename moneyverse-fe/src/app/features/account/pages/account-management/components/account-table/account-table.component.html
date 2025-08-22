@@ -1,118 +1,41 @@
-<p-table
-  #accountTable
-  [value]="accountStore.filteredAccounts()"
-  class="w-full"
-  stripedRows
-  [paginator]="true"
-  [rows]="5"
-  [rowsPerPageOptions]="[5, 10, 25, 50]"
-  [showCurrentPageReport]="true"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
->
-  <ng-template #header>
-    <tr>
-      <th id="accountName" pSortableColumn="accountName">
-        Name
-        <p-sortIcon field="accountName"/>
-      </th>
-      <th id="description">
-        Description
-      </th>
-      <th id="accountCategory" pSortableColumn="accountCategory">
-        Category
-        <p-sortIcon field="accountCategory"/>
-      </th>
-      <th id="currency" pSortableColumn="currency">
-        Currency
-        <p-sortIcon field="currency"/>
-      </th>
-      <th id="balance" pSortableColumn="balance">
-        Balance
-        <p-sortIcon field="balance"/>
-      </th>
-      <th id="balanceTarget" pSortableColumn="balanceTarget">
-        Balance Target
-        <p-sortIcon field="balanceTarget"/>
-      </th>
-      <th id="default">
-        Default
-      </th>
-      <th id="actions"></th>
-    </tr>
+<app-table [data]="accounts()"
+           [columns]="columns()"
+           [config]="config()"
+           [actions]="actions">
+  <ng-template cellTemplate field="accountCategory" let-account>
+    <p-tag [value]="account.accountCategory" [rounded]="true"></p-tag>
   </ng-template>
-  <ng-template #body let-account>
-    <tr>
-      <td>{{ account.accountName }}</td>
-      <td>{{ account.accountDescription }}</td>
-      <td>
-        <p-tag
-          [value]="account.accountCategory"
-          [rounded]="true"
-        />
-      </td>
-      <td>
-        <p-tag
-          [value]="account.currency"
-          [rounded]="true"
-          severity="secondary"
-        />
-      </td>
-      <td>{{ account.balance | currency: account.currency }}</td>
-      <td>
-        @if (account.balanceTarget > 0) {
-          {{ account.balanceTarget | currency: account.currency }}
-        } @else {
-          —
-        }
-      </td>
-      <td>
-        <div class="badge"
-             [ngClass]="account.default ? 'badge-soft badge-success' : 'badge-soft badge-error'">
-          @if (account.default) {
-            <app-svg [name]="Icons.CHECK"/>
-          } @else {
-            <app-svg [name]="Icons.X"/>
-          }
-        </div>
-      </td>
-      <td>
-        <div class="flex items-center justify-end gap-2">
-          <button
-            pButton
-            type="button"
-            text
-            rounded
-            severity="secondary"
-            (click)="accountForm.open(account)"
-          >
-            <app-svg [name]="Icons.PENCIL"/>
-          </button>
-          <button
-            pButton
-            type="button"
-            text
-            rounded
-            severity="danger"
-            (click)="onDelete($event,account)"
-          >
-            <app-svg [name]="Icons.TRASH"/>
-          </button>
-        </div>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="8">No accounts found.</td>
-    </tr>
-  </ng-template>
-</p-table>
 
-<app-account-form-dialog
-  #accountForm
-  [accounts]="accountStore.accounts()"
-  [categories]="accountStore.categories()"
-  (save)="onEdit($event)"
-/>
+  <ng-template cellTemplate field="currency" let-account>
+    <p-tag [value]="account.currency" severity="secondary" [rounded]="true"></p-tag>
+  </ng-template>
 
-<p-confirm-dialog/>
+  <ng-template cellTemplate field="balance" let-account>
+    {{ account.balance | currency: account.currency }}
+  </ng-template>
+
+  <ng-template cellTemplate field="balanceTarget" let-account>
+    @if (account.balanceTarget > 0) {
+      {{ account.balanceTarget | currency: account.currency }}
+    } @else {
+      —
+    }
+  </ng-template>
+
+  <ng-template cellTemplate field="default" let-account>
+    <p-tag [severity]="account.default ? 'success' : 'error'" [rounded]="true">
+      @if (account.default) {
+        <app-svg [name]="Icons.CHECK"/>
+      } @else {
+        <app-svg [name]="Icons.X"/>
+      }
+    </p-tag>
+  </ng-template>
+
+  <ng-template #actions let-account>
+    <app-table-actions
+      [row]="account"
+      [actions]="this.actions()">
+    </app-table-actions>
+  </ng-template>
+</app-table>

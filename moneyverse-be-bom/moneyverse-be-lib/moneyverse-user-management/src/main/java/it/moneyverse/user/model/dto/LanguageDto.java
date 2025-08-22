@@ -3,7 +3,6 @@ package it.moneyverse.user.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -14,6 +13,7 @@ public class LanguageDto implements Serializable {
 
   private final UUID languageId;
   private final String isoCode;
+  private final String locale;
   private final String country;
   private final String icon;
   private final Boolean isDefault;
@@ -22,6 +22,7 @@ public class LanguageDto implements Serializable {
   public LanguageDto(Builder builder) {
     this.languageId = builder.languageId;
     this.isoCode = builder.isoCode;
+    this.locale = builder.locale;
     this.country = builder.country;
     this.icon = builder.icon;
     this.isDefault = builder.isDefault;
@@ -34,6 +35,10 @@ public class LanguageDto implements Serializable {
 
   public String getIsoCode() {
     return isoCode;
+  }
+
+  public String getLocale() {
+    return locale;
   }
 
   public String getCountry() {
@@ -55,6 +60,7 @@ public class LanguageDto implements Serializable {
   public static class Builder {
     private UUID languageId;
     private String isoCode;
+    private String locale;
     private String country;
     private String icon;
     private Boolean isDefault;
@@ -67,6 +73,11 @@ public class LanguageDto implements Serializable {
 
     public Builder withIsoCode(String isoCode) {
       this.isoCode = isoCode;
+      return this;
+    }
+
+    public Builder withLocale(String locale) {
+      this.locale = locale;
       return this;
     }
 

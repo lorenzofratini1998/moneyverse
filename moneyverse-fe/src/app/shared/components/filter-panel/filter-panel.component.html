@@ -1,0 +1,36 @@
+<p-fieldset [toggleable]="true" [collapsed]="true">
+
+  <ng-template #header>
+    @if (activeFiltersCount() > 0) {
+      <div class="p-1">
+        <p-overlay-badge [value]="activeFiltersCount()" badgeSize="small">
+          <app-svg [name]="icons.FUNNEL"/>
+        </p-overlay-badge>
+      </div>
+    } @else {
+      <app-svg [name]="icons.FUNNEL"/>
+    }
+  </ng-template>
+
+  <ng-template #content>
+    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <ng-content select="[content]"/>
+
+      <div class="flex justify-center xl:justify-end items-center gap-2 shrink-0">
+        <p-button severity="secondary"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="form().reset()">
+          <app-svg [name]="icons.FUNNEL_X"/>
+        </p-button>
+        <p-button severity="success"
+                  [rounded]="true"
+                  [text]="true"
+                  type="submit"
+                  (onClick)="form().submit()">
+          <app-svg [name]="icons.CHECK"/>
+        </p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-fieldset>

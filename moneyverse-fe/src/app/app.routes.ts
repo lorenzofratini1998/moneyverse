@@ -2,13 +2,13 @@ import {Routes} from '@angular/router';
 import {canActivateAuthRole, canUseApplication} from './core/auth/auth.guard';
 import {OnboardingComponent} from './features/onboarding/onboarding.component';
 import {OverviewComponent} from './features/overview/overview.component';
-import {MainLayoutComponent} from './core/layout/main-layout/main-layout.component';
+import {LayoutComponent} from './core/layout/components/layout.component';
 
 export const routes: Routes = [
     {
       path: '',
-      component: MainLayoutComponent,
-      canActivate: [canActivateAuthRole, canUseApplication],
+      component: LayoutComponent,
+      canActivate: [canActivateAuthRole],
       data: {role: 'view-profile'},
       children: [
         {
@@ -17,37 +17,39 @@ export const routes: Routes = [
           pathMatch: 'full'
         },
         {
+          path: 'onboarding',
+          component: OnboardingComponent
+        },
+        {
           path: 'overview',
-          component: OverviewComponent
+          component: OverviewComponent,
+          canActivate: [canUseApplication],
         },
         {
           path: 'settings',
+          canActivate: [canUseApplication],
           loadChildren: () =>
-            import('./features/settings/settings.module').then(m => m.SettingsModule)
+            import('./features/settings/settings.route')
         },
         {
           path: 'accounts',
+          canActivate: [canUseApplication],
           loadChildren: () =>
-            import('./features/account/account.module').then(m => m.AccountModule)
+            import('./features/account/account.routes')
         },
         {
           path: 'categories',
+          canActivate: [canUseApplication],
           loadChildren: () =>
-            import('./features/category/category.module').then(m => m.CategoryModule)
+            import('./features/category/category.routes')
         },
         {
           path: 'transactions',
+          canActivate: [canUseApplication],
           loadChildren: () =>
-            import('./features/transaction/transaction.module').then(m => m.TransactionModule)
+            import('./features/transaction/transaction.routes')
         }
       ]
-    },
-    {
-      path: 'onboarding',
-      component: OnboardingComponent,
-      canActivate: [canActivateAuthRole],
-      data: {role: 'view-profile'}
-
     },
     {
       path: '**',
