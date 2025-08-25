@@ -1,0 +1,23 @@
+name: Currency Management CI
+
+on:
+  push:
+    branches:
+      - master
+      - feat/frontend
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-currency-management/**'
+      - '.github/workflows/currency-management-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+  pull_request:
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-currency-management/**'
+      - '.github/workflows/currency-management-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+
+jobs:
+  currency-management-be-job:
+    uses: ./.github/workflows/backend-ci.yaml
+    with:
+      service: moneyverse-currency-management
+    secrets: inherit
