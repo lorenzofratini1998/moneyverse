@@ -8,10 +8,9 @@ import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import it.moneyverse.core.model.dto.UserDto;
-import it.moneyverse.grpc.lib.UserRequest;
-import it.moneyverse.grpc.lib.UserResponse;
-import it.moneyverse.grpc.lib.UserServiceGrpc;
+import it.moneyverse.grpc.lib.*;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.user.model.entities.UserPreference;
 import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import it.moneyverse.user.services.KeycloakService;
 import java.io.IOException;
@@ -84,5 +83,45 @@ class UserServerTest {
 
     assertEquals("", response.getUserId());
     verify(keycloakService, times(1)).getUserById(userId);
+  }
+
+  @Test
+  void checkIfUserPreferenceExists_ShouldReturnTrueForExistingPreference(
+      @Mock UserPreference userPreference) {
+    UUID userId = RandomUtils.randomUUID();
+    UserPreferenceRequest request =
+        UserPreferenceRequest.newBuilder()
+            .setUserId(userId.toString())
+            .setPreferenceKey(RandomUtils.randomString(10))
+            .build();
+    when(userPreferenceRepository.findUserPreferenceByUserIdAndPreference_Name(
+            userId, request.getPreferenceKey()))
+        .thenReturn(Optional.of(userPreference));
+    when(userPreference.getValue()).thenReturn(RandomUtils.randomString(10));
+
+    UserPreferenceResponse response = stub.getUserPreference(request);
+
+    assertEquals(userPreference.getValue(), response.getPreferenceValue());
+    verify(userPreferenceRepository, times(1))
+        .findUserPreferenceByUserIdAndPreference_Name(userId, request.getPreferenceKey());
+  }
+
+  @Test
+  void checkIfUserPreferenceExists_ShouldReturnFalseForNonExistingPreference() {
+    UUID userId = RandomUtils.randomUUID();
+    UserPreferenceRequest request =
+        UserPreferenceRequest.newBuilder()
+            .setUserId(userId.toString())
+            .setPreferenceKey(RandomUtils.randomString(10))
+            .build();
+    when(userPreferenceRepository.findUserPreferenceByUserIdAndPreference_Name(
+            userId, request.getPreferenceKey()))
+        .thenReturn(Optional.empty());
+
+    UserPreferenceResponse response = stub.getUserPreference(request);
+
+    assertEquals("", response.getPreferenceValue());
+    verify(userPreferenceRepository, times(1))
+        .findUserPreferenceByUserIdAndPreference_Name(userId, request.getPreferenceKey());
   }
 }

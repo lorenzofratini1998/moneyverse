@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.exceptions.ResourceUpdateException;
 import it.moneyverse.core.model.dto.UserPreferenceDto;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.user.model.PreferenceTestFactory;
@@ -106,5 +107,60 @@ class PreferenceManagementServiceTest {
     verify(userService, times(1)).checkIfUserExists(userId);
     verify(preferenceRepository, times(1)).findById(any(UUID.class));
     verify(preferenceRepository, never()).saveAll(any());
+  }
+
+  @Test
+  void givenUserIdAndPreferences_WhenUpdatePreferences_ThenUpdateUserPreferences(
+      @Mock Preference preference,
+      @Mock UserPreference userPreference,
+      @Mock UserPreferenceDto preferenceDto) {
+    UUID userId = RandomUtils.randomUUID();
+    List<UserPreferenceRequest> request =
+        List.of(PreferenceTestFactory.UserPreferenceRequestBuilder.defaultInstance());
+    Mockito.doNothing().when(userService).checkIfUserExists(userId);
+    when(preferenceRepository.findById(any(UUID.class))).thenReturn(Optional.of(preference));
+    when(preference.getUpdatable()).thenReturn(true);
+    when(preference.getName()).thenReturn("STRING");
+    when(userPreferenceRepository.findUserPreferenceByUserIdAndPreference_Name(userId, "STRING"))
+        .thenReturn(Optional.of(userPreference));
+    preferenceMapper
+        .when(() -> PreferenceMapper.toUserPreference(userId, request.getFirst(), preference))
+        .thenReturn(userPreference);
+    when(userPreferenceRepository.saveAll(List.of(userPreference)))
+        .thenReturn(List.of(userPreference));
+    preferenceMapper
+        .when(() -> PreferenceMapper.toUserPreferenceDto(List.of(userPreference)))
+        .thenReturn(List.of(preferenceDto));
+
+    List<UserPreferenceDto> result =
+        preferenceManagementService.updateUserPreference(userId, request);
+
+    assertNotNull(result);
+    verify(userService, times(1)).checkIfUserExists(userId);
+    verify(preferenceRepository, times(1)).findById(any(UUID.class));
+    verify(userPreferenceRepository, times(1))
+        .findUserPreferenceByUserIdAndPreference_Name(userId, "STRING");
+    verify(userPreferenceRepository, times(1)).saveAll(List.of(userPreference));
+  }
+
+  @Test
+  void givenUserIdAndPreferences_WhenUpdatePreferences_ThenPreferenceNotUpdatable(
+      @Mock Preference preference) {
+    UUID userId = RandomUtils.randomUUID();
+    List<UserPreferenceRequest> request =
+        List.of(PreferenceTestFactory.UserPreferenceRequestBuilder.defaultInstance());
+    Mockito.doNothing().when(userService).checkIfUserExists(userId);
+    when(preferenceRepository.findById(any(UUID.class))).thenReturn(Optional.of(preference));
+    when(preference.getUpdatable()).thenReturn(false);
+
+    assertThrows(
+        ResourceUpdateException.class,
+        () -> preferenceManagementService.updateUserPreference(userId, request));
+
+    verify(userService, times(1)).checkIfUserExists(userId);
+    verify(preferenceRepository, times(1)).findById(any(UUID.class));
+    verify(userPreferenceRepository, never())
+        .findUserPreferenceByUserIdAndPreference_Name(userId, "STRING");
+    verify(userPreferenceRepository, never()).saveAll(any());
   }
 }

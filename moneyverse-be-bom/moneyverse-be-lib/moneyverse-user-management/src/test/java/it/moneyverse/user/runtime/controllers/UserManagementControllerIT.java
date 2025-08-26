@@ -263,4 +263,21 @@ class UserManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertEquals(Optional.empty(), keycloakService.getUserById(userModel.getUserId()));
   }
+
+  @Test
+  void testGetLanguages() {
+    final UserModel userModel = testContext.getRandomUser();
+    headers.setBearerAuth(testContext.getAuthenticationToken(userModel.getUserId()));
+
+    ResponseEntity<List<LanguageDto>> response =
+        restTemplate.exchange(
+            basePath + "/languages",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {});
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(testContext.getLanguages().size(), response.getBody().size());
+  }
 }
