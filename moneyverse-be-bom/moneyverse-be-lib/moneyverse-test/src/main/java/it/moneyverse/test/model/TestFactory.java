@@ -13,6 +13,7 @@ import it.moneyverse.test.utils.RandomUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class TestFactory {
@@ -43,10 +44,12 @@ public class TestFactory {
     private UUID accountId = RandomUtils.randomUUID();
     private UUID categoryId = RandomUtils.randomUUID();
     private UUID budgetId = RandomUtils.randomUUID();
+    private Set<UUID> tags = new HashSet<>();
     private final BigDecimal amount = RandomUtils.randomBigDecimal();
     private final BigDecimal normalizedAmount = RandomUtils.randomBigDecimal();
     private final String currency = RandomUtils.randomCurrency();
     private final LocalDate date = RandomUtils.randomDate();
+    private final LocalDateTime eventTimestamp = RandomUtils.randomLocalDateTime();
     private TransactionEvent previousTransaction;
     private final EventTypeEnum eventType = RandomUtils.randomEnum(EventTypeEnum.class);
 
@@ -62,6 +65,11 @@ public class TestFactory {
 
     public TransactionEventBuilder withBudgetId(UUID budgetId) {
       this.budgetId = budgetId;
+      return this;
+    }
+
+    public TransactionEventBuilder withTags(Set<UUID> tags) {
+      this.tags = tags;
       return this;
     }
 
@@ -86,6 +94,7 @@ public class TestFactory {
           .withDate(date)
           .withPreviousTransaction(previousTransaction)
           .withEventType(eventType)
+          .withEventTimestamp(eventTimestamp)
           .build();
     }
   }

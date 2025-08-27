@@ -54,7 +54,7 @@ public class TransactionConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     AccountEvent event = JsonUtils.fromJson(record.value(), AccountEvent.class);
-    if (!eventAlreadyProcessed(record.key()) && event.getAccountId() != null) {
+    if (eventNotProcessed(record.key()) && event.getAccountId() != null) {
       transactionService.deleteAllTransactionsByAccountId(event.getAccountId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
@@ -70,7 +70,7 @@ public class TransactionConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     CategoryEvent event = JsonUtils.fromJson(record.value(), CategoryEvent.class);
-    if (!eventAlreadyProcessed(record.key()) && event.getCategoryId() != null) {
+    if (eventNotProcessed(record.key()) && event.getCategoryId() != null) {
       transactionService.removeCategoryFromTransactions(event.getCategoryId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
@@ -86,7 +86,7 @@ public class TransactionConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     BudgetEvent event = JsonUtils.fromJson(record.value(), BudgetEvent.class);
-    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+    if (eventNotProcessed(record.key()) && event.getBudgetId() != null) {
       transactionService.removeBudgetFromTransactions(event.getBudgetId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }

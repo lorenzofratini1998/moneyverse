@@ -8,6 +8,7 @@ import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.model.dto.StyleRequestDto;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.utils.RandomUtils;
@@ -27,17 +28,18 @@ import org.springframework.data.domain.Sort;
 public class AccountTestFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AccountTestFactory.class);
-  private static final Supplier<UUID> FAKE_ACCOUNT_ID = () -> RandomUtils.randomUUID();
-  private static final Supplier<UUID> FAKE_USER_ID = () -> RandomUtils.randomUUID();
+  private static final Supplier<UUID> FAKE_ACCOUNT_ID = RandomUtils::randomUUID;
+  private static final Supplier<UUID> FAKE_USER_ID = RandomUtils::randomUUID;
   private static final Supplier<String> FAKE_ACCOUNT_NAME = () -> RandomUtils.randomString(15);
-  private static final Supplier<BigDecimal> FAKE_BALANCE = () -> RandomUtils.randomBigDecimal();
-  private static final Supplier<BigDecimal> FAKE_BALANCE_TARGET =
-      () -> RandomUtils.randomBigDecimal();
+  private static final Supplier<BigDecimal> FAKE_BALANCE = RandomUtils::randomBigDecimal;
+  private static final Supplier<BigDecimal> FAKE_BALANCE_TARGET = RandomUtils::randomBigDecimal;
   private static final Supplier<String> FAKE_ACCOUNT_CATEGORY_NAME =
       () -> RandomUtils.randomString(15).toUpperCase();
   private static final Supplier<String> FAKE_DESCRIPTION = () -> RandomUtils.randomString(30);
-  private static final Supplier<String> FAKE_CURRENCY = () -> RandomUtils.randomCurrency();
-  private static final Supplier<Boolean> FAKE_DEFAULT = () -> RandomUtils.randomBoolean();
+  private static final Supplier<String> FAKE_CURRENCY = RandomUtils::randomCurrency;
+  private static final Supplier<Boolean> FAKE_DEFAULT = RandomUtils::randomBoolean;
+  private static final Supplier<StyleRequestDto> FAKE_STYLE_REQUEST =
+      () -> new StyleRequestDto(RandomUtils.randomString(10), RandomUtils.randomString(10));
 
   public static List<AccountCategory> createAccountCategories() {
     List<AccountCategory> accountCategories = new ArrayList<>();
@@ -53,6 +55,7 @@ public class AccountTestFactory {
     category.setAccountCategoryId((long) counter);
     category.setName("CATEGORY %s".formatted(counter));
     category.setDescription(RandomUtils.randomString(20));
+    category.setStyle(TestFactory.fakeStyle());
     return category;
   }
 
@@ -90,6 +93,7 @@ public class AccountTestFactory {
     account.setAccountDescription("Account Description %s".formatted(counter));
     account.setCurrency(FAKE_CURRENCY.get());
     account.setDefault(counter == 1);
+    account.setStyle(TestFactory.fakeStyle());
     account.setCreatedBy(TestFactory.FAKE_USER);
     account.setCreatedAt(LocalDateTime.now());
     account.setUpdatedBy(TestFactory.FAKE_USER);
@@ -110,6 +114,7 @@ public class AccountTestFactory {
     account.setAccountDescription(FAKE_DESCRIPTION.get());
     account.setCurrency(FAKE_CURRENCY.get());
     account.setDefault(FAKE_DEFAULT.get());
+    account.setStyle(TestFactory.fakeStyle());
     return account;
   }
 
@@ -118,6 +123,7 @@ public class AccountTestFactory {
     category.setAccountCategoryId(RandomUtils.randomBigDecimal().longValue());
     category.setName(FAKE_ACCOUNT_CATEGORY_NAME.get());
     category.setDescription(FAKE_DESCRIPTION.get());
+    category.setStyle(TestFactory.fakeStyle());
     return category;
   }
 
@@ -131,6 +137,7 @@ public class AccountTestFactory {
     private final String accountDescription =
         RandomUtils.flipCoin() ? FAKE_DESCRIPTION.get() : null;
     private String currency = FAKE_CURRENCY.get();
+    private StyleRequestDto style = FAKE_STYLE_REQUEST.get();
 
     public AccountRequestDtoBuilder withUserId(UUID userId) {
       this.userId = userId;
@@ -186,7 +193,8 @@ public class AccountTestFactory {
           balanceTarget,
           accountCategory,
           accountDescription,
-          currency);
+          currency,
+          style);
     }
   }
 
@@ -197,6 +205,7 @@ public class AccountTestFactory {
     private String accountCategory = FAKE_ACCOUNT_CATEGORY_NAME.get();
     private final String accountDescription = FAKE_DESCRIPTION.get();
     private Boolean isDefault = FAKE_DEFAULT.get();
+    private StyleRequestDto style = FAKE_STYLE_REQUEST.get();
 
     public AccountUpdateRequestDtoBuilder withAccountCategory(String accountCategory) {
       this.accountCategory = accountCategory;
@@ -218,7 +227,13 @@ public class AccountTestFactory {
 
     public AccountUpdateRequestDto build() {
       return new AccountUpdateRequestDto(
-          accountName, balance, balanceTarget, accountCategory, accountDescription, isDefault);
+          accountName,
+          balance,
+          balanceTarget,
+          accountCategory,
+          accountDescription,
+          isDefault,
+          style);
     }
   }
 
@@ -273,14 +288,17 @@ public class AccountTestFactory {
     private Function<AccountCriteria, AccountCriteria> withRandomAccountCategory() {
       return criteria -> {
         criteria.setAccountCategories(
-            RandomUtils.flipCoin() ? testContext.getRandomAccountCategory().getName() : null);
+            RandomUtils.flipCoin()
+                ? List.of(testContext.getRandomAccountCategory().getName())
+                : null);
         return criteria;
       };
     }
 
     private Function<AccountCriteria, AccountCriteria> withRandomCurrency() {
       return criteria -> {
-        criteria.setCurrencies(RandomUtils.flipCoin() ? RandomUtils.randomCurrency() : null);
+        criteria.setCurrencies(
+            RandomUtils.flipCoin() ? List.of(RandomUtils.randomCurrency()) : null);
         return criteria;
       };
     }

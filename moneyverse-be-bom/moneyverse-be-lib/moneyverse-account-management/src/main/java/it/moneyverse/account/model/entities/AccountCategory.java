@@ -1,5 +1,6 @@
 package it.moneyverse.account.model.entities;
 
+import it.moneyverse.core.model.entities.Style;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,6 +22,8 @@ public class AccountCategory implements Serializable {
 
   @Column(name = "DESCRIPTION")
   private String description;
+
+  @Embedded private Style style;
 
   @OneToMany(mappedBy = "accountCategory", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Account> accounts = new ArrayList<>();
@@ -47,5 +50,13 @@ public class AccountCategory implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public Style getStyle() {
+    return style;
+  }
+
+  public void setStyle(Style style) {
+    this.style = style;
   }
 }

@@ -43,7 +43,7 @@ public class BudgetConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+    if (eventNotProcessed(record.key()) && event.getBudgetId() != null) {
       budgetService.incrementBudgetAmount(
           event.getBudgetId(), event.getAmount().abs(), event.getCurrency(), event.getDate());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
@@ -60,7 +60,7 @@ public class BudgetConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+    if (eventNotProcessed(record.key()) && event.getBudgetId() != null) {
       budgetService.decrementBudgetAmount(
           event.getBudgetId(),
           event.getAmount().abs().negate(),
@@ -81,7 +81,7 @@ public class BudgetConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (!eventAlreadyProcessed(record.key()) && event.getBudgetId() != null) {
+    if (eventNotProcessed(record.key()) && event.getBudgetId() != null) {
       LOGGER.info(
           "Undoing transaction {} on budget {}",
           event.getPreviousTransaction().getTransactionId(),

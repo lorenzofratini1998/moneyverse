@@ -9,6 +9,8 @@ CREATE TABLE accounts
     is_default          BOOLEAN                     DEFAULT FALSE NOT NULL,
     currency            VARCHAR(3)                                NOT NULL,
     account_category    BIGINT                                    NOT NULL,
+    color VARCHAR(255),
+    icon  VARCHAR(255),
     created_by          VARCHAR(255)                              NOT NULL,
     created_at          TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_by          VARCHAR(255),

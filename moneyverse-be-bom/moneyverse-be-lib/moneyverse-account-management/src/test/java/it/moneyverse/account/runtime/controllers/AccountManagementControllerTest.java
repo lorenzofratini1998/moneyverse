@@ -8,12 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.services.AccountManagementService;
-import it.moneyverse.core.boot.DatasourceAutoConfiguration;
-import it.moneyverse.core.boot.KafkaAutoConfiguration;
-import it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration;
+import it.moneyverse.core.boot.*;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.AccountDto;
+import it.moneyverse.core.model.events.SseEmitterRepository;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.List;
@@ -31,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -40,7 +40,16 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
     excludeAutoConfiguration = {
       DatasourceAutoConfiguration.class,
       UserServiceGrpcClientAutoConfiguration.class,
-      KafkaAutoConfiguration.class
+      CurrencyServiceGrpcClientAutoConfiguration.class,
+      RedisAutoConfiguration.class,
+      KafkaAutoConfiguration.class,
+      OutboxAutoConfiguration.class,
+      SseAutoConfiguration.class,
+    })
+@TestPropertySource(
+    properties = {
+      "spring.data.jpa.repositories.enabled=false",
+      "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration"
     })
 @ExtendWith(MockitoExtension.class)
 class AccountManagementControllerTest {
@@ -50,6 +59,7 @@ class AccountManagementControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @MockitoBean private AccountManagementService accountService;
+  @MockitoBean private SseEmitterRepository sseEmitterRepository;
 
   @Test
   void testCreateAccount_Success(@Mock AccountDto response) throws Exception {
@@ -236,6 +246,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomString(15),
         RandomUtils.randomString(15),
+        null,
         null);
   }
 

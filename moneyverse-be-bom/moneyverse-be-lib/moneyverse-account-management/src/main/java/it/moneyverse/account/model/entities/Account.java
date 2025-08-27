@@ -1,6 +1,7 @@
 package it.moneyverse.account.model.entities;
 
 import it.moneyverse.core.model.entities.Auditable;
+import it.moneyverse.core.model.entities.Style;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -41,6 +42,8 @@ public class Account extends Auditable implements Serializable {
 
   @Column(name = "CURRENCY", nullable = false, length = 3)
   private String currency;
+
+  @Embedded private Style style;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "ACCOUNT_CATEGORY", nullable = false)
@@ -108,6 +111,14 @@ public class Account extends Auditable implements Serializable {
 
   public void setCurrency(String currency) {
     this.currency = currency;
+  }
+
+  public Style getStyle() {
+    return style;
+  }
+
+  public void setStyle(Style style) {
+    this.style = style;
   }
 
   public AccountCategory getAccountCategory() {

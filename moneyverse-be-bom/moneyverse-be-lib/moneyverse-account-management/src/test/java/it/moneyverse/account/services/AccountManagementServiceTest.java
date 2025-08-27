@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import it.moneyverse.account.enums.AccountSseEventEnum;
 import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.model.entities.Account;
@@ -13,7 +14,6 @@ import it.moneyverse.account.model.repositories.AccountCategoryRepository;
 import it.moneyverse.account.model.repositories.AccountRepository;
 import it.moneyverse.account.runtime.messages.AccountEventPublisher;
 import it.moneyverse.account.utils.mapper.AccountMapper;
-import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.beans.AccountDeletionTopic;
@@ -21,6 +21,8 @@ import it.moneyverse.core.model.dto.AccountDto;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.services.CurrencyServiceGrpcClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.*;
 import org.junit.jupiter.api.AfterEach;
@@ -44,6 +46,8 @@ class AccountManagementServiceTest {
   @Mock private CurrencyServiceGrpcClient currencyServiceClient;
   @Mock private AccountEventPublisher eventPublisher;
   @Mock private AccountDeletionTopic accountDeletionTopic;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService sseEventService;
   private MockedStatic<AccountMapper> mapper;
 
   @BeforeEach
@@ -76,6 +80,9 @@ class AccountManagementServiceTest {
         .thenReturn(Optional.empty());
     when(accountRepository.save(any(Account.class))).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(accountDto);
+    doNothing()
+        .when(sseEventService)
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_CREATED.name(), accountDto);
 
     accountDto = accountManagementService.createAccount(request);
 
@@ -87,6 +94,8 @@ class AccountManagementServiceTest {
     verify(accountRepository, times(1)).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, times(1)).save(any(Account.class));
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+    verify(sseEventService, times(1))
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_CREATED.name(), accountDto);
   }
 
   @Test
@@ -204,6 +213,7 @@ class AccountManagementServiceTest {
   void givenAccountId_WhenUpdateAccount_ThenReturnAccountDto(
       @Mock Account account, @Mock AccountCategory category, @Mock AccountDto result) {
     UUID accountId = RandomUtils.randomUUID();
+    UUID userId = RandomUtils.randomUUID();
     AccountUpdateRequestDto request =
         AccountTestFactory.AccountUpdateRequestDtoBuilder.builder()
             .withDefault(Boolean.FALSE)
@@ -217,6 +227,10 @@ class AccountManagementServiceTest {
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
     when(accountRepository.save(account)).thenReturn(account);
     mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
+    when(securityService.getAuthenticatedUserId()).thenReturn(userId);
+    doNothing()
+        .when(sseEventService)
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_UPDATED.name(), result);
 
     result = accountManagementService.updateAccount(accountId, request);
 
@@ -228,6 +242,9 @@ class AccountManagementServiceTest {
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).save(account);
     mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+    verify(securityService, times(1)).getAuthenticatedUserId();
+    verify(sseEventService, times(1))
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_UPDATED.name(), result);
   }
 
   @Test
@@ -280,13 +297,20 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountId_WhenDeleteAccount_ThenDeleteAccount(@Mock Account account) {
     UUID accountId = RandomUtils.randomUUID();
+    UUID userId = RandomUtils.randomUUID();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(securityService.getAuthenticatedUserId()).thenReturn(userId);
+    doNothing()
+        .when(sseEventService)
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_DELETED.name(), account);
 
     accountManagementService.deleteAccount(accountId);
 
     verify(accountRepository, times(1)).findById(accountId);
-    verify(eventPublisher, times(1)).publishEvent(any(Account.class), any(EventTypeEnum.class));
+    verify(securityService, times(1)).getAuthenticatedUserId();
+    verify(sseEventService, times(1))
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_DELETED.name(), account);
   }
 
   @Test
@@ -300,7 +324,6 @@ class AccountManagementServiceTest {
 
     verify(accountRepository, times(1)).findById(accountId);
     verify(accountDeletionTopic, never()).name();
-    verify(eventPublisher, never()).publishEvent(any(Account.class), any(EventTypeEnum.class));
   }
 
   @Test

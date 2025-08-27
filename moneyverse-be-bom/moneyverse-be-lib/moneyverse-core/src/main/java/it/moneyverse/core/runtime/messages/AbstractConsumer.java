@@ -17,12 +17,12 @@ public abstract class AbstractConsumer {
     this.processedEventRepository = processedEventRepository;
   }
 
-  protected boolean eventAlreadyProcessed(UUID eventId) {
+  protected boolean eventNotProcessed(UUID eventId) {
     if (processedEventRepository.existsById(eventId)) {
       LOGGER.warn("Event {} already processed", eventId);
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   protected void persistProcessedEvent(

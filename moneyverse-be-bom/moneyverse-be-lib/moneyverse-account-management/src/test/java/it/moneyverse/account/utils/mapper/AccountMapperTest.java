@@ -10,6 +10,7 @@ import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.core.model.dto.AccountDto;
+import it.moneyverse.core.model.dto.StyleRequestDto;
 import it.moneyverse.test.utils.RandomUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -126,7 +127,8 @@ class AccountMapperTest {
             RandomUtils.randomBigDecimal(),
             category.getName(),
             RandomUtils.randomString(25),
-            RandomUtils.randomBoolean());
+            RandomUtils.randomBoolean(),
+            new StyleRequestDto(RandomUtils.randomString(15), RandomUtils.randomString(15)));
 
     Account result = AccountMapper.partialUpdate(account, request, category);
 

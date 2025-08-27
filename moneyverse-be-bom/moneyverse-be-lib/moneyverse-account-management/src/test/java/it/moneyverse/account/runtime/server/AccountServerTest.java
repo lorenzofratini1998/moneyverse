@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(MockitoExtension.class)
 class AccountServerTest {
@@ -31,19 +32,22 @@ class AccountServerTest {
   private ManagedChannel channel;
   private AccountServer accountServer;
   @Mock private AccountRepository accountRepository;
+  @Mock private PlatformTransactionManager transactionManager;
 
   @BeforeEach
   void setup() throws IOException {
     String serverName = InProcessServerBuilder.generateName();
     Server server =
         InProcessServerBuilder.forName(serverName)
-            .addService(new AccountManagementGrpcService(accountRepository))
+            .addService(new AccountManagementGrpcService(accountRepository, transactionManager))
             .directExecutor()
             .build()
             .start();
     channel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
     stub = AccountServiceGrpc.newBlockingStub(channel);
-    accountServer = new AccountServer(RandomUtils.randomBigDecimal().intValue(), accountRepository);
+    accountServer =
+        new AccountServer(
+            RandomUtils.randomBigDecimal().intValue(), accountRepository, transactionManager);
     accountServer.start();
   }
 

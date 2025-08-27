@@ -6,6 +6,8 @@ import it.moneyverse.account.model.dto.AccountUpdateRequestDto;
 import it.moneyverse.account.model.entities.Account;
 import it.moneyverse.account.model.entities.AccountCategory;
 import it.moneyverse.core.model.dto.AccountDto;
+import it.moneyverse.core.model.dto.StyleDto;
+import it.moneyverse.core.utils.mappers.StyleMapper;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +24,11 @@ public class AccountMapper {
         .withAccountCategoryId(accountCategory.getAccountCategoryId())
         .withName(accountCategory.getName().toUpperCase())
         .withDescription(accountCategory.getDescription())
+        .withStyle(
+            StyleDto.builder()
+                .withColor(accountCategory.getStyle().getColor())
+                .withIcon(accountCategory.getStyle().getIcon())
+                .build())
         .build();
   }
 
@@ -37,6 +44,7 @@ public class AccountMapper {
     account.setAccountCategory(accountCategory);
     account.setAccountDescription(request.accountDescription());
     account.setCurrency(request.currency());
+    account.setStyle(StyleMapper.toStyle(request.style()));
     return account;
   }
 
@@ -54,6 +62,11 @@ public class AccountMapper {
         .withAccountDescription(account.getAccountDescription())
         .withCurrency(account.getCurrency())
         .withDefault(account.isDefault())
+        .withStyle(
+            StyleDto.builder()
+                .withColor(account.getStyle().getColor())
+                .withIcon(account.getStyle().getIcon())
+                .build())
         .build();
   }
 
@@ -75,6 +88,7 @@ public class AccountMapper {
     account.setAccountCategory(accountCategory);
     account.setAccountDescription(request.accountDescription());
     account.setDefault(request.isDefault());
+    account.setStyle(StyleMapper.toStyle(request.style()));
     return account;
   }
 }

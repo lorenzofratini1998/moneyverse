@@ -2,6 +2,7 @@ package it.moneyverse.test.utils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,6 +90,10 @@ public class RandomUtils {
     int minutes = randomInteger(0, 59);
     int seconds = randomInteger(1, 59);
     return LocalTime.of(hours, minutes, seconds);
+  }
+
+  public static LocalDateTime randomLocalDateTime() {
+    return LocalDateTime.of(randomDate(), randomLocalTime());
   }
 
   public static boolean flipCoin() {

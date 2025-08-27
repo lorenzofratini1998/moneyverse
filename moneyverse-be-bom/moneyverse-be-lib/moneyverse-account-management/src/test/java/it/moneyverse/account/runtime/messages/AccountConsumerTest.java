@@ -3,6 +3,9 @@ package it.moneyverse.account.runtime.messages;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 
 import it.moneyverse.account.model.AccountTestContext;
 import it.moneyverse.account.model.entities.Account;
@@ -13,6 +16,8 @@ import it.moneyverse.core.model.beans.TransactionUpdateTopic;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.model.events.TransactionEvent;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.annotations.datasource.FlywayTestDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
@@ -33,13 +38,16 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Container;
 
 @MoneyverseTest
@@ -56,6 +64,7 @@ import org.testcontainers.junit.jupiter.Container;
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
       "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
     })
+@ExtendWith(MockitoExtension.class)
 class AccountConsumerTest {
 
   protected static AccountTestContext testContext;
@@ -67,6 +76,8 @@ class AccountConsumerTest {
 
   @Autowired private KafkaTemplate<UUID, String> kafkaTemplate;
   @Autowired private AccountRepository accountRepository;
+  @MockitoBean private SecurityService securityService;
+  @MockitoBean private SseEventService eventService;
 
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
@@ -88,6 +99,7 @@ class AccountConsumerTest {
 
   @BeforeEach
   void setup() {
+    doNothing().when(eventService).publishEvent(any(UUID.class), anyString(), anyString());
     exchangeRate = RandomUtils.flipCoin() ? BigDecimal.ONE : RandomUtils.randomBigDecimal();
     mockServer.mockExchangeRate(exchangeRate);
   }

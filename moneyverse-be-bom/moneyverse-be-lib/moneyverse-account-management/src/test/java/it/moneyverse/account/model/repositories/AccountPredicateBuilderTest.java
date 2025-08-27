@@ -16,6 +16,7 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -38,17 +39,18 @@ class AccountPredicateBuilderTest {
       @Mock Path<Object> accountCategoryPath) {
     UUID userId = RandomUtils.randomUUID();
     when(root.get(Account_.ACCOUNT_CATEGORY)).thenReturn(accountCategoryPath);
-    when(criteria.getAccountCategories()).thenReturn(Optional.of(RandomUtils.randomString(15)));
-    when(criteria.getCurrencies()).thenReturn(Optional.of(RandomUtils.randomString(3)));
+    when(criteria.getAccountCategories())
+        .thenReturn(Optional.of(List.of(RandomUtils.randomString(15))));
+    when(criteria.getCurrencies()).thenReturn(Optional.of(List.of(RandomUtils.randomString(3))));
     when(criteria.getIsDefault()).thenReturn(Optional.of(RandomUtils.randomBoolean()));
     when(criteria.getBalance()).thenReturn(Optional.of(randomBoundCriteria()));
     when(criteria.getBalanceTarget()).thenReturn(Optional.of(randomBoundCriteria()));
 
-    when(cb.equal(any(), any(String.class))).thenReturn(predicate);
+    when(cb.equal(any(), any(List.class))).thenReturn(predicate);
     when(cb.equal(any(), any(Boolean.class))).thenReturn(predicate);
     when(cb.equal(any(), any(String.class))).thenReturn(predicate);
-    when(cb.greaterThan(any(), any(BigDecimal.class))).thenReturn(predicate);
-    when(cb.lessThan(any(), any(BigDecimal.class))).thenReturn(predicate);
+    when(cb.greaterThanOrEqualTo(any(), any(BigDecimal.class))).thenReturn(predicate);
+    when(cb.lessThanOrEqualTo(any(), any(BigDecimal.class))).thenReturn(predicate);
     when(cb.and(any(Predicate[].class))).thenReturn(predicate);
 
     Predicate result = new AccountPredicateBuilder(cb, root).build(userId, criteria);
@@ -57,8 +59,8 @@ class AccountPredicateBuilderTest {
     verify(cb, times(1)).equal(any(), any(UUID.class));
     verify(cb, times(2)).equal(any(), any(String.class));
     verify(cb, times(1)).equal(any(), any(Boolean.class));
-    verify(cb, times(2)).greaterThan(any(), any(BigDecimal.class));
-    verify(cb, times(2)).lessThan(any(), any(BigDecimal.class));
+    verify(cb, times(2)).greaterThanOrEqualTo(any(), any(BigDecimal.class));
+    verify(cb, times(2)).lessThanOrEqualTo(any(), any(BigDecimal.class));
     verify(cb, times(1)).and(any(Predicate[].class));
   }
 

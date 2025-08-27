@@ -123,15 +123,15 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
             .orElse(true);
   }
 
-  private Predicate<Account> byAccountCategory(Optional<String> accountCategory) {
+  private Predicate<Account> byAccountCategory(Optional<List<String>> accountCategory) {
     return account ->
         accountCategory
-            .map(category -> category.equals(account.getAccountCategory().getName()))
+            .map(category -> category.contains(account.getAccountCategory().getName()))
             .orElse(true);
   }
 
-  private Predicate<Account> byCurrency(Optional<String> currency) {
-    return account -> currency.map(curr -> curr.equals(account.getCurrency())).orElse(true);
+  private Predicate<Account> byCurrency(Optional<List<String>> currency) {
+    return account -> currency.map(curr -> curr.contains(account.getCurrency())).orElse(true);
   }
 
   private Predicate<Account> byDefault(Optional<Boolean> isDefault) {

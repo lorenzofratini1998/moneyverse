@@ -1,5 +1,7 @@
 package it.moneyverse.analytics.runtime.messages;
 
+import it.moneyverse.analytics.model.mapper.TransactionEventBufferMapper;
+import it.moneyverse.analytics.model.repositories.TransactionEventBufferRepository;
 import it.moneyverse.core.model.beans.TransactionCreationTopic;
 import it.moneyverse.core.model.beans.TransactionDeletionTopic;
 import it.moneyverse.core.model.beans.TransactionUpdateTopic;
@@ -7,10 +9,7 @@ import it.moneyverse.core.model.events.TransactionEvent;
 import it.moneyverse.core.model.repositories.ProcessedEventRepository;
 import it.moneyverse.core.runtime.messages.AbstractConsumer;
 import it.moneyverse.core.utils.JsonUtils;
-import it.moneyverse.analytics.model.mapper.TransactionEventBufferMapper;
-import it.moneyverse.analytics.model.repositories.TransactionEventBufferRepository;
 import java.util.UUID;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +75,7 @@ public class DashboardConsumer extends AbstractConsumer {
 
   private void processEvent(ConsumerRecord<UUID, String> record, String topic) {
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (!eventAlreadyProcessed(record.key())) {
+    if (eventNotProcessed(record.key())) {
       transactionEventBufferRepository.save(
           TransactionEventBufferMapper.toTransactionEventBuffer(event));
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());

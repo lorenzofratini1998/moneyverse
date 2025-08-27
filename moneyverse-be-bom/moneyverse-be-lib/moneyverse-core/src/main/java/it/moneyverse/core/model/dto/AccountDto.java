@@ -22,6 +22,7 @@ public class AccountDto implements Serializable {
   private final String accountDescription;
   private final Boolean isDefault;
   private final String currency;
+  private final StyleDto style;
 
   public AccountDto(Builder builder) {
     this.accountId = builder.accountId;
@@ -33,6 +34,7 @@ public class AccountDto implements Serializable {
     this.accountDescription = builder.accountDescription;
     this.currency = builder.currency;
     this.isDefault = builder.isDefault;
+    this.style = builder.style;
   }
 
   public static Builder builder() {
@@ -75,6 +77,10 @@ public class AccountDto implements Serializable {
     return isDefault;
   }
 
+  public StyleDto getStyle() {
+    return style;
+  }
+
   @Override
   public String toString() {
     return JsonUtils.toJson(this);
@@ -91,6 +97,7 @@ public class AccountDto implements Serializable {
     private String accountDescription;
     private Boolean isDefault;
     private String currency;
+    private StyleDto style;
 
     public Builder withAccountId(UUID accountId) {
       this.accountId = accountId;
@@ -134,6 +141,11 @@ public class AccountDto implements Serializable {
 
     public Builder withCurrency(String currency) {
       this.currency = currency;
+      return this;
+    }
+
+    public Builder withStyle(StyleDto style) {
+      this.style = style;
       return this;
     }
 

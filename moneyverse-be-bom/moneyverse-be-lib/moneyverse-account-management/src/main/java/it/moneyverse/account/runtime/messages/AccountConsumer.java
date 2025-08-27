@@ -58,7 +58,7 @@ public class AccountConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (!eventAlreadyProcessed(record.key())) {
+    if (eventNotProcessed(record.key())) {
       accountService.incrementAccountBalance(
           event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
@@ -75,7 +75,7 @@ public class AccountConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (!eventAlreadyProcessed(record.key())) {
+    if (eventNotProcessed(record.key())) {
       accountService.decrementAccountBalance(
           event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
@@ -93,7 +93,7 @@ public class AccountConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (!eventAlreadyProcessed(record.key())) {
+    if (eventNotProcessed(record.key())) {
       LOGGER.info(
           "Undoing transaction {} on account {}",
           event.getPreviousTransaction().getTransactionId(),
