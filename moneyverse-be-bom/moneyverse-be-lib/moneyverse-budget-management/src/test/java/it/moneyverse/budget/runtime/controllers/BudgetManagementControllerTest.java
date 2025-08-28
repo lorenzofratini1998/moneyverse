@@ -16,6 +16,7 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.model.dto.CategoryDto;
 import it.moneyverse.core.model.dto.PageCriteria;
+import it.moneyverse.core.model.events.SseEmitterRepository;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
@@ -54,6 +55,7 @@ class BudgetManagementControllerTest {
   @Autowired private MockMvc mockMvc;
   @MockitoBean private CategoryManagementService categoryService;
   @MockitoBean private BudgetManagementService budgetService;
+  @MockitoBean private SseEmitterRepository sseEmitterRepository;
 
   @Test
   void testCreateCategory_Success(@Mock CategoryDto response) throws Exception {

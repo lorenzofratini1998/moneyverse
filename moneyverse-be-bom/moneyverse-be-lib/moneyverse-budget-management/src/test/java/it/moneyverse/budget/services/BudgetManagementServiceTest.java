@@ -13,11 +13,12 @@ import it.moneyverse.budget.model.repositories.BudgetRepository;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.budget.runtime.messages.BudgetEventPublisher;
 import it.moneyverse.budget.utils.mapper.BudgetMapper;
-import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.BudgetDto;
 import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.test.utils.RandomUtils;
 import java.time.LocalDate;
 import java.util.List;
@@ -42,6 +43,8 @@ class BudgetManagementServiceTest {
   @Mock private BudgetRepository budgetRepository;
   @Mock private CurrencyServiceClient currencyServiceClient;
   @Mock BudgetEventPublisher publisher;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService sseEventService;
   private MockedStatic<BudgetMapper> mapper;
 
   @BeforeEach
@@ -179,7 +182,6 @@ class BudgetManagementServiceTest {
 
     verify(budgetRepository, times(1)).findById(budgetId);
     verify(budgetRepository, times(1)).delete(budget);
-    verify(publisher, times(1)).publishEvent(budget, EventTypeEnum.DELETE);
   }
 
   @Test
@@ -193,6 +195,5 @@ class BudgetManagementServiceTest {
 
     verify(budgetRepository, times(1)).findById(budgetId);
     verify(budgetRepository, never()).delete(any(Budget.class));
-    verify(publisher, never()).publishEvent(any(Category.class), any(EventTypeEnum.class));
   }
 }

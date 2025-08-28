@@ -11,12 +11,13 @@ import it.moneyverse.budget.model.dto.CategoryRequestDto;
 import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
 import it.moneyverse.budget.model.entities.Category;
 import it.moneyverse.budget.model.repositories.CategoryRepository;
-import it.moneyverse.budget.runtime.messages.BudgetEventPublisher;
+import it.moneyverse.budget.runtime.messages.CategoryEventPublisher;
 import it.moneyverse.budget.utils.mapper.CategoryMapper;
-import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.dto.CategoryDto;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
 import java.util.Optional;
@@ -38,7 +39,9 @@ class CategoryManagementServiceTest {
 
   @Mock private CategoryRepository categoryRepository;
   @Mock private UserServiceClient userServiceClient;
-  @Mock private BudgetEventPublisher eventPublisher;
+  @Mock private CategoryEventPublisher eventPublisher;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService sseEventService;
   private MockedStatic<CategoryMapper> mapper;
 
   @BeforeEach
@@ -207,7 +210,6 @@ class CategoryManagementServiceTest {
     categoryManagementService.deleteCategory(categoryId);
 
     verify(categoryRepository, times(1)).findById(categoryId);
-    verify(eventPublisher, times(1)).publishEvent(category, EventTypeEnum.DELETE);
   }
 
   @Test
@@ -221,6 +223,5 @@ class CategoryManagementServiceTest {
         () -> categoryManagementService.deleteCategory(categoryId));
 
     verify(categoryRepository, times(1)).findById(categoryId);
-    verify(eventPublisher, never()).publishEvent(any(Category.class), eq(EventTypeEnum.DELETE));
   }
 }

@@ -2,6 +2,9 @@ package it.moneyverse.budget.runtime.messages;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 
 import it.moneyverse.budget.model.BudgetTestContext;
 import it.moneyverse.budget.model.repositories.BudgetRepository;
@@ -9,6 +12,8 @@ import it.moneyverse.budget.model.repositories.CategoryRepository;
 import it.moneyverse.core.model.beans.UserDeletionTopic;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.core.model.events.UserEvent;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.annotations.datasource.FlywayTestDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
@@ -22,13 +27,16 @@ import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Container;
 
 @MoneyverseTest
@@ -40,6 +48,7 @@ import org.testcontainers.junit.jupiter.Container;
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
       "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
     })
+@ExtendWith(MockitoExtension.class)
 class CategoryConsumerTest {
 
   protected static BudgetTestContext testContext;
@@ -50,6 +59,8 @@ class CategoryConsumerTest {
   @Autowired private KafkaTemplate<UUID, String> kafkaTemplate;
   @Autowired private CategoryRepository categoryRepository;
   @Autowired private BudgetRepository budgetRepository;
+  @MockitoBean private SecurityService securityService;
+  @MockitoBean private SseEventService eventService;
 
   @Container static PostgresContainer postgresContainer = new PostgresContainer();
   @RegisterExtension static GrpcMockServer mockServer = new GrpcMockServer();
@@ -76,6 +87,7 @@ class CategoryConsumerTest {
     final ProducerRecord<UUID, String> producerRecord =
         new ProducerRecord<>(UserDeletionTopic.TOPIC, event.key(), event.value());
 
+    doNothing().when(eventService).publishEvent(any(UUID.class), anyString(), anyString());
     mockServer.mockNonExistentUser();
 
     kafkaTemplate.send(producerRecord);
