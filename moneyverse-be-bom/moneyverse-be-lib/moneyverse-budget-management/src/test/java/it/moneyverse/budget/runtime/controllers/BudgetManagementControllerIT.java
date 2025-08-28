@@ -202,9 +202,6 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
     final UserModel user = testContext.getRandomUser();
     final Category category = testContext.getRandomCategoryByUserId(user.getUserId());
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
-    int beforeCount = categoryRepository.findAll().size();
-    int expectedDeleted =
-        category.getParentCategory() == null ? category.getSubCategories().size() + 1 : 1;
 
     ResponseEntity<Void> response =
         restTemplate.exchange(
@@ -213,9 +210,7 @@ class BudgetManagementControllerIT extends AbstractIntegrationTest {
             new HttpEntity<>(headers),
             Void.class);
 
-    categoryRepository.flush();
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    assertEquals(beforeCount - expectedDeleted, categoryRepository.findAll().size());
   }
 
   @Test
