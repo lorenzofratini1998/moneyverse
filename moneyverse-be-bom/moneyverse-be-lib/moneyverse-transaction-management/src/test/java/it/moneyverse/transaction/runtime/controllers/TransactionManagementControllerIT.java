@@ -3,6 +3,7 @@ package it.moneyverse.transaction.runtime.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import it.moneyverse.core.model.dto.PagedResponseDto;
 import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
@@ -124,7 +125,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     final List<Transaction> expected = testContext.filterTransactions(userId, criteria);
 
     headers.setBearerAuth(testContext.getAuthenticationToken(userId));
-    ResponseEntity<List<TransactionDto>> response =
+    ResponseEntity<PagedResponseDto<TransactionDto>> response =
         restTemplate.exchange(
             testContext.createUri(basePath + "/transactions/users/" + userId, criteria),
             HttpMethod.GET,
@@ -132,7 +133,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
             new ParameterizedTypeReference<>() {});
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(expected.size(), Objects.requireNonNull(response.getBody()).size());
+    assertEquals(expected.size(), Objects.requireNonNull(response.getBody()).getContent().size());
   }
 
   @Test
@@ -245,7 +246,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     ResponseEntity<TransferDto> response =
         restTemplate.exchange(
-            basePath + "/transfer",
+            basePath + "/transfers",
             HttpMethod.POST,
             new HttpEntity<>(request, headers),
             new ParameterizedTypeReference<>() {});
@@ -280,7 +281,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     ResponseEntity<TransferDto> response =
         restTemplate.exchange(
-            basePath + "/transfer/%s".formatted(transfer.getTransferId()),
+            basePath + "/transfers/%s".formatted(transfer.getTransferId()),
             HttpMethod.PUT,
             new HttpEntity<>(request, headers),
             new ParameterizedTypeReference<>() {});
@@ -311,7 +312,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     ResponseEntity<Void> response =
         restTemplate.exchange(
-            basePath + "/transfer/%s".formatted(transferId),
+            basePath + "/transfers/%s".formatted(transferId),
             HttpMethod.DELETE,
             new HttpEntity<>(headers),
             Void.class);
@@ -328,7 +329,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
 
     ResponseEntity<TransferDto> response =
         restTemplate.exchange(
-            basePath + "/transfer/%s".formatted(transfer.getTransferId()),
+            basePath + "/transfers/%s".formatted(transfer.getTransferId()),
             HttpMethod.GET,
             new HttpEntity<>(headers),
             new ParameterizedTypeReference<>() {});

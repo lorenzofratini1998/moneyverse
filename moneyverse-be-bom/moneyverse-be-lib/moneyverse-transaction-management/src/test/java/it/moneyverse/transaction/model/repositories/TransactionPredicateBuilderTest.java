@@ -61,7 +61,7 @@ class TransactionPredicateBuilderTest {
     verify(cb, times(1)).greaterThanOrEqualTo(any(), any(BigDecimal.class));
     verify(cb, times(1)).lessThanOrEqualTo(any(), any(LocalDate.class));
     verify(cb, times(1)).greaterThanOrEqualTo(any(), any(LocalDate.class));
-    verify(cb, times(2)).and(any(Predicate[].class));
-    verify(cb, times(2)).or(any(Predicate[].class));
+    verify(cb, times(1)).and(any(Predicate[].class));
+    verify(cb, times(3)).or(any(Predicate[].class));
   }
 }

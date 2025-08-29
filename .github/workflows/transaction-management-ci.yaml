@@ -1,0 +1,23 @@
+name: Transaction Management CI
+
+on:
+  push:
+    branches:
+      - master
+      - feat/frontend
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-transaction-management/**'
+      - '.github/workflows/transaction-management-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+  pull_request:
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-transaction-management/**'
+      - '.github/workflows/transaction-management-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+
+jobs:
+  transaction-management-be-job:
+    uses: ./.github/workflows/backend-ci.yaml
+    with:
+      service: moneyverse-transaction-management
+    secrets: inherit

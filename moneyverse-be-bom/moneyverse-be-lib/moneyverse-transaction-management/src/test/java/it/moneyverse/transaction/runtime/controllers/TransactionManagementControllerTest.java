@@ -7,6 +7,8 @@ import it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration;
 import it.moneyverse.core.boot.KafkaAutoConfiguration;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.dto.PagedResponseDto;
+import it.moneyverse.core.model.events.SseEmitterRepository;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
@@ -56,6 +58,7 @@ class TransactionManagementControllerTest {
   @MockitoBean private TransferManagementService transferService;
   @MockitoBean private TagManagementService tagService;
   @MockitoBean private SubscriptionService subscriptionService;
+  @MockitoBean private SseEmitterRepository sseEmitterRepository;
 
   @Test
   void testCreateAccount_Success(@Mock TransactionDto transactionDto) throws Exception {
@@ -104,7 +107,8 @@ class TransactionManagementControllerTest {
 
   @Test
   void testGetTransactions_Success(
-      @Mock TransactionCriteria criteria, @Mock List<TransactionDto> response) throws Exception {
+      @Mock TransactionCriteria criteria, @Mock PagedResponseDto<TransactionDto> response)
+      throws Exception {
     UUID userId = RandomUtils.randomUUID();
     when(transactionService.getTransactions(userId, criteria)).thenReturn(response);
 

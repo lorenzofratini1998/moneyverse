@@ -220,18 +220,8 @@ public class TransactionTestContext extends TestContext<TransactionTestContext> 
   private Predicate<Transaction> byTags(Optional<List<UUID>> tags) {
     return transaction ->
         tags.map(
-                tagIds -> {
-                  if (tagIds.isEmpty()) {
-                    return true;
-                  }
-                  long distinctCount = tagIds.stream().distinct().count();
-                  if (distinctCount > 1) {
-                    return false;
-                  }
-                  Object requiredTag = tagIds.stream().findFirst().get();
-                  return transaction.getTags().stream()
-                      .anyMatch(tag -> tag.getTagId().equals(requiredTag));
-                })
+                tagIds ->
+                    transaction.getTags().stream().anyMatch(tag -> tagIds.contains(tag.getTagId())))
             .orElse(true);
   }
 

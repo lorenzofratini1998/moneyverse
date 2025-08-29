@@ -339,7 +339,10 @@ public class TransactionTestFactory {
 
     private Function<TransactionCriteria, TransactionCriteria> withPage() {
       return criteria -> {
-        criteria.setPage(new PageCriteria());
+        PageCriteria pageCriteria = new PageCriteria();
+        pageCriteria.setOffset(0);
+        pageCriteria.setLimit(25);
+        criteria.setPage(pageCriteria);
         return criteria;
       };
     }

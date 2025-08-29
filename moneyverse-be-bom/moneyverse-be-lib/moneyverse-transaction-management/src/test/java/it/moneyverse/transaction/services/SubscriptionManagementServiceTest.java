@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.transaction.model.SubscriptionTestFactory;
 import it.moneyverse.transaction.model.dto.SubscriptionDto;
@@ -38,6 +40,8 @@ class SubscriptionManagementServiceTest {
   @Mock private SubscriptionRepository subscriptionRepository;
   @Mock private TransactionEventPublisher transactionEventPublisher;
   @Mock private TransactionValidator transactionValidator;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService eventService;
   private MockedStatic<SubscriptionMapper> subscriptionMapper;
 
   @BeforeEach
@@ -68,6 +72,7 @@ class SubscriptionManagementServiceTest {
     subscriptionMapper
         .when(() -> SubscriptionMapper.toSubscriptionDto(subscription))
         .thenReturn(subscriptionDto);
+    when(securityService.getAuthenticatedUserId()).thenReturn(request.userId());
 
     SubscriptionDto result = subscriptionManagementService.createSubscription(request);
 
@@ -101,6 +106,7 @@ class SubscriptionManagementServiceTest {
     subscriptionMapper
         .when(() -> SubscriptionMapper.toSubscriptionDto(subscription))
         .thenReturn(subscriptionDto);
+    when(securityService.getAuthenticatedUserId()).thenReturn(request.userId());
 
     SubscriptionDto result = subscriptionManagementService.createSubscription(request);
 

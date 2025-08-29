@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.runtime.batch;
 
+import it.moneyverse.core.services.SecurityService;
 import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.annotations.datasource.FlywayTestDir;
 import it.moneyverse.test.extensions.grpc.GrpcMockServer;
@@ -20,7 +21,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -32,6 +35,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Container;
 
 @MoneyverseTest
@@ -41,6 +45,7 @@ import org.testcontainers.junit.jupiter.Container;
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.RedisAutoConfiguration, it.moneyverse.core.boot.SecurityAutoConfiguration",
       "spring.batch.jdbc.initialize-schema=never"
     })
+@ExtendWith(MockitoExtension.class)
 class SubscriptionBatchIT {
 
   protected static TransactionTestContext testContext;
@@ -57,6 +62,7 @@ class SubscriptionBatchIT {
   @Autowired private JobRepositoryTestUtils jobRepositoryTestUtils;
   @Autowired private SubscriptionRepository subscriptionRepository;
   @Autowired private TransactionRepository transactionRepository;
+  @MockitoBean private SecurityService securityService;
 
   @DynamicPropertySource
   static void mappingProperties(DynamicPropertyRegistry registry) {

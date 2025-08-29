@@ -2,9 +2,12 @@ package it.moneyverse.transaction.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.postgresql.hostchooser.HostRequirement.any;
 
 import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.TagTestFactory;
 import it.moneyverse.transaction.model.dto.TagDto;
@@ -31,6 +34,8 @@ class TagManagementServiceTest {
 
   @InjectMocks private TagManagementService tagManagementService;
   @Mock private TagRepository tagRepository;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService eventService;
   private MockedStatic<TagMapper> tagMapper;
 
   @BeforeEach
@@ -51,6 +56,7 @@ class TagManagementServiceTest {
     tagMapper.when(() -> TagMapper.toTag(request)).thenReturn(tag);
     when(tagRepository.save(tag)).thenReturn(tag);
     tagMapper.when(() -> TagMapper.toTagDto(tag)).thenReturn(tagDto);
+    when(securityService.getAuthenticatedUserId()).thenReturn(userId);
 
     tagDto = tagManagementService.createTag(request);
 
@@ -79,16 +85,19 @@ class TagManagementServiceTest {
     TagUpdateRequestDto request = TagTestFactory.fakeTagUpdateRequest();
     when(tagRepository.findById(tagId)).thenReturn(Optional.of(tag));
     when(tag.getUserId()).thenReturn(userId);
-    when(tagRepository.existsByTagNameAndUserId(request.tagName(), userId)).thenReturn(false);
+    when(tagRepository.existsByTagNameAndUserIdAndTagIdNot(request.tagName(), userId, tagId))
+        .thenReturn(false);
     tagMapper.when(() -> TagMapper.partialUpdate(tag, request)).thenReturn(tag);
     when(tagRepository.save(tag)).thenReturn(tag);
     tagMapper.when(() -> TagMapper.toTagDto(tag)).thenReturn(tagDto);
+    when(securityService.getAuthenticatedUserId()).thenReturn(userId);
 
     tagDto = tagManagementService.updateTag(tagId, request);
 
     assertNotNull(tagDto);
     verify(tagRepository, times(1)).findById(tagId);
-    verify(tagRepository, times(1)).existsByTagNameAndUserId(request.tagName(), userId);
+    verify(tagRepository, times(1))
+        .existsByTagNameAndUserIdAndTagIdNot(request.tagName(), userId, tagId);
     verify(tagRepository, times(1)).save(tag);
   }
 
@@ -99,13 +108,15 @@ class TagManagementServiceTest {
     TagUpdateRequestDto request = TagTestFactory.fakeTagUpdateRequest();
     when(tagRepository.findById(tagId)).thenReturn(Optional.of(tag));
     when(tag.getUserId()).thenReturn(userId);
-    when(tagRepository.existsByTagNameAndUserId(request.tagName(), userId)).thenReturn(true);
+    when(tagRepository.existsByTagNameAndUserIdAndTagIdNot(request.tagName(), userId, tagId))
+        .thenReturn(true);
 
     assertThrows(
         ResourceAlreadyExistsException.class, () -> tagManagementService.updateTag(tagId, request));
 
     verify(tagRepository, times(1)).findById(tagId);
-    verify(tagRepository, times(1)).existsByTagNameAndUserId(request.tagName(), userId);
+    verify(tagRepository, times(1))
+        .existsByTagNameAndUserIdAndTagIdNot(request.tagName(), userId, tagId);
     verify(tagRepository, never()).save(any(Tag.class));
   }
 

@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.transaction.model.TransferTestFactory;
 import it.moneyverse.transaction.model.dto.TransferDto;
 import it.moneyverse.transaction.model.dto.TransferRequestDto;
 import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
+import it.moneyverse.transaction.model.factories.TransactionFactory;
 import it.moneyverse.transaction.model.factories.TransferFactory;
 import it.moneyverse.transaction.model.repositories.TransferRepository;
 import it.moneyverse.transaction.model.validator.TransactionValidator;
@@ -34,30 +37,44 @@ class TransferManagementServiceTest {
   @Mock private TransferRepository transferRepository;
   @Mock private TransactionEventPublisher eventPublisher;
   @Mock private TransactionValidator transactionValidator;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService eventService;
   private MockedStatic<TransferMapper> transferMapper;
   private MockedStatic<TransferFactory> transferFactory;
+  private MockedStatic<TransactionFactory> transactionFactory;
 
   @BeforeEach
   void setUp() {
     transferMapper = Mockito.mockStatic(TransferMapper.class);
     transferFactory = Mockito.mockStatic(TransferFactory.class);
+    transactionFactory = Mockito.mockStatic(TransactionFactory.class);
   }
 
   @AfterEach
   void tearDown() {
     transferMapper.close();
     transferFactory.close();
+    transactionFactory.close();
   }
 
   @Test
   void givenTransferRequest_WhenCreateTransfer_ThenReturnTransfer(
-      @Mock Transfer transfer, @Mock TransferDto transferDto) {
+      @Mock Transfer transfer,
+      @Mock TransferDto transferDto,
+      @Mock Transaction debitTx,
+      @Mock Transaction creditTx) {
     TransferRequestDto request = TransferTestFactory.TransferRequestBuilder.defaultInstance();
 
-    Mockito.doNothing().when(transactionValidator).validate(request);
     when(currencyServiceClient.convertCurrencyAmountByUserPreference(
             request.userId(), request.amount(), request.currency(), request.date()))
         .thenReturn(request.amount());
+    transactionFactory
+        .when(() -> TransactionFactory.createDebitTransaction(eq(request), any(), any()))
+        .thenReturn(debitTx);
+
+    transactionFactory
+        .when(() -> TransactionFactory.createCreditTransaction(eq(request), any(), any()))
+        .thenReturn(creditTx);
     transferFactory
         .when(
             () ->
@@ -66,6 +83,7 @@ class TransferManagementServiceTest {
         .thenReturn(transfer);
     when(transferRepository.save(any(Transfer.class))).thenReturn(transfer);
     transferMapper.when(() -> TransferMapper.toTransferDto(transfer)).thenReturn(transferDto);
+    when(securityService.getAuthenticatedUserId()).thenReturn(request.userId());
 
     TransferDto result = transferManagementService.createTransfer(request);
 

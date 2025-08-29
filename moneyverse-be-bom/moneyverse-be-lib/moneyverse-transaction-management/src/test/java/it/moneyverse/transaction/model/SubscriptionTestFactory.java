@@ -216,8 +216,6 @@ public class SubscriptionTestFactory {
         null,
         null,
         null,
-        null,
-        null,
         null);
   }
 }

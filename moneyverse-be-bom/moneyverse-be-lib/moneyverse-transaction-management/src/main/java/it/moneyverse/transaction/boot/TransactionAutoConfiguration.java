@@ -10,8 +10,10 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -19,6 +21,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @EnableScheduling
 @EnableAsync
+@EntityScan(
+    basePackages = {
+      "it.moneyverse.core.model.entities",
+      "it.moneyverse.transaction.model.entities"
+    })
+@EnableJpaRepositories(
+    basePackages = {
+      "it.moneyverse.core.model.repositories",
+      "it.moneyverse.transaction.model.repositories"
+    })
 public class TransactionAutoConfiguration {
 
   @Bean

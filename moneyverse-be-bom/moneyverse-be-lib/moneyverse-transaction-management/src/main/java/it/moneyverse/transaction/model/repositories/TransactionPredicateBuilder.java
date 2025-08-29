@@ -111,7 +111,7 @@ public class TransactionPredicateBuilder {
                   tags.stream()
                       .map(tag -> cb.equal(tagsJoin.get(Tag_.TAG_ID), tag))
                       .toArray(Predicate[]::new);
-              predicates.add(cb.and(tagPredicates));
+              predicates.add(cb.or(tagPredicates));
             });
   }
 

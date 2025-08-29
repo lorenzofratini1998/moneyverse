@@ -6,7 +6,10 @@ import static org.mockito.Mockito.*;
 
 import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.exceptions.ResourceStillExistsException;
+import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.services.CurrencyServiceClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
 import it.moneyverse.core.services.UserServiceClient;
 import it.moneyverse.test.utils.RandomUtils;
 import it.moneyverse.transaction.model.TransactionTestFactory;
@@ -48,6 +51,8 @@ class TransactionManagementServiceTest {
   @Mock private TagService tagService;
   @Mock private TransactionValidator transactionValidator;
   @Mock private TransactionFactoryService transactionFactoryService;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService eventService;
   private MockedStatic<TransactionMapper> transactionMapper;
 
   @BeforeEach
@@ -73,6 +78,7 @@ class TransactionManagementServiceTest {
     transactionMapper
         .when(() -> TransactionMapper.toTransactionDto(List.of(transaction)))
         .thenReturn(List.of(transactionDto));
+    when(securityService.getAuthenticatedUserId()).thenReturn(request.userId());
 
     List<TransactionDto> result = transactionManagementService.createTransactions(request);
 
@@ -84,10 +90,15 @@ class TransactionManagementServiceTest {
 
   @Test
   void givenTransactionCriteria_WhenGetTransactions_ThenReturnTransactions(
-      @Mock TransactionCriteria transactionCriteria, @Mock List<Transaction> transactions) {
+      @Mock TransactionCriteria transactionCriteria,
+      @Mock List<Transaction> transactions,
+      @Mock PageCriteria page) {
     UUID userId = RandomUtils.randomUUID();
     when(transactionRepository.findTransactions(userId, transactionCriteria))
         .thenReturn(transactions);
+    when(transactionCriteria.getPage()).thenReturn(page);
+    when(page.getOffset()).thenReturn(0);
+    when(page.getLimit()).thenReturn(25);
 
     transactionManagementService.getTransactions(userId, transactionCriteria);
 
@@ -154,6 +165,7 @@ class TransactionManagementServiceTest {
     transactionMapper
         .when(() -> TransactionMapper.toTransactionDto(transaction))
         .thenReturn(transactionDto);
+    when(securityService.getAuthenticatedUserId()).thenReturn(userId);
 
     transactionDto = transactionManagementService.updateTransaction(transactionId, request);
 
@@ -195,6 +207,7 @@ class TransactionManagementServiceTest {
       @Mock Transaction transaction) {
     UUID transactionId = RandomUtils.randomUUID();
     when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+    when(securityService.getAuthenticatedUserId()).thenReturn(RandomUtils.randomUUID());
 
     transactionManagementService.deleteTransaction(transactionId);
 
@@ -250,6 +263,7 @@ class TransactionManagementServiceTest {
     UUID accountId = RandomUtils.randomUUID();
 
     Mockito.doNothing().when(accountServiceClient).checkIfAccountStillExists(accountId);
+    when(securityService.getAuthenticatedUserId()).thenReturn(RandomUtils.randomUUID());
 
     transactionManagementService.deleteAllTransactionsByAccountId(accountId);
 
@@ -283,6 +297,7 @@ class TransactionManagementServiceTest {
     Mockito.doNothing().when(budgetServiceClient).checkIfCategoryStillExists(categoryId);
     when(transactionRepository.findTransactionByCategoryId(categoryId))
         .thenReturn(List.of(transaction));
+    when(securityService.getAuthenticatedUserId()).thenReturn(RandomUtils.randomUUID());
 
     transactionManagementService.removeCategoryFromTransactions(categoryId);
 
@@ -313,6 +328,7 @@ class TransactionManagementServiceTest {
     Mockito.doNothing().when(budgetServiceClient).checkIfBudgetStillExists(budgetId);
     when(transactionRepository.findTransactionByBudgetId(budgetId))
         .thenReturn(List.of(transaction));
+    when(securityService.getAuthenticatedUserId()).thenReturn(RandomUtils.randomUUID());
 
     transactionManagementService.removeBudgetFromTransactions(budgetId);
 

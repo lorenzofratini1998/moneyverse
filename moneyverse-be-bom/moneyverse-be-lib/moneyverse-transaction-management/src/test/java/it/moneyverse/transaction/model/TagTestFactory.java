@@ -3,6 +3,7 @@ package it.moneyverse.transaction.model;
 import static it.moneyverse.test.model.TestFactory.MAX_TAGS_PER_USER;
 import static it.moneyverse.test.model.TestFactory.MIN_TAGS_PER_USER;
 
+import it.moneyverse.core.model.dto.StyleRequestDto;
 import it.moneyverse.core.model.entities.UserModel;
 import it.moneyverse.test.model.TestFactory;
 import it.moneyverse.test.utils.RandomUtils;
@@ -22,6 +23,7 @@ public class TagTestFactory {
   private static final Supplier<String> FAKE_TAG_NAME_SUPPLIER = () -> RandomUtils.randomString(10);
   private static final Supplier<String> FAKE_DESCRIPTION_SUPPLIER =
       () -> RandomUtils.randomString(30);
+  private static final Supplier<StyleRequestDto> FAKE_STYLE_REQUEST = TestFactory::fakeStyleRequest;
 
   public static List<Tag> createTags(List<UserModel> users) {
     List<Tag> tags =
@@ -51,6 +53,7 @@ public class TagTestFactory {
     tag.setUserId(userId);
     tag.setTagName(FAKE_TAG_NAME_SUPPLIER.get());
     tag.setDescription(FAKE_DESCRIPTION_SUPPLIER.get());
+    tag.setStyle(TestFactory.fakeStyle());
     tag.setCreatedAt(LocalDateTime.now());
     tag.setCreatedBy(TestFactory.FAKE_USER);
     tag.setUpdatedAt(LocalDateTime.now());
@@ -59,10 +62,15 @@ public class TagTestFactory {
   }
 
   public static TagRequestDto fakeTagRequest(UUID userId) {
-    return new TagRequestDto(userId, FAKE_TAG_NAME_SUPPLIER.get(), FAKE_DESCRIPTION_SUPPLIER.get());
+    return new TagRequestDto(
+        userId,
+        FAKE_TAG_NAME_SUPPLIER.get(),
+        FAKE_DESCRIPTION_SUPPLIER.get(),
+        FAKE_STYLE_REQUEST.get());
   }
 
   public static TagUpdateRequestDto fakeTagUpdateRequest() {
-    return new TagUpdateRequestDto(FAKE_TAG_NAME_SUPPLIER.get(), FAKE_DESCRIPTION_SUPPLIER.get());
+    return new TagUpdateRequestDto(
+        FAKE_TAG_NAME_SUPPLIER.get(), FAKE_DESCRIPTION_SUPPLIER.get(), FAKE_STYLE_REQUEST.get());
   }
 }
