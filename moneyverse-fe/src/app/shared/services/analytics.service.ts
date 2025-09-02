@@ -24,7 +24,7 @@ import {
 })
 export class AnalyticsService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.analyticsUrl;
+  private readonly baseUrl = environment.services.krakendUrl;
 
   chartFilterOptions = computed<ChartFilterOption[]>(() => [
     {label: 'Total Amount', value: 'totalAmount'},

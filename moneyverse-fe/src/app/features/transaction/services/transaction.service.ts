@@ -22,7 +22,7 @@ import {buildHttpParams} from '../../../shared/utils/utils';
 })
 export class TransactionService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.transactionManagementUrl
+  private readonly baseUrl = environment.services.krakendUrl
 
   public getTransactionsByUser(userId: string, criteria: TransactionCriteria = {}): Observable<PageResponse<Transaction>> {
     const params = buildHttpParams(criteria);

@@ -1,0 +1,77 @@
+{
+  "host": "http://host.docker.internal:8095",
+  "endpoints": [
+    {
+      "endpoint": "/accounts/kpi",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/accounts/kpi",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/accounts/distribution",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/accounts/distribution",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/accounts/trend",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/accounts/trend",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/categories/kpi",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/categories/kpi",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/categories/distribution",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/categories/distribution",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/categories/trend",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/categories/trend",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/transactions/kpi",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/transactions/kpi",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/transactions/distribution",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/transactions/distribution",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/transactions/trend",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/transactions/trend",
+        "method": "POST"
+      }
+    }
+  ]
+}

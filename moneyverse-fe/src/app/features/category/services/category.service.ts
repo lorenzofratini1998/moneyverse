@@ -9,7 +9,7 @@ import {Budget, BudgetRequest, Category, CategoryRequest} from '../category.mode
 })
 export class CategoryService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.budgetManagementUrl
+  private readonly baseUrl = environment.services.krakendUrl
 
   public getCategoriesByUser(userId: string): Observable<Category[]> {
     return this.httpClient.get<Category[]>(`${this.baseUrl}/categories/users/${userId}`);

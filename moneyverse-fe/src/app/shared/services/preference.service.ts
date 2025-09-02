@@ -11,7 +11,7 @@ import {StorageService} from './storage.service';
 export class PreferenceService {
   private readonly httpClient = inject(HttpClient);
   private readonly storageService = inject(StorageService);
-  private readonly baseUrl = environment.services.userManagementUrl;
+  private readonly baseUrl = environment.services.krakendUrl;
 
   public getUserPreferences(userId: string): Observable<UserPreference[]> {
     return this.httpClient.get<UserPreference[]>(`${this.baseUrl}/users/${userId}/preferences`);

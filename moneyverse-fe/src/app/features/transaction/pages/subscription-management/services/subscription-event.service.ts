@@ -13,10 +13,10 @@ export class SubscriptionEventService {
 
   private readonly sseService = inject(SseService);
   private readonly authService = inject(AuthService);
-  private readonly baseUrl = environment.services.transactionManagementUrl;
+  private readonly baseUrl = environment.services.nginxUrl;
 
   connect(): Observable<SSEEvent> {
-    return this.sseService.connect(`${this.baseUrl}/sse`, {userId: this.authService.authenticatedUser.userId})
+    return this.sseService.connect(`${this.baseUrl}/transactions/sse`, {userId: this.authService.authenticatedUser.userId})
   }
 
   onSubscriptionCreated(): Observable<Subscription> {

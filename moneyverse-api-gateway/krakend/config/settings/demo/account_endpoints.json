@@ -1,0 +1,47 @@
+{
+  "host": "http://host.docker.internal:8092",
+  "endpoints": [
+    {
+      "endpoint": "/accounts/categories",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/accountsManagement/api/v1/accounts/categories",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/accounts/users/{userId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/accountsManagement/api/v1/accounts/users/{userId}",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/accounts",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/accountsManagement/api/v1/accounts",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/accounts/{accountId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/accountsManagement/api/v1/accounts/{accountId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/accounts/{accountId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/accountsManagement/api/v1/accounts/{accountId}",
+        "method": "DELETE"
+      }
+    }
+  ]
+}

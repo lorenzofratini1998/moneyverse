@@ -11,7 +11,7 @@ import {buildHttpParams} from '../../../shared/utils/utils';
 })
 export class AccountService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.accountManagementUrl
+  private readonly baseUrl = environment.services.krakendUrl
 
   public getAccountCategories(): Observable<AccountCategory[]> {
     return this.httpClient.get<AccountCategory[]>(`${this.baseUrl}/accounts/categories`);

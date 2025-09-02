@@ -9,10 +9,7 @@ export const environment = {
     expirationTime: 24 * 60 * 60 * 1000, // 1 day
   },
   services: {
-    userManagementUrl: 'http://localhost:8081/usersManagement/api/v1',
-    accountManagementUrl: 'http://localhost:8082/accountsManagement/api/v1',
-    budgetManagementUrl: 'http://localhost:8083/budgetsManagement/api/v1',
-    transactionManagementUrl: 'http://localhost:8084/transactionsManagement/api/v1',
-    analyticsUrl: 'http://localhost:8085/analytics/api/v1'
+    krakendUrl: 'http://localhost:8080',
+    nginxUrl: 'http://localhost:80'
   }
 }

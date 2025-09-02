@@ -1,0 +1,89 @@
+{
+  "host": "http://host.docker.internal:8093",
+  "endpoints": [
+    {
+      "endpoint": "/categories/users/{userId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/categories/users/{userId}",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/categories",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/categories",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/categories/users/{userId}/default",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/categories/users/{userId}/default",
+        "method": "POST",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/categories/",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/categories",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/categories/{categoryId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/categories/{categoryId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/categories/{categoryId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/categories/{categoryId}",
+        "method": "DELETE"
+      }
+    },
+    {
+      "endpoint": "/budgets/users/{userId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/budgets/users/{userId}",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/budgets",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/budgets",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/budgets/{budgetId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/budgets/{budgetId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/budgets/{budgetId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/budgetsManagement/api/v1/budgets/{budgetId}",
+        "method": "DELETE"
+      }
+    }
+  ]
+}
