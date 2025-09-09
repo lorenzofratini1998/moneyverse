@@ -23,7 +23,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 
 @MoneyverseTest
-@TestPropertySource(properties = {"spring.runner.initializer.enabled=false"})
+@TestPropertySource(
+    properties = {"spring.runner.initializer.enabled=false", "grpc.server.currency-service.port=0"})
 class CurrencyManagementControllerIT extends AbstractIntegrationTest {
 
   protected static CurrencyTestContext testContext;

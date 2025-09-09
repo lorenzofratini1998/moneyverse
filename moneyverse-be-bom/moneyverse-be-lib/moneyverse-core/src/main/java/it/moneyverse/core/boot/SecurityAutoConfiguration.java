@@ -73,7 +73,12 @@ public class SecurityAutoConfiguration {
                 }));
 
     httpSecurity.authorizeHttpRequests(
-        authz -> authz.requestMatchers("/public/**").permitAll().anyRequest().authenticated());
+        authz ->
+            authz
+                .requestMatchers("/public/**", "/actuator/health/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated());
 
     return httpSecurity.build();
   }
