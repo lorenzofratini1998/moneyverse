@@ -5,7 +5,7 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}5432/user_management
+    url: jdbc:postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/user_management
     username: ${SPRING_DATASOURCE_USERNAME:undefined}
     password: ${SPRING_DATASOURCE_PASSWORD:undefined}
   security:
