@@ -62,7 +62,8 @@ import org.testcontainers.junit.jupiter.Container;
 @TestPropertySource(
     properties = {
       "spring.autoconfigure.exclude=it.moneyverse.core.boot.SecurityAutoConfiguration, it.moneyverse.core.boot.RedisAutoConfiguration",
-      "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}"
+      "spring.kafka.admin.bootstrap-servers=${spring.embedded.kafka.brokers}",
+      "grpc.server.account-service.port=0"
     })
 @ExtendWith(MockitoExtension.class)
 class AccountConsumerTest {

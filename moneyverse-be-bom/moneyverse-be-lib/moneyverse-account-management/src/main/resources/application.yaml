@@ -3,8 +3,40 @@ server:
     ${PORT:8080}
 
 spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/account_management
+    username: ${SPRING_DATASOURCE_USERNAME:undefined}
+    password: ${SPRING_DATASOURCE_PASSWORD:undefined}
   security:
     base-path: /accountsManagement/api/v1
+    oauth2:
+      keycloak:
+        host: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST:undefined}
+        port: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_PORT:undefined}
+        realm-name: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_REALM_NAME:undefined}
+  cache:
+    redis:
+      host: ${SPRING_CACHE_REDIS_HOST:localhost}
+      port: ${SPRING_CACHE_REDIS_PORT:6379}
+      password: ${SPRING_CACHE_REDIS_PASSWORD:undefined}
+  kafka:
+    admin:
+      bootstrap-servers: ${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST}:${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_PORT}
+    consumer:
+      group-id: account-management
+
+grpc:
+  server:
+    account-service:
+      port: ${GRPC_USER_SERVER_PORT:50053}
+  client:
+    currency-service:
+      host: ${SPRING_GRPC_CLIENT_CURRENCY_SERVICE_HOST:localhost}
+      port: ${SPRING_GRPC_CLIENT_CURRENCY_SERVICE_PORT:50051}
+    user-service:
+      host: ${SPRING_GRPC_CLIENT_USER_SERVICE_HOST:localhost}
+      port: ${SPRING_GRPC_CLIENT_USER_SERVICE_PORT:50052}
 
 management:
   endpoints:
@@ -21,3 +53,10 @@ management:
       probes:
         enabled: true
       show-details: always
+
+springdoc:
+  api-docs:
+    path: /public/api/docs
+  swagger-ui:
+    path: /public/api/docs/swagger-ui.html
+    operations-sorter: alpha
