@@ -33,10 +33,12 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.junit.jupiter.Container;
 
 @MoneyverseTest
+@TestPropertySource(properties = {"grpc.server.budget-service.port=0"})
 class BudgetManagementControllerIT extends AbstractIntegrationTest {
 
   protected static BudgetTestContext testContext;
