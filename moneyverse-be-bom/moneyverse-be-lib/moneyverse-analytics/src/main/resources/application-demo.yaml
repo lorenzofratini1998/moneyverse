@@ -15,27 +15,8 @@ spring:
         host: localhost
         port: 7080
         realm-name: moneyverse-fe
-  #cache:
-  #  redis:
-  #    host: localhost
-  #    port: 6379
-  #    password: ${SPRING_CACHE_REDIS_PASSWORD:undefined}
   kafka:
     admin:
       bootstrap-servers: localhost:29092
     consumer:
       group-id: dashboard
-#grpc:
-#  client:
-#    currency-service:
-#      host: localhost
-#      port: 9080
-#    user-service:
-#      host: localhost
-#      port: 9081
-#    account-service:
-#      host: localhost
-#      port: 9082
-#    budget-service:
-#      host: localhost
-#      port: 9083
