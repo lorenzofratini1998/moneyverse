@@ -1,5 +1,5 @@
 {
-  "host": "http://host.docker.internal:8095",
+  "host": "http://moneyverse-analytics:7006",
   "endpoints": [
     {
       "endpoint": "/accounts/kpi",

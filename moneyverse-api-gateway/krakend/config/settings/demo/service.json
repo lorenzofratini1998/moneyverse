@@ -39,15 +39,5 @@
       "allow_credentials": true,
       "debug": true
     }
-  },
-  "backend": {
-    "hosts": {
-      "currency_management": "http://host.docker.internal:8090",
-      "user_management": "http://host.docker.internal:8091",
-      "account_management": "http://host.docker.internal:8092",
-      "budget_management": "http://host.docker.internal:8093",
-      "transaction-management": "http://host.docker.internal:8094",
-      "analytics": "http://host.docker.internal:8095"
-    }
   }
 }

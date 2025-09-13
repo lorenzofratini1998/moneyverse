@@ -1,5 +1,5 @@
 {
-  "host": "http://host.docker.internal:8092",
+  "host": "http://moneyverse-account-management:7003",
   "endpoints": [
     {
       "endpoint": "/accounts/categories",

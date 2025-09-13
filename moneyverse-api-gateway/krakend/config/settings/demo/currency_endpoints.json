@@ -1,5 +1,5 @@
 {
-  "host": "http://host.docker.internal:8090",
+  "host": "http://moneyverse-currency-management:7001",
   "endpoints": [
     {
       "endpoint": "/currencies",

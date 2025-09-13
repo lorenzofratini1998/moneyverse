@@ -1,5 +1,5 @@
 {
-  "host": "http://host.docker.internal:8093",
+  "host": "http://moneyverse-budget-management:7004",
   "endpoints": [
     {
       "endpoint": "/categories/users/{userId}",
