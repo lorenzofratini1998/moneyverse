@@ -1,0 +1,14 @@
+{{- include "helm-library.deployment" (list . "krakend.deployment") -}}
+
+{{- define "krakend.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "wait-for-service" (dict "name" "currency-management" "host" (include "moneyverse.currency-management-host" .) "port" .Values.global.dependencies.currency_management.ports.http) | nindent 8 }}
+        {{- include "wait-for-service" (dict "name" "user-management" "host" (include "moneyverse.user-management-host" .) "port" .Values.global.dependencies.user_management.ports.http) | nindent 8 }}
+        {{- include "wait-for-service" (dict "name" "account-management" "host" (include "moneyverse.account-management-host" .) "port" .Values.global.dependencies.account_management.ports.http) | nindent 8 }}
+        {{- include "wait-for-service" (dict "name" "budget-management" "host" (include "moneyverse.budget-management-host" .) "port" .Values.global.dependencies.budget_management.ports.http) | nindent 8 }}
+        {{- include "wait-for-service" (dict "name" "transaction-management" "host" (include "moneyverse.transaction-management-host" .) "port" .Values.global.dependencies.transaction_management.ports.http) | nindent 8 }}
+        {{- include "wait-for-service" (dict "name" "analytics" "host" (include "moneyverse.analytics-host" .) "port" .Values.global.dependencies.analytics.ports.http) | nindent 8 }}
+{{- end -}}

@@ -1,0 +1,4 @@
+{{- include "helm-library.service" (list . "frontend.service") -}}
+
+{{- define "frontend.service" -}}
+{{- end -}}

@@ -1,0 +1,2 @@
+{{- define "krakend.container" -}}
+{{- end -}}

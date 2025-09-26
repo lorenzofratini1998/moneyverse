@@ -1,0 +1,14 @@
+infisical:
+  secretName: "postgres-secret"
+  secretsPath: "/postgres"
+
+postgresql:
+  primary:
+    extraEnvVarsSecret: "postgres-secret"
+    extraVolumes:
+      - name: "postgres-init-volume"
+        configMap:
+          name: "postgres-init"
+    extraVolumeMounts:
+      - name: "postgres-init-volume"
+        mountPath: "/docker-entrypoint-initdb.d"

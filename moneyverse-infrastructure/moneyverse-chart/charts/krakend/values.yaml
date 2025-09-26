@@ -1,0 +1,45 @@
+ports:
+  http: &http 8080
+
+#Deployment settings
+replicas: 1
+serviceAccountName: "krakend"
+
+#Container configuration
+container:
+  image:
+    repository: "lfrat/moneyverse-krakend"
+    tag: "latest"
+    pullPolicy: "IfNotPresent"
+  ports:
+    - name: "http"
+      containerPort: *http
+  resourceTier: "micro"
+  livenessProbe:
+    httpGet:
+      path: "/__health"
+      port: *http
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    failureThreshold: 5
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: "/__health"
+      port: *http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 5
+    timeoutSeconds: 5
+
+#Service configuration
+service:
+  type: ClusterIP
+  ports:
+    - name: "http"
+      port: *http
+      targetPort: *http
+
+#ConfigMap data
+config:
+  serverPort: *http

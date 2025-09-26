@@ -1,0 +1,21 @@
+{{- include "helm-library.configmap" (list . "budget-management.configmap") -}}
+{{- define "budget-management.configmap" -}}
+metadata:
+  name: "budget-management-config"
+data:
+  PORT: {{ .Values.config.serverPort | quote }}
+  SPRING_DATASOURCE_HOST: {{ include "moneyverse.postgresql-host" . }}
+  SPRING_DATASOURCE_PORT: {{ .Values.global.dependencies.postgresql.port | quote }}
+  SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST: {{ include "moneyverse.keycloak-host" . }}
+  SPRING_SECURITY_OAUTH2_KEYCLOAK_PORT: {{ .Values.global.dependencies.keycloak.port | quote }}
+  SPRING_SECURITY_OAUTH2_KEYCLOAK_REALM_NAME: {{ .Values.global.dependencies.keycloak.realm | quote }}
+  SPRING_CACHE_REDIS_HOST: {{ include "moneyverse.redis-host" . }}
+  SPRING_CACHE_REDIS_PORT: {{ .Values.global.dependencies.redis.port | quote }}
+  SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST: {{ include "moneyverse.kafka-host" . }}
+  SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_PORT: {{ .Values.global.dependencies.kafka.port | quote }}
+  GRPC_CURRENCY_SERVER_PORT: {{ .Values.config.grpcPort | quote }}
+  SPRING_GRPC_CLIENT_CURRENCY_SERVICE_HOST: {{ include "moneyverse.currency-management-host" . }}
+  SPRING_GRPC_CLIENT_CURRENCY_SERVICE_PORT: {{ .Values.global.dependencies.currency_management.port | quote }}
+  SPRING_GRPC_CLIENT_USER_SERVICE_HOST: {{ include "moneyverse.user-management-host" . }}
+  SPRING_GRPC_CLIENT_USER_SERVICE_PORT: {{ .Values.global.dependencies.user_management.port | quote }}
+{{- end -}}

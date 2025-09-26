@@ -1,0 +1,13 @@
+{{- define "helm-library.initContainer.tpl" -}}
+{{- $initContainer := .Values.initContainer -}}
+name: {{ $initContainer.name | default .Chart.Name | quote }}
+image: {{ $initContainer.image | quote }}
+{{- if $initContainer.command }}
+command:
+  {{- toYaml $initContainer.command | nindent 12 }}
+{{- end }}
+{{- end -}}
+{{- define "helm-library.initContainer" -}}
+{{- println "" -}}
+{{- include "helm-library.util.merge" (append . "helm-library.initContainer.tpl") | indent 8 -}}
+{{- end -}}

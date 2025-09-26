@@ -1,0 +1,85 @@
+apiVersion: v2
+name: moneyverse-chart
+description: A Helm chart for Kubernetes
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.0.0"
+
+dependencies:
+  - name: helm-library
+    version: "0.1.0"
+    repository: file://charts/helm-library
+
+  - name: postgres
+    version: "0.1.0"
+    repository: file://charts/postgres
+
+  - name: clickhouse
+    version: "0.1.0"
+    repository: file://charts/clickhouse
+
+  - name: redis
+    version: "0.1.0"
+    repository: file://charts/redis
+
+  - name: keycloak
+    version: "0.1.0"
+    repository: file://charts/keycloak
+
+  - name: kafka
+    version: "0.1.0"
+    repository: file://charts/kafka
+
+  - name: currency-management
+    version: "0.1.0"
+    repository: file://charts/currency-management
+
+  - name: user-management
+    version: "0.1.0"
+    repository: file://charts/user-management
+
+  - name: account-management
+    version: "0.1.0"
+    repository: file://charts/account-management
+
+  - name: budget-management
+    version: "0.1.0"
+    repository: file://charts/budget-management
+
+  - name: transaction-management
+    version: "0.1.0"
+    repository: file://charts/transaction-management
+
+  - name: analytics
+    version: "0.1.0"
+    repository: file://charts/analytics
+
+  - name: krakend
+    version: "0.1.0"
+    repository: file://charts/krakend
+
+  - name: nginx
+    version: "0.1.0"
+    repository: file://charts/nginx
+
+  - name: frontend
+    version: "0.1.0"
+    repository: file://charts/frontend

@@ -1,0 +1,68 @@
+{{/*
+Base container template
+*/}}
+{{- define "helm-library.container.tpl" -}}
+name: {{ printf "%s-%s" .Release.Name .Chart.Name }}
+image: {{ .Values.container.image.repository }}:{{ .Values.container.image.tag | default .Chart.AppVersion }}
+imagePullPolicy: {{ .Values.container.image.pullPolicy | default "IfNotPresent" }}
+{{- if .Values.container.ports }}
+ports:
+  {{- range .Values.container.ports }}
+  - name: {{ .name }}
+    containerPort: {{ .containerPort }}
+    protocol: {{ .protocol | default "TCP" }}
+  {{- end }}
+{{- end }}
+{{- if or .Values.container.envFrom .Values.container.env }}
+{{- if .Values.container.envFrom }}
+envFrom:
+  {{- toYaml .Values.container.envFrom | nindent 2 }}
+{{- end }}
+{{- if .Values.container.env }}
+env:
+  {{- toYaml .Values.container.env | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- if .Values.container.command }}
+command:
+  {{- toYaml .Values.container.command | nindent 2 }}
+{{- end }}
+{{- if .Values.container.args }}
+args:
+  {{- toYaml .Values.container.args | nindent 2 }}
+{{- end }}
+{{- if or .Values.container.resourceTier .Values.container.resources }}
+resources:
+  {{- if .Values.container.resourceTier }}
+  {{- include "helm-library.resources.tier" . | nindent 2 }}
+  {{- else }}
+  {{- toYaml .Values.container.resources | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- if .Values.container.volumeMounts }}
+volumeMounts:
+  {{- toYaml .Values.container.volumeMounts | nindent 2 }}
+{{- end }}
+{{- if .Values.container.startupProbe }}
+startupProbe:
+  {{- toYaml .Values.container.startupProbe | nindent 2 }}
+{{- end }}
+{{- if .Values.container.livenessProbe }}
+livenessProbe:
+  {{- toYaml .Values.container.livenessProbe | nindent 2 }}
+{{- end }}
+{{- if .Values.container.readinessProbe }}
+readinessProbe:
+  {{- toYaml .Values.container.readinessProbe | nindent 2 }}
+{{- end }}
+{{- if .Values.container.securityContext }}
+securityContext:
+  {{- toYaml .Values.container.securityContext | nindent 2 }}
+{{- end }}
+{{- end }}
+{{/*
+Main container template with override support
+*/}}
+{{- define "helm-library.container" -}}
+{{- include "helm-library.util.merge" (append . "helm-library.container.tpl") | indent 8 -}}
+{{- end -}}

@@ -1,0 +1,9 @@
+dependencies:
+- name: clickhouse
+  repository: https://charts.bitnami.com/bitnami
+  version: 9.4.4
+- name: helm-library
+  repository: file://../helm-library
+  version: 0.1.0
+digest: sha256:ba2fb7007d06f7dd88d34bff8bc3f336c40c0d7465ba4fe3424ea0025074570f
+generated: "2025-09-07T15:32:32.94422+02:00"

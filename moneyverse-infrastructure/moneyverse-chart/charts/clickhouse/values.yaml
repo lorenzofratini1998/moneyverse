@@ -1,0 +1,20 @@
+infisical:
+  secretName: "clickhouse-secret"
+  secretsPath: "/clickhouse"
+
+clickhouse:
+  shards: 1
+  replicaCount: 1
+  keeper:
+    enabled: false
+  auth:
+    username: "admin"
+    existingSecret: "clickhouse-secret"
+    existingSecretKey: "CLICKHOUSE_ADMIN_PASSWORD"
+  extraVolumes:
+    - name: "clickhouse-init-volume"
+      configMap:
+        name: "clickhouse-init"
+  extraVolumeMounts:
+    - name: "clickhouse-init-volume"
+      mountPath: "/docker-entrypoint-initdb.d"

@@ -1,0 +1,16 @@
+{{- define "helm-library.volumeClaim.tpl" -}}
+{{- $volumeClaim := .Values.volumeClaim -}}
+metadata:
+  name: {{ $volumeClaim.name | default (printf "%s-volume" .Chart.Name ) | quote }}
+spec:
+  storageClassName: {{ $volumeClaim.storageClassName | default "standard" | quote }}
+  accessModes:
+    - {{ $volumeClaim.accessMode | default "ReadWriteOnce" | quote }}
+  resources:
+    requests:
+      storage: {{ $volumeClaim.storage | default "1Gi" | quote }}
+{{- end -}}
+{{- define "helm-library.volumeClaim" -}}
+{{- println "" -}}
+{{- include "helm-library.util.merge" (append . "helm-library.volumeClaim.tpl") | indent 8 -}}
+{{- end -}}

@@ -1,0 +1,4 @@
+{{- include "helm-library.service" (list . "budget-management.service") -}}
+
+{{- define "budget-management.service" -}}
+{{- end -}}

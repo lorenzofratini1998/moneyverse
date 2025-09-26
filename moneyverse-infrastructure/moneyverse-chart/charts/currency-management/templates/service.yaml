@@ -1,0 +1,4 @@
+{{- include "helm-library.service" (list . "currency-management.service") -}}
+
+{{- define "currency-management.service" -}}
+{{- end -}}

@@ -1,0 +1,45 @@
+infisical:
+  secretName: "keycloak-secret"
+  secretsPath: "/keycloak"
+
+keycloak:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30080
+    ports:
+      http: 7080
+  usePasswordFiles: false
+  postgresql:
+    enabled: false
+  auth:
+    adminUser: "admin"
+    existingSecret: "keycloak-secret"
+    passwordSecretKey: "KC_BOOTSTRAP_ADMIN_PASSWORD"
+  externalDatabase:
+    host: "moneyverse-postgresql"
+    database: "keycloak"
+    existingSecret: "postgres-secret"
+    existingSecretUserKey: "POSTGRESQL_USERNAME"
+    existingSecretPasswordKey: "POSTGRESQL_PASSWORD"
+  extraEnvVars:
+    - name: KEYCLOAK_EXTRA_ARGS
+      value: "--import-realm"
+    - name: KEYCLOAK_LOG_LEVEL
+      value: DEBUG
+  metrics:
+    enabled: true
+  initContainers:
+    - name: "wait-for-postgres"
+      image: "busybox:1.36"
+      command:
+        - "sh"
+        - "-c"
+        - 'until nc -z moneyverse-postgresql 5432; do echo "Waiting for postgres..."; sleep 3; done;'
+  extraVolumes:
+    - name: "keycloak-init-volume"
+      configMap:
+        name: "keycloak-init-realm"
+  extraVolumeMounts:
+    - name: "keycloak-init-volume"
+      mountPath: "/opt/bitnami/keycloak/data/import"
