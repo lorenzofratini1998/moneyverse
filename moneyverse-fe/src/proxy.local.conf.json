@@ -1,0 +1,29 @@
+{
+  "/accounts/sse": {
+    "target": "http://localhost:7003",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/accounts/sse": "/accountsManagement/api/v1/sse"
+    }
+  },
+  "/budgets/sse": {
+    "target": "http://localhost:7004",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/budgets/sse": "/budgetsManagement/api/v1/sse"
+    }
+  },
+  "/transactions/sse": {
+    "target": "http://localhost:7005",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/transactions/sse": "/transactionsManagement/api/v1/sse"
+    }
+  }
+}

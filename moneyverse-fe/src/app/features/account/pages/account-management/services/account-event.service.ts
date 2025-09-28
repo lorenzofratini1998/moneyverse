@@ -13,10 +13,9 @@ export class AccountEventService {
 
   private readonly sseService = inject(SseService);
   private readonly authService = inject(AuthService);
-  private readonly baseUrl = environment.services.nginxUrl
 
   connect(): Observable<SSEEvent> {
-    return this.sseService.connect(`${this.baseUrl}/accounts/sse`, {userId: this.authService.authenticatedUser.userId})
+    return this.sseService.connect(`/accounts/sse`, {userId: this.authService.authenticatedUser.userId})
   }
 
   onAccountCreated(): Observable<Account> {

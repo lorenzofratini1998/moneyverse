@@ -1,6 +1,6 @@
 export const environment = {
   keycloak: {
-    url: 'http://localhost:30080',
+    url: 'http://localhost:7080',
     realm: 'moneyverse-fe',
     clientId: 'web-client',
     redirectUri: window.location.origin
@@ -9,6 +9,6 @@ export const environment = {
     expirationTime: 24 * 60 * 60 * 1000, // 1 day
   },
   services: {
-    krakendUrl: 'http://moneyverse-krakend:8080'
+    krakendUrl: 'http://localhost:8080'
   }
 }

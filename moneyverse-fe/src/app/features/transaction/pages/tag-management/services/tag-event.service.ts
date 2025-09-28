@@ -13,10 +13,9 @@ export class TagEventService {
 
   private readonly sseService = inject(SseService);
   private readonly authService = inject(AuthService);
-  private readonly baseUrl = environment.services.nginxUrl;
 
   connect(): Observable<SSEEvent> {
-    return this.sseService.connect(`${this.baseUrl}/transactions/sse`, {userId: this.authService.authenticatedUser.userId})
+    return this.sseService.connect(`/transactions/sse`, {userId: this.authService.authenticatedUser.userId})
   }
 
   onTagCreated(): Observable<Tag> {

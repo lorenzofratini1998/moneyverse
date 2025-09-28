@@ -13,10 +13,9 @@ export class BudgetEventService {
 
   private readonly sseService = inject(SseService);
   private readonly authService = inject(AuthService);
-  private readonly baseUrl = environment.services.nginxUrl;
 
   connect(): Observable<SSEEvent> {
-    return this.sseService.connect(`${this.baseUrl}/budgets/sse`, {userId: this.authService.authenticatedUser.userId})
+    return this.sseService.connect(`/budgets/sse`, {userId: this.authService.authenticatedUser.userId})
   }
 
   onBudgetCreated(): Observable<Budget> {
