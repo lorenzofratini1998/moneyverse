@@ -1,1 +1,3 @@
-/out
+out.json
+/config/*/local
+docker-compose.yaml

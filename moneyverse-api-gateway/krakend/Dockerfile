@@ -7,7 +7,7 @@ COPY config .
 ## Save temporary file to /tmp to avoid permission errors
 RUN FC_ENABLE=1 \
     FC_OUT=/tmp/krakend.json \
-    FC_PARTIALS="/etc/krakend/partials" \
+    FC_PARTIALS="/etc/krakend/partials/$ENV" \
     FC_SETTINGS="/etc/krakend/settings/$ENV" \
     FC_TEMPLATES="/etc/krakend/templates" \
     krakend check -d -t -c krakend.tmpl
