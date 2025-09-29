@@ -9,50 +9,49 @@ import {Budget, BudgetRequest, Category, CategoryRequest} from '../category.mode
 })
 export class CategoryService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.krakendUrl
 
   public getCategoriesByUser(userId: string): Observable<Category[]> {
-    return this.httpClient.get<Category[]>(`${this.baseUrl}/categories/users/${userId}`);
+    return this.httpClient.get<Category[]>(`/categories/users/${userId}`);
   }
 
   public getDefaultCategories(): Observable<Category[]> {
-    return this.httpClient.get<Category[]>(`${this.baseUrl}/categories?default=true`);
+    return this.httpClient.get<Category[]>(`/categories?default=true`);
   }
 
   public createDefaultCategories(userId: string): Observable<Category[]> {
-    return this.httpClient.post<Category[]>(`${this.baseUrl}/categories/users/${userId}/default`, {});
+    return this.httpClient.post<Category[]>(`/categories/users/${userId}/default`, {});
   }
 
   public createCategory(request: CategoryRequest): Observable<Category> {
-    return this.httpClient.post<Category>(`${this.baseUrl}/categories`, request);
+    return this.httpClient.post<Category>(`/categories`, request);
   }
 
   public updateCategory(categoryId: string, request: CategoryRequest): Observable<Category> {
-    return this.httpClient.put<Category>(`${this.baseUrl}/categories/${categoryId}`, request);
+    return this.httpClient.put<Category>(`/categories/${categoryId}`, request);
   }
 
   public deleteCategory(categoryId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseUrl}/categories/${categoryId}`);
+    return this.httpClient.delete<void>(`/categories/${categoryId}`);
   }
 
   public createBudget(request: BudgetRequest): Observable<Budget> {
-    return this.httpClient.post<Budget>(`${this.baseUrl}/budgets`, request);
+    return this.httpClient.post<Budget>(`/budgets`, request);
   }
 
   public getBudgetsByUser(userId: string): Observable<Budget[]> {
-    return this.httpClient.get<Budget[]>(`${this.baseUrl}/budgets/users/${userId}`);
+    return this.httpClient.get<Budget[]>(`/budgets/users/${userId}`);
   }
 
   public getBudget(budgetId: string): Observable<Budget> {
-    return this.httpClient.get<Budget>(`${this.baseUrl}/budgets/${budgetId}`);
+    return this.httpClient.get<Budget>(`/budgets/${budgetId}`);
   }
 
   public updateBudget(budgetId: string, request: BudgetRequest): Observable<Budget> {
-    return this.httpClient.put<Budget>(`${this.baseUrl}/budgets/${budgetId}`, request);
+    return this.httpClient.put<Budget>(`/budgets/${budgetId}`, request);
   }
 
   public deleteBudget(budgetId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseUrl}/budgets/${budgetId}`);
+    return this.httpClient.delete<void>(`/budgets/${budgetId}`);
   }
 
 }

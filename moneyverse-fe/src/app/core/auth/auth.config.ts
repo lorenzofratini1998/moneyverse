@@ -10,7 +10,7 @@ import {
 import {environment} from '../../../environments/environment';
 
 const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
-  urlPattern: /^http:\/\/[^\/:]+:80(\d*)(\/.*)?$/i,
+  urlPattern: /^(?!\/analytics).*$/i,
   bearerPrefix: "Bearer"
 })
 

@@ -10,22 +10,20 @@ import {StorageService} from './storage.service';
 })
 export class PreferenceService {
   private readonly httpClient = inject(HttpClient);
-  private readonly storageService = inject(StorageService);
-  private readonly baseUrl = environment.services.krakendUrl;
 
   public getUserPreferences(userId: string): Observable<UserPreference[]> {
-    return this.httpClient.get<UserPreference[]>(`${this.baseUrl}/users/${userId}/preferences`);
+    return this.httpClient.get<UserPreference[]>(`/users/${userId}/preferences`);
   }
 
   public getUserPreference(userId: string, preferenceName: string): Observable<UserPreference> {
-    return this.httpClient.get<UserPreference>(`${this.baseUrl}/users/${userId}/preferences/${preferenceName}`);
+    return this.httpClient.get<UserPreference>(`/users/${userId}/preferences/${preferenceName}`);
   }
 
   public getPreferences(mandatory: boolean = false) {
     if (mandatory) {
-      return this.httpClient.get<Preference[]>(`${this.baseUrl}/preferences?mandatory=true`);
+      return this.httpClient.get<Preference[]>(`/preferences?mandatory=true`);
     }
-    return this.httpClient.get<Preference[]>(`${this.baseUrl}/preferences`);
+    return this.httpClient.get<Preference[]>(`/preferences`);
   }
 
   public async checkMissingPreferences(userId: string): Promise<boolean> {
@@ -49,15 +47,15 @@ export class PreferenceService {
 
 
   public getLanguages(): Observable<Language[]> {
-    return this.httpClient.get<Language[]>(`${this.baseUrl}/languages`);
+    return this.httpClient.get<Language[]>(`/languages`);
   }
 
   public saveUserPreferences(userId: string, userPreferences: UserPreferenceRequest[]): Observable<UserPreference[]> {
-    return this.httpClient.post<UserPreference[]>(`${this.baseUrl}/users/${userId}/preferences`, userPreferences);
+    return this.httpClient.post<UserPreference[]>(`/users/${userId}/preferences`, userPreferences);
   }
 
   public updateUserPreferences(userId: string, request: UserPreferenceRequest[]): Observable<UserPreference[]> {
-    return this.httpClient.put<UserPreference[]>(`${this.baseUrl}/users/${userId}/preferences`, request);
+    return this.httpClient.put<UserPreference[]>(`/users/${userId}/preferences`, request);
   }
 
 

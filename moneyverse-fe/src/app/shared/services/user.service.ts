@@ -8,13 +8,12 @@ import {UserUpdateRequestDto} from '../../core/auth/models/user.model';
 })
 export class UserService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.krakendUrl;
 
   public updateUser(userId: string, request: Partial<UserUpdateRequestDto>) {
-    return this.httpClient.put(`${this.baseUrl}/users/${userId}`, request);
+    return this.httpClient.put(`/users/${userId}`, request);
   }
 
   public deleteUser(userId: string) {
-    return this.httpClient.delete(`${this.baseUrl}/users/${userId}`);
+    return this.httpClient.delete(`/users/${userId}`);
   }
 }

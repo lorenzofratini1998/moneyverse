@@ -22,78 +22,77 @@ import {buildHttpParams} from '../../../shared/utils/utils';
 })
 export class TransactionService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.krakendUrl
 
   public getTransactionsByUser(userId: string, criteria: TransactionCriteria = {}): Observable<PageResponse<Transaction>> {
     const params = buildHttpParams(criteria);
-    return this.httpClient.get<PageResponse<Transaction>>(`${this.baseUrl}/transactions/users/${userId}`, {params});
+    return this.httpClient.get<PageResponse<Transaction>>(`/transactions/users/${userId}`, {params});
   }
 
   public createTransaction(request: TransactionRequest): Observable<Transaction> {
-    return this.httpClient.post<Transaction>(`${this.baseUrl}/transactions`, request);
+    return this.httpClient.post<Transaction>(`/transactions`, request);
   }
 
   public updateTransaction(transactionId: string, request: TransactionRequestItem): Observable<Transaction> {
-    return this.httpClient.put<Transaction>(`${this.baseUrl}/transactions/${transactionId}`, request);
+    return this.httpClient.put<Transaction>(`/transactions/${transactionId}`, request);
   }
 
   public deleteTransaction(transactionId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseUrl}/transactions/${transactionId}`);
+    return this.httpClient.delete<void>(`/transactions/${transactionId}`);
   }
 
   createTag(request: TagRequest): Observable<Tag> {
-    return this.httpClient.post<Tag>(`${this.baseUrl}/tags`, request);
+    return this.httpClient.post<Tag>(`/tags`, request);
   }
 
   getTagsByUser(userId: string): Observable<Tag[]> {
-    return this.httpClient.get<Tag[]>(`${this.baseUrl}/tags/users/${userId}`);
+    return this.httpClient.get<Tag[]>(`/tags/users/${userId}`);
   }
 
   getTag(tagId: string): Observable<Tag> {
-    return this.httpClient.get<Tag>(`${this.baseUrl}/tags/${tagId}`);
+    return this.httpClient.get<Tag>(`/tags/${tagId}`);
   }
 
   updateTag(tagId: string, request: TagRequest): Observable<Tag> {
-    return this.httpClient.put<Tag>(`${this.baseUrl}/tags/${tagId}`, request);
+    return this.httpClient.put<Tag>(`/tags/${tagId}`, request);
   }
 
   deleteTag(tagId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseUrl}/tags/${tagId}`);
+    return this.httpClient.delete<void>(`/tags/${tagId}`);
   }
 
   createTransfer(request: TransferRequest): Observable<Transfer> {
-    return this.httpClient.post<Transfer>(`${this.baseUrl}/transfers`, request);
+    return this.httpClient.post<Transfer>(`/transfers`, request);
   }
 
   updateTransfer(transferId: string, request: TransferRequest): Observable<Transfer> {
-    return this.httpClient.put<Transfer>(`${this.baseUrl}/transfers/${transferId}`, request);
+    return this.httpClient.put<Transfer>(`/transfers/${transferId}`, request);
   }
 
   deleteTransfer(transferId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseUrl}/transfers/${transferId}`);
+    return this.httpClient.delete<void>(`/transfers/${transferId}`);
   }
 
   getTransactionsByTransferId(transferId: string): Observable<Transfer> {
-    return this.httpClient.get<Transfer>(`${this.baseUrl}/transfers/${transferId}`);
+    return this.httpClient.get<Transfer>(`/transfers/${transferId}`);
   }
 
   createSubscription(request: SubscriptionRequest): Observable<Subscription> {
-    return this.httpClient.post<Subscription>(`${this.baseUrl}/subscriptions`, request);
+    return this.httpClient.post<Subscription>(`/subscriptions`, request);
   }
 
   getSubscription(subscriptionId: string): Observable<Subscription> {
-    return this.httpClient.get<Subscription>(`${this.baseUrl}/subscriptions/${subscriptionId}`);
+    return this.httpClient.get<Subscription>(`/subscriptions/${subscriptionId}`);
   }
 
   getSubscriptionsByUser(userId: string): Observable<Subscription[]> {
-    return this.httpClient.get<Subscription[]>(`${this.baseUrl}/subscriptions/users/${userId}`);
+    return this.httpClient.get<Subscription[]>(`/subscriptions/users/${userId}`);
   }
 
   deleteSubscription(subscriptionId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseUrl}/subscriptions/${subscriptionId}`);
+    return this.httpClient.delete<void>(`/subscriptions/${subscriptionId}`);
   }
 
   updateSubscription(subscriptionId: string, request: SubscriptionRequest): Observable<Subscription> {
-    return this.httpClient.put<Subscription>(`${this.baseUrl}/subscriptions/${subscriptionId}`, request);
+    return this.httpClient.put<Subscription>(`/subscriptions/${subscriptionId}`, request);
   }
 }

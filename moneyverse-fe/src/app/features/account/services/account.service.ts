@@ -11,26 +11,25 @@ import {buildHttpParams} from '../../../shared/utils/utils';
 })
 export class AccountService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.krakendUrl
 
   public getAccountCategories(): Observable<AccountCategory[]> {
-    return this.httpClient.get<AccountCategory[]>(`${this.baseUrl}/accounts/categories`);
+    return this.httpClient.get<AccountCategory[]>(`/accounts/categories`);
   }
 
   public getAccounts(userId: string, criteria: AccountCriteria = {}): Observable<Account[]> {
     const params = buildHttpParams(criteria);
-    return this.httpClient.get<Account[]>(`${this.baseUrl}/accounts/users/${userId}`, {params});
+    return this.httpClient.get<Account[]>(`/accounts/users/${userId}`, {params});
   }
 
   public createAccount(request: AccountRequest): Observable<Account> {
-    return this.httpClient.post<Account>(`${this.baseUrl}/accounts`, request);
+    return this.httpClient.post<Account>(`/accounts`, request);
   }
 
   public updateAccount(accountId: string, request: AccountRequest): Observable<Account> {
-    return this.httpClient.put<Account>(`${this.baseUrl}/accounts/${accountId}`, request);
+    return this.httpClient.put<Account>(`/accounts/${accountId}`, request);
   }
 
   public deleteAccount(accountId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseUrl}/accounts/${accountId}`);
+    return this.httpClient.delete<void>(`/accounts/${accountId}`);
   }
 }

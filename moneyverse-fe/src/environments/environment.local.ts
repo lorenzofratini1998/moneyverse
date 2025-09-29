@@ -7,8 +7,5 @@ export const environment = {
   },
   storage: {
     expirationTime: 24 * 60 * 60 * 1000, // 1 day
-  },
-  services: {
-    krakendUrl: 'http://localhost:8080'
   }
 }

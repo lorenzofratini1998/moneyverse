@@ -10,9 +10,7 @@ import {environment} from '../../../environments/environment';
 export class CurrencyService {
   private readonly httpClient = inject(HttpClient);
 
-  private readonly baseUrl = environment.services.krakendUrl;
-
   public getCurrencies(): Observable<Currency[]> {
-    return this.httpClient.get<Currency[]>(`${this.baseUrl}/currencies`);
+    return this.httpClient.get<Currency[]>(`/currencies`);
   }
 }

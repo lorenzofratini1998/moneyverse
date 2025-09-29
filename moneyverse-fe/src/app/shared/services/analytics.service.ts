@@ -24,7 +24,6 @@ import {
 })
 export class AnalyticsService {
   private readonly httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.services.krakendUrl;
 
   chartFilterOptions = computed<ChartFilterOption[]>(() => [
     {label: 'Total Amount', value: 'totalAmount'},
@@ -33,38 +32,38 @@ export class AnalyticsService {
   ])
 
   calculateAccountAnalyticsKpi(filter: DashboardFilter): Observable<AccountAnalyticsKpi> {
-    return this.httpClient.post<AccountAnalyticsKpi>(`${this.baseUrl}/accounts/kpi`, filter);
+    return this.httpClient.post<AccountAnalyticsKpi>(`analytics/accounts/kpi`, filter);
   }
 
   calculateAccountAnalyticsDistribution(filter: DashboardFilter): Observable<AccountAnalyticsDistribution[]> {
-    return this.httpClient.post<AccountAnalyticsDistribution[]>(`${this.baseUrl}/accounts/distribution`, filter);
+    return this.httpClient.post<AccountAnalyticsDistribution[]>(`analytics/accounts/distribution`, filter);
   }
 
   calculateAccountAnalyticsTrend(filter: DashboardFilter): Observable<AccountAnalyticsTrend[]> {
-    return this.httpClient.post<AccountAnalyticsTrend[]>(`${this.baseUrl}/accounts/trend`, filter);
+    return this.httpClient.post<AccountAnalyticsTrend[]>(`analytics/accounts/trend`, filter);
   }
 
   calculateCategoryKpi(filter: DashboardFilter): Observable<CategoryAnalyticsKpi> {
-    return this.httpClient.post<CategoryAnalyticsKpi>(`${this.baseUrl}/categories/kpi`, filter);
+    return this.httpClient.post<CategoryAnalyticsKpi>(`analytics/categories/kpi`, filter);
   }
 
   calculateCategoryDistribution(filter: DashboardFilter): Observable<CategoryAnalyticsDistribution[]> {
-    return this.httpClient.post<CategoryAnalyticsDistribution[]>(`${this.baseUrl}/categories/distribution`, filter);
+    return this.httpClient.post<CategoryAnalyticsDistribution[]>(`analytics/categories/distribution`, filter);
   }
 
   calculateCategoryTrend(filter: DashboardFilter): Observable<CategoryAnalyticsTrend[]> {
-    return this.httpClient.post<CategoryAnalyticsTrend[]>(`${this.baseUrl}/categories/trend`, filter);
+    return this.httpClient.post<CategoryAnalyticsTrend[]>(`analytics/categories/trend`, filter);
   }
 
   calculateTransactionKpi(filter: DashboardFilter): Observable<TransactionKpi> {
-    return this.httpClient.post<TransactionKpi>(`${this.baseUrl}/transactions/kpi`, filter);
+    return this.httpClient.post<TransactionKpi>(`analytics/transactions/kpi`, filter);
   }
 
   calculateTransactionDistribution(filter: DashboardFilter): Observable<TransactionDistribution> {
-    return this.httpClient.post<TransactionDistribution>(`${this.baseUrl}/transactions/distribution`, filter);
+    return this.httpClient.post<TransactionDistribution>(`analytics/transactions/distribution`, filter);
   }
 
   calculateTransactionTrend(filter: DashboardFilter): Observable<TransactionTrend> {
-    return this.httpClient.post<TransactionTrend>(`${this.baseUrl}/transactions/trend`, filter);
+    return this.httpClient.post<TransactionTrend>(`analytics/transactions/trend`, filter);
   }
 }

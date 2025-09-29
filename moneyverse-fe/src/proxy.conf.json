@@ -1,5 +1,5 @@
 {
-  "/accounts/sse": {
+  "/accounts/sse/**": {
     "target": "http://moneyverse-account-management:7003",
     "secure": false,
     "changeOrigin": true,
@@ -8,7 +8,7 @@
       "^/accounts/sse": "/accountsManagement/api/v1/sse"
     }
   },
-  "/budgets/sse": {
+  "/budgets/sse/**": {
     "target": "http://moneyverse-budget-management:7004",
     "secure": false,
     "changeOrigin": true,
@@ -17,7 +17,7 @@
       "^/budgets/sse": "/budgetsManagement/api/v1/sse"
     }
   },
-  "/transactions/sse": {
+  "/transactions/sse/**": {
     "target": "http://moneyverse-transaction-management:7005",
     "secure": false,
     "changeOrigin": true,
@@ -25,5 +25,80 @@
     "pathRewrite": {
       "^/transactions/sse": "/transactionsManagement/api/v1/sse"
     }
+  },
+  "/analytics/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/analytics": ""
+    }
+  },
+  "/currencies/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/users/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/preferences/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/languages/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/accounts/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/budgets/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/categories/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/tags/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/transfers/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/subscriptions/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/transactions/**": {
+    "target": "http://moneyverse-krakend:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }
