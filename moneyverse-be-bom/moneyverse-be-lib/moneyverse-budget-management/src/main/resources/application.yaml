@@ -25,6 +25,8 @@ spring:
       bootstrap-servers: ${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST}:${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_PORT}
     consumer:
       group-id: budget-management
+  flyway:
+    locations: classpath:db/migration/common
 
 grpc:
   server:
