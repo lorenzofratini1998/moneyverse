@@ -26,10 +26,10 @@ spring:
     job:
       enabled: false
   flyway:
-    clickhouse:
-      locations: classpath:db/migration/clickhouse
     postgres:
-      locations: classpath:db/migration/postgres
+      locations: classpath:db/migration/postgres/common
+    clickhouse:
+      locations: classpath:db/migration/clickhouse/common
   kafka:
     admin:
       bootstrap-servers: ${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST}:${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_PORT}

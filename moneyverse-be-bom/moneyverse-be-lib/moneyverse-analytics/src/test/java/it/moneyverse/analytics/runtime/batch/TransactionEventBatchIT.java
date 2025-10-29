@@ -57,7 +57,7 @@ public class TransactionEventBatchIT {
     registry.add(
         "spring.flyway.postgres.locations",
         () ->
-            "classpath:db/migration/postgres,filesystem:%s"
+            "classpath:db/migration/postgres/common,filesystem:%s"
                 .formatted(tempDir.toAbsolutePath().toString()));
   }
 

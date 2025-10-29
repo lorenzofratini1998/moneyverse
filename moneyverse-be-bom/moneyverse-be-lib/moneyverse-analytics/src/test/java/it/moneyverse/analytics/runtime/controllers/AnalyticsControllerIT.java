@@ -47,7 +47,7 @@ public class AnalyticsControllerIT extends AbstractIntegrationTest {
     registry.add(
         "spring.flyway.clickhouse.locations",
         () ->
-            "classpath:db/migration/clickhouse,filesystem:%s"
+            "classpath:db/migration/clickhouse/common,filesystem:%s"
                 .formatted(tempDir.toAbsolutePath().toString()));
   }
 
