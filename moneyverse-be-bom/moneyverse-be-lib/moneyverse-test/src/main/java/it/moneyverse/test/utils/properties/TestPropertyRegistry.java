@@ -75,7 +75,7 @@ public class TestPropertyRegistry {
     registry.add(
         "spring.flyway.locations",
         () ->
-            "classpath:db/migration/schema,filesystem:%s"
+            "classpath:db/migration/common/schema,filesystem:%s"
                 .formatted(tempDir.toAbsolutePath().toString()));
     return this;
   }

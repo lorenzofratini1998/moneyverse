@@ -1,0 +1,6 @@
+spring:
+  flyway:
+    locations: classpath:/db/migration/common,classpath:/db/migration/demo
+    placeholders:
+      DEMO_USER_ID: ${DEMO_USER_ID:84830153-f653-4e57-9057-36fce83476c5}
+      DEMO_EMAIL: ${DEMO_EMAIL:demo@demo.it}
