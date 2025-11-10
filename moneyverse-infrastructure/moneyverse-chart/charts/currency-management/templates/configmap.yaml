@@ -4,9 +4,9 @@ metadata:
   name: "currency-management-config"
 data:
   PORT: {{ .Values.config.serverPort | quote }}
-  SPRING_DATASOURCE_HOST: {{ include "moneyverse.postgresql-host" . }}
+  SPRING_DATASOURCE_HOST: {{ include "moneyverse.postgresql-host" . | quote }}
   SPRING_DATASOURCE_PORT: {{ .Values.global.dependencies.postgresql.port | quote }}
-  SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST: {{ include "moneyverse.keycloak-host" . }}
+  SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST: {{ include "moneyverse.keycloak-host" . | quote }}
   SPRING_SECURITY_OAUTH2_KEYCLOAK_PORT: {{ .Values.global.dependencies.keycloak.port | quote }}
   SPRING_SECURITY_OAUTH2_KEYCLOAK_REALM_NAME: {{ .Values.global.dependencies.keycloak.realm | quote }}
   GRPC_CURRENCY_SERVER_PORT: {{ .Values.config.grpcPort | quote }}

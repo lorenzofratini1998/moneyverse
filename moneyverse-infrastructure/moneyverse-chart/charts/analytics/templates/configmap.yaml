@@ -4,13 +4,16 @@ metadata:
   name: "analytics-config"
 data:
   PORT: {{ .Values.config.serverPort | quote }}
-  SPRING_DATASOURCE_HOST: {{ include "moneyverse.postgresql-host" . }}
+  SPRING_DATASOURCE_HOST: {{ include "moneyverse.postgresql-host" . | quote }}
   SPRING_DATASOURCE_PORT: {{ .Values.global.dependencies.postgresql.port | quote }}
-  SPRING_DATASOURCE_CLICKHOUSE_HOST: {{ include "moneyverse.clickhouse-host" . }}
+  SPRING_DATASOURCE_CLICKHOUSE_HOST: {{ include "moneyverse.clickhouse-host" . | quote }}
   SPRING_DATASOURCE_CLICKHOUSE_PORT: {{ .Values.global.dependencies.clickhouse.port | quote }}
-  SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST: {{ include "moneyverse.keycloak-host" . }}
+  SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST: {{ include "moneyverse.keycloak-host" . | quote }}
   SPRING_SECURITY_OAUTH2_KEYCLOAK_PORT: {{ .Values.global.dependencies.keycloak.port | quote }}
   SPRING_SECURITY_OAUTH2_KEYCLOAK_REALM_NAME: {{ .Values.global.dependencies.keycloak.realm | quote }}
-  SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST: {{ include "moneyverse.kafka-host" . }}
+  SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST: {{ include "moneyverse.kafka-host" . | quote }}
   SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_PORT: {{ .Values.global.dependencies.kafka.port | quote }}
+  DEMO_USER_ID: {{ .Values.global.demo.user.userId | quote }}
+  DEMO_EMAIL: {{ .Values.global.demo.user.email | quote }}
+  SPRING_PROFILES_ACTIVE: {{ .Values.global.environment | quote }}
 {{- end -}}

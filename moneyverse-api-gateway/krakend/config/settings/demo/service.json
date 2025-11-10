@@ -3,7 +3,7 @@
   "environment": "Demo",
   "service_name": "Moneyverse KrakenD API GATEWAY",
   "default_host": "ignore",
-  "timeout": "3s",
+  "timeout": "30000ms",
   "cache_ttl": "60s",
   "output_encoding": "json",
   "extra_config": {
@@ -20,20 +20,25 @@
     },
     "security/cors": {
       "allow_origins": [
-        "*"
+        "http://localhost:30000"
       ],
       "allow_methods": [
         "GET",
         "POST",
         "PUT",
         "DELETE",
-        "PATCH"
+        "PATCH",
+        "HEAD",
+        "OPTIONS"
       ],
       "allow_headers": [
-        "*"
+        "Origin",
+        "Authorization",
+        "Content-Type",
+        "Accept"
       ],
       "expose_headers": [
-        "*"
+        "Content-Length"
       ],
       "max_age": "12h",
       "allow_credentials": true,

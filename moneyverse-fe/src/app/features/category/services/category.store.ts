@@ -5,7 +5,7 @@ import {CategoryService} from './category.service';
 import {AuthService} from '../../../core/auth/auth.service';
 import {ToastService} from '../../../shared/services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {debounceTime, distinctUntilChanged, filter, skip, switchMap, tap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, filter, merge, skip, Subscription, switchMap, tap} from 'rxjs';
 import {CategoryEventService} from '../pages/category-management/services/category-event.service';
 import {toObservable} from '@angular/core/rxjs-interop';
 
@@ -113,29 +113,35 @@ export const CategoryStore = signalStore(
 
   withHooks((store) => {
     const eventService = inject(CategoryEventService);
+    const subscriptions = new Subscription();
 
     return {
       onInit() {
         store.loadCategories(true);
 
-        toObservable(store.categories).pipe(
-          skip(1),
-          debounceTime(300),
-          distinctUntilChanged((prev, curr) => prev.length === curr.length),
-          filter((categories) => categories.length === 0)
-        ).subscribe(() => {
-          store.loadDefaultCategories();
-        });
+        subscriptions.add(
+          toObservable(store.categories).pipe(
+            skip(1),
+            debounceTime(300),
+            distinctUntilChanged((prev, curr) => prev.length === curr.length),
+            filter((categories) => categories.length === 0)
+          ).subscribe(() => {
+            store.loadDefaultCategories();
+          })
+        );
 
-        eventService.connect().subscribe({
-          error: (error) => console.log('SSE connection error: ', error)
-        })
-        eventService.onCategoryCreated().subscribe(() => store.loadCategories(true));
-        eventService.onCategoryUpdated().subscribe(() => store.loadCategories(true));
-        eventService.onCategoryDeleted().subscribe(() => store.loadCategories(true));
+        const reloadEvents$ = merge(
+          eventService.onCategoryCreated(),
+          eventService.onCategoryUpdated(),
+          eventService.onCategoryDeleted()
+        );
+
+        subscriptions.add(
+          reloadEvents$.subscribe(() => store.loadCategories(true))
+        );
       },
       onDestroy() {
-        eventService.disconnect();
+        subscriptions.unsubscribe();
       },
     }
   })

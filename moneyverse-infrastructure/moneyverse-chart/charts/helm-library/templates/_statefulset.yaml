@@ -11,7 +11,7 @@ spec:
   serviceName: {{ .Chart.Name | quote }}
   selector:
     matchLabels:
-      {{- include "helm-library.selector-labels" . | nindent 6 }}
+      {{- include "helm-library.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:

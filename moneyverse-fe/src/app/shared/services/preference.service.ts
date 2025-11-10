@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {firstValueFrom, map, Observable} from 'rxjs';
 import {Language, Preference, UserPreference, UserPreferenceRequest} from '../models/preference.model';
 import {environment} from '../../../environments/environment';
@@ -20,10 +20,11 @@ export class PreferenceService {
   }
 
   public getPreferences(mandatory: boolean = false) {
+    let params = new HttpParams();
     if (mandatory) {
-      return this.httpClient.get<Preference[]>(`/preferences?mandatory=true`);
+      params = params.set('mandatory', 'true');
     }
-    return this.httpClient.get<Preference[]>(`/preferences`);
+    return this.httpClient.get<Preference[]>('/preferences', { params });
   }
 
   public async checkMissingPreferences(userId: string): Promise<boolean> {
@@ -41,7 +42,6 @@ export class PreferenceService {
         )
       )
     )) ?? [];
-
     return missingPreferences.length > 0;
   }
 

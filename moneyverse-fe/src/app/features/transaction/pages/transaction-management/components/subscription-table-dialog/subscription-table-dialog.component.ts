@@ -1,6 +1,6 @@
 import {Component, computed, viewChild} from '@angular/core';
 import {DialogComponent} from '../../../../../../shared/components/dialogs/dialog/dialog.component';
-import {Subscription} from '../../../../transaction.model';
+import {SubscriptionTransaction} from '../../../../transaction.model';
 import {
   SubscriptionTableComponent
 } from '../../../subscription-management/components/subscription-table/subscription-table.component';
@@ -34,21 +34,21 @@ import {SvgComponent} from '../../../../../../shared/components/svg/svg.componen
   `
 })
 export class SubscriptionTableDialogComponent {
-  protected dialog = viewChild.required<DialogComponent<Subscription>>(DialogComponent<Subscription>)
+  protected dialog = viewChild.required<DialogComponent<SubscriptionTransaction>>(DialogComponent<SubscriptionTransaction>)
 
   config = computed(() => ({
     header: this.dialog().selectedItem()?.subscriptionName,
     styleClass: 'w-[90vw] lg:w-[65vw] xl:w-[50vw] lg:max-w-[700px]'
   }))
 
-  tableConfig = computed<TableConfig<Subscription>>(() => ({
+  tableConfig = computed<TableConfig<SubscriptionTransaction>>(() => ({
     paginator: false,
     scrollable: true,
     showCurrentPageReport: false,
     tableStyle: {'min-width': '60rem'}
   }))
 
-  open(item?: Subscription) {
+  open(item?: SubscriptionTransaction) {
     this.dialog().open(item);
   }
 }

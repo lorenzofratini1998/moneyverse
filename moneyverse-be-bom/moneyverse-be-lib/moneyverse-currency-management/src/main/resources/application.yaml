@@ -20,6 +20,8 @@ spring:
       initialize-schema: always
     job:
       enabled: false
+  flyway:
+    locations: classpath:db/migration/common
 
 grpc:
   server:

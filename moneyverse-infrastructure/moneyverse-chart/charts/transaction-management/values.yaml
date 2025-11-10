@@ -13,7 +13,7 @@ container:
   image:
     repository: "lfrat/moneyverse-transaction-management"
     tag: "latest"
-    pullPolicy: "IfNotPresent"
+    pullPolicy: "Always"
   ports:
     - name: "http"
       containerPort: *http

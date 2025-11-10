@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {SSEEvent, SseService} from '../../../../../shared/services/sse.service';
 import {AuthService} from '../../../../../core/auth/auth.service';
 import {environment} from '../../../../../../environments/environment';
-import {map, Observable} from 'rxjs';
+import {filter, map, Observable} from 'rxjs';
 import {Transaction, Transfer} from '../../../transaction.model';
 import {TransactionSseEventEnum, TransferSseEventEnum} from '../models/event.model';
 
@@ -14,47 +14,57 @@ export class TransactionEventService {
   private readonly sseService = inject(SseService);
   private readonly authService = inject(AuthService);
 
-  connect(): Observable<SSEEvent> {
-    return this.sseService.connect(`/transactions/sse`, {userId: this.authService.authenticatedUser.userId})
+  private transactionStream$: Observable<SSEEvent> | null = null;
+  private readonly URL = '/transactions/sse';
+
+  private getStream(): Observable<SSEEvent> {
+    if (!this.transactionStream$) {
+      this.transactionStream$ = this.sseService.getStream(this.URL, {
+        userId: this.authService.authenticatedUser.userId
+      });
+    }
+    return this.transactionStream$;
   }
 
   onTransactionCreated(): Observable<Transaction> {
-    return this.sseService.addEventListener(TransactionSseEventEnum.TRANSACTION_CREATED).pipe(
+    return this.getStream().pipe(
+      filter(event => event.type === TransactionSseEventEnum.TRANSACTION_CREATED),
       map(event => JSON.parse(event.data) as Transaction)
     )
   }
 
   onTransactionUpdated(): Observable<Transaction> {
-    return this.sseService.addEventListener(TransactionSseEventEnum.TRANSACTION_UPDATED).pipe(
+    return this.getStream().pipe(
+      filter(event => event.type === TransactionSseEventEnum.TRANSACTION_UPDATED),
       map(event => JSON.parse(event.data) as Transaction)
     )
   }
 
   onTransactionDeleted(): Observable<Transaction> {
-    return this.sseService.addEventListener(TransactionSseEventEnum.TRANSACTION_DELETED).pipe(
+    return this.getStream().pipe(
+      filter(event => event.type === TransactionSseEventEnum.TRANSACTION_DELETED),
       map(event => JSON.parse(event.data) as Transaction)
     )
   }
 
   onTransferCreated(): Observable<Transfer> {
-    return this.sseService.addEventListener(TransferSseEventEnum.TRANSFER_CREATED).pipe(
+    return this.getStream().pipe(
+      filter(event => event.type === TransferSseEventEnum.TRANSFER_CREATED),
       map(event => JSON.parse(event.data) as Transfer)
     )
   }
 
   onTransferUpdated(): Observable<Transfer> {
-    return this.sseService.addEventListener(TransferSseEventEnum.TRANSFER_UPDATED).pipe(
+    return this.getStream().pipe(
+      filter(event => event.type === TransferSseEventEnum.TRANSFER_UPDATED),
       map(event => JSON.parse(event.data) as Transfer)
     )
   }
 
   onTransferDeleted(): Observable<Transfer> {
-    return this.sseService.addEventListener(TransferSseEventEnum.TRANSFER_DELETED).pipe(
+    return this.getStream().pipe(
+      filter(event => event.type === TransferSseEventEnum.TRANSFER_DELETED),
       map(event => JSON.parse(event.data) as Transfer)
     )
-  }
-
-  disconnect(): void {
-    this.sseService.disconnect();
   }
 }

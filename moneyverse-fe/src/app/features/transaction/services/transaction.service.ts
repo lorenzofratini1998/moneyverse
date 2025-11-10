@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../environments/environment';
 import {Observable} from 'rxjs';
 import {
-  Subscription,
+  SubscriptionTransaction,
   SubscriptionRequest,
   Tag,
   TagRequest,
@@ -76,23 +76,23 @@ export class TransactionService {
     return this.httpClient.get<Transfer>(`/transfers/${transferId}`);
   }
 
-  createSubscription(request: SubscriptionRequest): Observable<Subscription> {
-    return this.httpClient.post<Subscription>(`/subscriptions`, request);
+  createSubscription(request: SubscriptionRequest): Observable<SubscriptionTransaction> {
+    return this.httpClient.post<SubscriptionTransaction>(`/subscriptions`, request);
   }
 
-  getSubscription(subscriptionId: string): Observable<Subscription> {
-    return this.httpClient.get<Subscription>(`/subscriptions/${subscriptionId}`);
+  getSubscription(subscriptionId: string): Observable<SubscriptionTransaction> {
+    return this.httpClient.get<SubscriptionTransaction>(`/subscriptions/${subscriptionId}`);
   }
 
-  getSubscriptionsByUser(userId: string): Observable<Subscription[]> {
-    return this.httpClient.get<Subscription[]>(`/subscriptions/users/${userId}`);
+  getSubscriptionsByUser(userId: string): Observable<SubscriptionTransaction[]> {
+    return this.httpClient.get<SubscriptionTransaction[]>(`/subscriptions/users/${userId}`);
   }
 
   deleteSubscription(subscriptionId: string): Observable<void> {
     return this.httpClient.delete<void>(`/subscriptions/${subscriptionId}`);
   }
 
-  updateSubscription(subscriptionId: string, request: SubscriptionRequest): Observable<Subscription> {
-    return this.httpClient.put<Subscription>(`/subscriptions/${subscriptionId}`, request);
+  updateSubscription(subscriptionId: string, request: SubscriptionRequest): Observable<SubscriptionTransaction> {
+    return this.httpClient.put<SubscriptionTransaction>(`/subscriptions/${subscriptionId}`, request);
   }
 }

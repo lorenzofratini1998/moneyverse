@@ -1,7 +1,8 @@
 global:
-  namespace: default
+  namespace: moneyverse
   environment: demo
   infisical:
+    projectSlug: moneyverse-luo-3
     envSlug: dev
   dependencies:
     keycloak:
@@ -43,8 +44,16 @@ global:
     nginx:
       ports:
         http: 80
+  demo:
+    currency: "EUR"
+    user:
+      userId: "84830153-f653-4e57-9057-36fce83476c5"
+      email: "demo@demo.it"
+      firstName: "Demo"
+      lastName: "User"
+      password: "demo"
 
 infisical:
   authentification:
-    clientId: "NTI1MTA2YjktM2JjOS00M2RlLWFmZWMtNWFlNjJhMDVkM2Iw"
-    clientSecret: "ODU3ZDk1NDg2ZDg5YjYyNzRiMDY1NGRiZmZjOTNiZjViZGNhZmU5ZjI4YzI4ZjAwZWJiZTcxMTI1ZTUyNmM4ZA=="
+    clientId: "Njg4NjA2YjUtMDliOC00MmJjLWI1ZGYtOWEyMzNmNzRkZDRl"
+    clientSecret: "NzEzNWUyNWQ0MWJlNGZiYzEzNzY3MWNiMjBjNjY5YWFjOWUzYWZhNDdkZTRmNDg5MTAzYWZiNWI4Yzc4YTdjMA=="

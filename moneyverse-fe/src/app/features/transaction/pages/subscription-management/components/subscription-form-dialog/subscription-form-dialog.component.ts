@@ -1,6 +1,6 @@
 import {Component, computed, effect, output, viewChild} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {Subscription} from '../../../../transaction.model';
+import {SubscriptionTransaction} from '../../../../transaction.model';
 import {SubscriptionFormComponent} from '../subscription-form/subscription-form.component';
 import {FormDialogComponent} from '../../../../../../shared/components/dialogs/form-dialog/form-dialog.component';
 import {DynamicDialogConfig} from 'primeng/dynamicdialog';
@@ -23,7 +23,7 @@ export class SubscriptionFormDialogComponent {
   onSubmit = output<SubscriptionFormData>();
 
   protected form = viewChild.required(SubscriptionFormComponent);
-  protected formDialog = viewChild.required(FormDialogComponent<Subscription, SubscriptionFormData>);
+  protected formDialog = viewChild.required(FormDialogComponent<SubscriptionTransaction, SubscriptionFormData>);
 
   config = computed<DynamicDialogConfig>(() => ({
     header: this.formDialog().selectedItem() ? 'Edit Subscription' : 'Add Subscription',
@@ -34,7 +34,7 @@ export class SubscriptionFormDialogComponent {
     effect(() => this.form().onSubmit.subscribe(data => this.onSubmit.emit(data)));
   }
 
-  open(item?: Subscription) {
+  open(item?: SubscriptionTransaction) {
     this.formDialog().open(item);
   }
 

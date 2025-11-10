@@ -1,6 +1,6 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {AppConfirmationService} from '../../../../../../shared/services/confirmation.service';
-import {Subscription, Transaction} from "../../../../transaction.model";
+import {SubscriptionTransaction, Transaction} from "../../../../transaction.model";
 import {TableRowExpandEvent} from 'primeng/table';
 import {TransactionService} from '../../../../services/transaction.service';
 import {map, Observable, tap} from 'rxjs';
@@ -18,7 +18,7 @@ export class SubscriptionTableService {
   private readonly _subscriptionTransactionsMap = signal<Map<string, Transaction[]>>(new Map());
   readonly subscriptionTransactionsMap = this._subscriptionTransactionsMap.asReadonly();
 
-  confirmDelete(subscription: Subscription, onDeleteSubscription: () => void) {
+  confirmDelete(subscription: SubscriptionTransaction, onDeleteSubscription: () => void) {
     this.confirmationService.confirmDelete({
       message: `Are you sure you want to delete the subscription "${subscription.subscriptionName}"? All associated transactions will be deleted.`,
       header: 'Delete subscription',
@@ -47,7 +47,7 @@ export class SubscriptionTableService {
     })
   }
 
-  private getSubscription(subscriptionId: string): Observable<Subscription> {
+  private getSubscription(subscriptionId: string): Observable<SubscriptionTransaction> {
     return this.transactionService.getSubscription(subscriptionId).pipe(
       map(subscription => ({
         ...subscription,

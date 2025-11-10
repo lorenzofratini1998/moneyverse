@@ -1,6 +1,6 @@
 import {Component, computed, inject, input, output, signal} from '@angular/core';
 import {TableModule} from 'primeng/table';
-import {RecurrenceRuleEnum, recurrenceRuleOptions, Subscription, Transaction} from '../../../../transaction.model';
+import {RecurrenceRuleEnum, recurrenceRuleOptions, SubscriptionTransaction, Transaction} from '../../../../transaction.model';
 import {CurrencyPipe} from '../../../../../../shared/pipes/currency.pipe';
 import {DatePipe} from '@angular/common';
 import {PreferenceStore} from '../../../../../../shared/stores/preference.store';
@@ -32,12 +32,12 @@ import {SubscriptionTableService} from './subscription-table.service';
   templateUrl: './subscription-table.component.html'
 })
 export class SubscriptionTableComponent {
-  subscriptions = input.required<Subscription[]>();
+  subscriptions = input.required<SubscriptionTransaction[]>();
   readonly = input<boolean>(false);
   expanded = input<boolean>(true);
-  config = input<Partial<TableConfig<Subscription>>>({})
-  onEdit = output<Subscription>();
-  onDelete = output<Subscription>();
+  config = input<Partial<TableConfig<SubscriptionTransaction>>>({})
+  onEdit = output<SubscriptionTransaction>();
+  onDelete = output<SubscriptionTransaction>();
 
   protected readonly preferenceStore = inject(PreferenceStore);
   protected readonly accountStore = inject(AccountStore);
@@ -47,8 +47,8 @@ export class SubscriptionTableComponent {
   protected readonly Icons = IconsEnum;
   protected readonly math = Math;
 
-  tableConfig = computed<TableConfig<Subscription>>(() => {
-    const baseConfig: TableConfig<Subscription> = {
+  tableConfig = computed<TableConfig<SubscriptionTransaction>>(() => {
+    const baseConfig: TableConfig<SubscriptionTransaction> = {
       stripedRows: true,
       paginator: true,
       rows: 5,
@@ -61,7 +61,7 @@ export class SubscriptionTableComponent {
     return {...baseConfig, ...this.config()}
   });
 
-  columns = signal<TableColumn<Subscription>[]>([
+  columns = signal<TableColumn<SubscriptionTransaction>[]>([
     {field: "subscriptionName", header: "Name"},
     {field: "amount", header: "Amount", sortable: true},
     {field: "totalAmount", header: "Total Amount"},
@@ -74,7 +74,7 @@ export class SubscriptionTableComponent {
     {field: "active", header: "Active"},
   ])
 
-  actions = computed<TableAction<Subscription>[]>(() => [
+  actions = computed<TableAction<SubscriptionTransaction>[]>(() => [
     {
       icon: IconsEnum.PENCIL,
       severity: "secondary",
@@ -119,7 +119,7 @@ export class SubscriptionTableComponent {
     }
   }
 
-  private confirmDelete(subscription: Subscription) {
+  private confirmDelete(subscription: SubscriptionTransaction) {
     this.subscriptionTableService.confirmDelete(subscription, () => this.onDelete.emit(subscription));
   }
 }

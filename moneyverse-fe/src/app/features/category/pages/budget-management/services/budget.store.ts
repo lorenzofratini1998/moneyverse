@@ -5,7 +5,7 @@ import {CategoryService} from '../../../services/category.service';
 import {AuthService} from '../../../../../core/auth/auth.service';
 import {ToastService} from '../../../../../shared/services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {debounceTime, filter, switchMap, tap} from 'rxjs';
+import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {BudgetEventService} from './budget-event.service';
 
 interface BudgetState {
@@ -86,20 +86,23 @@ export const BudgetStore = signalStore(
 
   withHooks((store) => {
     const eventService = inject(BudgetEventService);
+    const subscriptions = new Subscription();
 
     return {
       onInit() {
         store.loadBudgets(true);
+        const reloadEvents$ = merge(
+          eventService.onBudgetCreated(),
+          eventService.onBudgetUpdated(),
+          eventService.onBudgetDeleted()
+        );
 
-        eventService.connect().subscribe({
-          error: (error) => console.log('SSE connection error: ', error)
-        })
-        eventService.onBudgetCreated().subscribe(() => store.loadBudgets(true));
-        eventService.onBudgetUpdated().subscribe(() => store.loadBudgets(true));
-        eventService.onBudgetDeleted().subscribe(() => store.loadBudgets(true));
+        subscriptions.add(
+          reloadEvents$.subscribe(() => store.loadBudgets(true))
+        );
       },
       onDestroy() {
-        eventService.disconnect();
+        subscriptions.unsubscribe();
       },
     }
   })

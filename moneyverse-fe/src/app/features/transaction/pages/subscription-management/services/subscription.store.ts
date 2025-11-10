@@ -1,5 +1,5 @@
-import {debounceTime, filter, switchMap, tap} from 'rxjs';
-import {Subscription, SubscriptionRequest} from '../../../transaction.model';
+import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
+import {SubscriptionTransaction, SubscriptionRequest} from '../../../transaction.model';
 import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
 import {TransactionService} from '../../../services/transaction.service';
 import {computed, inject} from '@angular/core';
@@ -9,7 +9,7 @@ import {rxMethod} from '@ngrx/signals/rxjs-interop';
 import {SubscriptionEventService} from './subscription-event.service';
 
 interface SubscriptionState {
-  subscriptions: Subscription[],
+  subscriptions: SubscriptionTransaction[],
 }
 
 const initialState: SubscriptionState = {
@@ -84,20 +84,23 @@ export const SubscriptionStore = signalStore(
 
   withHooks((store) => {
     const eventService = inject(SubscriptionEventService);
+    const subscriptions = new Subscription();
 
     return {
       onInit() {
         store.loadSubscriptions(true);
+        const reloadEvents$ = merge(
+          eventService.onSubscriptionCreated(),
+          eventService.onSubscriptionUpdated(),
+          eventService.onSubscriptionDeleted()
+        )
 
-        eventService.connect().subscribe({
-          error: (error) => console.log('SSE connection error: ', error)
-        })
-        eventService.onSubscriptionCreated().subscribe(() => store.loadSubscriptions(true))
-        eventService.onSubscriptionUpdated().subscribe(() => store.loadSubscriptions(true))
-        eventService.onSubscriptionDeleted().subscribe(() => store.loadSubscriptions(true))
+        subscriptions.add(
+          reloadEvents$.subscribe(() => store.loadSubscriptions(true))
+        );
       },
       onDestroy() {
-        eventService.disconnect();
+        subscriptions.unsubscribe();
       }
     }
   })

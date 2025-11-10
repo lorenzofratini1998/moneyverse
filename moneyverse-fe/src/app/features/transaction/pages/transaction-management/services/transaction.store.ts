@@ -14,7 +14,7 @@ import {AuthService} from '../../../../../core/auth/auth.service';
 import {ToastService} from '../../../../../shared/services/toast.service';
 import {Direction} from '../../../../../shared/models/criteria.model';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {debounceTime, filter, switchMap, tap} from 'rxjs';
+import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {TransactionEventService} from './transaction-event.service';
 import {SubscriptionEventService} from '../../subscription-management/services/subscription-event.service';
 
@@ -172,6 +172,8 @@ export const TransactionStore = signalStore(
   withHooks((store) => {
     const transactionEventService = inject(TransactionEventService);
     const subscriptionEventService = inject(SubscriptionEventService);
+    const subscriptions = new Subscription();
+
     return {
       onInit() {
         store.loadTransactions(true);
@@ -181,25 +183,24 @@ export const TransactionStore = signalStore(
           store.loadTransactions(true);
         });
 
-        transactionEventService.connect().subscribe({
-          error: (error) => console.log('SSE connection error: ', error)
-        })
-        subscriptionEventService.connect().subscribe({
-          error: (error) => console.log('SSE connection error: ', error)
-        })
-        transactionEventService.onTransactionCreated().subscribe(() => store.loadTransactions(true));
-        transactionEventService.onTransactionUpdated().subscribe(() => store.loadTransactions(true));
-        transactionEventService.onTransactionDeleted().subscribe(() => store.loadTransactions(true));
-        transactionEventService.onTransferCreated().subscribe(() => store.loadTransactions(true));
-        transactionEventService.onTransferUpdated().subscribe(() => store.loadTransactions(true));
-        transactionEventService.onTransferDeleted().subscribe(() => store.loadTransactions(true));
-        subscriptionEventService.onSubscriptionCreated().subscribe(() => store.loadTransactions(true));
-        subscriptionEventService.onSubscriptionUpdated().subscribe(() => store.loadTransactions(true));
-        subscriptionEventService.onSubscriptionDeleted().subscribe(() => store.loadTransactions(true));
+        const reloadEvents$ = merge(
+          transactionEventService.onTransactionCreated(),
+          transactionEventService.onTransactionUpdated(),
+          transactionEventService.onTransactionDeleted(),
+          transactionEventService.onTransferCreated(),
+          transactionEventService.onTransferUpdated(),
+          transactionEventService.onTransferDeleted(),
+          subscriptionEventService.onSubscriptionCreated(),
+          subscriptionEventService.onSubscriptionUpdated(),
+          subscriptionEventService.onSubscriptionDeleted()
+        )
+
+        subscriptions.add(
+          reloadEvents$.subscribe(() => store.loadTransactions(true))
+        );
       },
       onDestroy() {
-        transactionEventService.disconnect();
-        subscriptionEventService.disconnect();
+        subscriptions.unsubscribe();
       }
     }
   })

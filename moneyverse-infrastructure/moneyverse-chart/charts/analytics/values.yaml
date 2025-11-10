@@ -14,7 +14,7 @@ container:
   image:
     repository: "lfrat/moneyverse-analytics"
     tag: "latest"
-    pullPolicy: "IfNotPresent"
+    pullPolicy: "Always"
   ports:
     - name: "http"
       containerPort: *http

@@ -4,7 +4,7 @@ import {patchState, signalStore, withHooks, withMethods, withState} from '@ngrx/
 import {TransactionService} from '../../../services/transaction.service';
 import {AuthService} from '../../../../../core/auth/auth.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {debounceTime, filter, switchMap, tap} from 'rxjs';
+import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {ToastService} from '../../../../../shared/services/toast.service';
 import {TagEventService} from './tag-event.service';
 
@@ -81,19 +81,23 @@ export const TagStore = signalStore(
   }),
   withHooks((store) => {
     const eventService = inject(TagEventService);
+    const subscriptions = new Subscription();
+
     return {
       onInit() {
         store.loadTags(true);
+        const reloadEvents$ = merge(
+          eventService.onTagCreated(),
+          eventService.onTagUpdated(),
+          eventService.onTagDeleted()
+        )
 
-        eventService.connect().subscribe({
-          error: (error) => console.log('SSE connection error: ', error)
-        })
-        eventService.onTagCreated().subscribe(() => store.loadTags(true));
-        eventService.onTagUpdated().subscribe(() => store.loadTags(true));
-        eventService.onTagDeleted().subscribe(() => store.loadTags(true));
+        subscriptions.add(
+          reloadEvents$.subscribe(() => store.loadTags(true))
+        )
       },
       onDestroy() {
-        eventService.disconnect();
+        subscriptions.unsubscribe();
       }
     }
   })

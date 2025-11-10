@@ -10,7 +10,7 @@ container:
   image:
     repository: "lfrat/moneyverse-fe"
     tag: "latest"
-    pullPolicy: "IfNotPresent"
+    pullPolicy: "Always"
   ports:
     - name: "http"
       containerPort: *http

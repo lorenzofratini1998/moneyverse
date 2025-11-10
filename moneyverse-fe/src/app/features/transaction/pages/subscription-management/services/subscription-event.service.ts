@@ -1,9 +1,8 @@
 import {inject, Injectable} from '@angular/core';
 import {AuthService} from '../../../../../core/auth/auth.service';
 import {SSEEvent, SseService} from '../../../../../shared/services/sse.service';
-import {environment} from "../../../../../../environments/environment";
-import {map, Observable} from 'rxjs';
-import {Subscription} from '../../../transaction.model';
+import {filter, map, Observable} from 'rxjs';
+import {SubscriptionTransaction} from '../../../transaction.model';
 import {SubscriptionSseEventEnum} from '../models/events.models';
 
 @Injectable({
@@ -14,30 +13,37 @@ export class SubscriptionEventService {
   private readonly sseService = inject(SseService);
   private readonly authService = inject(AuthService);
 
-  connect(): Observable<SSEEvent> {
-    return this.sseService.connect(`/transactions/sse`, {userId: this.authService.authenticatedUser.userId})
+  private subscriptionStream$: Observable<SSEEvent> | null = null;
+  private readonly URL = '/transactions/sse';
+
+  private getStream(): Observable<SSEEvent> {
+    if (!this.subscriptionStream$) {
+      this.subscriptionStream$ = this.sseService.getStream(this.URL, {
+        userId: this.authService.authenticatedUser.userId
+      });
+    }
+    return this.subscriptionStream$;
   }
 
-  onSubscriptionCreated(): Observable<Subscription> {
-    return this.sseService.addEventListener(SubscriptionSseEventEnum.SUBSCRIPTION_CREATED).pipe(
-      map(event => JSON.parse(event.data) as Subscription)
-    );
+  onSubscriptionCreated(): Observable<SubscriptionTransaction> {
+    return this.getStream().pipe(
+      filter(event => event.type === SubscriptionSseEventEnum.SUBSCRIPTION_CREATED),
+      map(event => JSON.parse(event.data) as SubscriptionTransaction)
+    )
   }
 
-  onSubscriptionUpdated(): Observable<Subscription> {
-    return this.sseService.addEventListener(SubscriptionSseEventEnum.SUBSCRIPTION_UPDATED).pipe(
-      map(event => JSON.parse(event.data) as Subscription)
-    );
+  onSubscriptionUpdated(): Observable<SubscriptionTransaction> {
+    return this.getStream().pipe(
+      filter(event => event.type === SubscriptionSseEventEnum.SUBSCRIPTION_UPDATED),
+      map(event => JSON.parse(event.data) as SubscriptionTransaction)
+    )
   }
 
-  onSubscriptionDeleted(): Observable<Subscription> {
-    return this.sseService.addEventListener(SubscriptionSseEventEnum.SUBSCRIPTION_DELETED).pipe(
-      map(event => JSON.parse(event.data) as Subscription)
-    );
-  }
-
-  disconnect(): void {
-    this.sseService.disconnect();
+  onSubscriptionDeleted(): Observable<SubscriptionTransaction> {
+    return this.getStream().pipe(
+      filter(event => event.type === SubscriptionSseEventEnum.SUBSCRIPTION_DELETED),
+      map(event => JSON.parse(event.data) as SubscriptionTransaction)
+    )
   }
 
 }

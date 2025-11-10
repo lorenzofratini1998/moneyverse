@@ -10,7 +10,7 @@ container:
   image:
     repository: "lfrat/moneyverse-krakend"
     tag: "latest"
-    pullPolicy: "IfNotPresent"
+    pullPolicy: "Always"
   ports:
     - name: "http"
       containerPort: *http
@@ -31,14 +31,30 @@ container:
     periodSeconds: 10
     failureThreshold: 5
     timeoutSeconds: 5
+  command: ["/usr/bin/krakend"]
+  args: ["run", "-d", "-c", "/etc/krakend/krakend.json", "-p", "8080"]
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+      add:
+        - NET_BIND_SERVICE
+  env:
+  - name: KRAKEND_PORT
+    value: "8080"
 
 #Service configuration
 service:
-  type: ClusterIP
+  type: NodePort
   ports:
     - name: "http"
       port: *http
       targetPort: *http
+      nodePort: 30081
 
 #ConfigMap data
 config:

@@ -90,7 +90,7 @@ export interface TransferRequest {
   currency?: string
 }
 
-export interface Subscription {
+export interface SubscriptionTransaction {
   subscriptionId: string,
   userId: string,
   accountId: string,

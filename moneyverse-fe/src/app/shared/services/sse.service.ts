@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, filter, Observable, Subject} from 'rxjs';
+import {inject, Injectable} from '@angular/core';
+import {BehaviorSubject, filter, Observable, shareReplay, Subject} from 'rxjs';
 import {AuthService} from '../../core/auth/auth.service';
 import {fetchEventSource} from '@microsoft/fetch-event-source';
 
@@ -9,103 +9,102 @@ export interface SSEEvent {
   event?: string;
 }
 
+interface SseConnection {
+  stream: Observable<SSEEvent>;
+  abortController: AbortController;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class SseService {
 
-  private eventSubject = new Subject<SSEEvent>();
-  private connectionStatusSubject = new BehaviorSubject<boolean>(false);
-  private abortController: AbortController | null = null;
+  private readonly authService = inject(AuthService);
+  private connectionPool = new Map<string, SseConnection>();
 
-  constructor(private authService: AuthService) {
-  }
-
-  connect(url: string, params?: Record<string, string>): Observable<SSEEvent> {
-    if (this.connectionStatusSubject.value) {
-      return this.eventSubject.asObservable();
-    }
-
+  getStream(url: string, params?: Record<string, string>): Observable<SSEEvent> {
     const finalUrl = params ? `${url}?${new URLSearchParams(params).toString()}` : url;
 
-    this.abortController = new AbortController();
+    const existingConnection = this.connectionPool.get(finalUrl);
+    if (existingConnection) {
+      return existingConnection.stream;
+    }
 
+    const abortController = new AbortController();
     const self = this;
 
-    fetchEventSource(finalUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'text/event-stream',
-        'Authorization': `Bearer ${this.authService.token}`,
-        'Cache-Control': 'no-cache'
-      },
-      signal: this.abortController.signal,
+    const newStream = new Observable<SSEEvent>(subscriber => {
 
-      async onopen(response) {
-        if (response.ok && response.headers.get('content-type')?.includes('text/event-stream')) {
-          self.connectionStatusSubject.next(true);
-          return;
-        } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          self.connectionStatusSubject.next(false);
-          throw new Error(`Client error: ${response.status} - ${response.statusText}`);
-        } else {
-          self.connectionStatusSubject.next(false);
-          throw new Error(`Server error: ${response.status} - ${response.statusText}`);
+      fetchEventSource(finalUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/event-stream',
+          'Authorization': `Bearer ${this.authService.token}`,
+          'Cache-Control': 'no-cache'
+        },
+        signal: abortController.signal,
+
+        async onopen(response) {
+          if (response.ok && response.headers.get('content-type')?.includes('text/event-stream')) {
+            return;
+          }
+          const errorMsg = `SSE Error: ${response.status} - ${response.statusText}`;
+          console.error(errorMsg);
+          subscriber.error(new Error(errorMsg));
+        },
+
+        onmessage(event) {
+          subscriber.next({
+            type: event.event || 'message',
+            data: event.data,
+            event: event.event
+          });
+        },
+
+        onclose() {
+          subscriber.complete();
+          self.connectionPool.delete(finalUrl);
+        },
+
+        onerror(err) {
+          subscriber.error(err);
+          self.connectionPool.delete(finalUrl);
         }
-      },
-
-      onmessage(event) {
-        self.eventSubject.next({
-          type: event.event || 'message',
-          data: event.data,
-          event: event.event
-        });
-      },
-
-      onclose() {
-        self.connectionStatusSubject.next(false);
-      },
-
-      onerror(err) {
-        console.error('SSE connection error:', err);
-        self.connectionStatusSubject.next(false);
-        self.eventSubject.error(err);
-      }
-    }).catch(error => {
-      console.error('Failed to establish SSE connection:', error);
-      this.connectionStatusSubject.next(false);
-      this.eventSubject.error(error);
+      }).catch(error => {
+        subscriber.error(error);
+        self.connectionPool.delete(finalUrl);
+      });
     });
 
-    return this.eventSubject.asObservable();
-  }
-
-  disconnect(): void {
-    if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
-    }
-    this.connectionStatusSubject.next(false);
-  }
-
-  addEventListener(eventType: string): Observable<SSEEvent> {
-    return this.eventSubject.asObservable().pipe(
-      filter(event => event.type === eventType || event.event === eventType)
+    const sharedStream = newStream.pipe(
+      shareReplay(1)
     );
+
+    this.connectionPool.set(finalUrl, {
+      stream: sharedStream,
+      abortController: abortController
+    });
+
+    return sharedStream;
   }
 
-  /*isConnectionActive(): boolean {
-    return this.connectionStatusSubject.value;
+  disconnectStream(url: string, params?: Record<string, string>): void {
+    const finalUrl = params ? `${url}?${new URLSearchParams(params).toString()}` : url;
+    const connection = this.connectionPool.get(finalUrl);
+
+    if (connection) {
+      connection.abortController.abort();
+      this.connectionPool.delete(finalUrl);
+    }
   }
 
-  getConnectionStatus(): Observable<boolean> {
-    return this.connectionStatusSubject.asObservable();
+  disconnectAll(): void {
+    this.connectionPool.forEach((connection, url) => {
+      connection.abortController.abort();
+    });
+    this.connectionPool.clear();
   }
 
-  reconnect(): Observable<SSEEvent> {
-    this.disconnect();
-    return this.connect();
-  }*/
 }
 
 

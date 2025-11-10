@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {Subscription, Transaction, TransactionSortAttributeEnum, Transfer} from '../../../../transaction.model';
+import {SubscriptionTransaction, Transaction, TransactionSortAttributeEnum, Transfer} from '../../../../transaction.model';
 import {TransactionService} from '../../../../services/transaction.service';
 import {ToastService} from '../../../../../../shared/services/toast.service';
 import {AppConfirmationService} from '../../../../../../shared/services/confirmation.service';
@@ -79,7 +79,7 @@ export class TransactionTableService {
     });
   }
 
-  openSubscriptionDetails(subscriptionId: string, openDialog: (subscription: Subscription) => void) {
+  openSubscriptionDetails(subscriptionId: string, openDialog: (subscription: SubscriptionTransaction) => void) {
     this.transactionService.getSubscription(subscriptionId).subscribe({
       next: (subscription) => openDialog(subscription),
       error: () => this.toastService.error('Failed to load subscription')

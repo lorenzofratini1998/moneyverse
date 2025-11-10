@@ -2,7 +2,7 @@
   "host": "http://moneyverse-analytics:7006",
   "endpoints": [
     {
-      "endpoint": "/accounts/kpi",
+      "endpoint": "/analytics/accounts/kpi",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/accounts/kpi",
@@ -10,23 +10,25 @@
       }
     },
     {
-      "endpoint": "/accounts/distribution",
+      "endpoint": "/analytics/accounts/distribution",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/accounts/distribution",
-        "method": "POST"
+        "method": "POST",
+        "is_collection": true
       }
     },
     {
-      "endpoint": "/accounts/trend",
+      "endpoint": "/analytics/accounts/trend",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/accounts/trend",
-        "method": "POST"
+        "method": "POST",
+        "is_collection": true
       }
     },
     {
-      "endpoint": "/categories/kpi",
+      "endpoint": "/analytics/categories/kpi",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/categories/kpi",
@@ -34,23 +36,25 @@
       }
     },
     {
-      "endpoint": "/categories/distribution",
+      "endpoint": "/analytics/categories/distribution",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/categories/distribution",
-        "method": "POST"
+        "method": "POST",
+        "is_collection": true
       }
     },
     {
-      "endpoint": "/categories/trend",
+      "endpoint": "/analytics/categories/trend",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/categories/trend",
-        "method": "POST"
+        "method": "POST",
+        "is_collection": true
       }
     },
     {
-      "endpoint": "/transactions/kpi",
+      "endpoint": "/analytics/transactions/kpi",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/transactions/kpi",
@@ -58,7 +62,7 @@
       }
     },
     {
-      "endpoint": "/transactions/distribution",
+      "endpoint": "/analytics/transactions/distribution",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/transactions/distribution",
@@ -66,7 +70,7 @@
       }
     },
     {
-      "endpoint": "/transactions/trend",
+      "endpoint": "/analytics/transactions/trend",
       "method": "POST",
       "backend": {
         "url_pattern": "/analytics/api/v1/transactions/trend",

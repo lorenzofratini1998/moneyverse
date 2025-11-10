@@ -26,6 +26,26 @@
             "extra_config": {
                 "backend/http": {
                   "return_error_code": true
+                },
+                "modifier/martian": {
+                    "fifo.Group": {
+                      "scope": ["request", "response"],
+                      "aggregateErrors": true,
+                      "modifiers": [
+                          {
+                            "header.Blacklist": {
+                              "scope": ["request"],
+                              "names": [
+                                "Access-Control-Request-Method",
+                                "Sec-Fetch-Dest",
+                                "Sec-Fetch-Mode",
+                                "Sec-Fetch-Site",
+                                "Origin"
+                              ]
+                            }
+                          }
+                      ]
+                    }
                 }
             }
         }

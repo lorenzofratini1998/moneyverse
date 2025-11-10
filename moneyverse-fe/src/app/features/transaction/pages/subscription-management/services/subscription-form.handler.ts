@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {FormHandler} from '../../../../../shared/models/form.model';
-import {recurrenceRuleOptions, Subscription} from '../../../transaction.model';
+import {recurrenceRuleOptions, SubscriptionTransaction} from '../../../transaction.model';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {today} from '../../../../../shared/utils/date.utils';
 import {PreferenceStore} from '../../../../../shared/stores/preference.store';
@@ -10,7 +10,7 @@ import {SubscriptionFormData} from "../models/form.model";
 @Injectable({
   providedIn: 'root'
 })
-export class SubscriptionFormHandler implements FormHandler<Subscription, SubscriptionFormData> {
+export class SubscriptionFormHandler implements FormHandler<SubscriptionTransaction, SubscriptionFormData> {
   private readonly fb = inject(FormBuilder);
   private readonly preferenceStore = inject(PreferenceStore);
   private readonly accountStore = inject(AccountStore);
@@ -33,7 +33,7 @@ export class SubscriptionFormHandler implements FormHandler<Subscription, Subscr
     });
   }
 
-  patch(form: FormGroup, subscription: Subscription): void {
+  patch(form: FormGroup, subscription: SubscriptionTransaction): void {
     form.patchValue({
       subscriptionId: subscription.subscriptionId,
       subscriptionName: subscription.subscriptionName,

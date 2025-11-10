@@ -17,7 +17,7 @@
       "^/users": "/usersManagement/api/v1/users"
     }
   },
-  "/preferences/**": {
+  "/preferences*": {
     "target": "http://localhost:7002",
     "secure": false,
     "changeOrigin": true,

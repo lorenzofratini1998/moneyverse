@@ -5,7 +5,7 @@ import {AccountService} from './account.service';
 import {AuthService} from '../../../core/auth/auth.service';
 import {ToastService} from '../../../shared/services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {debounceTime, filter, switchMap, tap} from 'rxjs';
+import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {AccountEventService} from '../pages/account-management/services/account-event.service';
 
 interface AccountStoreState {
@@ -113,20 +113,24 @@ export const AccountStore = signalStore(
 
   withHooks((store) => {
     const eventService = inject(AccountEventService);
+    const subscriptions = new Subscription();
 
     return {
       onInit() {
         store.loadAccountCategories();
         store.loadAccounts(true);
-        eventService.connect().subscribe({
-          error: (error) => console.log('SSE connection error: ', error)
-        })
-        eventService.onAccountCreated().subscribe(() => store.loadAccounts(true));
-        eventService.onAccountUpdated().subscribe(() => store.loadAccounts(true));
-        eventService.onAccountDeleted().subscribe(() => store.loadAccounts(true));
+
+        const reloadEvents$ = merge(
+          eventService.onAccountCreated(),
+          eventService.onAccountUpdated(),
+          eventService.onAccountDeleted()
+        );
+        subscriptions.add(
+          reloadEvents$.subscribe(() => store.loadAccounts(true))
+        )
       },
       onDestroy() {
-        eventService.disconnect();
+        subscriptions.unsubscribe();
       },
     };
   })

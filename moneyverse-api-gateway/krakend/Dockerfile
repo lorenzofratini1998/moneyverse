@@ -10,12 +10,12 @@ RUN FC_ENABLE=1 \
     FC_PARTIALS="/etc/krakend/partials/$ENV" \
     FC_SETTINGS="/etc/krakend/settings/$ENV" \
     FC_TEMPLATES="/etc/krakend/templates" \
-    krakend check -d -t -c krakend.tmpl
-
-# The linting needs the final krakend.json file
-RUN krakend check -c /tmp/krakend.json --lint
+    krakend check -d -t -c krakend.tmpl --lint
 
 FROM krakend:2.10
-COPY --from=builder --chown=krakend:krakend /tmp/krakend.json .
+# Keep operating system updated with security fixes between releases
+RUN apk upgrade --no-cache --no-interactive
+
+COPY --from=builder --chown=krakend:nogroup /tmp/krakend.json .
 
 EXPOSE 8080

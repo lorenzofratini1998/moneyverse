@@ -38,11 +38,8 @@ dependencies:
 - name: krakend
   repository: file://charts/krakend
   version: 0.1.0
-- name: nginx
-  repository: file://charts/nginx
-  version: 0.1.0
 - name: frontend
   repository: file://charts/frontend
   version: 0.1.0
-digest: sha256:094dfc79788bf9aa73b7385b0d2eacfe8640b4a2efb01012500cc372b9af1dfd
-generated: "2025-09-14T11:54:02.9124195+02:00"
+digest: sha256:80aed60e5e5f50f4ab90b6bddc37393a3edba1e62ffb4bdc0d614a85c142ecaf
+generated: "2025-10-28T18:02:28.428867+01:00"

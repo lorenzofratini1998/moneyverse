@@ -76,10 +76,6 @@ dependencies:
     version: "0.1.0"
     repository: file://charts/krakend
 
-  - name: nginx
-    version: "0.1.0"
-    repository: file://charts/nginx
-
   - name: frontend
     version: "0.1.0"
     repository: file://charts/frontend

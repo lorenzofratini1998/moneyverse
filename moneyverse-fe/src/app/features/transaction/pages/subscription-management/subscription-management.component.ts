@@ -3,7 +3,7 @@ import {IconsEnum} from '../../../../shared/models/icons.model';
 import {
   SubscriptionFormDialogComponent
 } from './components/subscription-form-dialog/subscription-form-dialog.component';
-import {Subscription} from '../../transaction.model';
+import {SubscriptionTransaction} from '../../transaction.model';
 import {AuthService} from '../../../../core/auth/auth.service';
 import {SubscriptionTableComponent} from './components/subscription-table/subscription-table.component';
 import {SubscriptionStore} from './services/subscription.store';
@@ -61,7 +61,7 @@ export class SubscriptionManagementComponent {
     }
   }
 
-  deleteSubscription(subscription: Subscription) {
+  deleteSubscription(subscription: SubscriptionTransaction) {
     this.subscriptionStore.deleteSubscription(subscription.subscriptionId);
   }
 }

@@ -12,7 +12,7 @@ spec:
   replicas: {{ .Values.replicas | default 1 }}
   selector:
     matchLabels:
-      {{- include "helm-library.selector-labels" . | nindent 6 }}
+      {{- include "helm-library.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
@@ -22,17 +22,12 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.initContainer }}
-      initContainers:
-        - {{ include "helm-library.initContainer" (list . (printf "%s.initContainer" .Chart.Name )) }}
-{{ include "helm-library.initContainer.tpl" . | indent 8 }}
-      {{- end }}
       containers:
-      {{- if .Values.container }}
-        - {{ include "helm-library.container" (list . (printf "%s.container" .Chart.Name )) }}
-      {{- else }}
-        - {{- end }}
-{{ include "helm-library.container.tpl" . | indent 8 }}
+        {{- if .Values.container }}
+        - {{ include "helm-library.container" (list . (printf "%s.container" .Chart.Name )) | nindent 10 }}
+        {{- else }}
+        - {{- include "helm-library.container.tpl" . | nindent 10 }}
+        {{- end }}
 {{- end }}
 
 {{/*

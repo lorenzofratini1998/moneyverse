@@ -531,16 +531,16 @@ data:
           "realmRoles": [
             "default-roles-moneyverse-fe"
           ],
-          "username": "demo@demo.it",
+          "username": "{{ .Values.global.demo.user.email | default "demo@demo.it"}}",
           "enabled": true,
-          "email": "demo@demo.it",
+          "email": "{{ .Values.global.demo.user.email | default "demo@demo.it" }}",
           "emailVerified": true,
-          "firstName": "Demo",
-          "lastName": "User",
+          "firstName": "{{ .Values.global.demo.user.firstName | default "Demo" }}",
+          "lastName": "{{ .Values.global.demo.user.lastName  | default "Demo" }}",
           "credentials": [
             {
               "type": "password",
-              "value": "demo",
+              "value": "{{ .Values.global.demo.user.password | default "demo" }}",
               "temporary": false
             }
           ]

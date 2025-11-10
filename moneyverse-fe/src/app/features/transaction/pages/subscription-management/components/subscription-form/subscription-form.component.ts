@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
-import {RecurrenceRuleEnum, RecurrenceRuleOption, Subscription} from '../../../../transaction.model';
+import {RecurrenceRuleEnum, RecurrenceRuleOption, SubscriptionTransaction} from '../../../../transaction.model';
 import {SubscriptionFormHandler} from '../../services/subscription-form.handler';
 import {
   AccountSelectComponent
@@ -43,7 +43,7 @@ export const recurrenceRuleOptions: RecurrenceRuleOption[] = [
   ],
   templateUrl: './subscription-form.component.html'
 })
-export class SubscriptionFormComponent extends AbstractFormComponent<Subscription, SubscriptionFormData> {
+export class SubscriptionFormComponent extends AbstractFormComponent<SubscriptionTransaction, SubscriptionFormData> {
   protected override readonly formHandler = inject(SubscriptionFormHandler);
   protected readonly recurrenceRuleOptions = recurrenceRuleOptions;
 }
