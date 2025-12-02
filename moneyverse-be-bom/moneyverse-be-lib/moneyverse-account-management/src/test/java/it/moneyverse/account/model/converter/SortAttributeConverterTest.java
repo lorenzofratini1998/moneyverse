@@ -19,7 +19,8 @@ class SortAttributeConverterTest {
   @Test
   void givenSource_ThenReturnSortAttribute() {
     AccountSortAttributeEnum source = RandomUtils.randomEnum(AccountSortAttributeEnum.class);
-    AccountSortAttributeEnum result =  (AccountSortAttributeEnum) sortAttributeConverter.convert(source.name());
+    AccountSortAttributeEnum result =
+        (AccountSortAttributeEnum) sortAttributeConverter.convert(source.name());
     assertEquals(source, result);
   }
 

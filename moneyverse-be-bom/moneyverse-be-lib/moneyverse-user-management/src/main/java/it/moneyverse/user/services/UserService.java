@@ -3,7 +3,6 @@ package it.moneyverse.user.services;
 import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.user.model.dto.LanguageDto;
 import it.moneyverse.user.model.dto.UserUpdateRequestDto;
-
 import java.util.List;
 import java.util.UUID;
 

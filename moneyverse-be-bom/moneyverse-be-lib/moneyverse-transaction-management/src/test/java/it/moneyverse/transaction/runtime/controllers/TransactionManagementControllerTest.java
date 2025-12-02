@@ -12,6 +12,7 @@ import it.moneyverse.core.model.events.SseEmitterRepository;
 import it.moneyverse.test.runtime.processor.MockAdminRequestPostProcessor;
 import it.moneyverse.test.runtime.processor.MockUserRequestPostProcessor;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.transaction.boot.TransactionAutoConfiguration;
 import it.moneyverse.transaction.model.SubscriptionTestFactory;
 import it.moneyverse.transaction.model.TransactionTestFactory;
 import it.moneyverse.transaction.model.dto.*;
@@ -33,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -46,7 +49,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
       AccountServiceGrpcClientAutoConfiguration.class,
       BudgetServiceGrpcClientAutoConfiguration.class,
       KafkaAutoConfiguration.class
-    })
+    },
+    excludeFilters =
+        @ComponentScan.Filter(
+            type = FilterType.ASSIGNABLE_TYPE,
+            classes = TransactionAutoConfiguration.class))
 @ExtendWith(MockitoExtension.class)
 class TransactionManagementControllerTest {
 

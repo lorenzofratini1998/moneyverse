@@ -1,9 +1,8 @@
 package it.moneyverse.core.utils.properties;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.Objects;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = KafkaProperties.PREFIX)
 public class KafkaProperties {

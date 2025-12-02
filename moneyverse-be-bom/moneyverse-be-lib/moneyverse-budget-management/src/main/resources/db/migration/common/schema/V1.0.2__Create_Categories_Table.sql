@@ -9,8 +9,8 @@ CREATE TABLE categories
     category_name        VARCHAR(255) NOT NULL,
     category_description VARCHAR(255),
     parent_id            UUID,
-    color VARCHAR(255),
-    icon  VARCHAR(255),
+    color                VARCHAR(255),
+    icon                 VARCHAR(255),
     CONSTRAINT pk_categories PRIMARY KEY (category_id)
 );
 

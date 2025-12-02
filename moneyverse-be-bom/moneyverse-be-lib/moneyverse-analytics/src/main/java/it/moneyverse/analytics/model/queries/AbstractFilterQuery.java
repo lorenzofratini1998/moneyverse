@@ -18,8 +18,8 @@ public abstract class AbstractFilterQuery<T> implements Query<T, FilterDto> {
 
     Map<String, Object> params = new HashMap<>();
     params.put("userId", parameters.userId());
-    params.put("startDate", parameters.period().startDate());
-    params.put("endDate", parameters.period().endDate());
+    params.put("startDate", parameters.period() != null ? parameters.period().startDate() : null);
+    params.put("endDate", parameters.period() != null ? parameters.period().endDate() : null);
     params.put("accounts", accounts);
     params.put("categories", categories);
     params.put("tags", tags);

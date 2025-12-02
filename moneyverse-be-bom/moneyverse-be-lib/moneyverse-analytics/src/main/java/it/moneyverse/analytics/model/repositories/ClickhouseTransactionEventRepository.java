@@ -6,12 +6,10 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Repository;
 
 @Repository

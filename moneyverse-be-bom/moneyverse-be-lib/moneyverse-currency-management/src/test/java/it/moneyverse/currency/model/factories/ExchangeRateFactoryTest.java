@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class ExchangeRateFactoryTest {
 
   private static final String XML_INPUT =
-      """
+"""
 <?xml version="1.0" encoding="UTF-8"?>
 <message:StructureSpecificData xmlns:message="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message" xmlns:common="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:data="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/structurespecific" xmlns:ecb_exr1="urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=ECB:ECB_EXR1(1.0):ObsLevelDim:TIME_PERIOD" xsi:schemaLocation="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message http://data-api.ecb.europa.eu:80/vocabulary/sdmx/2_1/SDMXMessage.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common http://data-api.ecb.europa.eu:80/vocabulary/sdmx/2_1/SDMXCommon.xsd urn:sdmx:org.sdmx.infomodel.datastructure.DataStructure=ECB:ECB_EXR1(1.0):ObsLevelDim:TIME_PERIOD http://data-api.ecb.europa.eu:80/service/schema/datastructure/ECB/ECB_EXR1/1.0">
   <message:Header>

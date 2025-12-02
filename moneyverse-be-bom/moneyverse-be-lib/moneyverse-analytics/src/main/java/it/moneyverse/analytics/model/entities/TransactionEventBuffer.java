@@ -1,9 +1,8 @@
 package it.moneyverse.analytics.model.entities;
 
-import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.analytics.enums.TransactionEventStateEnum;
+import it.moneyverse.core.enums.EventTypeEnum;
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

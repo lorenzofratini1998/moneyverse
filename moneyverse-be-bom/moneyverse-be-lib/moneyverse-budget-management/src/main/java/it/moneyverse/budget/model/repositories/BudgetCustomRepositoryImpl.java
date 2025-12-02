@@ -15,35 +15,34 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class BudgetCustomRepositoryImpl implements BudgetCustomRepository {
 
-    private final EntityManager em;
-    private final CriteriaBuilder cb;
+  private final EntityManager em;
+  private final CriteriaBuilder cb;
 
-    public BudgetCustomRepositoryImpl(EntityManager em) {
-        this.em = em;
-        this.cb = em.getCriteriaBuilder();
-    }
+  public BudgetCustomRepositoryImpl(EntityManager em) {
+    this.em = em;
+    this.cb = em.getCriteriaBuilder();
+  }
 
   @Override
   public List<Budget> filterBudgets(UUID userId, BudgetCriteria param) {
-        CriteriaQuery<Budget> cq = cb.createQuery(Budget.class);
-        Root<Budget> root = cq.from(Budget.class);
+    CriteriaQuery<Budget> cq = cb.createQuery(Budget.class);
+    Root<Budget> root = cq.from(Budget.class);
     Predicate predicate = new BudgetPredicateBuilder(cb, root).build(userId, param);
-        cq.where(predicate);
-        if (param.getSort() != null) {
-            cq.orderBy(getOrder(param.getSort(), root));
-        }
-        TypedQuery<Budget> query = em.createQuery(cq);
-        if (param.getPage() != null) {
-            query.setFirstResult(param.getPage().getOffset());
-            query.setMaxResults(param.getPage().getLimit());
-        }
-        return query.getResultList();
+    cq.where(predicate);
+    if (param.getSort() != null) {
+      cq.orderBy(getOrder(param.getSort(), root));
     }
+    TypedQuery<Budget> query = em.createQuery(cq);
+    if (param.getPage() != null) {
+      query.setFirstResult(param.getPage().getOffset());
+      query.setMaxResults(param.getPage().getLimit());
+    }
+    return query.getResultList();
+  }
 
-    private Order getOrder(
-            SortCriteria<BudgetSortAttributeEnum> sortCriteria, Root<Budget> account) {
-        return sortCriteria.getDirection() == Sort.Direction.ASC
-                ? cb.asc(account.get(sortCriteria.getAttribute().getField()))
-                : cb.desc(account.get(sortCriteria.getAttribute().getField()));
-    }
+  private Order getOrder(SortCriteria<BudgetSortAttributeEnum> sortCriteria, Root<Budget> account) {
+    return sortCriteria.getDirection() == Sort.Direction.ASC
+        ? cb.asc(account.get(sortCriteria.getAttribute().getField()))
+        : cb.desc(account.get(sortCriteria.getAttribute().getField()));
+  }
 }

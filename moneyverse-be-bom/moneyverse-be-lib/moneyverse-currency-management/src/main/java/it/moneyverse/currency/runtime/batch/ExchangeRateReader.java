@@ -17,15 +17,16 @@ public class ExchangeRateReader implements ItemReader<String> {
 
   private boolean batchJobState = false;
 
-    public ExchangeRateReader(ExchangeRateService exchangeRateService) {
-        this.exchangeRateService = exchangeRateService;
-    }
+  public ExchangeRateReader(ExchangeRateService exchangeRateService) {
+    this.exchangeRateService = exchangeRateService;
+  }
 
-    @Override
+  @Override
   public String read() {
     if (!batchJobState) {
       LOGGER.info("Reading exchange-rates from batch for date: {}", LocalDate.now());
-      ResponseEntity<String> response = exchangeRateService.readExchangeRates(LocalDate.now(), LocalDate.now());
+      ResponseEntity<String> response =
+          exchangeRateService.readExchangeRates(LocalDate.now(), LocalDate.now());
       batchJobState = true;
       return response.getBody();
     }

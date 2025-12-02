@@ -6,10 +6,10 @@ import it.moneyverse.test.annotations.MoneyverseTest;
 import it.moneyverse.test.annotations.datasource.FlywayTestDir;
 import it.moneyverse.test.extensions.testcontainers.ClickhouseContainer;
 import it.moneyverse.test.extensions.testcontainers.KafkaContainer;
-import it.moneyverse.test.extensions.testcontainers.KeycloakContainer;
 import it.moneyverse.test.extensions.testcontainers.PostgresContainer;
 import it.moneyverse.test.operations.mapping.EntityScriptGenerator;
 import it.moneyverse.test.utils.properties.TestPropertyRegistry;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,8 +24,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Container;
-
-import java.nio.file.Path;
 
 @MoneyverseTest
 @SpringBatchTest

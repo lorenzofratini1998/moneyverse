@@ -4,7 +4,6 @@ import it.moneyverse.core.enums.EventTypeEnum;
 import it.moneyverse.core.model.events.TransactionEvent;
 import it.moneyverse.transaction.model.entities.Tag;
 import it.moneyverse.transaction.model.entities.Transaction;
-
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 

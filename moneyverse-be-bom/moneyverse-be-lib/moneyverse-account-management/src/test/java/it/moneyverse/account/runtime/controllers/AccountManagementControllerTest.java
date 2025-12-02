@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import it.moneyverse.account.boot.AccountAutoConfiguration;
 import it.moneyverse.account.model.AccountTestFactory;
 import it.moneyverse.account.model.dto.*;
 import it.moneyverse.account.services.AccountManagementService;
@@ -28,6 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.TestPropertySource;
@@ -45,7 +48,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
       KafkaAutoConfiguration.class,
       OutboxAutoConfiguration.class,
       SseAutoConfiguration.class,
-    })
+    },
+    excludeFilters =
+        @ComponentScan.Filter(
+            type = FilterType.ASSIGNABLE_TYPE,
+            classes = AccountAutoConfiguration.class))
 @TestPropertySource(
     properties = {
       "spring.data.jpa.repositories.enabled=false",

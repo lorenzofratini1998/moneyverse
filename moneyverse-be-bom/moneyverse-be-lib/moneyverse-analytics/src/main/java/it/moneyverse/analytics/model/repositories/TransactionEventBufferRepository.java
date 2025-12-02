@@ -2,14 +2,13 @@ package it.moneyverse.analytics.model.repositories;
 
 import it.moneyverse.analytics.enums.TransactionEventStateEnum;
 import it.moneyverse.analytics.model.entities.TransactionEventBuffer;
+import java.awt.print.Pageable;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.awt.print.Pageable;
-import java.util.List;
-import java.util.UUID;
 
 public interface TransactionEventBufferRepository
     extends JpaRepository<TransactionEventBuffer, UUID> {

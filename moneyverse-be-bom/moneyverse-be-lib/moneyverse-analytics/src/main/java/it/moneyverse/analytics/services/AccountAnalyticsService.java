@@ -4,7 +4,6 @@ import it.moneyverse.analytics.model.dto.AccountAnalyticsDistributionDto;
 import it.moneyverse.analytics.model.dto.AccountAnalyticsKpiDto;
 import it.moneyverse.analytics.model.dto.AccountAnalyticsTrendDto;
 import it.moneyverse.analytics.model.dto.FilterDto;
-
 import java.util.List;
 
 public interface AccountAnalyticsService {

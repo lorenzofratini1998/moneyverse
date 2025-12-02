@@ -5,7 +5,6 @@ import it.moneyverse.core.model.dto.BoundCriteria;
 import it.moneyverse.core.model.dto.PageCriteria;
 import it.moneyverse.core.model.dto.SortCriteria;
 import it.moneyverse.core.utils.JsonUtils;
-
 import java.util.List;
 import java.util.Optional;
 

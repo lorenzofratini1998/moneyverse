@@ -1,5 +1,6 @@
 package it.moneyverse.user.boot;
 
+import it.moneyverse.core.exceptions.MoneyverseExceptionHandler;
 import it.moneyverse.core.utils.properties.KeycloakAdminProperties;
 import it.moneyverse.core.utils.properties.KeycloakProperties;
 import org.keycloak.OAuth2Constants;
@@ -10,9 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
 @EnableConfigurationProperties(value = {KeycloakAdminProperties.class, KeycloakProperties.class})
+@Import(MoneyverseExceptionHandler.class)
 public class UserManagementAutoConfiguration {
 
   private static final Logger LOGGER =

@@ -3,7 +3,6 @@ package it.moneyverse.analytics.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 

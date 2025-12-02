@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.boot;
 
+import it.moneyverse.core.exceptions.MoneyverseExceptionHandler;
 import it.moneyverse.transaction.model.entities.Subscription;
 import it.moneyverse.transaction.runtime.batch.SubscriptionProcessor;
 import it.moneyverse.transaction.runtime.batch.SubscriptionReader;
@@ -13,6 +14,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -31,6 +33,7 @@ import org.springframework.transaction.PlatformTransactionManager;
       "it.moneyverse.core.model.repositories",
       "it.moneyverse.transaction.model.repositories"
     })
+@Import(MoneyverseExceptionHandler.class)
 public class TransactionAutoConfiguration {
 
   @Bean

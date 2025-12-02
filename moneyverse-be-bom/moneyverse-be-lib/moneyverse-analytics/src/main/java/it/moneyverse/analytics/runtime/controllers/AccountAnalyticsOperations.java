@@ -5,7 +5,6 @@ import it.moneyverse.analytics.model.dto.AccountAnalyticsKpiDto;
 import it.moneyverse.analytics.model.dto.AccountAnalyticsTrendDto;
 import it.moneyverse.analytics.model.dto.FilterDto;
 import jakarta.validation.Valid;
-
 import java.util.List;
 
 public interface AccountAnalyticsOperations {

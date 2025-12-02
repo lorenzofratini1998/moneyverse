@@ -14,7 +14,6 @@ CREATE TABLE TRANSACTION_EVENTS
     CURRENCY                String,
     DATE                    Date,
     EVENT_TIMESTAMP         DateTime
-)
-    ENGINE = ReplacingMergeTree
+) ENGINE = ReplacingMergeTree
         PARTITION BY toYYYYMM(DATE)
         ORDER BY (USER_ID, DATE, TRANSACTION_ID)

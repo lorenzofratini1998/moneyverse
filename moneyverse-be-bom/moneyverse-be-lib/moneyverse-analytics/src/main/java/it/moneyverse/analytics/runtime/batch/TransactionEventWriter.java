@@ -4,7 +4,6 @@ import it.moneyverse.analytics.enums.TransactionEventStateEnum;
 import it.moneyverse.analytics.model.entities.TransactionEvent;
 import it.moneyverse.analytics.model.repositories.TransactionEventBufferRepository;
 import it.moneyverse.analytics.model.repositories.TransactionEventRepository;
-
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;

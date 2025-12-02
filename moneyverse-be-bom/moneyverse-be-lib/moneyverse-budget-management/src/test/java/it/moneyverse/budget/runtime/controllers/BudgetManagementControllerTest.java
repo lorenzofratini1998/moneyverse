@@ -3,6 +3,7 @@ package it.moneyverse.budget.runtime.controllers;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import it.moneyverse.budget.boot.BudgetAutoConfiguration;
 import it.moneyverse.budget.model.BudgetTestFactory;
 import it.moneyverse.budget.model.CategoryTestFactory;
 import it.moneyverse.budget.model.dto.*;
@@ -33,6 +34,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -45,7 +48,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
       DatasourceAutoConfiguration.class,
       UserServiceGrpcClientAutoConfiguration.class,
       KafkaAutoConfiguration.class
-    })
+    },
+    excludeFilters =
+        @ComponentScan.Filter(
+            type = FilterType.ASSIGNABLE_TYPE,
+            classes = BudgetAutoConfiguration.class))
 @ExtendWith(MockitoExtension.class)
 class BudgetManagementControllerTest {
 

@@ -1,6 +1,8 @@
 package it.moneyverse.account.model.entities;
 
 import it.moneyverse.core.model.entities.Style;
+import it.moneyverse.core.model.entities.Translatable;
+import it.moneyverse.core.model.entities.TranslationEntityListener;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -9,7 +11,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "ACCOUNT_CATEGORIES")
-public class AccountCategory implements Serializable {
+@EntityListeners(TranslationEntityListener.class)
+public class AccountCategory implements Serializable, Translatable {
   @Serial private static final long serialVersionUID = 1L;
 
   @Id
@@ -27,6 +30,9 @@ public class AccountCategory implements Serializable {
 
   @OneToMany(mappedBy = "accountCategory", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Account> accounts = new ArrayList<>();
+
+  @OneToMany(mappedBy = "accountCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<AccountCategoryTranslation> translations = new ArrayList<>();
 
   public Long getAccountCategoryId() {
     return accountCategoryId;
@@ -58,5 +64,23 @@ public class AccountCategory implements Serializable {
 
   public void setStyle(Style style) {
     this.style = style;
+  }
+
+  @Override
+  public void applyTranslations(String locale) {
+    if (locale == null || translations.isEmpty()) {
+      return;
+    }
+
+    translations.stream()
+        .filter(translation -> translation.getLocale().equals(locale))
+        .findFirst()
+        .ifPresent(
+            translation -> {
+              this.name = translation.getName();
+              if (translation.getDescription() != null) {
+                this.description = translation.getDescription();
+              }
+            });
   }
 }

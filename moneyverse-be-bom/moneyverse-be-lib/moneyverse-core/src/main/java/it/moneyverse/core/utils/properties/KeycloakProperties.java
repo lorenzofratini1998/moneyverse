@@ -1,9 +1,8 @@
 package it.moneyverse.core.utils.properties;
 
+import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
-
-import java.util.Objects;
 
 @ConfigurationProperties(prefix = KeycloakProperties.KEYCLOAK_PREFIX)
 public class KeycloakProperties {

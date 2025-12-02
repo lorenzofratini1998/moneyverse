@@ -8,7 +8,7 @@ CREATE TABLE budgets
     category_id  UUID           NOT NULL,
     start_date   date           NOT NULL,
     end_date     date           NOT NULL,
-    amount       DECIMAL(18, 2) NOT NULL     DEFAULT 0.0,
+    amount       DECIMAL(18, 2) NOT NULL DEFAULT 0.0,
     budget_limit DECIMAL(18, 2) NOT NULL,
     currency     VARCHAR(3)     NOT NULL,
     CONSTRAINT pk_budgets PRIMARY KEY (budget_id)

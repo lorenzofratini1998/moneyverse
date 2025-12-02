@@ -1,14 +1,14 @@
 <configuration>
-  <appender class="ch.qos.logback.core.ConsoleAppender" name="STDOUT">
-    <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level)
-        %cyan(%logger{36})\t%-20msg%n
-      </pattern>
-    </encoder>
-  </appender>
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="STDOUT">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level)
+                %cyan(%logger{36})\t%-20msg%n
+            </pattern>
+        </encoder>
+    </appender>
 
-  <root level="INFO">
-    <appender-ref ref="STDOUT"/>
-  </root>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
 </configuration>
 

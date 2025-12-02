@@ -2,7 +2,6 @@ package it.moneyverse.analytics.model.mapper;
 
 import it.moneyverse.analytics.model.entities.TransactionEvent;
 import it.moneyverse.analytics.model.entities.TransactionEventBuffer;
-
 import java.util.List;
 
 public class TransactionEventMapper {

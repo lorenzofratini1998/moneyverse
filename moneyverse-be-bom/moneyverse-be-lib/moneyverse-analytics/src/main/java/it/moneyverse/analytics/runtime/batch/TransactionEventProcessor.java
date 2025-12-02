@@ -3,10 +3,9 @@ package it.moneyverse.analytics.runtime.batch;
 import it.moneyverse.analytics.model.entities.TransactionEvent;
 import it.moneyverse.analytics.model.entities.TransactionEventBuffer;
 import it.moneyverse.analytics.model.mapper.TransactionEventMapper;
+import java.util.List;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class TransactionEventProcessor

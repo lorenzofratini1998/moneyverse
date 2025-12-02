@@ -1,12 +1,11 @@
 package it.moneyverse.test.annotations.datasource;
 
+import java.util.Map;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.Map;
 
 public class FlywayTestExtension implements BeforeEachCallback {
 

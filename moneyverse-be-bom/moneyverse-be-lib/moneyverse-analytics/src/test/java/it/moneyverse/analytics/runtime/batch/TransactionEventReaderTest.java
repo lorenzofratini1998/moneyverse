@@ -1,7 +1,14 @@
 package it.moneyverse.analytics.runtime.batch;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import it.moneyverse.analytics.model.entities.TransactionEventBuffer;
 import it.moneyverse.analytics.model.repositories.TransactionEventBufferRepository;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,15 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionEventReaderTest {

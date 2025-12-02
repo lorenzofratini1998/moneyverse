@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface ExchangeRateService {
 
-    ResponseEntity<String> readExchangeRates(LocalDate startPeriod, LocalDate endPeriod);
-    void initializeExchangeRates();
+  ResponseEntity<String> readExchangeRates(LocalDate startPeriod, LocalDate endPeriod);
 
+  void initializeExchangeRates();
 }

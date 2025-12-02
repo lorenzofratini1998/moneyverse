@@ -9,10 +9,9 @@ import it.moneyverse.core.model.dto.UserDto;
 import it.moneyverse.core.model.events.UserEvent;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.test.utils.RandomUtils;
+import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import java.util.Optional;
 import java.util.UUID;
-
-import it.moneyverse.user.model.repositories.UserPreferenceRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

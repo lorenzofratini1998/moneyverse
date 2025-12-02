@@ -21,11 +21,7 @@ public abstract class Auditable implements AuditableModel {
   private String createdBy;
 
   @CreatedDate
-  @Column(
-      name = "CREATED_AT",
-      nullable = false,
-      updatable = false
-  )
+  @Column(name = "CREATED_AT", nullable = false, updatable = false)
   @CreationTimestamp
   private LocalDateTime createdAt;
 
