@@ -32,6 +32,10 @@ jobs:
             --username ${{ secrets.DOCKER_USERNAME }} \
             --password ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Update Helm dependencies
+        run: |
+          helm dependencies update moneyverse-infrastructure/moneyverse-chart
+
       - name: Package Helm chart
         run: |
           helm package moneyverse-infrastructure/moneyverse-chart -d moneyverse-infrastructure
