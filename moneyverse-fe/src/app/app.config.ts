@@ -37,6 +37,7 @@ import {ConfirmationService, MessageService} from 'primeng/api';
 import {LucideAngularModule} from 'lucide-angular';
 import {UserDateFormatPipe} from './shared/pipes/user-date-format.pipe';
 import {CurrencyPipe} from '@angular/common';
+import {SystemService} from './core/services/system.service';
 
 echarts.use([TitleComponent, TooltipComponent, LegendComponent, GridComponent, ToolboxComponent, MarkLineComponent, MarkAreaComponent, PieChart, BarChart, LineChart, GaugeChart, SVGRenderer]);
 
@@ -55,6 +56,20 @@ const loadingInterceptor: HttpInterceptorFn =
       )
   }
 
+export const languageInterceptor: HttpInterceptorFn = (req, next) => {
+  const systemService = inject(SystemService);
+
+  const lang = systemService.currentLanguage()?.isoCode ?? 'en';
+
+  const modifiedReq = req.clone({
+    setHeaders: {
+      'Accept-Language': lang
+    }
+  });
+
+  return next(modifiedReq);
+};
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideKeycloakAngular(),
@@ -62,7 +77,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([
       includeBearerTokenInterceptor,
-      loadingInterceptor
+      loadingInterceptor,
+      languageInterceptor
     ])),
     importProvidersFrom([TranslateModule.forRoot({
         loader: {

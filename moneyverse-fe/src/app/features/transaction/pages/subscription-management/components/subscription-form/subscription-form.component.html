@@ -4,13 +4,13 @@
     <div class="grid grid-cols-1">
       <div class="flex justify-center items-center gap-4">
         <div class="flex items-center gap-2">
-          <label for="active-toggle" class="text-sm font-medium">Active</label>
+          <label for="active-toggle" class="text-sm font-medium">{{ 'app.form.active' | translate}}</label>
           <p-toggle-switch id="active-toggle" formControlName="active"/>
         </div>
         <app-date-picker
           formControlName="nextExecutionDate"
           id="nextExecutionDate-date-picker"
-          label="Next Payment"
+          [label]="'app.form.nextPayment' | translate"
           [disabled]="!formGroup.get('active')?.value"/>
       </div>
     </div>
@@ -20,14 +20,14 @@
     <app-input-text
       formControlName="subscriptionName"
       id="subscriptionName-input"
-      label="Subscription Name"
+      [label]="'app.form.subscriptionName' | translate"
       [required]="true"/>
 
     <div class="grid grid-cols-2 gap-4">
       <app-amount-input-number
         formControlName="amount"
         id="amount-input"
-        label="Amount"
+        [label]="'app.amount' | translate"
         [currency]="formGroup.get('currency')?.value"
         [required]="true"/>
 
@@ -45,8 +45,8 @@
         <app-select
           formControlName="recurrenceRule"
           id="recurrenceRule-select"
-          label="Recurrence"
-          [options]="recurrenceRuleOptions"
+          [label]="'app.form.recurrence' | translate"
+          [options]="recurrenceRuleOptions()"
           [required]="true"/>
       </div>
 
@@ -54,13 +54,13 @@
         <app-date-picker
           formControlName="startDate"
           id="startDate-date-picker"
-          label="Start Date"
+          [label]="'app.form.dateStart' | translate"
           [required]="true"/>
 
         <app-date-picker
           formControlName="endDate"
           id="endDate-date-picker"
-          label="End Date"/>
+          [label]="'app.form.dateEnd' | translate"/>
       </div>
     </div>
   </div>

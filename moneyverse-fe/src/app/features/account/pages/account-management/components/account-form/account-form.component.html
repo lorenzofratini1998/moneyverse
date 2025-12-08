@@ -1,16 +1,25 @@
 <form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid grid-cols-1 flex items-center justify-center gap-2">
+    <app-form-preview [color]="getControlValue('color')"
+                      [icon]="getControlValue('icon')"
+                      [message]="getControlValue('accountName')"/>
+    <div class="col-span-1 flex items-center justify-center gap-2">
+      <app-color-picker formControlName="color"/>
+      <app-icon-picker formControlName="icon"/>
+    </div>
+  </div>
   <div class="grid gap-4" [class]="selectedItem() ? 'grid-cols-4' : 'grid-cols-1'">
     <div [class]="selectedItem() ? 'col-span-3' : 'col-span-1'">
       <app-input-text formControlName="accountName"
                       id="account-name-input"
-                      label="Account Name"
+                      [label]="'app.form.accountName' | translate"
                       [required]="true"
                       class="w-full"/>
     </div>
     @if (selectedItem()) {
       <div class="col-span-1 flex items-center justify-center">
         <div class="flex items-center gap-2">
-          <label for="isDefault-toggle" class="text-sm font-medium">Default</label>
+          <label for="isDefault-toggle" class="text-sm font-medium">{{ 'app.default' | translate }}</label>
           <p-toggle-switch formControlName="isDefault"
                            id="isDefault-toggle"
           />
@@ -21,7 +30,7 @@
   <div class="grid grid-cols-1">
     <app-text-area formControlName="accountDescription"
                    id="accountDescription"
-                   label="Description"
+                   [label]="'app.description' | translate"
                    class="w-full"/>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -34,11 +43,11 @@
     <app-amount-input-number formControlName="balance"
                              [currency]="getControlValue('currency')"
                              id="balance"
-                             label="Balance"/>
+                             [label]="'app.balance' | translate"/>
 
     <app-amount-input-number formControlName="target"
                              [currency]="getControlValue('currency')"
                              id="target"
-                             label="Target Balance"/>
+                             [label]="'app.balanceTarget' | translate"/>
   </div>
 </form>

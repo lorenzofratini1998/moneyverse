@@ -19,7 +19,7 @@ export class BudgetEventService {
   private getStream(): Observable<SSEEvent> {
     if (!this.budgetStream$) {
       this.budgetStream$ = this.sseService.getStream(this.URL, {
-        userId: this.authService.authenticatedUser.userId
+        userId: this.authService.user().userId
       });
     }
     return this.budgetStream$;

@@ -6,6 +6,7 @@ import {FloatLabel} from 'primeng/floatlabel';
 import {MultiSelect} from 'primeng/multiselect';
 import {LabelComponent} from '../label/label.component';
 import {Message} from 'primeng/message';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-tag-multi-select',
@@ -15,7 +16,8 @@ import {Message} from 'primeng/message';
     ReactiveFormsModule,
     LabelComponent,
     Message,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   providers: [
     {
@@ -33,7 +35,7 @@ import {Message} from 'primeng/message';
 })
 export class TagMultiSelectComponent extends AbstractMultiSelectComponent {
   override id = input<string>('tag-multi-select');
-  override label = input<string>('Tags');
+  override label = input<string>('app.tags');
   override display = input<string>('chip');
   override filter = input<boolean>(true);
 

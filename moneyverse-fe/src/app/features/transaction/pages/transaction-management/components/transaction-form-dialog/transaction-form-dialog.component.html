@@ -17,7 +17,8 @@
   </div>
   <div class="form-dialog-content-container">
     @if (isExpenseOrIncome() || isSubscription()) {
-      <app-expense-income-form [selectedItem]="this.formDialog().selectedItem()"
+      <app-expense-income-form [transactionFormOption]="dialogOption()"
+                               [selectedItem]="this.formDialog().selectedItem()"
                                [transactionToEdit]="transactionToEdit()"
       />
     } @else {

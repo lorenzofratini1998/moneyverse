@@ -13,6 +13,7 @@ import {
 import {CategoryTrendChartService} from '../../services/category-trend-chart.service';
 import {ChartFilter} from '../../../../../analytics/analytics.models';
 import {LineChartOptions} from "../../../../../../shared/models/chart.model";
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-category-trend-chart',
@@ -30,6 +31,7 @@ export class CategoryTrendChartComponent extends AbstractLineChartComponent<Cate
   protected readonly categoryStore = inject(CategoryStore);
   protected readonly analyticsService = inject(AnalyticsService);
   private readonly chartService = inject(CategoryTrendChartService);
+  private readonly translateService = inject(TranslationService);
 
   protected chartFilter = signal<ChartFilter>('totalAmount');
   protected selectedCategory = signal<Category | null>(null);
@@ -39,7 +41,7 @@ export class CategoryTrendChartComponent extends AbstractLineChartComponent<Cate
     if (!trend || trend.length === 0 || this.selectedCategory() === null) {
       return {
         series: [{
-          name: 'No data',
+          name: this.translateService.translate('app.chart.empty'),
           data: []
         }]
       } as LineChartOptions;

@@ -122,7 +122,7 @@ export interface SubscriptionRequest {
 export interface RecurrenceRule {
   recurrenceRule: string,
   startDate: Date,
-  endDate: Date
+  endDate?: Date
 }
 
 export interface RecurrenceRuleOption {
@@ -132,9 +132,9 @@ export interface RecurrenceRuleOption {
 }
 
 export enum RecurrenceRuleEnum {
-  WEEKLY = 'WEEKLY',
-  MONTHLY = 'MONTHLY',
-  YEARLY = 'YEARLY'
+  WEEKLY = 'app.form.recurrenceRule.weekly',
+  MONTHLY = 'app.form.recurrenceRule.monthly',
+  YEARLY = 'app.form.recurrenceRule.yearly'
 }
 
 export const recurrenceRuleOptions: RecurrenceRuleOption[] = [

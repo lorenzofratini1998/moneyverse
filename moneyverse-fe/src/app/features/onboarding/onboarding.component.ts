@@ -1,7 +1,6 @@
 import {Component, computed, inject} from '@angular/core';
 import {AuthService} from '../../core/auth/auth.service';
 import {FormsModule} from '@angular/forms';
-import {switchMap} from 'rxjs';
 import {PreferenceService} from '../../shared/services/preference.service';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {Router} from '@angular/router';
@@ -18,6 +17,8 @@ import {Card} from 'primeng/card';
 import {PreferenceStore} from '../../shared/stores/preference.store';
 import {ToastService} from '../../shared/services/toast.service';
 import {SystemService} from '../../core/services/system.service';
+import {TranslatePipe} from '@ngx-translate/core';
+import {TranslationService} from '../../shared/services/translation.service';
 
 @Component({
   selector: 'app-onboarding',
@@ -26,6 +27,7 @@ import {SystemService} from '../../core/services/system.service';
     OnboardingFormComponent,
     LucideAngularModule,
     Card,
+    TranslatePipe,
 
 
   ],
@@ -39,6 +41,7 @@ export class OnboardingComponent {
   private readonly toastService = inject(ToastService);
   private readonly preferenceStore = inject(PreferenceStore);
   private readonly router = inject(Router);
+  private readonly translateService = inject(TranslationService);
 
   protected readonly dateFormats = DATE_FORMATS;
 
@@ -48,9 +51,7 @@ export class OnboardingComponent {
   )
 
   userPreferences = toSignal(
-    this.authService.getUserId().pipe(
-      switchMap(userId => this.preferenceService.getUserPreferences(userId))
-    ),
+    this.preferenceService.getUserPreferences(this.authService.user().userId),
     {initialValue: []}
   );
 
@@ -66,13 +67,13 @@ export class OnboardingComponent {
       return;
     }
 
-    this.preferenceService.saveUserPreferences(this.authService.getAuthenticatedUser().userId, request).subscribe({
+    this.preferenceService.saveUserPreferences(this.authService.user().userId, request).subscribe({
       next: (result) => {
         this.preferenceStore.updateUserPreferences(result);
         this.navigateToHome();
       },
       error: () => {
-        this.toastService.error('Error saving preferences');
+        this.toastService.error(this.translateService.translate('app.message.preferences.save.error'));
       }
     })
   }
@@ -95,10 +96,10 @@ export class OnboardingComponent {
 
   private navigateToHome() {
     this.storageService.clear();
-    this.storageService.setItem(STORAGE_MISSING_MANDATORY_PREFERENCES, 'false');
-    console.log(this.preferenceStore.userCurrency());
-    console.log(this.preferenceStore.userLanguage());
-    console.log(this.preferenceStore.userDateFormat());
+    this.storageService.setItem(STORAGE_MISSING_MANDATORY_PREFERENCES, {
+      userId: this.authService.user().userId,
+      value: false,
+    });
     void this.router.navigateByUrl('/');
   }
 }

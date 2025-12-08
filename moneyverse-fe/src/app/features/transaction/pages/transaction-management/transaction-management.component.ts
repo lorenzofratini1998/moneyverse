@@ -11,6 +11,7 @@ import {
   TransactionFilterPanelComponent
 } from './components/transaction-filter-panel/transaction-filter-panel.component';
 import {TransactionTableService} from './components/transaction-table/transaction-table.service';
+import {TranslationService} from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-transaction-management',
@@ -27,25 +28,29 @@ export class TransactionManagementComponent {
   protected readonly transactionStore = inject(TransactionStore);
   protected readonly transactionTableService = inject(TransactionTableService);
   private readonly authService = inject(AuthService);
+  private readonly translateService = inject(TranslationService);
 
   transactionFormDialog = viewChild.required(TransactionFormDialogComponent);
 
-  managementConfig = computed<ManagementConfig>(() => ({
-    title: 'Transaction Management',
-    actions: [
-      {
-        icon: IconsEnum.REFRESH,
-        variant: 'text',
-        severity: 'secondary',
-        action: () => this.transactionStore.loadTransactions(true)
-      },
-      {
-        icon: IconsEnum.PLUS,
-        label: 'New Transaction',
-        action: () => this.transactionFormDialog().open()
-      }
-    ]
-  }))
+  managementConfig = computed<ManagementConfig>(() => {
+    this.translateService.lang();
+    return {
+      title: this.translateService.translate('app.manageTransactions'),
+      actions: [
+        {
+          icon: IconsEnum.REFRESH,
+          variant: 'text',
+          severity: 'secondary',
+          action: () => this.transactionStore.loadTransactions(true)
+        },
+        {
+          icon: IconsEnum.PLUS,
+          label: this.translateService.translate('app.actions.newTransaction'),
+          action: () => this.transactionFormDialog().open()
+        }
+      ]
+    }
+  })
 
   submit(formData: TransactionFormData | TransferFormData) {
     if (isTransferFormData(formData)) {
@@ -64,7 +69,7 @@ export class TransactionManagementComponent {
       })
     } else {
       this.transactionStore.createTransfer({
-          userId: this.authService.authenticatedUser.userId,
+          userId: this.authService.user().userId,
           ...formData
         }
       )
@@ -80,7 +85,7 @@ export class TransactionManagementComponent {
       })
     } else {
       this.transactionStore.createTransaction({
-        userId: this.authService.authenticatedUser.userId,
+        userId: this.authService.user().userId,
         transactions: [{...formData}]
       })
     }

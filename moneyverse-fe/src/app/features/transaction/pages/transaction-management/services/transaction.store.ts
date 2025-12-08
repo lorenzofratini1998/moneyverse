@@ -1,7 +1,7 @@
 import {PageResponse} from '../../../../../shared/models/common.model';
 import {
   Transaction,
-  TransactionCriteria,
+  TransactionCriteria, TransactionCriteriaTypeEnum,
   TransactionRequest,
   TransactionRequestItem,
   TransactionSortAttributeEnum,
@@ -12,11 +12,13 @@ import {TransactionService} from '../../../services/transaction.service';
 import {computed, effect, inject} from '@angular/core';
 import {AuthService} from '../../../../../core/auth/auth.service';
 import {ToastService} from '../../../../../shared/services/toast.service';
-import {Direction} from '../../../../../shared/models/criteria.model';
+import {BoundCriteria, Direction} from '../../../../../shared/models/criteria.model';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
 import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {TransactionEventService} from './transaction-event.service';
 import {SubscriptionEventService} from '../../subscription-management/services/subscription-event.service';
+import {TranslationService} from '../../../../../shared/services/translation.service';
+import {SystemService} from '../../../../../core/services/system.service';
 
 interface TransactionStoreState {
   criteria: TransactionCriteria,
@@ -45,6 +47,29 @@ const initialState: TransactionStoreState = {
   }
 }
 
+function normalizeAmountForBackend(
+  amount: BoundCriteria | undefined,
+  type: TransactionCriteriaTypeEnum | undefined
+): BoundCriteria | undefined {
+  if (!amount || !type) return amount;
+
+  if (type === TransactionCriteriaTypeEnum.EXPENSE) {
+    return {
+      lower: amount.upper ? -Math.abs(amount.upper) : undefined,
+      upper: amount.lower ? -Math.abs(amount.lower) : undefined
+    };
+  }
+
+  if (type === TransactionCriteriaTypeEnum.INCOME) {
+    return {
+      lower: amount.lower ? Math.abs(amount.lower) : 0,
+      upper: amount.upper ? Math.abs(amount.upper) : undefined
+    };
+  }
+
+  return amount;
+}
+
 export const TransactionStore = signalStore(
   {providedIn: 'root'},
   withState(initialState),
@@ -53,6 +78,7 @@ export const TransactionStore = signalStore(
     const transactionService = inject(TransactionService);
     const authService = inject(AuthService);
     const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     const loadTransactions = rxMethod<boolean | void>((trigger) =>
       trigger.pipe(
@@ -62,11 +88,15 @@ export const TransactionStore = signalStore(
           return store.transactionPage().content.length === 0 || refresh;
         }),
         switchMap(() => {
-          const userId = authService.authenticatedUser.userId;
-          return transactionService.getTransactionsByUser(userId, store.criteria()).pipe(
+          const userId = authService.user().userId;
+          const criteria = {
+            ...store.criteria(),
+            amount: normalizeAmountForBackend(store.criteria().amount, store.criteria().type)
+          };
+          return transactionService.getTransactionsByUser(userId, criteria).pipe(
             tap({
               next: (transactionPage) => patchState(store, {transactionPage: transactionPage}),
-              error: () => toastService.error('Failed to load transactions')
+              error: () => toastService.error(translateService.translate("app.message.transaction.load.error"))
             })
           )
         })
@@ -80,8 +110,8 @@ export const TransactionStore = signalStore(
         request$.pipe(
           switchMap((request => transactionService.createTransaction(request))),
           tap({
-            next: () => toastService.success('Transaction created successfully'),
-            error: () => toastService.error('Failed to create transaction')
+            next: () => toastService.success(translateService.translate("app.message.transaction.create.success")),
+            error: () => toastService.error(translateService.translate("app.message.transaction.create.error"))
           })
         )
       ),
@@ -90,8 +120,8 @@ export const TransactionStore = signalStore(
         request$.pipe(
           switchMap(({transactionId, request}) => transactionService.updateTransaction(transactionId, request)),
           tap({
-            next: () => toastService.success('Transaction updated successfully'),
-            error: () => toastService.error('Failed to update transaction')
+            next: () => toastService.success(translateService.translate("app.message.transaction.update.success")),
+            error: () => toastService.error(translateService.translate("app.message.transaction.update.error"))
           })
         )
       ),
@@ -100,8 +130,8 @@ export const TransactionStore = signalStore(
         transactionId$.pipe(
           switchMap(transactionId => transactionService.deleteTransaction(transactionId)),
           tap({
-            next: () => toastService.success('Transaction deleted successfully'),
-            error: () => toastService.error('Failed to delete transaction')
+            next: () => toastService.success(translateService.translate("app.message.transaction.delete.success")),
+            error: () => toastService.error(translateService.translate("app.message.transaction.delete.error"))
           })
         )
       ),
@@ -110,8 +140,8 @@ export const TransactionStore = signalStore(
         request$.pipe(
           switchMap((request => transactionService.createTransfer(request))),
           tap({
-            next: () => toastService.success('Transfer created successfully'),
-            error: () => toastService.error('Failed to create transfer')
+            next: () => toastService.success(translateService.translate("app.message.transfer.create.success")),
+            error: () => toastService.error(translateService.translate("app.message.transfer.create.error"))
           })
         )
       ),
@@ -120,8 +150,8 @@ export const TransactionStore = signalStore(
         request$.pipe(
           switchMap(({transferId, request}) => transactionService.updateTransfer(transferId, request)),
           tap({
-            next: () => toastService.success('Transfer updated successfully'),
-            error: () => toastService.error('Failed to update transfer')
+            next: () => toastService.success(translateService.translate("app.message.transfer.update.success")),
+            error: () => toastService.error(translateService.translate("app.message.transfer.update.error"))
           })
         )
       ),
@@ -130,8 +160,8 @@ export const TransactionStore = signalStore(
         transferId$.pipe(
           switchMap(transferId => transactionService.deleteTransfer(transferId)),
           tap({
-            next: () => toastService.success('Transfer deleted successfully'),
-            error: () => toastService.error('Failed to delete transfer')
+            next: () => toastService.success(translateService.translate("app.message.transfer.delete.success")),
+            error: () => toastService.error(translateService.translate("app.message.transfer.delete.error"))
           })
         )
       ),
@@ -146,7 +176,18 @@ export const TransactionStore = signalStore(
       },
 
       resetFilters() {
-        patchState(store, {criteria: {}})
+        patchState(store, {
+          criteria: {
+            page: {
+              offset: 0,
+              limit: 25
+            },
+            sort: {
+              attribute: TransactionSortAttributeEnum.DATE,
+              direction: Direction.DESC
+            }
+          }
+        })
       }
     }
   }),
@@ -170,13 +211,19 @@ export const TransactionStore = signalStore(
   })),
 
   withHooks((store) => {
+    const systemService = inject(SystemService);
     const transactionEventService = inject(TransactionEventService);
     const subscriptionEventService = inject(SubscriptionEventService);
     const subscriptions = new Subscription();
 
     return {
       onInit() {
-        store.loadTransactions(true);
+        effect(() => {
+          const translationsReady = systemService.translationsReady();
+          if (translationsReady) {
+            store.loadTransactions(true);
+          }
+        });
 
         effect(() => {
           store.criteria();

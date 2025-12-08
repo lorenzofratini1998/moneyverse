@@ -9,17 +9,27 @@ import {PreferenceStore} from '../stores/preference.store';
 export class UserDateFormatPipe implements PipeTransform {
   private readonly preferenceStore = inject(PreferenceStore);
 
-  transform(date: Date | string, fallbackFormat?: string): string {
+  transform(date: Date | string, fallbackFormat?: string, mode: "full" | "year" | "month" | "year-month" = "full"): string {
     if (!date) return '';
 
     const dateObj = date instanceof Date ? date : new Date(date);
     const userFormat = this.preferenceStore.userDateFormat();
 
-    if (!userFormat && fallbackFormat) {
-      return this.formatDate(dateObj, fallbackFormat);
+    let format = userFormat || fallbackFormat || 'yyyy-MM-dd';
+
+    switch (mode) {
+      case "year":
+        format = "yyyy";
+        break;
+      case "month":
+        format = "MM";
+        break;
+      case "year-month":
+        format = "MM-yyyy";
+        break;
     }
 
-    return this.formatDate(dateObj, userFormat || 'MM/dd/yyyy');
+    return this.formatDate(dateObj, format);
   }
 
   private formatDate(date: Date, format: string): string {

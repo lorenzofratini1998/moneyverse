@@ -12,8 +12,8 @@ export class AppConfirmationService {
     this.confirmationService.confirm({
       message: confirmation.message,
       header: confirmation.header,
-      acceptLabel: 'Delete',
-      rejectLabel: 'Cancel',
+      acceptLabel: 'app.dialog.delete',
+      rejectLabel: 'app.dialog.cancel',
       accept: confirmation.accept,
       reject: confirmation.reject,
     })

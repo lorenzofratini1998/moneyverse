@@ -1,12 +1,13 @@
 import {inject, Injectable} from '@angular/core';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
-import {switchMap} from 'rxjs';
+import {combineLatest, switchMap} from 'rxjs';
 import {DashboardStore} from '../../../../analytics/services/dashboard.store';
 import {AnalyticsService} from '../../../../../shared/services/analytics.service';
 import {AccountAnalyticsTrend} from '../models/account-analytics.model';
 import {Account} from '../../../account.model';
 import {UserDateFormatPipe} from '../../../../../shared/pipes/user-date-format.pipe';
 import {ChartFilter, ExpenseIncome} from "../../../../analytics/analytics.models";
+import {AnalyticsEventService} from '../../../../analytics/services/analytics-event.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,12 +17,18 @@ export class AccountTrendChartService {
   private readonly dashboardStore = inject(DashboardStore);
   private readonly analyticsService = inject(AnalyticsService);
   private readonly userDateFormatPipe = inject(UserDateFormatPipe);
+  private readonly analyticsEventService = inject(AnalyticsEventService);
 
   data = toSignal(
-    toObservable(this.dashboardStore.filter).pipe(
-      switchMap(filter => this.analyticsService.calculateAccountAnalyticsTrend(filter))
+    combineLatest([
+      toObservable(this.dashboardStore.filter),
+      this.analyticsEventService.reload$
+    ]).pipe(
+      switchMap(([filter]) =>
+        this.analyticsService.calculateAccountAnalyticsTrend(filter)
+      )
     ),
-    {initialValue: []}
+    { initialValue: [] }
   );
 
   getLabels(trend: AccountAnalyticsTrend[], account: Account): string[] {
@@ -29,7 +36,7 @@ export class AccountTrendChartService {
     if (!trendData) {
       return [];
     }
-    return trendData.data.map(t => this.userDateFormatPipe.transform(t.period!.startDate.toString()));
+    return trendData.data.map(t => this.userDateFormatPipe.transform(t.period!.startDate.toString(), undefined, "year-month"));
   }
 
   getSeries(trend: AccountAnalyticsTrend[], account: Account, chartFilter: ChartFilter): {

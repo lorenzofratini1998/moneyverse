@@ -74,7 +74,7 @@
               "buildTarget": "moneyverse-fe:build:production"
             },
             "development": {
-              "proxyConfig": "src/proxy.local.conf.json",
+              "proxyConfig": "src/proxy.local.conf.js",
               "buildTarget": "moneyverse-fe:build:development"
             }
           },

@@ -6,6 +6,7 @@ import {FloatLabel} from 'primeng/floatlabel';
 import {LabelComponent} from '../label/label.component';
 import {Message} from 'primeng/message';
 import {Select} from 'primeng/select';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-category-select',
@@ -14,7 +15,8 @@ import {Select} from 'primeng/select';
     LabelComponent,
     Message,
     Select,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   providers: [
     {
@@ -28,12 +30,11 @@ import {Select} from 'primeng/select';
       multi: true
     }
   ],
-  templateUrl: './category-select.component.html',
-  styleUrl: './category-select.component.scss'
+  templateUrl: './category-select.component.html'
 })
 export class CategorySelectComponent extends AbstractSelectComponent {
   override id = input<string>('category-select');
-  override label = input<string>('Category');
+  override label = input<string>('app.category');
 
   protected readonly categoryStore = inject(CategoryStore);
 

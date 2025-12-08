@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {FormHandler} from '../../../../../shared/models/form.model';
 import {recurrenceRuleOptions, SubscriptionTransaction} from '../../../transaction.model';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {today} from '../../../../../shared/utils/date.utils';
+import {getUTCDate, today} from '../../../../../shared/utils/date.utils';
 import {PreferenceStore} from '../../../../../shared/stores/preference.store';
 import {AccountStore} from '../../../../account/services/account.store';
 import {SubscriptionFormData} from "../models/form.model";
@@ -72,6 +72,9 @@ export class SubscriptionFormHandler implements FormHandler<SubscriptionTransact
 
   prepareData(form: FormGroup): SubscriptionFormData {
     const value = form.value;
+    const startDate = value.recurrence.startDate;
+    const endDate = value.recurrence.endDate;
+    const nextExecutionDate = value.nextExecutionDate;
     return {
       subscriptionId: value.subscriptionId,
       subscriptionName: value.subscriptionName,
@@ -79,13 +82,13 @@ export class SubscriptionFormHandler implements FormHandler<SubscriptionTransact
       currency: value.currency,
       recurrence: {
         recurrenceRule: value.recurrence.recurrenceRule,
-        startDate: value.recurrence.startDate,
-        endDate: value.recurrence.endDate
+        startDate: getUTCDate(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()),
+        endDate: endDate ? getUTCDate(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()) : undefined
       },
       accountId: value.account,
       categoryId: value.category,
       isActive: value.active,
-      nextExecutionDate: value.nextExecutionDate
+      nextExecutionDate: nextExecutionDate ? getUTCDate(nextExecutionDate.getFullYear(), nextExecutionDate.getMonth(), nextExecutionDate.getDate()) : undefined
     };
   }
 

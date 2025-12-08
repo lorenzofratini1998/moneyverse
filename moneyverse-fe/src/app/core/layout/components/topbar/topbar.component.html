@@ -31,15 +31,15 @@
               </p-overlay-badge>
             </button>
           }
+          <app-language-popover/>
         }
-        <app-language-popover/>
         @if (layoutService.isOnboarding()) {
           <button type="button" class="layout-topbar-action" (click)="authService.logout()">
             <app-svg [name]="icons.LOG_OUT"/>
           </button>
         } @else {
           <button type="button" class="layout-topbar-action" (click)="userOp.toggle($event)">
-            <span>{{ user.firstName.toUpperCase()[0] + user.lastName.toUpperCase()[0] }}</span>
+            <span>{{ authService.user().firstName.toUpperCase()[0] + authService.user().lastName.toUpperCase()[0] }}</span>
           </button>
         }
       </div>
@@ -54,12 +54,12 @@
   <div class="flex items-center gap-3 p-2">
     <div class="avatar bg-base-200">
       <div class="placeholder rounded-full">
-        <span>{{ user.firstName.toUpperCase()[0] + user.lastName.toUpperCase()[0] }}</span>
+        <span>{{ authService.user().firstName.toUpperCase()[0] + authService.user().lastName.toUpperCase()[0] }}</span>
       </div>
     </div>
     <div class="flex flex-col">
-      <span class="font-bold">{{ user.fullName }}</span>
-      <span class="text-sm opacity-70">{{ user.email }}</span>
+      <span class="font-bold">{{ authService.user().fullName }}</span>
+      <span class="text-sm opacity-70">{{ authService.user().email }}</span>
     </div>
   </div>
 
@@ -71,16 +71,16 @@
         class="flex items-center gap-2"
       >
         <i class="pi pi-cog"></i>
-        <span>{{ 'menu.settings' | translate }}</span>
+        <span>{{ 'app.settings' | translate }}</span>
       </a>
     </li>
     <li class="gap-2 p-2 hover:bg-emphasis cursor-pointer rounded-border">
       <a
-        routerLink="/logout"
+        (click)="authService.logout()"
         class="flex items-center gap-2"
       >
         <i class="pi pi-sign-out"></i>
-        <span>{{ 'menu.logout' | translate }}</span>
+        <span>{{ 'app.logout' | translate }}</span>
       </a>
     </li>
   </ul>

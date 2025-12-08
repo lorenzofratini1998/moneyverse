@@ -8,6 +8,8 @@ import {IconsEnum} from '../../../../../../shared/models/icons.model';
 import {Budget} from '../../../../category.model';
 import {CurrencyPipe} from '../../../../../../shared/pipes/currency.pipe';
 import {AppConfirmationService} from '../../../../../../shared/services/confirmation.service';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-budget-detail',
@@ -17,7 +19,8 @@ import {AppConfirmationService} from '../../../../../../shared/services/confirma
     Card,
     ProgressBar,
     SvgComponent,
-    CurrencyPipe
+    CurrencyPipe,
+    TranslatePipe
   ],
   templateUrl: './budget-detail.component.html'
 })
@@ -29,11 +32,12 @@ export class BudgetDetailComponent {
 
   protected readonly icons = IconsEnum;
   private readonly confirmationService = inject(AppConfirmationService);
+  private readonly translateService = inject(TranslationService);
 
   protected confirmDelete(budget: Budget) {
     this.confirmationService.confirmDelete({
-      header: 'Delete Budget',
-      message: 'Are you sure you want to delete the budget?',
+      header: this.translateService.translate('app.dialog.budget.delete'),
+      message: this.translateService.translate('app.dialog.budget.confirmDelete'),
       accept: () => this.onDelete.emit(budget),
     })
   }

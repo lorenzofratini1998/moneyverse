@@ -1,0 +1,29 @@
+<p-card>
+  <ng-template #title>
+    <h3>{{ 'app.accounts' | translate }}</h3>
+  </ng-template>
+  <app-table [data]="data()"
+             [columns]="columns()"
+             [config]="config()">
+    <ng-template cellTemplate field="accountId" let-data>
+      @if (this.accountStore.accountsMap().get(data.accountId); as account) {
+        <app-chip [color]="account.style.color"
+                  [icon]="account.style.icon"
+                  [message]="account.accountName"/>
+      }
+    </ng-template>
+
+    <ng-template cellTemplate field="totalIncome" let-data>
+      @if (this.accountStore.accountsMap().get(data.accountId); as account) {
+        {{ data.totalIncome.amount | currency: preferenceStore.userCurrency() }}
+      }
+    </ng-template>
+
+    <ng-template cellTemplate field="totalExpense" let-data>
+      @if (this.accountStore.accountsMap().get(data.accountId); as account) {
+        {{ data.totalExpense.amount | currency: preferenceStore.userCurrency() }}
+      }
+    </ng-template>
+
+  </app-table>
+</p-card>

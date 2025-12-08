@@ -42,7 +42,7 @@ export class AccountDistributionChartComponent extends AbstractPieChartComponent
     const _data = this.accountDistributionService.data();
     return {
       data: _data.map(account => ({
-        name: this.accountStore.accountsMap().get(account.accountId)!.accountName,
+        name: this.accountStore.accountsMap().get(account.accountId)?.accountName ?? 'N/A',
         value: this.accountDistributionService.getPieChartValue(account, this.pieChartCard().pieChartFilter())
       }))
     }

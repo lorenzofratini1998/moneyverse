@@ -1,39 +1,342 @@
 {
-  "menu": {
-    "overview": "Overview",
-    "settings": "Settings",
-    "accounts": {
-      "title": "Accounts",
-      "dashboard": "Dashboard",
-      "manage": "Manage Accounts"
+  "app": {
+    "account": "Account",
+    "accounts": "Accounts",
+    "actions": {
+      "addDefaultCategories": "Add Default Categories",
+      "newAccount": "New Account",
+      "newBudget": "New Budget",
+      "newCategory": "New Category",
+      "newSubscription": "New Subscription",
+      "newTag": "New Tag",
+      "newTransaction": "New Transaction"
     },
-    "categories": {
-      "title": "Categories",
-      "manage": "Manage Categories",
-      "dashboard": "Dashboard",
-      "budgeting": "Budgeting"
+    "add": "Add",
+    "amount": "Amount",
+    "analytics": "Analytics",
+    "balance": "Balance",
+    "balanceTarget": "Balance Target",
+    "budgeting": "Budgeting",
+    "category": "Category",
+    "categories": "Categories",
+    "chart": {
+      "activeAccounts": "Active accounts",
+      "activeCategories": "Active categories",
+      "averageAmount": "Average amount",
+      "compare": "Compare",
+      "current": "Current",
+      "empty": "No data",
+      "month": "Month",
+      "mostUsedAccount": "Most used account",
+      "mostUsedCategory": "Most used category",
+      "numberOfTransactions": "Number of transactions",
+      "quantile90": "90% quantile",
+      "uncategorizedAmount": "Uncategorized amount",
+      "topCategory": "Top category",
+      "total": "Total",
+      "totalExpense": "Total expense",
+      "totalIncome": "Total income",
+      "year": "Year"
     },
-    "transactions": {
-      "title": "Transactions",
-      "manage": "Manage Transactions",
-      "tags": "Tags",
-      "subscriptions": "Subscriptions",
-      "analytics": "Analytics"
-    },
-    "logout": "Logout"
-  },
-  "features": {
-    "overview": {
-      "title": "Overview"
-    },
-    "settings": {
-      "title": "Settings",
-      "profile": {
-        "title": "Profile",
-        "subtitle": "Let's configure your profile"
+    "currencies": "Currencies",
+    "currency": "Currency",
+    "date": "Date",
+    "dateFormat": "Date format",
+    "default": "Default",
+    "description": "Description",
+    "dialog": {
+      "account": {
+        "add": "Add Account",
+        "confirmDelete": "Are you sure you want to delete the account {{field}}? All associated transactions will be deleted.?",
+        "delete": "Delete Account",
+        "edit": "Edit Account"
       },
-      "preferences": "Preferences"
-    }
+      "budget": {
+        "add": "Add Budget",
+        "confirmDelete": "Are you sure you want to delete the budget?",
+        "delete": "Delete Budget",
+        "edit": "Edit Budget"
+      },
+      "category": {
+        "add": "Add Category",
+        "confirmDelete": "Are you sure you want to delete the category {{field}}? All associated transactions will be deleted.?",
+        "defaultCategory": "The following expenditure categories will be created",
+        "delete": "Delete Category",
+        "edit": "Edit Category"
+      },
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "delete": "Delete",
+      "profile": {
+        "delete": "Delete Profile",
+        "confirmDelete": "Are you sure you want to delete your profile? All the related data will be lost."
+      },
+      "save": "Save",
+      "subscription": {
+        "add": "Add Subscription",
+        "delete": "Delete Subscription",
+        "confirmDelete": "Are you sure you want to delete the subscription {{field}}? All associated transactions will be deleted.",
+        "edit": "Edit Subscription"
+      },
+      "tag": {
+        "add": "Add Tag",
+        "delete": "Delete tag",
+        "confirmDelete": "Are you sure that you want to delete the tag {{field}}?",
+        "edit": "Edit tag"
+      },
+      "transaction": {
+        "analytics": {
+          "title": "View Data"
+        },
+        "delete": "Delete transaction",
+        "confirmDelete": "Are you sure that you want to proceed?"
+      },
+      "transfer": {
+        "delete": "Delete transfer: {{from}} ⇆ {{to}}",
+        "detail": "Transfer from {{from}} to {{to}}",
+        "confirmDelete": "Are you sure that you want to proceed? All transactions associated with this transfer will be deleted."
+      }
+    },
+    "edit": "Edit",
+    "expense": "Expense",
+    "features": {
+      "preferences": {
+        "subtitle": "Manage your preferences"
+      },
+      "profile": {
+        "subtitle": "Manage your profile",
+        "danger": {
+          "title": "Danger Zone",
+          "subtitle": "Delete this profile",
+          "subsubtitle": "Once you delete your profile, there is no going back. Please be certain.",
+          "button": "Delete profile"
+        }
+      }
+    },
+    "form": {
+      "accountCategory": "Account Category",
+      "accountFrom": "Account From",
+      "accountName": "Account Name",
+      "accountTo": "Account To",
+      "active": "Active",
+      "amountMin": "Amount min.",
+      "amountMax": "Amount max.",
+      "balanceMin": "Balance min.",
+      "balanceMax": "Balance max.",
+      "budgetLimit": "Budget Limit",
+      "categoryName": "Category Name",
+      "dateStart": "Date Start",
+      "dateEnd": "Date End",
+      "email": "Email",
+      "errors": {
+        "required": "{{field}} is required",
+        "maxlength": "{{field}} cannot exceed {{requiredLength}} characters"
+      },
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "nextPayment": "Next Payment",
+      "parentCategory": "Parent Category",
+      "preview": "Preview",
+      "recurrence": "Recurrence",
+      "recurrenceRule": {
+        "weekly": "WEEKLY",
+        "monthly": "MONTHLY",
+        "yearly": "YEARLY"
+      },
+      "subscriptionName": "Subscription Name",
+      "tagName": "Tag Name",
+      "totalAmount": "Total Amount"
+    },
+    "footer": "All right reserved",
+    "income": "Income",
+    "language": "Language",
+    "left": "Left",
+    "logout": "Logout",
+    "manageAccounts": "Manage Accounts",
+    "manageCategories": "Manage Categories",
+    "manageSubscriptions": "Manage Subscriptions",
+    "manageTags": "Manage Tags",
+    "manageTransactions": "Manage Transactions",
+    "message": {
+      "account": {
+        "load": {
+          "error": "Failed to load accounts"
+        },
+        "create": {
+          "success": "Account created successfully",
+          "error": "Failed to create account"
+        },
+        "update": {
+          "success": "Account updated successfully",
+          "error": "Failed to update account"
+        },
+        "delete": {
+          "success": "Account deleted successfully",
+          "error": "Failed to delete account"
+        }
+      },
+      "accountCategories": {
+        "load": {
+          "error": "Failed to load account categories"
+        }
+      },
+      "budget": {
+        "load": {
+          "error": "Failed to load budgets"
+        },
+        "create": {
+          "success": "Budget created successfully",
+          "error": "Failed to create budget"
+        },
+        "update": {
+          "success": "Budget updated successfully",
+          "error": "Failed to update budget"
+        },
+        "delete": {
+          "success": "Budget deleted successfully",
+          "error": "Failed to delete budget"
+        }
+      },
+      "category": {
+        "load": {
+          "error": "Failed to load categories"
+        },
+        "create": {
+          "success": "Category created successfully",
+          "error": "Failed to create category"
+        },
+        "update": {
+          "success": "Category updated successfully",
+          "error": "Failed to update category"
+        },
+        "delete": {
+          "success": "Category deleted successfully",
+          "error": "Failed to delete category"
+        }
+      },
+      "defaultCategories": {
+        "load": {
+          "error": "Failed to load default categories"
+        },
+        "create": {
+          "success": "Default categories created successfully",
+          "error": "Failed to create default categories"
+        }
+      },
+      "preferences": {
+        "save": {
+          "error": "Failed to save preferences"
+        },
+        "update": {
+          "success": "Preferences updated successfully",
+          "error": "Failed to update preferences"
+        }
+      },
+      "profile": {
+        "update": {
+          "success": "Profile updated successfully",
+          "error": "Failed to update profile"
+        },
+        "delete": {
+          "error": "Failed to delete profile"
+        }
+      },
+      "subscription": {
+        "load": {
+          "error": "Failed to load subscriptions"
+        },
+        "create": {
+          "success": "Subscription created successfully",
+          "error": "Failed to create subscription"
+        },
+        "update": {
+          "success": "Subscription updated successfully",
+          "error": "Failed to update subscription"
+        },
+        "delete": {
+          "success": "Subscription deleted successfully",
+          "error": "Failed to delete subscription"
+        }
+      },
+      "tag": {
+        "load": {
+          "error": "Failed to load tags"
+        },
+        "create": {
+          "success": "Tag created successfully",
+          "error": "Failed to create tag"
+        },
+        "update": {
+          "success": "Tag updated successfully",
+          "error": "Failed to update tag"
+        },
+        "delete": {
+          "success": "Tag deleted successfully",
+          "error": "Failed to delete tag"
+        }
+      },
+      "transaction": {
+        "load": {
+          "error": "Failed to load transactions"
+        },
+        "create": {
+          "success": "Transaction created successfully",
+          "error": "Failed to create transaction"
+        },
+        "update": {
+          "success": "Transaction updated successfully",
+          "error": "Failed to update transaction"
+        },
+        "delete": {
+          "success": "Transaction deleted successfully",
+          "error": "Failed to delete transaction"
+        }
+      },
+      "transfer": {
+        "load": {
+          "error": "Failed to load transfers"
+        },
+        "create": {
+          "success": "Transfer created successfully",
+          "error": "Failed to create transfer"
+        },
+        "update": {
+          "success": "Transfer updated successfully",
+          "error": "Failed to update transfer"
+        },
+        "delete": {
+          "success": "Transfer deleted successfully",
+          "error": "Failed to delete transfer"
+        }
+      }
+    },
+    "name": "Name",
+    "normalizedAmount": "Normalized Amount",
+    "of": "of",
+    "onboarding": {
+      "title": "Configure your preferences",
+      "subtitle": "Let's configure your preferences"
+    },
+    "overview": "Overview",
+    "patrimony": "Patrimony",
+    "period": "Period",
+    "preferences": "Preferences",
+    "profile": "Profile",
+    "profileSubtitle": "Let's configure your profile",
+    "recentTransactions": "Recent Transactions",
+    "settings": "Settings",
+    "spent": "Spent",
+    "subscription": "Subscription",
+    "subscriptions": "Subscriptions",
+    "table": {
+      "empty": "No data available.",
+      "pageReportDefault": "{{current}} of {{total}}",
+      "pageReport": "Showing {{first}} to {{last}} of {{totalRecords}} entries"
+    },
+    "tags": "Tags",
+    "transfer": "Transfer",
+    "transaction": "Transaction",
+    "transactions": "Transactions"
   },
   "primeng": {
     "accept": "Yes",

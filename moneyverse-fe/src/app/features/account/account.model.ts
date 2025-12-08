@@ -1,4 +1,5 @@
 import {BoundCriteria} from "../../shared/models/criteria.model";
+import {Style} from '../../shared/models/common.model';
 
 export interface Account {
   accountId: string,
@@ -9,7 +10,8 @@ export interface Account {
   accountCategory: string,
   accountDescription: string,
   default: boolean,
-  currency: string
+  currency: string,
+  style: Style
 }
 
 export interface AccountCategory {

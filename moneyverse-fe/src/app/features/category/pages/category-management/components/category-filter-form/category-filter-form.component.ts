@@ -9,13 +9,15 @@ import {
 } from '../../../../../../shared/components/forms/category-multi-select/category-multi-select.component';
 import {InputTextComponent} from '../../../../../../shared/components/forms/input-text/input-text.component';
 import {ReactiveFormsModule} from '@angular/forms';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-category-filter-form',
   imports: [
     CategoryMultiSelectComponent,
     InputTextComponent,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslatePipe
   ],
   templateUrl: './category-filter-form.component.html'
 })

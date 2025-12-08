@@ -1,6 +1,6 @@
 <p-table
   [alwaysShowPaginator]="config().alwaysShowPaginator ?? true"
-  [currentPageReportTemplate]="config().currentPageReportTemplate ?? '{currentPage} of {totalPages}'"
+  [currentPageReportTemplate]="config().currentPageReportTemplate ?? pageReportTemplate"
   [customSort]="config().customSort ?? false"
   [dataKey]="config().dataKey?.toString() ?? undefined"
   [lazy]="config().lazy ?? false"
@@ -89,7 +89,7 @@
   <ng-template #emptymessage>
     <tr>
       <td [attr.colspan]="columns().length + (actions() ? 1 : 0)">
-        No data available.
+        {{ 'app.table.empty' | translate}}
       </td>
     </tr>
   </ng-template>

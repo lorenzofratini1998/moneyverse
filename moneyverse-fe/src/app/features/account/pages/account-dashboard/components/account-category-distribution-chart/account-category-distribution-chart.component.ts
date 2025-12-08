@@ -9,7 +9,7 @@ import {PreferenceStore} from '../../../../../../shared/stores/preference.store'
 import {
   AbstractPieChartComponent
 } from '../../../../../../shared/components/charts/pie-chart/abstract-pie-chart.component';
-import {Account} from '../../../../account.model';
+import {Account, AccountCategory} from '../../../../account.model';
 import {AccountDistributionChartService} from '../../services/account-distribution-chart.service';
 
 @Component({
@@ -52,15 +52,15 @@ export class AccountCategoryDistributionChartComponent extends AbstractPieChartC
     }
 
     return {
-      data: Array.from(categoryTotals.entries()).map(([name, value]) => ({
-        name,
+      data: Array.from(categoryTotals.entries()).map(([accountCategoryId, value]) => ({
+        name: this.accountStore.accountsCategoryMap().get(+accountCategoryId)!.name,
         value
       }))
     };
   })
 
   clickChart(event: any) {
-    const accountCategory = event.name;
-    this.onChartClick.emit(this.accountStore.accounts().filter(acc => acc.accountCategory === accountCategory));
+    const accountCategory: AccountCategory = this.accountStore.categories().find(cat => cat.name === event.name)!;
+    this.onChartClick.emit(this.accountStore.accounts().filter(acc => +acc.accountCategory === +accountCategory.accountCategoryId));
   }
 }

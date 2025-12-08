@@ -41,4 +41,4 @@ testem.log
 .DS_Store
 Thumbs.db
 
-src/proxy.local.conf.json
+src/proxy.local.conf.js

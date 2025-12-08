@@ -53,15 +53,21 @@ const areMandatoryPreferencesMissing = async (
   }
 
   try {
-    const userId = await firstValueFrom(authService.getUserId());
+    const userId = authService.user().userId;
     let missingPreferences: boolean;
-    const storageMissingPreferences = storageService.getItem(STORAGE_MISSING_MANDATORY_PREFERENCES);
+    const cached = storageService.getItem<{ userId: string; value: boolean }>(
+      STORAGE_MISSING_MANDATORY_PREFERENCES
+    );
 
-    if (storageMissingPreferences !== null) {
-      missingPreferences = storageMissingPreferences === true;
+    if (cached && cached.userId === userId) {
+      missingPreferences = cached.value;
     } else {
       missingPreferences = await userService.checkMissingPreferences(userId);
-      storageService.setItem(STORAGE_MISSING_MANDATORY_PREFERENCES, missingPreferences);
+
+      storageService.setItem(STORAGE_MISSING_MANDATORY_PREFERENCES, {
+        userId,
+        value: missingPreferences,
+      });
     }
 
     if (!missingPreferences) {

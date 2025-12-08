@@ -7,6 +7,7 @@ import {PreferenceService} from '../../../../shared/services/preference.service'
 import {UserPreferenceFormData, UserPreferenceRequest} from '../../../../shared/models/preference.model';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../../../../core/auth/auth.service';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-preference',
@@ -14,15 +15,16 @@ import {AuthService} from '../../../../core/auth/auth.service';
     FormsModule,
     PreferenceFormComponent,
     Card,
+    TranslatePipe,
 
   ],
   template: `
     <p-card>
       <ng-template #title>
-        <h3>Preferences</h3>
+        <h3>{{ 'app.preferences' | translate }}</h3>
       </ng-template>
       <ng-template #subtitle>
-        <p>Manage your preferences</p>
+        <p>{{ 'app.features.preferences.subtitle' | translate }}</p>
       </ng-template>
       <div class="form-dialog-content-container">
         <app-preference-form (onSubmit)="savePreferences($event)"/>
@@ -45,7 +47,7 @@ export class PreferenceComponent {
     if (request.length === 0) {
       return
     }
-    this.preferenceService.updateUserPreferences(this.authService.authenticatedUser.userId, request).subscribe({
+    this.preferenceService.updateUserPreferences(this.authService.user().userId, request).subscribe({
         next: (result) => {
           this.preferenceStore.updateUserPreferences(result);
         },

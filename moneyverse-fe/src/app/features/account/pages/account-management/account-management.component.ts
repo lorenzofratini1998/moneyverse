@@ -9,6 +9,7 @@ import {AuthService} from '../../../../core/auth/auth.service';
 import {ManagementComponent, ManagementConfig} from '../../../../shared/components/management/management.component';
 import {AccountTableComponent} from './components/account-table/account-table.component';
 import {AccountFilterPanelComponent} from './components/account-filter-panel/account-filter-panel.component';
+import {TranslationService} from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-account-management',
@@ -25,12 +26,14 @@ export class AccountManagementComponent {
   protected readonly accountStore = inject(AccountStore);
   protected readonly accountFilterStore = inject(AccountFilterStore);
   private readonly authService = inject(AuthService);
+  private readonly translateService = inject(TranslationService);
 
   accountFormDialog = viewChild.required(AccountFormDialogComponent);
 
-  managementConfig = computed<ManagementConfig>(() => (
-    {
-      title: 'Account Management',
+  managementConfig = computed<ManagementConfig>(() => {
+    this.translateService.lang();
+    return {
+      title: this.translateService.translate('app.manageAccounts'),
       actions: [
         {
           icon: IconsEnum.REFRESH,
@@ -40,12 +43,12 @@ export class AccountManagementComponent {
         },
         {
           icon: IconsEnum.PLUS,
-          label: 'New Account',
+          label: this.translateService.translate('app.actions.newAccount'),
           action: () => this.accountFormDialog().open()
         }
       ]
     }
-  ));
+  });
 
   submit(formData: AccountFormData) {
     const accountId = formData.accountId;
@@ -57,7 +60,7 @@ export class AccountManagementComponent {
     } else {
       this.accountStore.createAccount({
         ...formData,
-        userId: this.authService.authenticatedUser.userId
+        userId: this.authService.user().userId
       });
     }
   }

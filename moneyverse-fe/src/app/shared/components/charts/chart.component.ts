@@ -2,6 +2,7 @@ import {computed, Directive, inject, Injectable, signal} from '@angular/core';
 import {LayoutService} from '../../../core/layout/layout.service';
 import {CurrencyPipe} from '@angular/common';
 import {PercentagePipe} from '../../pipes/percentage.pipe';
+import {TranslationService} from '../../services/translation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,7 @@ export abstract class ChartComponent {
   protected readonly layoutService = inject(LayoutService);
   protected readonly currencyPipe = inject(CurrencyPipeInjectable);
   protected readonly percentagePipe = inject(PercentagePipeInjectable);
+  protected readonly translateService = inject(TranslationService);
 
   private readonly _textColor = signal(this.getTextColor());
   private readonly _surfaceCard = signal(this.getSurfaceCard());

@@ -1,13 +1,15 @@
-import {computed, inject} from '@angular/core';
+import {computed, effect, inject} from '@angular/core';
 import {Category, CategoryCriteria, CategoryRequest} from '../category.model';
 import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
 import {CategoryService} from './category.service';
 import {AuthService} from '../../../core/auth/auth.service';
 import {ToastService} from '../../../shared/services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {debounceTime, distinctUntilChanged, filter, merge, skip, Subscription, switchMap, tap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, EMPTY, filter, merge, skip, Subscription, switchMap, tap} from 'rxjs';
 import {CategoryEventService} from '../pages/category-management/services/category-event.service';
 import {toObservable} from '@angular/core/rxjs-interop';
+import {SystemService} from '../../../core/services/system.service';
+import {TranslationService} from '../../../shared/services/translation.service';
 
 interface CategoryStoreState {
   defaultCategories: Category[];
@@ -30,6 +32,7 @@ export const CategoryStore = signalStore(
     const categoryService = inject(CategoryService);
     const authService = inject(AuthService);
     const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     const loadCategories = rxMethod<boolean | void>((trigger) =>
       trigger.pipe(
@@ -39,11 +42,11 @@ export const CategoryStore = signalStore(
           return store.categories().length === 0 || refresh;
         }),
         switchMap(() => {
-          const userId = authService.authenticatedUser.userId;
+          const userId = authService.user().userId;
           return categoryService.getCategoriesByUser(userId).pipe(
             tap({
               next: (categories) => patchState(store, {categories: categories}),
-              error: () => toastService.error('Failed to load categories')
+              error: () => toastService.error(translateService.translate('app.message.category.load.error'))
             })
           )
         })
@@ -51,12 +54,18 @@ export const CategoryStore = signalStore(
     );
 
     return {
-      loadDefaultCategories: rxMethod<void>((trigger) =>
+      loadDefaultCategories: rxMethod<boolean | void>((trigger) =>
         trigger.pipe(
-          switchMap(() => categoryService.getDefaultCategories()),
-          tap({
-            next: (categories) => patchState(store, {defaultCategories: categories}),
-            error: () => toastService.error('Failed to load default categories')
+          switchMap((force = false) => {
+            if (!force && store.defaultCategories().length > 0) {
+              return EMPTY;
+            }
+            return categoryService.getDefaultCategories().pipe(
+              tap({
+                next: (categories) => patchState(store, {defaultCategories: categories}),
+                error: () => toastService.error(translateService.translate('app.message.defaultCategories.load.error'))
+              })
+            );
           })
         )
       ),
@@ -65,8 +74,8 @@ export const CategoryStore = signalStore(
         userId$.pipe(
           switchMap(userId => categoryService.createDefaultCategories(userId)),
           tap({
-            next: () => toastService.success('Default categories created successfully'),
-            error: () => toastService.error('Failed to create default categories')
+            next: () => toastService.success(translateService.translate('app.message.defaultCategories.create.success')),
+            error: () => toastService.error(translateService.translate('app.message.defaultCategories.create.error'))
           })
         )
       ),
@@ -77,8 +86,8 @@ export const CategoryStore = signalStore(
         request$.pipe(
           switchMap((request) => categoryService.createCategory(request)),
           tap({
-            next: () => toastService.success('Category created successfully'),
-            error: () => toastService.error('Failed to create category')
+            next: () => toastService.success(translateService.translate('app.message.category.create.success')),
+            error: () => toastService.error(translateService.translate('app.message.category.create.error'))
           })
         )
       ),
@@ -87,8 +96,8 @@ export const CategoryStore = signalStore(
         request$.pipe(
           switchMap(({categoryId, request}) => categoryService.updateCategory(categoryId, request)),
           tap({
-            next: () => toastService.success('Category updated successfully'),
-            error: () => toastService.error('Failed to update category')
+            next: () => toastService.success(translateService.translate('app.message.category.update.success')),
+            error: () => toastService.error(translateService.translate('app.message.category.update.error'))
           })
         )
       ),
@@ -97,8 +106,8 @@ export const CategoryStore = signalStore(
         categoryId$.pipe(
           switchMap(categoryId => categoryService.deleteCategory(categoryId)),
           tap({
-            next: () => toastService.success('Category deleted successfully'),
-            error: () => toastService.error('Failed to delete category')
+            next: () => toastService.success(translateService.translate('app.message.category.delete.success')),
+            error: () => toastService.error(translateService.translate('app.message.category.delete.error'))
           })
         )
       ),
@@ -112,12 +121,25 @@ export const CategoryStore = signalStore(
   })),
 
   withHooks((store) => {
+    const systemService = inject(SystemService);
     const eventService = inject(CategoryEventService);
     const subscriptions = new Subscription();
 
     return {
       onInit() {
-        store.loadCategories(true);
+        effect(() => {
+          const translationsReady = systemService.translationsReady();
+          if (translationsReady) {
+            store.loadCategories(true);
+          }
+        });
+
+        effect(() => {
+          const lang = systemService.languageChanged();
+          if (lang) {
+            store.loadDefaultCategories(true);
+          }
+        })
 
         subscriptions.add(
           toObservable(store.categories).pipe(
@@ -126,7 +148,7 @@ export const CategoryStore = signalStore(
             distinctUntilChanged((prev, curr) => prev.length === curr.length),
             filter((categories) => categories.length === 0)
           ).subscribe(() => {
-            store.loadDefaultCategories();
+            store.loadDefaultCategories(true);
           })
         );
 

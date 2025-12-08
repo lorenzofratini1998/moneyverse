@@ -2,11 +2,13 @@ import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {SubscriptionTransaction, SubscriptionRequest} from '../../../transaction.model';
 import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
 import {TransactionService} from '../../../services/transaction.service';
-import {computed, inject} from '@angular/core';
+import {computed, effect, inject} from '@angular/core';
 import {AuthService} from '../../../../../core/auth/auth.service';
 import {ToastService} from '../../../../../shared/services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
 import {SubscriptionEventService} from './subscription-event.service';
+import {TranslationService} from '../../../../../shared/services/translation.service';
+import {SystemService} from '../../../../../core/services/system.service';
 
 interface SubscriptionState {
   subscriptions: SubscriptionTransaction[],
@@ -24,6 +26,7 @@ export const SubscriptionStore = signalStore(
     const transactionService = inject(TransactionService);
     const authService = inject(AuthService);
     const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     const loadSubscriptions = rxMethod<boolean | void>((trigger) =>
       trigger.pipe(
@@ -33,11 +36,11 @@ export const SubscriptionStore = signalStore(
           return store.subscriptions().length === 0 || refresh;
         }),
         switchMap(() => {
-          const userId = authService.authenticatedUser.userId;
+          const userId = authService.user().userId;
           return transactionService.getSubscriptionsByUser(userId).pipe(
             tap({
               next: (subscriptions) => patchState(store, {subscriptions: subscriptions}),
-              error: () => toastService.error('Failed to load subscriptions')
+              error: () => toastService.error(translateService.translate('app.message.subscription.load.error'))
             })
           )
         })
@@ -50,8 +53,8 @@ export const SubscriptionStore = signalStore(
         request$.pipe(
           switchMap((request => transactionService.createSubscription(request))),
           tap({
-            next: () => toastService.success('Subscription created successfully'),
-            error: () => toastService.error('Failed to create subscription')
+            next: () => toastService.success(translateService.translate('app.message.subscription.create.success')),
+            error: () => toastService.error(translateService.translate('app.message.subscription.create.error'))
           })
         )
       ),
@@ -60,8 +63,8 @@ export const SubscriptionStore = signalStore(
         request$.pipe(
           switchMap(({subscriptionId, request}) => transactionService.updateSubscription(subscriptionId, request)),
           tap({
-            next: () => toastService.success('Subscription updated successfully'),
-            error: () => toastService.error('Failed to update subscription')
+            next: () => toastService.success(translateService.translate('app.message.subscription.update.success')),
+            error: () => toastService.error(translateService.translate('app.message.subscription.update.error'))
           })
         )),
 
@@ -69,8 +72,8 @@ export const SubscriptionStore = signalStore(
         subscriptionId$.pipe(
           switchMap(subscriptionId => transactionService.deleteSubscription(subscriptionId)),
           tap({
-            next: () => toastService.success('Subscription deleted successfully'),
-            error: () => toastService.error('Failed to delete subscription')
+            next: () => toastService.success(translateService.translate('app.message.subscription.delete.success')),
+            error: () => toastService.error(translateService.translate('app.message.subscription.delete.error'))
           })
         )
       ),
@@ -83,12 +86,19 @@ export const SubscriptionStore = signalStore(
   })),
 
   withHooks((store) => {
+    const systemService = inject(SystemService);
     const eventService = inject(SubscriptionEventService);
     const subscriptions = new Subscription();
 
     return {
       onInit() {
-        store.loadSubscriptions(true);
+        effect(() => {
+          const translationsReady = systemService.translationsReady();
+          if (translationsReady) {
+            store.loadSubscriptions(true);
+          }
+        });
+
         const reloadEvents$ = merge(
           eventService.onSubscriptionCreated(),
           eventService.onSubscriptionUpdated(),

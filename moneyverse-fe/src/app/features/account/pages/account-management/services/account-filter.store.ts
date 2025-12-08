@@ -7,6 +7,7 @@ import {ToastService} from '../../../../../shared/services/toast.service';
 import {AccountStore} from '../../../services/account.store';
 import {rxMethod} from "@ngrx/signals/rxjs-interop";
 import {switchMap, tap} from 'rxjs';
+import {TranslationService} from '../../../../../shared/services/translation.service';
 
 interface AccountFilterState {
   criteria: AccountCriteria;
@@ -26,15 +27,16 @@ export const AccountFilterStore = signalStore(
     const accountService = inject(AccountService);
     const authService = inject(AuthService);
     const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     const loadFilteredAccounts = rxMethod<AccountCriteria | void>((criteria$) =>
       criteria$.pipe(
         switchMap((criteriaArg) => {
           const criteria = criteriaArg ?? store.criteria();
-          return accountService.getAccounts(authService.authenticatedUser.userId, criteria).pipe(
+          return accountService.getAccounts(authService.user().userId, criteria).pipe(
             tap({
               next: (accounts) => patchState(store, {accounts}),
-              error: () => toastService.error('Failed to load filtered accounts')
+              error: () => toastService.error(translateService.translate('app.message.account.load.error'))
             })
           )
         })

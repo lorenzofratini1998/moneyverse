@@ -10,7 +10,8 @@ import {
   AbstractBarChartComponent
 } from '../../../../../../shared/components/charts/bar-chart/abstract-bar-chart-component.directive';
 import {Category} from '../../../../category.model';
-import {BarChartOptions} from '../../../../../../shared/models/chart.model';
+import {BarLineChartOptions} from '../../../../../../shared/models/chart.model';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-category-distribution-chart',
@@ -33,18 +34,20 @@ import {BarChartOptions} from '../../../../../../shared/models/chart.model';
 export class CategoryDistributionChartComponent extends AbstractBarChartComponent<Category> {
   protected readonly categoryStore = inject(CategoryStore);
   protected readonly chartService = inject(CategoryDistributionChartService);
+  private readonly translateService = inject(TranslationService);
 
   horizontalBarChartCard = viewChild.required(HorizontalBarChartCardComponent);
 
-  override options = computed<BarChartOptions>(() => {
+  override options = computed<BarLineChartOptions>(() => {
+    this.translateService.lang();
     const categoryDistribution: CategoryAnalyticsDistribution[] = this.chartService.data();
     if (categoryDistribution.length === 0 || this.categoryStore.categoriesMap().size === 0) return {
       labels: [],
       series: [{
-        name: 'No data',
+        name: this.translateService.translate('app.chart.empty'),
         data: []
       }]
-    } as BarChartOptions;
+    } as BarLineChartOptions;
     return this.chartService.getChartOptions(categoryDistribution, this.horizontalBarChartCard().pieChartFilter());
   });
 

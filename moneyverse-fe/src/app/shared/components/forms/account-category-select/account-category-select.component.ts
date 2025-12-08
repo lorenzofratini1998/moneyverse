@@ -6,6 +6,7 @@ import {Message} from 'primeng/message';
 import {Select} from 'primeng/select';
 import {LabelComponent} from '../label/label.component';
 import {AbstractSelectComponent} from '../AbstractSelectComponent.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-account-category-select',
@@ -15,7 +16,8 @@ import {AbstractSelectComponent} from '../AbstractSelectComponent.component';
     ReactiveFormsModule,
     Select,
     FormsModule,
-    LabelComponent
+    LabelComponent,
+    TranslatePipe
   ],
   templateUrl: './account-category-select.component.html',
   providers: [
@@ -34,7 +36,7 @@ import {AbstractSelectComponent} from '../AbstractSelectComponent.component';
 export class AccountCategorySelectComponent extends AbstractSelectComponent {
 
   override id = input<string>('account-category-select');
-  override label = input<string>('Account Category');
+  override label = input<string>('app.form.accountCategory');
 
   protected readonly accountStore = inject(AccountStore);
 

@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, computed, inject} from '@angular/core';
 import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
 import {RecurrenceRuleEnum, RecurrenceRuleOption, SubscriptionTransaction} from '../../../../transaction.model';
 import {SubscriptionFormHandler} from '../../services/subscription-form.handler';
@@ -20,12 +20,8 @@ import {InputTextComponent} from '../../../../../../shared/components/forms/inpu
 import {SelectComponent} from '../../../../../../shared/components/forms/select/select.component';
 import {ToggleSwitch} from 'primeng/toggleswitch';
 import {SubscriptionFormData} from "../../models/form.model";
-
-export const recurrenceRuleOptions: RecurrenceRuleOption[] = [
-  {label: RecurrenceRuleEnum.WEEKLY, value: 'FREQ=WEEKLY', default: false},
-  {label: RecurrenceRuleEnum.MONTHLY, value: 'FREQ=MONTHLY', default: true},
-  {label: RecurrenceRuleEnum.YEARLY, value: 'FREQ=YEARLY', default: false}
-];
+import {TranslatePipe} from '@ngx-translate/core';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-subscription-form',
@@ -39,11 +35,21 @@ export const recurrenceRuleOptions: RecurrenceRuleOption[] = [
     InputTextComponent,
     ReactiveFormsModule,
     SelectComponent,
-    ToggleSwitch
+    ToggleSwitch,
+    TranslatePipe
   ],
   templateUrl: './subscription-form.component.html'
 })
 export class SubscriptionFormComponent extends AbstractFormComponent<SubscriptionTransaction, SubscriptionFormData> {
   protected override readonly formHandler = inject(SubscriptionFormHandler);
-  protected readonly recurrenceRuleOptions = recurrenceRuleOptions;
+  private readonly translateService = inject(TranslationService);
+
+  protected recurrenceRuleOptions = computed<RecurrenceRuleOption[]>(() => {
+    this.translateService.lang();
+    return [
+      {label: this.translateService.translate(RecurrenceRuleEnum.WEEKLY), value: 'FREQ=WEEKLY', default: false},
+      {label: this.translateService.translate(RecurrenceRuleEnum.MONTHLY), value: 'FREQ=MONTHLY', default: true},
+      {label: this.translateService.translate(RecurrenceRuleEnum.YEARLY), value: 'FREQ=YEARLY', default: false}
+    ] as RecurrenceRuleOption[];
+  })
 }

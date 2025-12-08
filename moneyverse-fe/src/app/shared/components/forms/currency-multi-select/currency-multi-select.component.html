@@ -25,7 +25,7 @@
     </p-multi-select>
     <app-label [for]="id()"
                [required]="required()"
-               [name]="label()"
+               [name]="label() | translate"
                [disabled]="disabled()"
                componentType="multiselect"
     />

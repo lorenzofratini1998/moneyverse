@@ -1,6 +1,0 @@
-@if (isExpenseOrIncome() || isSubscription()) {
-  <app-expense-income-form [transactionToEdit]="transactionToEdit()"
-                           [transactionFormOption]="formType()"/>
-} @else if (isTransfer()) {
-  <app-transfer-form [transferToEdit]="transferToEdit()"/>
-}

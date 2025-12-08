@@ -9,6 +9,7 @@ import {AppConfirmationService} from '../../../../../../shared/services/confirma
 import {TableComponent} from '../../../../../../shared/components/table/table.component';
 import {CellTemplateDirective} from '../../../../../../shared/directives/cell-template.directive';
 import {TableActionsComponent} from '../../../../../../shared/components/table-actions/table-actions.component';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-tag-table',
@@ -24,24 +25,35 @@ import {TableActionsComponent} from '../../../../../../shared/components/table-a
 export class TagTableComponent {
   protected readonly tagStore = inject(TagStore);
   private readonly confirmationService = inject(AppConfirmationService);
+  private readonly translateService = inject(TranslationService);
 
   onDelete = output<Tag>();
   onEdit = output<Tag>();
 
-  config = computed<TableConfig<Tag>>(() => ({
-    stripedRows: true,
-    paginator: true,
-    rows: 5,
-    rowsPerPageOptions: [5, 10, 25, 50],
-    showCurrentPageReport: true,
-    currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
-    dataKey: 'tagId'
-  }))
+  config = computed<TableConfig<Tag>>(() => {
+    this.translateService.lang();
+    return {
+      stripedRows: true,
+      paginator: true,
+      rows: 5,
+      rowsPerPageOptions: [5, 10, 25, 50],
+      showCurrentPageReport: true,
+      currentPageReportTemplate: this.translateService.translate('app.table.pageReport', {
+        first: '{first}',
+        last: '{last}',
+        totalRecords: '{totalRecords}'
+      }),
+      dataKey: 'tagId'
+    }
+  })
 
-  columns = signal<TableColumn<Tag>[]>([
-    {field: 'tagName', header: 'Name', sortable: true},
-    {field: 'description', header: 'Description'},
-  ])
+  columns = computed<TableColumn<Tag>[]>(() => {
+    this.translateService.lang();
+    return [
+      {field: 'tagName', header: this.translateService.translate('app.name'), sortable: true},
+      {field: 'description', header: this.translateService.translate('app.description')},
+    ]
+  })
 
   actions = computed<TableAction<Tag>[]>(() => [
     {
@@ -58,8 +70,8 @@ export class TagTableComponent {
 
   confirmDelete(tag: Tag) {
     this.confirmationService.confirmDelete({
-      message: `Are you sure that you want to delete the tag "${tag.tagName}"?`,
-      header: 'Delete tag',
+      message: this.translateService.translate('app.dialog.tag.confirmDelete', {field: tag.tagName}),
+      header: this.translateService.translate('app.dialog.tag.delete'),
       accept: () => this.onDelete.emit(tag)
     });
   }

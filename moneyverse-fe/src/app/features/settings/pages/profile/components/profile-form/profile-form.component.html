@@ -2,17 +2,17 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <app-input-text formControlName="firstName"
                     id="first-name-input"
-                    label="First Name"
+                    [label]="'app.form.firstName' | translate"
                     [required]="true"
                     class="w-full"/>
     <app-input-text formControlName="lastName"
                     id="last-name-input"
-                    label="Last Name"
+                    [label]="'app.form.lastName' | translate"
                     [required]="true"
                     class="w-full"/>
     <app-input-text formControlName="email"
                     id="email-input"
-                    label="Email"
+                    [label]="'app.form.email' | translate"
                     [required]="true"
                     class="w-full"/>
   </div>

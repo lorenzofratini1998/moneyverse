@@ -12,6 +12,7 @@ import {MultiSelectComponent} from '../../../../../../shared/components/forms/mu
 import {AccountFilterStore} from '../../services/account-filter.store';
 import {AccountStore} from '../../../../services/account.store';
 import {AccountFilterFormData} from '../../models/form.model';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-account-filter-form',
@@ -21,7 +22,8 @@ import {AccountFilterFormData} from '../../models/form.model';
     FormsModule,
     InputNumberComponent,
     MultiSelectComponent,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslatePipe
   ],
   templateUrl: './account-filter-form.component.html'
 })

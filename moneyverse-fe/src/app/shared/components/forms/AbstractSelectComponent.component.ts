@@ -10,11 +10,12 @@ export abstract class AbstractSelectComponent extends AbstractFormControl<string
 
   validate(control: AbstractControl): ValidationErrors | null {
     this.control = control;
-    if (this.required() && (!this.value || this.value.trim() === '')) {
-      return {required: true};
+    if (this.required() && (this.value === null || this.value === undefined || this.value === '')) {
+      return { required: true };
     }
     return null;
   }
+
 
   onSelect(event: any) {
     this.value = event.value;

@@ -1,27 +1,30 @@
-import {Component, inject} from '@angular/core';
+import {Component} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {Button} from 'primeng/button';
-import {ToastService} from '../../shared/services/toast.service';
-import {LogoIconComponent} from '../../shared/components/icons/logo-icon.component';
-import {ItFlagIconComponent} from '../../shared/components/icons/flags/it-flag-icon.component';
+import {OverviewChartComponent} from './components/overview-chart/overview-chart.component';
+import {OverviewAccountComponent} from './components/overview-account/overview-account.component';
+import {OverviewCategoryComponent} from './components/overview-category/overview-category.component';
+import {OverviewTransactionComponent} from './components/overview-transaction/overview-transaction.component';
 
 @Component({
   selector: 'app-overview',
   imports: [
     FormsModule,
-    Button,
-    LogoIconComponent,
-    ItFlagIconComponent
+    OverviewChartComponent,
+    OverviewAccountComponent,
+    OverviewCategoryComponent,
+    OverviewTransactionComponent
   ],
-  templateUrl: './overview.component.html',
-  styleUrl: './overview.component.scss'
+  template: `
+    <div class="flex flex-col gap-4">
+      <app-overview-chart/>
+      <app-overview-transaction/>
+      <div class="flex flex-col lg:flex-row gap-4">
+        <app-overview-account class="w-full"/>
+        <app-overview-category class="w-full"/>
+      </div>
+    </div>
+  `,
 })
 export class OverviewComponent {
 
-  private readonly toastService = inject(ToastService);
-  date: any;
-
-  showMessage(): void {
-    this.toastService.error('Hello World!');
-  }
 }

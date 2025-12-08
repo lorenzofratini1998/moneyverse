@@ -3,12 +3,14 @@ import {ConfirmDialog} from 'primeng/confirmdialog';
 import {Confirmation, ConfirmationService} from 'primeng/api';
 import {Button} from 'primeng/button';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-confirm-dialog',
   imports: [
     ConfirmDialog,
-    Button
+    Button,
+    TranslatePipe
   ],
   templateUrl: './confirm-dialog.component.html'
 })
@@ -23,10 +25,10 @@ export class ConfirmDialogComponent {
 
   title = computed(() => this.config()?.header || '');
   message = computed(() => this.config()?.message || '');
-  acceptLabel = computed(() => this.config()?.acceptLabel || 'Delete');
+  acceptLabel = computed(() => this.config()?.acceptLabel || 'app.dialog.delete');
 
   acceptSeverity = computed(() =>
-    this.acceptLabel() === 'Delete' ? 'danger' as const : 'primary' as const
+    this.acceptLabel() === 'app.dialog.delete' ? 'danger' as const : 'primary' as const
   );
 
   constructor() {

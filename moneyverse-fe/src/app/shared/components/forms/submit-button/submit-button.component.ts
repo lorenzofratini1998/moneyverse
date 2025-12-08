@@ -2,12 +2,14 @@ import {Component, input, output} from '@angular/core';
 import {Button, ButtonSeverity} from 'primeng/button';
 import {IconsEnum} from '../../../models/icons.model';
 import {SvgComponent} from '../../svg/svg.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-submit-button',
   imports: [
     Button,
-    SvgComponent
+    SvgComponent,
+    TranslatePipe
   ],
   template: `
     <p-button
@@ -18,12 +20,12 @@ import {SvgComponent} from '../../svg/svg.component';
       [severity]="severity()"
     >
       <app-svg [name]="icon()"/>
-      <span>{{ label() }}</span>
+      <span>{{ label() | translate}}</span>
     </p-button>
   `
 })
 export class SubmitButtonComponent {
-  label = input<string>('Save');
+  label = input<string>('app.dialog.save');
   icon = input<IconsEnum>(IconsEnum.CHECK);
   rounded = input<boolean>(true);
   disabled = input<boolean>(false);

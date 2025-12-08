@@ -14,6 +14,7 @@ import {
   CategorySelectComponent
 } from '../../../../../../shared/components/forms/category-select/category-select.component';
 import {BudgetFormData} from '../../models/form.models';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-budget-form',
@@ -22,7 +23,8 @@ import {BudgetFormData} from '../../models/form.models';
     DatePickerComponent,
     AmountInputNumberComponent,
     CurrencySelectComponent,
-    CategorySelectComponent
+    CategorySelectComponent,
+    TranslatePipe
   ],
   templateUrl: './budget-form.component.html'
 })

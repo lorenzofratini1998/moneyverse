@@ -40,7 +40,8 @@ export class ProfileFormHandler implements FormHandler<UserModel, ProfileFormDat
     const value = form.value;
     return {
       firstName: value.firstName,
-      lastName: value.lastName
+      lastName: value.lastName,
+      email: value.email
     };
   }
 

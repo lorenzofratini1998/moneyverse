@@ -19,7 +19,7 @@ export class CategoryEventService {
   private getStream(): Observable<SSEEvent> {
     if (!this.categoryStream$) {
       this.categoryStream$ = this.sseService.getStream(this.URL, {
-        userId: this.authService.authenticatedUser.userId
+        userId: this.authService.user().userId
       });
     }
     return this.categoryStream$;

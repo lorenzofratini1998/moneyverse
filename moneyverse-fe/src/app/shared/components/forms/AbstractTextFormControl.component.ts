@@ -36,4 +36,12 @@ export abstract class AbstractTextComponent extends AbstractFormControl<string> 
     return Object.keys(errors).length > 0 ? errors : null;
   }
 
+  override get errorMessage(): string {
+    return this.errorService.getErrorMessage(
+      this.control,
+      this.label(),
+      this.maxLength()
+    );
+  }
+
 }

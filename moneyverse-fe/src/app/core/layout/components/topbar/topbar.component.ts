@@ -37,7 +37,5 @@ export class TopbarComponent {
   protected readonly authService = inject(AuthService);
   protected readonly icons = IconsEnum;
 
-  user = this.authService.getAuthenticatedUser();
-
 
 }

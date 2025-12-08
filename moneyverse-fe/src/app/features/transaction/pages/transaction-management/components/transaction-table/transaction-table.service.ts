@@ -8,6 +8,7 @@ import {TransactionFormDialogOptionsEnum} from '../transaction-form-dialog/trans
 import {TablePageEvent} from 'primeng/table';
 import {Direction, PageCriteria} from '../../../../../../shared/models/criteria.model';
 import {TransactionStore} from '../../services/transaction.store';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,7 @@ export class TransactionTableService {
   private readonly confirmationService = inject(AppConfirmationService);
   private readonly accountStore = inject(AccountStore);
   private readonly transactionStore = inject(TransactionStore);
+  private readonly translateService = inject(TranslationService);
 
   confirmDelete(
     transaction: Transaction,
@@ -29,17 +31,17 @@ export class TransactionTableService {
       this.transactionService.getTransactionsByTransferId(transaction.transferId).subscribe({
         next: (transfer: Transfer) => {
           this.confirmationService.confirmDelete({
-            message: `Are you sure that you want to proceed? All transactions associated with this transfer will be deleted.`,
-            header: `Delete transfer: "${this.accountStore.accountsMap().get(transfer.transactionFrom.accountId)!.accountName} ⇆ ${this.accountStore.accountsMap().get(transfer.transactionTo.accountId)!.accountName}"`,
+            message: this.translateService.translate('app.dialog.transfer.confirmDelete'),
+            header: this.translateService.translate('app.dialog.transfer.delete', {from: this.accountStore.accountsMap().get(transfer.transactionFrom.accountId)!.accountName, to: this.accountStore.accountsMap().get(transfer.transactionTo.accountId)!.accountName}),
             accept: () => onDeleteTransfer(transfer)
           });
         },
-        error: () => this.toastService.error('Failed to load transfer.')
+        error: () => this.toastService.error(this.translateService.translate("app.message.transfer.load.error"))
       });
     } else {
       this.confirmationService.confirmDelete({
-        message: `Are you sure that you want to proceed?`,
-        header: 'Delete transaction',
+        message: this.translateService.translate('app.dialog.transaction.confirmDelete'),
+        header: this.translateService.translate('app.dialog.transaction.delete'),
         accept: () => onDeleteTransaction(transaction)
       });
     }
@@ -55,7 +57,7 @@ export class TransactionTableService {
           data: transfer,
           option: TransactionFormDialogOptionsEnum.TRANSFER
         }),
-        error: () => this.toastService.error('Failed to load transfer.')
+        error: () => this.toastService.error(this.translateService.translate("app.message.transfer.load.error"))
       });
     } else if (transaction.subscriptionId != null) {
       onEdit({
@@ -75,14 +77,14 @@ export class TransactionTableService {
   openTransferDetails(transferId: string, openDialog: (transfer: Transfer) => void) {
     this.transactionService.getTransactionsByTransferId(transferId).subscribe({
       next: (transfer: Transfer) => openDialog(transfer),
-      error: () => this.toastService.error('Failed to load transfer.')
+      error: () => this.toastService.error(this.translateService.translate("app.message.transfer.load.error"))
     });
   }
 
   openSubscriptionDetails(subscriptionId: string, openDialog: (subscription: SubscriptionTransaction) => void) {
     this.transactionService.getSubscription(subscriptionId).subscribe({
       next: (subscription) => openDialog(subscription),
-      error: () => this.toastService.error('Failed to load subscription')
+      error: () => this.toastService.error(this.translateService.translate("app.message.subscription.load.error"))
     });
   }
 

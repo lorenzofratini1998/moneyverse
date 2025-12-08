@@ -2,12 +2,16 @@ import {Component, inject, signal} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {AuthService} from '../../../../core/auth/auth.service';
 import {IconsEnum} from '../../../../shared/models/icons.model';
-import {ProfileFormComponent} from './components/profile-form/profile-form.component';
+import {ProfileFormComponent, ProfileFormData} from './components/profile-form/profile-form.component';
 import {Card} from 'primeng/card';
 import {Button} from 'primeng/button';
 import {SvgComponent} from '../../../../shared/components/svg/svg.component';
 import {UserService} from '../../../../shared/services/user.service';
 import {ToastService} from '../../../../shared/services/toast.service';
+import {Budget} from '../../../category/category.model';
+import {AppConfirmationService} from '../../../../shared/services/confirmation.service';
+import {TranslationService} from '../../../../shared/services/translation.service';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-profile',
@@ -16,28 +20,46 @@ import {ToastService} from '../../../../shared/services/toast.service';
     ProfileFormComponent,
     Card,
     Button,
-    SvgComponent
+    SvgComponent,
+    TranslatePipe
   ],
-  templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss'
+  templateUrl: './profile.component.html'
 })
 export class ProfileComponent {
 
   protected readonly icons = IconsEnum;
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly toastService = inject(ToastService);
+  private readonly confirmationService = inject(AppConfirmationService);
+  private readonly translateService = inject(TranslationService);
 
-  user = signal(this.authService.getAuthenticatedUser());
+  protected updateProfile(formData: ProfileFormData) {
+    this.userService.updateUser(this.authService.user().userId, formData).subscribe({
+      next: async () => {
+        await this.authService.refreshToken();
+        this.toastService.success(this.translateService.translate('app.message.profile.update.success'))
+      },
+      error: () => this.toastService.error(this.translateService.translate('app.message.profile.update.error'))
+    })
+  }
 
-  deleteProfile() {
-    this.userService.deleteUser(this.user().userId).subscribe({
+  protected confirmDelete() {
+    this.confirmationService.confirmDelete({
+      header: this.translateService.translate('app.dialog.profile.delete'),
+      message: this.translateService.translate('app.dialog.profile.confirmDelete'),
+      accept: () => this.deleteProfile(),
+    })
+  }
+
+  private deleteProfile() {
+    this.userService.deleteUser(this.authService.user().userId).subscribe({
       next: () => {
         sessionStorage.clear();
         localStorage.clear();
         void this.authService.logout();
       },
-      error: () => this.toastService.error('Error deleting profile')
+      error: () => this.toastService.error(this.translateService.translate('app.message.profile.delete.error'))
     })
   }
 }

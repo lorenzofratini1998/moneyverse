@@ -3,7 +3,7 @@ import {AccountManagementComponent} from './pages/account-management/account-man
 import {Routes} from '@angular/router';
 
 export default [
-  {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-  {path: 'dashboard', component: AccountAnalyticsComponent},
+  {path: '', redirectTo: 'analytics', pathMatch: 'full'},
+  {path: 'analytics', component: AccountAnalyticsComponent},
   {path: 'manage', component: AccountManagementComponent}
 ] as Routes;

@@ -16,6 +16,7 @@ import {BudgetFormData} from './models/form.models';
 import {
   BudgetTransactionsTableComponent
 } from './components/budget-transactions-table/budget-transactions-table.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-budget-management',
@@ -27,7 +28,8 @@ import {
     Card,
     SelectComponent,
     BudgetDetailComponent,
-    BudgetTransactionsTableComponent
+    BudgetTransactionsTableComponent,
+    TranslatePipe
   ],
   templateUrl: './budget-management.component.html',
   providers: [DatePipe, CurrencyPipe]

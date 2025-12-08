@@ -6,24 +6,26 @@ import {
 import {LineChartComponent} from '../../../../../../shared/components/charts/line-chart/line-chart.component';
 import {LineChartOptions} from '../../../../../../shared/models/chart.model';
 import {BoundCriteria} from '../../../../../../shared/models/criteria.model';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-transaction-trend-chart',
   imports: [
     LineChartComponent
   ],
-  templateUrl: './transaction-trend-chart.component.html',
-  styleUrl: './transaction-trend-chart.component.scss'
+  templateUrl: './transaction-trend-chart.component.html'
 })
 export class TransactionTrendChartComponent extends AbstractLineChartComponent<BoundCriteria> {
   private readonly chartService = inject(TransactionTrendService);
+  private readonly translateService = inject(TranslationService);
 
   override options = computed(() => {
+    this.translateService.lang();
     const trend = this.chartService.data();
     if (!trend || trend.data.length === 0) {
       return {
         series: [{
-          name: 'No data',
+          name: this.translateService.translate('app.chart.empty'),
           data: []
         }]
       } as LineChartOptions;

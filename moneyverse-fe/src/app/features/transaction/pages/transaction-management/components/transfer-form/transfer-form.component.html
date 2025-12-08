@@ -2,14 +2,14 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <app-date-picker formControlName="date"
                      id="date-date-picker"
-                     label="Date"
+                     [label]="'app.date' | translate"
                      [required]="true"/>
 
     <div class="col-span-2 grid grid-cols-2 gap-4">
       <app-amount-input-number
         formControlName="amount"
         id="amount-input"
-        label="Amount"
+        [label]="'app.amount' | translate"
         [currency]="formGroup.get('currency')?.value"
         [required]="true"/>
 
@@ -23,12 +23,12 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <app-account-select formControlName="fromAccount"
                         id="fromAccount-select"
-                        label="Account From"
+                        [label]="'app.form.accountFrom' | translate"
                         [required]="true"/>
 
     <app-account-select formControlName="toAccount"
                         id="toAccount-select"
-                        label="Account To"
+                        [label]="'app.form.accountTo' | translate"
                         [required]="true"/>
   </div>
 </form>

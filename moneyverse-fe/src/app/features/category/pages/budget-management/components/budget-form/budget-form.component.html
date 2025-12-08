@@ -1,7 +1,7 @@
 <form [formGroup]="formGroup" class="space-y-4">
   <div class="grid grid-cols-1">
     <app-date-picker formControlName="rangeDates"
-                     label="Period"
+                     [label]="'app.period' | translate"
                      id="period-date-picker"
                      selectionMode="range"
                      [required]="true"/>
@@ -11,7 +11,7 @@
       <app-amount-input-number formControlName="budgetLimit"
                                [currency]="getControlValue('currency')!"
                                id="budgetLimit"
-                               label="Budget Limit"
+                               [label]="'app.form.budgetLimit' | translate"
                                [required]="true"/>
     </div>
     @if (selectedItem()) {
@@ -19,7 +19,7 @@
         <app-amount-input-number formControlName="amount"
                                  [currency]="getControlValue('currency')!"
                                  id="amount"
-                                 label="Amount"/>
+                                 [label]="'app.amount' | translate"/>
       </div>
     }
     <div class="col-span-1">

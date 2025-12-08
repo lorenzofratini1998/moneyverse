@@ -23,6 +23,7 @@ import {
 import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
 import {ExpenseIncomeFormHandler} from '../../services/expense-income-form.handler';
 import {TransactionFormData} from "../../models/form.model";
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-expense-income-form',
@@ -35,7 +36,8 @@ import {TransactionFormData} from "../../models/form.model";
     TextAreaComponent,
     AccountSelectComponent,
     CategorySelectComponent,
-    TagMultiSelectComponent
+    TagMultiSelectComponent,
+    TranslatePipe
   ],
   templateUrl: './expense-income-form.component.html'
 })
@@ -76,7 +78,7 @@ export class ExpenseIncomeFormComponent extends AbstractFormComponent<Transactio
     const data = super.prepareData();
     return {
       ...data,
-      amount: this.isExpense() ? -Math.abs(data.amount) : Math.abs(data.amount)
+      amount: this.isExpense() || this.isSubscription() ? -Math.abs(data.amount) : Math.abs(data.amount)
     }
   }
 }

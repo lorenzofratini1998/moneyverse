@@ -14,7 +14,7 @@ export class TransactionFilterFormHandler implements FormHandler<TransactionCrit
 
   create(): FormGroup {
     return this.fb.group({
-      type: [null],
+      type: [TransactionCriteriaTypeEnum.EXPENSE],
       accounts: [null],
       categories: [null],
       date: this.fb.group({
@@ -34,7 +34,8 @@ export class TransactionFilterFormHandler implements FormHandler<TransactionCrit
 
   patch(form: FormGroup, data: TransactionCriteria): void {
     form.patchValue({
-      type: this.inferTypeFromAmount(data),
+      //type: this.inferTypeFromAmount(data),
+      type: data.type,
       accounts: data.accounts ?? null,
       categories: data.categories ?? null,
       date: {

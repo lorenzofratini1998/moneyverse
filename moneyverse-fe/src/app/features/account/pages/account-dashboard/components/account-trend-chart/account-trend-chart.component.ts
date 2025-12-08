@@ -13,6 +13,7 @@ import {
 import {AccountTrendChartService} from '../../services/account-trend-chart.service';
 import {ChartFilter} from '../../../../../analytics/analytics.models';
 import {LineChartOptions} from "../../../../../../shared/models/chart.model";
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-account-trend',
@@ -30,16 +31,18 @@ export class AccountTrendChartComponent extends AbstractLineChartComponent<Accou
   protected readonly accountStore = inject(AccountStore);
   protected readonly analyticsService = inject(AnalyticsService);
   private readonly accountTrendChartService = inject(AccountTrendChartService);
+  private readonly translateService = inject(TranslationService);
 
   protected chartFilter = signal<ChartFilter>('totalAmount')
   protected selectedAccount = signal<Account | null>(null);
 
   override options = computed(() => {
+    this.translateService.lang();
     const trend = this.accountTrendChartService.data();
-    if (!trend || trend.length === 0 || this.selectedAccount() === null) {
+    if (!trend || trend.length === 0 || !this.selectedAccount()) {
       return {
         series: [{
-          name: 'No data',
+          name: this.translateService.translate('app.chart.empty'),
           data: []
         }]
       } as LineChartOptions;

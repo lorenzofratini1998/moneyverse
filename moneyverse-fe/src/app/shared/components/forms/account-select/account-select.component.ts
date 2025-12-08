@@ -6,6 +6,7 @@ import {FloatLabel} from 'primeng/floatlabel';
 import {LabelComponent} from '../label/label.component';
 import {Message} from 'primeng/message';
 import {Select} from 'primeng/select';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-account-select',
@@ -14,7 +15,8 @@ import {Select} from 'primeng/select';
     LabelComponent,
     Message,
     Select,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   providers: [
     {
@@ -32,7 +34,7 @@ import {Select} from 'primeng/select';
 })
 export class AccountSelectComponent extends AbstractSelectComponent {
   override id = input<string>('account-select');
-  override label = input<string>('Account');
+  override label = input<string>('app.account');
 
   protected readonly accountStore = inject(AccountStore);
 }

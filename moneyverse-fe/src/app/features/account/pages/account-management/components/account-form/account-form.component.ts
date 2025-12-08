@@ -17,6 +17,10 @@ import {
 } from '../../../../../../shared/components/forms/amount-input-number/amount-input-number.component';
 import {AccountFormHandler} from '../../services/account-form.handler';
 import {AccountFormData} from '../../models/form.model';
+import {ColorPickerComponent} from '../../../../../../shared/components/forms/color-picker/color-picker.component';
+import {FormPreviewComponent} from '../../../../../../shared/components/forms/form-preview/form-preview.component';
+import {IconPickerComponent} from '../../../../../../shared/components/forms/icon-picker/icon-picker.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-account-form',
@@ -27,7 +31,11 @@ import {AccountFormData} from '../../models/form.model';
     TextAreaComponent,
     AccountCategorySelectComponent,
     CurrencySelectComponent,
-    AmountInputNumberComponent
+    AmountInputNumberComponent,
+    ColorPickerComponent,
+    FormPreviewComponent,
+    IconPickerComponent,
+    TranslatePipe
   ],
   templateUrl: './account-form.component.html',
 })

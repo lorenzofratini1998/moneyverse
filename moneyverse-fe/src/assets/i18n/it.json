@@ -1,14 +1,343 @@
 {
-  "menu": {
-    "overview": "Riepilogo",
+  "test": "Test Messaggio",
+  "app": {
+    "account": "Account",
     "accounts": "Accounts",
+    "add": "Nuovo/a",
+    "actions": {
+      "addDefaultCategories": "Aggiungi Categorie Predefinite",
+      "newAccount": "Nuovo Account",
+      "newBudget": "Nuovo Budget",
+      "newCategory": "Nuova Categoria",
+      "newSubscription": "Nuovo Abbonamento",
+      "newTag": "Nuovo Tag",
+      "newTransaction": "Nuova Transazione"
+    },
+    "amount": "Importo",
+    "analytics": "Analitiche",
+    "balance": "Saldo",
+    "balanceTarget": "Saldo Target",
+    "budgeting": "Budgeting",
+    "category": "Categoria",
+    "categories": "Categorie",
+    "chart": {
+      "activeAccounts": "Account attivi",
+      "activeCategories": "Categorie attive",
+      "averageAmount": "Importo medio",
+      "compare": "Confronto",
+      "current": "Attuale",
+      "empty": "Nessun dato",
+      "month": "Mese",
+      "mostUsedAccount": "Account più utilizzato",
+      "mostUsedCategory": "Categorià più utilizzata",
+      "numberOfTransactions": "Numero di transazioni",
+      "quantile90": "90% quantile",
+      "uncategorizedAmount": "Importo non classificato",
+      "topCategory": "Categoria principale",
+      "total": "Totale",
+      "totalExpense": "Totale spese",
+      "totalIncome": "Totale entrate",
+      "year": "Anno"
+    },
+    "currencies": "Valute",
+    "currency": "Valuta",
+    "date": "Data",
+    "dateFormat": "Formato Data",
+    "default": "Predefinito",
+    "description": "Descrizione",
+    "dialog": {
+      "account": {
+        "add": "Nuovo Account",
+        "confirmDelete": "Sei sicuro di voler eliminare l'account {{field}}? Tutte le transazioni associate verranno eliminate.",
+        "delete": "Elimina Account",
+        "edit": "Modifica Account"
+      },
+      "budget": {
+        "add": "Nuovo Budget",
+        "confirmDelete": "Sei sicuro di voler eliminare il budget?",
+        "delete": "Elimina Budget",
+        "edit": "Modifica Budget"
+      },
+      "category": {
+        "add": "Nuova Categoria",
+        "confirmDelete": "Sei sicuro di voler eliminare la categoria {{field}}? Tutte le transazioni associate verranno eliminate.",
+        "defaultCategory": "Verranno create le seguenti categorie di spesa",
+        "delete": "Elimina Categoria",
+        "edit": "Modifica Categoria"
+      },
+      "cancel": "Annulla",
+      "confirm": "Conferma",
+      "delete": "Elimina",
+      "profile": {
+        "delete": "Elimina Profilo",
+        "confirmDelete": "Sei sicuro di voler eliminare il tuo profilo? Tutti i dati correlati andranno persi."
+      },
+      "save": "Salva",
+      "subscription": {
+        "add": "Nuovo Abbonamento",
+        "delete": "Elimina Abbonamento",
+        "confirmDelete": "Sei sicuro di voler eliminare l'abbonamento {{field}}? Tutte le transazioni associate verranno eliminate.",
+        "edit": "Modifica Abbonamento"
+      },
+      "tag": {
+        "add": "Nuovo tag",
+        "delete": "Elimina tag",
+        "confirmDelete": "Sei sicuro di voler eliminare il tag {{field}}?",
+        "edit": "Modifica tag"
+      },
+      "transaction": {
+        "analytics": {
+          "title": "Visualizza Dati"
+        },
+        "delete": "Elimina transazione",
+        "confirmDelete": "Sei sicuro di voler procedere?"
+      },
+      "transfer": {
+        "delete": "Elimina trasferimento: {{from}} ⇆ {{to}}",
+        "detail": "Trasferimento da {{from}} a {{to}}",
+        "confirmDelete": "Sei sicuro di voler procedere? Tutte le transazioni associate a questo trasferimento saranno cancellate."
+      }
+    },
+    "edit": "Modifica",
+    "expense": "Uscite",
+    "features": {
+      "preferences": {
+        "subtitle": "Configura le tue preferenze"
+      },
+      "profile": {
+        "subtitle": "Gestisci il tuo profilo",
+        "danger": {
+          "title": "Zona di Pericolo",
+          "subtitle": "Elimina questo profilo",
+          "subsubtitle": "Una volta eliminato il tuo profilo, non potrai più tornare indietro. Ti preghiamo di essere sicuro della tua scelta.",
+          "button": "Elimina profilo"
+        }
+      }
+    },
+    "form": {
+      "accountCategory": "Categoria Account",
+      "accountFrom": "Account da",
+      "accountName": "Nome Account",
+      "accountTo": "Account a",
+      "active": "Attivo",
+      "amountMin": "Importo min.",
+      "amountMax": "Importo max.",
+      "balanceMin": "Saldo min.",
+      "balanceMax": "Saldo max.",
+      "budgetLimit": "Limite Budget",
+      "categoryName": "Nome Categoria",
+      "dateStart": "Data Inizio",
+      "dateEnd": "Data Fine",
+      "email": "Email",
+      "errors": {
+        "required": "{{field}} è obbligatorio.",
+        "maxlength": "{{field}} non può superare i {{requiredLength}} caratteri"
+      },
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "nextPayment": "Prossimo Pagamento",
+      "parentCategory": "Categoria Padre",
+      "preview": "Anteprima",
+      "recurrence": "Ricorrenza",
+      "recurrenceRule": {
+        "weekly": "SETTIMANALE",
+        "monthly": "MENSILE",
+        "yearly": "ANNUALE"
+      },
+      "subscriptionName": "Nome Abbonamento",
+      "tagName": "Nome Tag",
+      "totalAmount": "Importo Totale"
+    },
+    "footer": "Tutti i diritti riservati",
+    "income": "Entrate",
+    "language": "Lingua",
+    "left": "Rimasto",
+    "logout": "Logout",
+    "manageAccounts": "Gestione Accounts",
+    "manageCategories": "Gestione Categorie",
+    "manageSubscriptions": "Gestione Abbonamenti",
+    "manageTags": "Gestione Tags",
+    "manageTransactions": "Gestione Transazioni",
+    "message": {
+      "account": {
+        "load": {
+          "error": "Impossibile caricare gli account"
+        },
+        "create": {
+          "success": "Account creato con successo",
+          "error": "Impossibile creare l'account"
+        },
+        "update": {
+          "success": "Account aggiornato con successo",
+          "error": "Impossibile aggiornare l'account"
+        },
+        "delete": {
+          "success": "Account eliminato con successo",
+          "error": "Impossibile eliminare l'account"
+        }
+      },
+      "accountCategories": {
+        "load": {
+          "error": "Impossibile caricare le categorie degli account"
+        }
+      },
+      "budget": {
+        "load": {
+          "error": "Impossibile caricare i budget"
+        },
+        "create": {
+          "success": "Budget creato con successo",
+          "error": "Impossibile creare il budget"
+        },
+        "update": {
+          "success": "Budget aggiornato con successo",
+          "error": "Impossibile aggiornare il budget"
+        },
+        "delete": {
+          "success": "Budget eliminato con successo",
+          "error": "Impossibile eliminare il budget"
+        }
+      },
+      "category": {
+        "load": {
+          "error": "Impossibile caricare le categorie"
+        },
+        "create": {
+          "success": "Categoria creata con successo",
+          "error": "Impossibile creare la categoria"
+        },
+        "update": {
+          "success": "Categoria aggiornata con successo",
+          "error": "Impossibile aggiornare la categoria"
+        },
+        "delete": {
+          "success": "Categoria eliminata con successo",
+          "error": "Impossibile eliminare la categoria"
+        }
+      },
+      "defaultCategories": {
+        "load": {
+          "error": "Impossibile caricare le categorie predefinite"
+        },
+        "create": {
+          "success": "Categorie predefinite create con successo",
+          "error": "Impossibile creare le categorie predefinite"
+        }
+      },
+      "preferences": {
+        "save": {
+          "error": "Impossibile salvare le preferenze"
+        },
+        "update": {
+          "success": "Preferenze aggiornate con successo",
+          "error": "Impossibile aggiornare le preferenze"
+        }
+      },
+      "profile": {
+        "update": {
+          "success": "Profilo aggiornato con successo",
+          "error": "Impossibile aggiornare il profilo"
+        },
+        "delete": {
+          "error": "Impossibile eliminare il profilo"
+        }
+      },
+      "subscription": {
+        "load": {
+          "error": "Impossibile caricare gli abbonamenti"
+        },
+        "create": {
+          "success": "Abbonamento creato con successo",
+          "error": "Impossibile creare l'abbonamento"
+        },
+        "update": {
+          "success": "Abbonamento aggiornato con successo",
+          "error": "Impossibile aggiornare l'abbonamento"
+        },
+        "delete": {
+          "success": "Abbonamento eliminato con successo",
+          "error": "Impossibile eliminare l'abbonamento"
+        }
+      },
+      "tag": {
+        "load": {
+          "error": "Impossibile caricare i tags"
+        },
+        "create": {
+          "success": "Tag creato con successo",
+          "error": "Impossibile creare il tag"
+        },
+        "update": {
+          "success": "Tag aggiornato con successo",
+          "error": "Impossibile aggiornare il tag"
+        },
+        "delete": {
+          "success": "Tag eliminato con successo",
+          "error": "Impossibile eliminare il tag"
+        }
+      },
+      "transaction": {
+        "load": {
+          "error": "Impossibile caricare le transazioni"
+        },
+        "create": {
+          "success": "Transazione creata con successo",
+          "error": "Impossibile creare la transazione"
+        },
+        "update": {
+          "success": "Transazione aggiornata con successo",
+          "error": "Impossibile aggiornare la transazione"
+        },
+        "delete": {
+          "success": "Transazione eliminata con successo",
+          "error": "Impossibile eliminare la transazione"
+        }
+      },
+      "transfer": {
+        "load": {
+          "error": "Impossibile caricare i trasferimenti"
+        },
+        "create": {
+          "success": "Trasferimento creato con successo",
+          "error": "Impossibile creare il trasferimento"
+        },
+        "update": {
+          "success": "Trasferimento aggiornato con successo",
+          "error": "Impossibile aggiornare il trasferimento"
+        },
+        "delete": {
+          "success": "Trasferimento eliminato con successo",
+          "error": "Impossibile eliminare il trasferimento"
+        }
+      }
+    },
+    "name": "Nome",
+    "normalizedAmount": "Importo Normalizzato",
+    "of": "Di",
+    "onboarding": {
+      "title": "Configura le tue preferenze",
+      "subtitle": "Configuriamo le tue preferenze"
+    },
+    "overview": "Riepilogo",
+    "patrimony": "Patrimonio",
+    "period": "Periodo",
+    "preferences": "Preferenze",
+    "profile": "Profilo",
+    "profileSubtitle": "Configura il tuo profilo",
+    "recentTransactions": "Transazioni Recenti",
     "settings": "Impostazioni",
-    "logout": "Esci"
-  },
-  "features": {
-    "overview": {
-      "title": "Riepilogo"
-    }
+    "spent": "Speso",
+    "subscription": "Abbonamento",
+    "subscriptions": "Abbonamenti",
+    "table": {
+      "empty": "Nessun dato disponibile.",
+      "pageReportDefault": "{{current}} di {{total}}",
+      "pageReport": "Visualizzazione da {{first}} a {{last}} di {{totalRecords}} voci"
+    },
+    "tags": "Tags",
+    "transfer": "Trasferimento",
+    "transaction": "Transazione",
+    "transactions": "Transazioni"
   },
   "primeng": {
     "accept": "Si",

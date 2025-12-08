@@ -18,14 +18,14 @@
   <ng-template #footer>
     <div class="flex justify-center gap-4 p-2 w-full">
       <p-button
-        label="Cancel"
+        [label]="'app.dialog.cancel' | translate"
         [outlined]="true"
         [rounded]="true"
         severity="secondary"
         (onClick)="onCancel()"/>
 
       <p-button
-        [label]="acceptLabel()"
+        [label]="acceptLabel() | translate"
         [rounded]="true"
         [severity]="acceptSeverity()"
         (onClick)="onAcceptClick()"/>

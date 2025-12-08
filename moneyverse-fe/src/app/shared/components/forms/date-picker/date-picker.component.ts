@@ -37,8 +37,7 @@ type SelectionMode = "range" | "single" | "multiple";
       multi: true
     }
   ],
-  templateUrl: './date-picker.component.html',
-  styleUrl: './date-picker.component.scss'
+  templateUrl: './date-picker.component.html'
 })
 export class DatePickerComponent extends AbstractFormControl<Date | Date[]> {
   selectionMode = input<SelectionMode>('single');

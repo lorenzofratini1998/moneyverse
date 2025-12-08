@@ -12,24 +12,31 @@ import {
   CategoryAnalyticsKpi,
   CategoryAnalyticsTrend
 } from '../../features/category/pages/category-dashboard/models/category-analytics.model';
-import {ChartFilterOption, DashboardFilter} from "../../features/analytics/analytics.models";
+import {ChartFilterOption, DashboardFilter, PeriodFormatOption} from "../../features/analytics/analytics.models";
 import {
   TransactionDistribution,
   TransactionKpi,
   TransactionTrend
 } from '../../features/transaction/pages/transaction-analytics/models/transaction-analytics.model';
+import {OverviewAnalytics} from '../../features/overview/models/overview-analytics.model';
+import {ChartType} from '../models/chart.model';
+import {TranslationService} from './translation.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalyticsService {
   private readonly httpClient = inject(HttpClient);
+  private readonly translateService = inject(TranslationService);
 
-  chartFilterOptions = computed<ChartFilterOption[]>(() => [
-    {label: 'Total Amount', value: 'totalAmount'},
-    {label: 'Total Income', value: 'totalIncome'},
-    {label: 'Total Expense', value: 'totalExpense'}
-  ])
+  chartFilterOptions = computed<ChartFilterOption[]>(() => {
+    this.translateService.lang();
+    return [
+      {label: this.translateService.translate('app.chart.total'), value: 'totalAmount'},
+      {label: this.translateService.translate('app.income'), value: 'totalIncome'},
+      {label: this.translateService.translate('app.expense'), value: 'totalExpense'}
+    ]
+  })
 
   calculateAccountAnalyticsKpi(filter: DashboardFilter): Observable<AccountAnalyticsKpi> {
     return this.httpClient.post<AccountAnalyticsKpi>(`analytics/accounts/kpi`, filter);
@@ -65,5 +72,9 @@ export class AnalyticsService {
 
   calculateTransactionTrend(filter: DashboardFilter): Observable<TransactionTrend> {
     return this.httpClient.post<TransactionTrend>(`analytics/transactions/trend`, filter);
+  }
+
+  calculateOverview(userId: string): Observable<OverviewAnalytics[]> {
+    return this.httpClient.post<OverviewAnalytics[]>(`analytics/overview`, {userId: userId});
   }
 }

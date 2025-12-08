@@ -4,6 +4,7 @@ import {Account} from '../../../account.model';
 import {FormHandler} from '../../../../../shared/models/form.model';
 import {PreferenceStore} from '../../../../../shared/stores/preference.store';
 import {AccountFormData} from '../models/form.model';
+import {IconsEnum} from '../../../../../shared/models/icons.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,9 @@ export class AccountFormHandler implements FormHandler<Account, AccountFormData>
       balance: [0.00],
       target: [null],
       currency: [this.preferenceStore.userCurrency(), Validators.required],
-      isDefault: [null]
+      isDefault: [null],
+      color: ['yellow'],
+      icon: [IconsEnum.CREDIT_CARD]
     });
   }
 
@@ -30,11 +33,13 @@ export class AccountFormHandler implements FormHandler<Account, AccountFormData>
         accountId: account.accountId,
         accountName: account.accountName,
         accountDescription: account.accountDescription,
-        accountCategory: account.accountCategory,
+        accountCategory: parseInt(account.accountCategory),
         balance: account.balance.toFixed(2),
         target: account.balanceTarget ? account.balanceTarget.toFixed(2) : null,
         currency: account.currency,
-        isDefault: account.default
+        isDefault: account.default,
+      color: account.style.color,
+      icon: account.style.icon
       }
     )
   }
@@ -48,7 +53,9 @@ export class AccountFormHandler implements FormHandler<Account, AccountFormData>
       balance: 0.0,
       target: null,
       currency: this.preferenceStore.userCurrency(),
-      isDefault: null
+      isDefault: null,
+      color: 'yellow',
+      icon: IconsEnum.CREDIT_CARD
     });
     form.markAsPristine();
     form.markAsUntouched();
@@ -64,7 +71,11 @@ export class AccountFormHandler implements FormHandler<Account, AccountFormData>
       balance: value.balance ?? 0.0,
       balanceTarget: value.target,
       currency: value.currency,
-      isDefault: value.isDefault
+      isDefault: value.isDefault,
+      style: {
+        color: value.color,
+        icon: value.icon
+      }
     };
   }
 

@@ -9,6 +9,7 @@ import {InputTextComponent} from '../../../../../../shared/components/forms/inpu
 import {TextAreaComponent} from '../../../../../../shared/components/forms/text-area/text-area.component';
 import {FormPreviewComponent} from '../../../../../../shared/components/forms/form-preview/form-preview.component';
 import {TagFormData} from "../../models/form.model";
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-tag-form',
@@ -18,7 +19,8 @@ import {TagFormData} from "../../models/form.model";
     IconPickerComponent,
     InputTextComponent,
     TextAreaComponent,
-    FormPreviewComponent
+    FormPreviewComponent,
+    TranslatePipe
   ],
   templateUrl: './tag-form.component.html'
 })

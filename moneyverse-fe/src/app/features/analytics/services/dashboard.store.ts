@@ -28,13 +28,13 @@ export const DashboardStore = signalStore(
 
   withState(() => {
     const authService = inject(AuthService);
-    const userId = authService.authenticatedUser.userId;
+    const userId = authService.user().userId;
     return createInitialState(userId);
   }),
 
   withMethods((store) => {
     const authService = inject(AuthService);
-    const user = authService.authenticatedUser.userId;
+    const user = authService.user().userId;
 
     return {
       updateFilter(filter: Partial<DashboardFilter>) {

@@ -8,6 +8,7 @@ import {DATE_FORMATS, UserPreferenceFormData} from '../../../../../../shared/mod
 import {SystemService} from '../../../../../../core/services/system.service';
 import {PreferenceFormHandler} from '../services/preference-form.handler';
 import {SubmitButtonComponent} from '../../../../../../shared/components/forms/submit-button/submit-button.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-preference-form',
@@ -16,7 +17,8 @@ import {SubmitButtonComponent} from '../../../../../../shared/components/forms/s
     InputTextComponent,
     LucideAngularModule,
     SelectComponent,
-    SubmitButtonComponent
+    SubmitButtonComponent,
+    TranslatePipe
   ],
   templateUrl: './preference-form.component.html'
 })

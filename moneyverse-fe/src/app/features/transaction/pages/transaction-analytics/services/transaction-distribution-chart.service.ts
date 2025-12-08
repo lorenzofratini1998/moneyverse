@@ -2,10 +2,11 @@ import {inject, Injectable} from '@angular/core';
 import {DashboardStore} from '../../../../analytics/services/dashboard.store';
 import {AnalyticsService} from '../../../../../shared/services/analytics.service';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
-import {switchMap} from 'rxjs';
+import {combineLatest, switchMap} from 'rxjs';
 import {DistributionRange} from '../models/transaction-analytics.model';
 import {PreferenceStore} from '../../../../../shared/stores/preference.store';
 import {CurrencyPipe} from '@angular/common';
+import {AnalyticsEventService} from '../../../../analytics/services/analytics-event.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,15 +16,20 @@ export class TransactionDistributionChartService {
   private readonly analyticsService = inject(AnalyticsService);
   private readonly preferenceStore = inject(PreferenceStore);
   private readonly currencyPipe = inject(CurrencyPipe);
+  private readonly analyticsEventService = inject(AnalyticsEventService);
 
   readonly distributionRangeMap = new Map<string, DistributionRange>()
 
   data = toSignal(
-    toObservable(this.dashboardStore.filter).pipe(
-      switchMap(filter => this.analyticsService.calculateTransactionDistribution(filter))
+    combineLatest([
+      toObservable(this.dashboardStore.filter),
+      this.analyticsEventService.reload$
+    ]).pipe(
+      switchMap(([filter]) =>
+        this.analyticsService.calculateTransactionDistribution(filter))
     ),
-    {initialValue: null}
-  );
+    { initialValue: null}
+  )
 
   getLabels(data: DistributionRange[]): string[] {
     return data.map(t => {

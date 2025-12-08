@@ -6,6 +6,7 @@ import {FloatLabel} from 'primeng/floatlabel';
 import {LabelComponent} from '../label/label.component';
 import {Message} from 'primeng/message';
 import {MultiSelect} from 'primeng/multiselect';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-currency-multi-select',
@@ -14,7 +15,8 @@ import {MultiSelect} from 'primeng/multiselect';
     LabelComponent,
     Message,
     MultiSelect,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   providers: [
     {
@@ -32,7 +34,7 @@ import {MultiSelect} from 'primeng/multiselect';
 })
 export class CurrencyMultiSelectComponent extends AbstractMultiSelectComponent {
   override id = input<string>('currency-multi-select')
-  override label = input<string>('Currencies')
+  override label = input<string>('app.currencies')
 
   protected readonly currencyStore = inject(CurrencyStore);
 

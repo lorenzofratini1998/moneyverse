@@ -47,6 +47,7 @@ export class GaugeComponent extends ChartComponent {
   })
 
   series = computed(() => {
+    this.translateService.lang();
     return {
       type: 'gauge',
       startAngle: 90,
@@ -101,7 +102,7 @@ export class GaugeComponent extends ChartComponent {
         formatter: (value: number) => {
           return [
             `{first|${this.currencyPipe.transform(value, this.currency())}}`,
-            `{second| of ${this.currencyPipe.transform(this.max(), this.currency())}}`
+            `{second| ${this.translateService.translate('app.of').toLowerCase()} ${this.currencyPipe.transform(this.max(), this.currency())}}`
           ].join('\n');
         },
         rich: {

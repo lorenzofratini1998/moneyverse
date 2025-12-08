@@ -5,15 +5,15 @@
                       id="account-categories-multiselect"
                       [options]="accountStore.categories()"
                       optionLabel="name"
-                      optionValue="name"
-                      label="Categories"/>
+                      optionValue="accountCategoryId"
+                      [label]="'app.categories' | translate"/>
 
     <app-currency-multi-select formControlName="currencies"/>
 
     <div class="col-span-1">
       <div formGroupName="balance" class="grid grid-cols-2 gap-2">
-        <app-input-number formControlName="lower" label="Balance min."/>
-        <app-input-number formControlName="upper" label="Balance max."/>
+        <app-input-number formControlName="lower" [label]="'app.form.balanceMin' | translate"/>
+        <app-input-number formControlName="upper" [label]="'app.form.balanceMax' | translate"/>
       </div>
     </div>
 

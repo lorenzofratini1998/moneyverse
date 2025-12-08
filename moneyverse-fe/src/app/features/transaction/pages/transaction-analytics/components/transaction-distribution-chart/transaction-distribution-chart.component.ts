@@ -5,7 +5,8 @@ import {
 import {BarChartComponent} from "../../../../../../shared/components/charts/bar-chart/bar-chart.component";
 import {TransactionDistributionChartService} from '../../services/transaction-distribution-chart.service';
 import {BoundCriteria} from '../../../../../../shared/models/criteria.model';
-import {BarChartOptions} from '../../../../../../shared/models/chart.model';
+import {BarLineChartOptions} from '../../../../../../shared/models/chart.model';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-transaction-distribution-chart',
@@ -24,21 +25,23 @@ import {BarChartOptions} from '../../../../../../shared/models/chart.model';
 export class TransactionDistributionChartComponent extends AbstractBarChartComponent<BoundCriteria> {
 
   private readonly chartService = inject(TransactionDistributionChartService);
+  private readonly translateService = inject(TranslationService);
 
-  override options = computed<BarChartOptions>(() => {
+  override options = computed<BarLineChartOptions>(() => {
+    this.translateService.lang();
     const transactionDistribution = this.chartService.data();
     if (!transactionDistribution || transactionDistribution.data.length === 0) return {
       labels: [],
       series: [{
-        name: 'No data',
+        name: this.translateService.translate('app.chart.empty'),
         data: []
       }]
-    } as BarChartOptions;
+    } as BarLineChartOptions;
     const data = transactionDistribution.data;
     return {
       labels: this.chartService.getLabels(data),
       series: [{
-        name: 'Current',
+        name: this.translateService.translate('app.chart.current'),
         data: data.map(t => t.count.count)
       }]
     }

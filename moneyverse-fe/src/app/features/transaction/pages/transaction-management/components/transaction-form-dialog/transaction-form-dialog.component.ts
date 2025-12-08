@@ -11,6 +11,7 @@ import {ExpenseIncomeFormComponent} from '../expense-income-form/expense-income-
 import {TransferFormComponent} from '../transfer-form/transfer-form.component';
 import {AbstractFormComponent} from '../../../../../../shared/components/forms/abstract-form.component';
 import {TransactionFormData, TransferFormData} from '../../models/form.model';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 export enum TransactionFormDialogOptionsEnum {
   EXPENSE = "Expense",
@@ -26,37 +27,6 @@ type TransactionFormDialogOption = {
   disabled: boolean,
   selected: boolean
 }
-
-const dialogOptions: TransactionFormDialogOption[] = [
-  {
-    label: 'Expense',
-    value: TransactionFormDialogOptionsEnum.EXPENSE,
-    icon: IconsEnum.CIRCLE_MINUS,
-    disabled: false,
-    selected: true
-  },
-  {
-    label: 'Income',
-    value: TransactionFormDialogOptionsEnum.INCOME,
-    icon: IconsEnum.CIRCLE_PLUS,
-    disabled: false,
-    selected: false
-  },
-  {
-    label: 'Transfer',
-    value: TransactionFormDialogOptionsEnum.TRANSFER,
-    icon: IconsEnum.ARROW_LEFT_RIGHT,
-    disabled: false,
-    selected: false
-  },
-  {
-    label: 'Subscription',
-    value: TransactionFormDialogOptionsEnum.SUBSCRIPTION,
-    icon: IconsEnum.CIRCLE_PLUS,
-    disabled: false,
-    selected: false
-  }
-]
 
 @Component({
   selector: 'app-transaction-form-dialog',
@@ -78,6 +48,8 @@ export class TransactionFormDialogComponent {
   protected expenseIncomeForm = viewChild(ExpenseIncomeFormComponent);
   protected transferForm = viewChild(TransferFormComponent);
 
+  private readonly translateService = inject(TranslationService);
+
   isExpenseOrIncome = computed(() => this.dialogOption() === TransactionFormDialogOptionsEnum.EXPENSE || this.dialogOption() === TransactionFormDialogOptionsEnum.INCOME);
   isTransfer = computed(() => this.dialogOption() === TransactionFormDialogOptionsEnum.TRANSFER);
   isSubscription = computed(() => this.dialogOption() === TransactionFormDialogOptionsEnum.SUBSCRIPTION);
@@ -92,16 +64,50 @@ export class TransactionFormDialogComponent {
     return form as AbstractFormComponent<Transaction | Transfer, TransactionFormData | TransferFormData>;
   });
 
+  private dialogOptions = computed<TransactionFormDialogOption[]>(() => {
+    this.translateService.lang();
+    return [
+      {
+        label: this.translateService.translate('app.expense'),
+        value: TransactionFormDialogOptionsEnum.EXPENSE,
+        icon: IconsEnum.CIRCLE_MINUS,
+        disabled: false,
+        selected: true
+      },
+      {
+        label: this.translateService.translate('app.income'),
+        value: TransactionFormDialogOptionsEnum.INCOME,
+        icon: IconsEnum.CIRCLE_PLUS,
+        disabled: false,
+        selected: false
+      },
+      {
+        label: this.translateService.translate('app.transfer'),
+        value: TransactionFormDialogOptionsEnum.TRANSFER,
+        icon: IconsEnum.ARROW_LEFT_RIGHT,
+        disabled: false,
+        selected: false
+      },
+      {
+        label: this.translateService.translate('app.subscription'),
+        value: TransactionFormDialogOptionsEnum.SUBSCRIPTION,
+        icon: IconsEnum.CIRCLE_PLUS,
+        disabled: false,
+        selected: false
+      }
+    ]
+  });
 
   private readonly header = computed(() => {
-    const prefix = this.formDialog().selectedItem() ? 'Edit' : 'Add';
+    this.translateService.lang();
+    const prefix = this.formDialog().selectedItem() ? this.translateService.translate('app.edit') : this.translateService.translate('app.add');
     const option = this.dialogOption();
 
     const headerMap: Record<TransactionFormDialogOptionsEnum, string> = {
-      [TransactionFormDialogOptionsEnum.EXPENSE]: `${prefix} Transaction`,
-      [TransactionFormDialogOptionsEnum.INCOME]: `${prefix} Transaction`,
-      [TransactionFormDialogOptionsEnum.TRANSFER]: `${prefix} Transfer`,
-      [TransactionFormDialogOptionsEnum.SUBSCRIPTION]: `${prefix} Subscription`
+      [TransactionFormDialogOptionsEnum.EXPENSE]: `${prefix} ${this.translateService.translate('app.transaction')}`,
+      [TransactionFormDialogOptionsEnum.INCOME]: `${prefix} ${this.translateService.translate('app.transaction')}`,
+      [TransactionFormDialogOptionsEnum.TRANSFER]: `${prefix} ${this.translateService.translate('app.transfer')}`,
+      [TransactionFormDialogOptionsEnum.SUBSCRIPTION]: `${prefix} ${this.translateService.translate('app.subscription')}`
     };
 
     return headerMap[option] || `${prefix} Item`;
@@ -139,8 +145,6 @@ export class TransactionFormDialogComponent {
   }
 
   protected readonly preferenceStore = inject(PreferenceStore);
-  protected readonly Icons = IconsEnum;
-  private readonly allOptions = signal<TransactionFormDialogOption[]>(dialogOptions);
 
   dialogOption = signal<TransactionFormDialogOptionsEnum>(TransactionFormDialogOptionsEnum.EXPENSE);
 
@@ -158,7 +162,7 @@ export class TransactionFormDialogComponent {
 
     const enabledOptions = this.getEnabledOptions(isEditMode, currentOption);
 
-    return this.allOptions()
+    return this.dialogOptions()
       .filter(opt => availableOptions.includes(opt.value))
       .map(opt => ({
         ...opt,

@@ -6,6 +6,7 @@ import {FloatLabel} from 'primeng/floatlabel';
 import {LabelComponent} from '../label/label.component';
 import {Message} from 'primeng/message';
 import {MultiSelect} from 'primeng/multiselect';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-category-multi-select',
@@ -14,7 +15,8 @@ import {MultiSelect} from 'primeng/multiselect';
     LabelComponent,
     Message,
     MultiSelect,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   providers: [
     {
@@ -32,7 +34,7 @@ import {MultiSelect} from 'primeng/multiselect';
 })
 export class CategoryMultiSelectComponent extends AbstractMultiSelectComponent {
   override id = input<string>('category-multi-select')
-  override label = input<string>('Categories')
+  override label = input<string>('app.categories')
 
   protected readonly categoryStore = inject(CategoryStore);
 }

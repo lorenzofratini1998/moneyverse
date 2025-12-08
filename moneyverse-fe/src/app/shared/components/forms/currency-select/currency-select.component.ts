@@ -6,6 +6,7 @@ import {Message} from 'primeng/message';
 import {Select} from 'primeng/select';
 import {LabelComponent} from '../label/label.component';
 import {AbstractSelectComponent} from '../AbstractSelectComponent.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-currency-select',
@@ -15,7 +16,8 @@ import {AbstractSelectComponent} from '../AbstractSelectComponent.component';
     ReactiveFormsModule,
     Select,
     FormsModule,
-    LabelComponent
+    LabelComponent,
+    TranslatePipe
   ],
   providers: [
     {
@@ -34,7 +36,7 @@ import {AbstractSelectComponent} from '../AbstractSelectComponent.component';
 export class CurrencySelectComponent extends AbstractSelectComponent {
 
   override id = input<string>('currency-select')
-  override label = input<string>('Currency')
+  override label = input<string>('app.currency')
 
   protected readonly currencyStore = inject(CurrencyStore);
 

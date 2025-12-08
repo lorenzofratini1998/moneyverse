@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, output, signal, viewChild} from '@angular/core';
+import {Component, computed, inject, input, output, viewChild} from '@angular/core';
 import {IconsEnum} from '../../../../../../shared/models/icons.model';
 import {Category} from '../../../../category.model';
 import {TableModule} from 'primeng/table';
@@ -10,6 +10,7 @@ import {TableComponent} from '../../../../../../shared/components/table/table.co
 import {TableActionsComponent} from '../../../../../../shared/components/table-actions/table-actions.component';
 import {AppConfirmationService} from '../../../../../../shared/services/confirmation.service';
 import {CellTemplateDirective} from '../../../../../../shared/directives/cell-template.directive';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-category-table',
@@ -32,6 +33,7 @@ export class CategoryTableComponent {
 
   protected readonly Icons = IconsEnum;
   private readonly confirmationService = inject(AppConfirmationService);
+  private readonly translateService = inject(TranslationService);
 
   categoryTreeDialog = viewChild.required<CategoryTreeDialogComponent>(CategoryTreeDialogComponent);
 
@@ -39,22 +41,32 @@ export class CategoryTableComponent {
     return this.categories().filter(c => !c.parentCategory);
   });
 
-  config = computed<TableConfig<Category>>(() => ({
-    currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
-    dataKey: 'categoryId',
-    paginator: true,
-    rows: 10,
-    rowsPerPageOptions: [5, 10, 25, 50],
-    showCurrentPageReport: true,
-    stripedRows: true,
-    styleClass: 'mt-4'
-  }));
+  config = computed<TableConfig<Category>>(() => {
+    this.translateService.lang();
+    return {
+      currentPageReportTemplate: this.translateService.translate('app.table.pageReport', {
+        first: '{first}',
+        last: '{last}',
+        totalRecords: '{totalRecords}'
+      }),
+      dataKey: 'categoryId',
+      paginator: true,
+      rows: 10,
+      rowsPerPageOptions: [5, 10, 25, 50],
+      showCurrentPageReport: true,
+      stripedRows: true,
+      styleClass: 'mt-4'
+    }
+  });
 
-  columns = signal<TableColumn<Category>[]>([
-    {field: 'categoryName', header: 'Name', sortable: true},
-    {field: 'description', header: 'Description'},
-    {field: 'parentCategory', header: 'Parent Category', sortable: true},
-  ])
+  columns = computed<TableColumn<Category>[]>(() => {
+    this.translateService.lang();
+    return [
+      {field: 'categoryName', header: this.translateService.translate('app.name'), sortable: true},
+      {field: 'description', header: this.translateService.translate('app.description'), sortable: true},
+      {field: 'parentCategory', header: this.translateService.translate('app.form.parentCategory'), sortable: true},
+    ]
+  })
 
   protected getParentCategory(parentId?: string): Category | undefined {
     if (!parentId) return undefined;
@@ -82,8 +94,8 @@ export class CategoryTableComponent {
 
   private confirmDelete(category: Category) {
     this.confirmationService.confirmDelete({
-      header: 'Delete Category',
-      message: `Are you sure you want to delete the category "${category.categoryName}?" All associated transactions will be deleted.`,
+      header: this.translateService.translate('app.dialog.category.delete'),
+      message: this.translateService.translate('app.dialog.category.confirmDelete', {field: category.categoryName}),
       accept: () => this.onDelete.emit(category)
     })
   }

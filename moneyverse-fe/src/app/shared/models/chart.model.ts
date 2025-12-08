@@ -3,15 +3,17 @@ export interface GaugeData {
   name?: string;
 }
 
-export interface BarChartOptions {
+export interface BarLineChartOptions {
   labels: string[];
   series: {
+    type?: ChartType;
     name: string;
     data: number[];
   }[];
 }
 
 export type Orientation = 'horizontal' | 'vertical';
+export type ChartType = 'line' | 'bar';
 
 export interface LineChartOptions {
   labels?: string[];

@@ -20,7 +20,7 @@ export class TagEventService {
   private getStream(): Observable<SSEEvent> {
     if (!this.tagStream$) {
       this.tagStream$ = this.sseService.getStream(this.URL, {
-        userId: this.authService.authenticatedUser.userId
+        userId: this.authService.user().userId
       });
     }
     return this.tagStream$;

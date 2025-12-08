@@ -11,6 +11,7 @@ import {CategoryFilterStore} from './services/category-filter.store';
 import {CategoryFormData} from './models/form.model';
 import {ManagementComponent, ManagementConfig} from '../../../../shared/components/management/management.component';
 import {CategoryFilterPanelComponent} from './components/category-filter-panel/category-filter-panel.component';
+import {TranslationService} from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-category-management',
@@ -29,33 +30,37 @@ export class CategoryManagementComponent {
   protected readonly categoryStore = inject(CategoryStore);
   protected readonly categoryFilterStore = inject(CategoryFilterStore);
   protected readonly authService = inject(AuthService);
+  private readonly translateService = inject(TranslationService);
 
   defaultCategoryDialog = viewChild.required<CategoryDefaultDialogComponent>(CategoryDefaultDialogComponent);
   categoryFormDialog = viewChild.required<CategoryFormDialogComponent>(CategoryFormDialogComponent);
 
-  managementConfig = computed<ManagementConfig>(() => ({
-    title: 'Category Management',
-    actions: [
-      {
-        icon: IconsEnum.BOX,
-        severity: 'secondary',
-        label: 'Add Default Categories',
-        condition: () => this.categoryStore.defaultCategories().length > 0,
-        action: () => this.defaultCategoryDialog().open()
-      },
-      {
-        icon: IconsEnum.REFRESH,
-        variant: 'text',
-        severity: 'secondary',
-        action: () => this.categoryStore.loadCategories(true)
-      },
-      {
-        icon: IconsEnum.PLUS,
-        label: 'New Category',
-        action: () => this.categoryFormDialog().open()
-      }
-    ]
-  }))
+  managementConfig = computed<ManagementConfig>(() => {
+    this.translateService.lang();
+    return {
+      title: this.translateService.translate('app.manageCategories'),
+      actions: [
+        {
+          icon: IconsEnum.BOX,
+          severity: 'secondary',
+          label: this.translateService.translate('app.actions.addDefaultCategories'),
+          condition: () => this.categoryStore.categories().length == 0,
+          action: () => this.defaultCategoryDialog().open()
+        },
+        {
+          icon: IconsEnum.REFRESH,
+          variant: 'text',
+          severity: 'secondary',
+          action: () => this.categoryStore.loadCategories(true)
+        },
+        {
+          icon: IconsEnum.PLUS,
+          label: this.translateService.translate('app.actions.newCategory'),
+          action: () => this.categoryFormDialog().open()
+        }
+      ]
+    }
+  })
 
   submit(formData: CategoryFormData) {
     const categoryId = formData.categoryId;
@@ -67,14 +72,14 @@ export class CategoryManagementComponent {
     } else {
       this.categoryStore.createCategory({
           ...formData,
-          userId: this.authService.authenticatedUser.userId,
+          userId: this.authService.user().userId,
         }
       )
     }
   }
 
   createDefaultCategories(): void {
-    this.categoryStore.createDefaultCategories(this.authService.authenticatedUser.userId);
+    this.categoryStore.createDefaultCategories(this.authService.user().userId);
   }
 
   deleteCategory(category: Category) {

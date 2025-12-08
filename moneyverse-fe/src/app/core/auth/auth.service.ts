@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import Keycloak from 'keycloak-js';
 import {Observable, of, throwError} from 'rxjs';
 import {UserModel} from './models/user.model';
@@ -10,19 +10,38 @@ export class AuthService {
 
   readonly keycloak = inject(Keycloak);
 
-  public getUserId(): Observable<string> {
-    const userId = this.keycloak.tokenParsed?.sub;
-    return userId ? of(userId) : throwError(() => new Error("User ID is missing"));
+  user = signal<UserModel>({
+    userId: '',
+    firstName: '',
+    lastName: '',
+    fullName: '',
+    email: ''
+  });
+
+  constructor() {
+    this.updateUserFromToken();
   }
 
-  public getAuthenticatedUser(): UserModel {
-    return {
-      userId: this.keycloak.tokenParsed?.sub ?? '',
-      firstName: this.keycloak.tokenParsed?.['given_name'] ?? '',
-      lastName: this.keycloak.tokenParsed?.['family_name'] ?? '',
-      fullName: this.keycloak.tokenParsed?.['name'] ?? '',
-      email: this.keycloak.tokenParsed?.['email'] ?? ''
-    };
+  private updateUserFromToken() {
+    const token = this.keycloak.tokenParsed;
+
+    this.user.set({
+      userId: token?.sub ?? '',
+      firstName: token?.['given_name'] ?? '',
+      lastName: token?.['family_name'] ?? '',
+      fullName: token?.['name'] ?? '',
+      email: token?.['email'] ?? ''
+    });
+  }
+
+  public async refreshToken(): Promise<void> {
+    try {
+      await this.keycloak.updateToken(-1);
+      this.updateUserFromToken();
+    } catch (error) {
+      console.error('Failed to refresh token', error);
+      throw error;
+    }
   }
 
   get token() {
@@ -31,20 +50,6 @@ export class AuthService {
       throw new Error('Token is not available');
     }
     return token;
-  }
-
-  get authenticatedUser(): UserModel {
-    const tokenParsed = this.keycloak.tokenParsed;
-    if (!tokenParsed) {
-      throw new Error('Token is not available');
-    }
-    return {
-      userId: tokenParsed.sub ?? '',
-      firstName: tokenParsed['given_name'] ?? '',
-      lastName: tokenParsed['family_name'] ?? '',
-      fullName: tokenParsed['name'] ?? '',
-      email: tokenParsed['email'] ?? ''
-    }
   }
 
   public async logout(): Promise<void> {

@@ -1,4 +1,5 @@
 import {BoundCriteria} from '../../../../../shared/models/criteria.model';
+import {Style} from '../../../../../shared/models/common.model';
 
 export interface AccountFormData {
   accountId?: string,
@@ -8,7 +9,8 @@ export interface AccountFormData {
   currency: string,
   balance: number,
   balanceTarget?: number
-  isDefault?: boolean
+  isDefault?: boolean,
+  style: Style
 }
 
 export interface AccountFilterFormData {

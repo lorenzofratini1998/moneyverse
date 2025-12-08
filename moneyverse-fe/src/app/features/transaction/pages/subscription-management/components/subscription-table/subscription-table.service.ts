@@ -5,6 +5,7 @@ import {TableRowExpandEvent} from 'primeng/table';
 import {TransactionService} from '../../../../services/transaction.service';
 import {map, Observable, tap} from 'rxjs';
 import {ToastService} from '../../../../../../shared/services/toast.service';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +15,15 @@ export class SubscriptionTableService {
   private readonly confirmationService = inject(AppConfirmationService);
   private readonly transactionService = inject(TransactionService);
   private readonly toastService = inject(ToastService);
+  private readonly translateService = inject(TranslationService);
 
   private readonly _subscriptionTransactionsMap = signal<Map<string, Transaction[]>>(new Map());
   readonly subscriptionTransactionsMap = this._subscriptionTransactionsMap.asReadonly();
 
   confirmDelete(subscription: SubscriptionTransaction, onDeleteSubscription: () => void) {
     this.confirmationService.confirmDelete({
-      message: `Are you sure you want to delete the subscription "${subscription.subscriptionName}"? All associated transactions will be deleted.`,
-      header: 'Delete subscription',
+      message: this.translateService.translate("app.dialog.subscription.confirmDelete", {field: subscription.subscriptionName}),
+      header: this.translateService.translate("app.dialog.subscription.delete"),
       accept: () => onDeleteSubscription(),
     })
   }
@@ -56,7 +58,7 @@ export class SubscriptionTableService {
         )
       })),
       tap({
-        error: () => this.toastService.error('Failed to load subscription')
+        error: () => this.toastService.error(this.translateService.translate("app.message.subscription.load.error"))
       })
     );
   }

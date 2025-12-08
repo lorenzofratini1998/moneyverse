@@ -16,7 +16,9 @@
 
   <ng-template cellTemplate field="accountId" let-transaction>
     @if (accountStore.accountsMap().get(transaction.accountId); as account) {
-      <span>{{ account.accountName }}</span>
+      <app-chip [color]="account.style.color"
+                [icon]="account.style.icon"
+                [message]="account.accountName"/>
     }
   </ng-template>
 
@@ -84,7 +86,9 @@
 
         <ng-template cellTemplate field="accountId" let-transaction>
           @if (accountStore.accountsMap().get(transaction.accountId); as account) {
-            <span>{{ account.accountName }}</span>
+            <app-chip [color]="account.style.color"
+                      [icon]="account.style.icon"
+                      [message]="account.accountName"/>
           }
         </ng-template>
 

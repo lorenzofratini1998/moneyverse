@@ -19,15 +19,8 @@
     />
   </p-float-label>
   @if (showError) {
-    @if (control?.errors?.['required']) {
-      <p-message severity="error" size="small" variant="simple">
-        {{ label() }} is required.
-      </p-message>
-    }
-    @if (control?.errors?.['maxlength']) {
-      <p-message severity="error" size="small" variant="simple">
-        {{ label() }} cannot exceed {{ maxLength() }} characters.
-      </p-message>
-    }
+    <p-message severity="error" size="small" variant="simple">
+      {{ errorMessage }}
+    </p-message>
   }
 </div>

@@ -7,6 +7,7 @@ import {TagStore} from './services/tag.store';
 import {Tag} from '../../transaction.model';
 import {TagFormData} from "./models/form.model";
 import {ManagementComponent, ManagementConfig} from '../../../../shared/components/management/management.component';
+import {TranslationService} from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-tag-management',
@@ -21,25 +22,29 @@ export class TagManagementComponent {
 
   protected readonly authService = inject(AuthService);
   protected readonly tagStore = inject(TagStore);
+  private readonly translateService = inject(TranslationService);
 
   tagFormDialog = viewChild.required(TagFormDialogComponent);
 
-  managementConfig = computed<ManagementConfig>(() => ({
-    title: 'Tag Management',
-    actions: [
-      {
-        icon: IconsEnum.REFRESH,
-        variant: 'text',
-        severity: 'secondary',
-        action: () => this.tagStore.loadTags(true)
-      },
-      {
-        icon: IconsEnum.PLUS,
-        label: 'New Tag',
-        action: () => this.tagFormDialog().open()
-      }
-    ]
-  }))
+  managementConfig = computed<ManagementConfig>(() => {
+    this.translateService.lang();
+    return {
+      title: this.translateService.translate('app.manageTags'),
+      actions: [
+        {
+          icon: IconsEnum.REFRESH,
+          variant: 'text',
+          severity: 'secondary',
+          action: () => this.tagStore.loadTags(true)
+        },
+        {
+          icon: IconsEnum.PLUS,
+          label: this.translateService.translate('app.actions.newTag'),
+          action: () => this.tagFormDialog().open()
+        }
+      ]
+    }
+  })
 
   submit(formData: TagFormData) {
     const tagId = formData.tagId;
@@ -51,7 +56,7 @@ export class TagManagementComponent {
     } else {
       this.tagStore.createTag({
         ...formData,
-        userId: this.authService.authenticatedUser.userId
+        userId: this.authService.user().userId
       });
     }
   }

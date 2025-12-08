@@ -2,8 +2,14 @@
            [columns]="columns()"
            [config]="config()"
            [actions]="actions">
+  <ng-template cellTemplate field="accountName" let-account>
+    <app-chip [color]="account.style.color"
+              [icon]="account.style.icon"
+              [message]="account.accountName"/>
+  </ng-template>
+
   <ng-template cellTemplate field="accountCategory" let-account>
-    <p-tag [value]="account.accountCategory" [rounded]="true"></p-tag>
+    <p-tag [rounded]="true">{{accountStore.accountsCategoryMap().get(Number(account.accountCategory))?.name ?? 'N/A'}}</p-tag>
   </ng-template>
 
   <ng-template cellTemplate field="currency" let-account>

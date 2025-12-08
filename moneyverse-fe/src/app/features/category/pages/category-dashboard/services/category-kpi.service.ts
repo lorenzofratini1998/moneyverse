@@ -1,8 +1,9 @@
 import {inject, Injectable} from '@angular/core';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
-import {switchMap} from 'rxjs';
+import {combineLatest, switchMap} from 'rxjs';
 import {DashboardStore} from '../../../../analytics/services/dashboard.store';
 import {AnalyticsService} from '../../../../../shared/services/analytics.service';
+import {AnalyticsEventService} from '../../../../analytics/services/analytics-event.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +11,15 @@ import {AnalyticsService} from '../../../../../shared/services/analytics.service
 export class CategoryKpiService {
   private readonly dashboardStore = inject(DashboardStore);
   private readonly analyticsService = inject(AnalyticsService);
+  private readonly analyticsEventService = inject(AnalyticsEventService);
 
   data = toSignal(
-    toObservable(this.dashboardStore.filter).pipe(
-      switchMap(filter => this.analyticsService.calculateCategoryKpi(filter))
+    combineLatest([
+      toObservable(this.dashboardStore.filter),
+      this.analyticsEventService.reload$
+    ]).pipe(
+      switchMap(([filter]) =>
+        this.analyticsService.calculateCategoryKpi(filter))
     ),
     {initialValue: null}
   )

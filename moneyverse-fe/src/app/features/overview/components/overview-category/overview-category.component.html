@@ -1,0 +1,30 @@
+<p-card>
+  <ng-template #title>
+    <h3>{{ 'app.categories' | translate }}</h3>
+  </ng-template>
+  <app-table [data]="data()"
+             [columns]="columns()"
+             [config]="config()">
+
+    <ng-template cellTemplate field="categoryId" let-data>
+      @if (categoryStore.categoriesMap().get(data.categoryId); as category) {
+        <app-chip [color]="category.style.color"
+                  [icon]="category.style.icon"
+                  [message]="category.categoryName"/>
+      }
+    </ng-template>
+
+    <ng-template cellTemplate field="totalIncome" let-data>
+      @if (categoryStore.categoriesMap().get(data.categoryId); as category) {
+        {{ data.totalIncome.amount | currency: preferenceStore.userCurrency() }}
+      }
+    </ng-template>
+
+    <ng-template cellTemplate field="totalExpense" let-data>
+      @if (categoryStore.categoriesMap().get(data.categoryId); as account) {
+        {{ data.totalExpense.amount | currency: preferenceStore.userCurrency() }}
+      }
+    </ng-template>
+
+  </app-table>
+</p-card>

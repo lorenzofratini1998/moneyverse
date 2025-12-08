@@ -1,5 +1,10 @@
 export type PeriodFormat = 'none' | 'month' | 'year' | 'custom';
 
+export interface PeriodFormatOption {
+  label: string,
+  value: PeriodFormat
+}
+
 export type ChartFilter = 'totalAmount' | 'totalExpense' | 'totalIncome';
 
 export interface ChartFilterOption {

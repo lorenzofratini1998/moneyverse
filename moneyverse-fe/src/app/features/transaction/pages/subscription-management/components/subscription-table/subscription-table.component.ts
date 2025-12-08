@@ -1,6 +1,11 @@
 import {Component, computed, inject, input, output, signal} from '@angular/core';
 import {TableModule} from 'primeng/table';
-import {RecurrenceRuleEnum, recurrenceRuleOptions, SubscriptionTransaction, Transaction} from '../../../../transaction.model';
+import {
+  RecurrenceRuleEnum,
+  recurrenceRuleOptions,
+  SubscriptionTransaction,
+  Transaction
+} from '../../../../transaction.model';
 import {CurrencyPipe} from '../../../../../../shared/pipes/currency.pipe';
 import {DatePipe} from '@angular/common';
 import {PreferenceStore} from '../../../../../../shared/stores/preference.store';
@@ -15,6 +20,7 @@ import {TableComponent} from '../../../../../../shared/components/table/table.co
 import {TableActionsComponent} from '../../../../../../shared/components/table-actions/table-actions.component';
 import {CellTemplateDirective} from '../../../../../../shared/directives/cell-template.directive';
 import {SubscriptionTableService} from './subscription-table.service';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-subscription-table',
@@ -43,11 +49,13 @@ export class SubscriptionTableComponent {
   protected readonly accountStore = inject(AccountStore);
   protected readonly categoryStore = inject(CategoryStore);
   protected readonly subscriptionTableService = inject(SubscriptionTableService);
+  private readonly translateService = inject(TranslationService);
 
   protected readonly Icons = IconsEnum;
   protected readonly math = Math;
 
   tableConfig = computed<TableConfig<SubscriptionTransaction>>(() => {
+    this.translateService.lang();
     const baseConfig: TableConfig<SubscriptionTransaction> = {
       stripedRows: true,
       paginator: true,
@@ -55,24 +63,31 @@ export class SubscriptionTableComponent {
       rowsPerPageOptions: [5, 10, 25, 50],
       showCurrentPageReport: true,
       scrollable: true,
-      currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
+      currentPageReportTemplate: this.translateService.translate('app.table.pageReport', {
+        first: '{first}',
+        last: '{last}',
+        totalRecords: '{totalRecords}'
+      }),
       dataKey: 'subscriptionId'
     };
     return {...baseConfig, ...this.config()}
   });
 
-  columns = signal<TableColumn<SubscriptionTransaction>[]>([
-    {field: "subscriptionName", header: "Name"},
-    {field: "amount", header: "Amount", sortable: true},
-    {field: "totalAmount", header: "Total Amount"},
-    {field: "accountId", header: "Account"},
-    {field: "categoryId", header: "Category"},
-    {field: "recurrenceRule", header: "Recurrence"},
-    {field: "startDate", header: "Start Date"},
-    {field: "endDate", header: "End Date"},
-    {field: "nextExecutionDate", header: "Next Payment Date", sortable: true},
-    {field: "active", header: "Active"},
-  ])
+  columns = computed<TableColumn<SubscriptionTransaction>[]>(() => {
+    this.translateService.lang();
+    return [
+      {field: "subscriptionName", header: this.translateService.translate('app.name')},
+      {field: "amount", header: this.translateService.translate('app.amount'), sortable: true},
+      {field: "totalAmount", header: this.translateService.translate('app.form.totalAmount')},
+      {field: "accountId", header: this.translateService.translate('app.account')},
+      {field: "categoryId", header: this.translateService.translate('app.category')},
+      {field: "recurrenceRule", header: this.translateService.translate('app.form.recurrence')},
+      {field: "startDate", header: this.translateService.translate('app.form.dateStart')},
+      {field: "endDate", header: this.translateService.translate('app.form.dateEnd')},
+      {field: "nextExecutionDate", header: this.translateService.translate('app.form.nextPayment'), sortable: true},
+      {field: "active", header: this.translateService.translate('app.form.active')},
+    ]
+  })
 
   actions = computed<TableAction<SubscriptionTransaction>[]>(() => [
     {
@@ -87,25 +102,36 @@ export class SubscriptionTableComponent {
     }
   ]);
 
-  expandedConfig = computed<TableConfig<Transaction>>(() => ({
-    dataKey: 'transactionId',
-    paginator: true,
-    rows: 5,
-    showCurrentPageReport: true,
-    currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
-  }));
+  expandedConfig = computed<TableConfig<Transaction>>(() => {
+    this.translateService.lang();
+    return {
+      dataKey: 'transactionId',
+      paginator: true,
+      rows: 5,
+      showCurrentPageReport: true,
+      currentPageReportTemplate: this.translateService.translate('app.table.pageReport', {
+        first: '{first}',
+        last: '{last}',
+        totalRecords: '{totalRecords}'
+      }),
+    }
+  });
 
-  expandedColumns = signal<TableColumn<Transaction>[]>([
-    {field: "date", header: "Date"},
-    {field: "description", header: "Description"},
-    {field: "amount", header: "Amount"},
-    {field: "normalizedAmount", header: "Normalized Amount"},
-    {field: "accountId", header: "Account"},
-    {field: "categoryId", header: "Category"},
-  ])
+  expandedColumns = computed<TableColumn<Transaction>[]>(() => {
+    this.translateService.lang();
+    return [
+      {field: "date", header: this.translateService.translate('app.date')},
+      {field: "description", header: this.translateService.translate('app.description')},
+      {field: "amount", header: this.translateService.translate('app.amount')},
+      {field: "normalizedAmount", header: this.translateService.translate('app.normalizedAmount')},
+      {field: "accountId", header: this.translateService.translate('app.account')},
+      {field: "categoryId", header: this.translateService.translate('app.category')},
+    ]
+  })
 
   protected formatRecurrence(recurrence: string): string {
-    return recurrenceRuleOptions.find(option => option.value === recurrence)?.label ?? '';
+    const option = recurrenceRuleOptions.find(o => o.value === recurrence);
+    return option ? this.translateService.translate(option.label) : '';
   }
 
   protected getSeverity(status: string) {

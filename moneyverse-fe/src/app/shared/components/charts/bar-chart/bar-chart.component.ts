@@ -3,7 +3,7 @@ import {NgxEchartsDirective} from 'ngx-echarts';
 import {PreferenceStore} from '../../../stores/preference.store';
 import {CurrencyPipe} from '../../../pipes/currency.pipe';
 import {ChartComponent} from '../chart.component';
-import {BarChartOptions, Orientation} from '../../../models/chart.model';
+import {BarLineChartOptions, Orientation} from '../../../models/chart.model';
 
 @Component({
   selector: 'app-bar-chart',
@@ -23,7 +23,7 @@ import {BarChartOptions, Orientation} from '../../../models/chart.model';
 })
 export class BarChartComponent extends ChartComponent {
   private readonly preferenceStore = inject(PreferenceStore);
-  options = input.required<BarChartOptions>();
+  options = input.required<BarLineChartOptions>();
   orientation = input<Orientation>('vertical');
   xAxisFormatter = input<((value: any) => string) | undefined>();
   yAxisFormatter = input<((value: any) => string) | undefined>();
@@ -81,21 +81,25 @@ export class BarChartComponent extends ChartComponent {
 
     return (params: any[]) => {
       const currency = this.preferenceStore.userCurrency();
-      return params
-        .map(p =>
-          `${p.name}: ${this.currencyPipe.transform(
-            p.value,
-            currency
-          )}`
-        )
-        .join('<br/>');
+      const label = params[0].axisValueLabel || params[0].axisValue;
+      const lines = params.map(p => {
+        const rawValue = typeof p.value === 'object' ? p.value.value : p.value;
+        const formatted = this.currencyPipe.transform(rawValue, currency);
+
+        return `
+      ${p.marker}
+      ${p.seriesName}:&nbsp;&nbsp;<b>${formatted}</b>
+    `;
+      });
+
+      return `<strong>${label}</strong><br/>` + lines.join('<br/>');
     };
   });
 
   series = computed(() => {
     return this.options().series.map((s, index) => ({
       name: s.name,
-      type: 'bar',
+      type: s.type ?? 'bar',
       data: s.data,
       itemStyle: {
         color: this.colorPalette()[index % this.colorPalette().length],

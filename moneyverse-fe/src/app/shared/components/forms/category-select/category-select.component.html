@@ -18,11 +18,13 @@
     />
     <app-label [for]="id()"
                [required]="required()"
-               [name]="label()"
+               [name]="label() | translate"
                componentType="select"
                [disabled]="disabled()"/>
   </p-float-label>
   @if (showError) {
-    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+    <p-message severity="error" size="small" variant="simple">
+      {{ errorMessage }}
+    </p-message>
   }
 </div>

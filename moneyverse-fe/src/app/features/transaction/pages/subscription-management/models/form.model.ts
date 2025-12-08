@@ -9,5 +9,5 @@ export interface SubscriptionFormData {
   currency: string
   recurrence: RecurrenceRule
   isActive: boolean,
-  nextExecutionDate: Date
+  nextExecutionDate?: Date
 }

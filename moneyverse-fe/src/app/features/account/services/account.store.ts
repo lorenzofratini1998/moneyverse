@@ -1,12 +1,14 @@
-import {computed, inject} from '@angular/core';
+import {computed, effect, inject} from '@angular/core';
 import {Account, AccountCategory, AccountRequest} from '../account.model';
 import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
 import {AccountService} from './account.service';
 import {AuthService} from '../../../core/auth/auth.service';
 import {ToastService} from '../../../shared/services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
+import {debounceTime, EMPTY, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {AccountEventService} from '../pages/account-management/services/account-event.service';
+import {SystemService} from '../../../core/services/system.service';
+import {TranslationService} from '../../../shared/services/translation.service';
 
 interface AccountStoreState {
   accountCategories: AccountCategory[];
@@ -27,6 +29,7 @@ export const AccountStore = signalStore(
     const accountService = inject(AccountService);
     const authService = inject(AuthService);
     const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     const loadAccounts = rxMethod<boolean | void>((trigger) =>
       trigger.pipe(
@@ -36,11 +39,11 @@ export const AccountStore = signalStore(
           return store.accounts().length === 0 || refresh;
         }),
         switchMap(() => {
-          const userId = authService.authenticatedUser.userId;
+          const userId = authService.user().userId;
           return accountService.getAccounts(userId, {}).pipe(
             tap({
               next: (accounts) => patchState(store, {accounts: accounts}),
-              error: () => toastService.error('Failed to load accounts')
+              error: () => toastService.error(translateService.translate('app.message.account.load.error'))
             })
           )
         })
@@ -49,13 +52,18 @@ export const AccountStore = signalStore(
 
     return {
 
-      loadAccountCategories: rxMethod<void>((trigger) =>
+      loadAccountCategories: rxMethod<boolean | void>((trigger) =>
         trigger.pipe(
-          filter(() => store.accountCategories().length === 0),
-          switchMap(() => accountService.getAccountCategories()),
-          tap({
-            next: (data) => patchState(store, {accountCategories: data}),
-            error: () => toastService.error('Failed to load categories')
+          switchMap((force = false) => {
+            if (!force && store.accountCategories().length > 0) {
+              return EMPTY;
+            }
+            return accountService.getAccountCategories().pipe(
+              tap({
+                next: (data) => patchState(store, { accountCategories: data }),
+                error: () => toastService.error(translateService.translate('app.message.accountCategories.load.error'))
+              })
+            );
           })
         )
       ),
@@ -67,10 +75,10 @@ export const AccountStore = signalStore(
           switchMap((request) => accountService.createAccount(request)),
           tap({
             next: () => {
-              toastService.success('Account created successfully');
+              toastService.success(translateService.translate('app.message.account.create.success'));
               loadAccounts(true);
             },
-            error: () => toastService.error('Failed to create account')
+            error: () => toastService.error(translateService.translate('app.message.account.create.error'))
           })
         )
       ),
@@ -80,10 +88,10 @@ export const AccountStore = signalStore(
           switchMap(({accountId, request}) => accountService.updateAccount(accountId, request)),
           tap({
             next: () => {
-              toastService.success('Account updated successfully');
+              toastService.success(translateService.translate('app.message.account.update.success'));
               loadAccounts(true);
             },
-            error: () => toastService.error('Failed to update account')
+            error: () => toastService.error(translateService.translate('app.message.account.update.error'))
           })
         )
       ),
@@ -93,10 +101,10 @@ export const AccountStore = signalStore(
           switchMap(accountId => accountService.deleteAccount(accountId)),
           tap({
               next: () => {
-                toastService.success('Account deleted successfully');
+                toastService.success(translateService.translate('app.message.account.delete.success'));
                 loadAccounts(true);
               },
-              error: () => toastService.error('Failed to delete account')
+              error: () => toastService.error(translateService.translate('app.message.account.delete.error'))
             }
           )
         )
@@ -108,17 +116,37 @@ export const AccountStore = signalStore(
     categories: computed(() => store.accountCategories()),
     accounts: computed(() => store.accounts()),
     defaultAccount: computed(() => store.accounts().find(acc => acc.default)),
-    accountsMap: computed(() => new Map(store.accounts().map(account => [account.accountId, account])))
+    accountsMap: computed(() => new Map(store.accounts().map(account => [account.accountId, account]))),
+    accountsCategoryMap: computed(() => new Map(
+      store.accountCategories().map(category => [
+        Number(category.accountCategoryId),
+        category
+      ])
+    )),
   })),
 
   withHooks((store) => {
+    const systemService = inject(SystemService);
     const eventService = inject(AccountEventService);
     const subscriptions = new Subscription();
 
     return {
       onInit() {
-        store.loadAccountCategories();
-        store.loadAccounts(true);
+        effect(() => {
+          const translationsReady = systemService.translationsReady();
+          if (translationsReady) {
+            store.loadAccountCategories();
+            store.loadAccounts(true);
+          }
+        });
+
+        effect(() => {
+          const lang = systemService.languageChanged();
+          if (lang) {
+            store.loadAccountCategories(true);
+            store.loadAccounts(true);
+          }
+        })
 
         const reloadEvents$ = merge(
           eventService.onAccountCreated(),

@@ -9,6 +9,7 @@ import {SubscriptionTableComponent} from './components/subscription-table/subscr
 import {SubscriptionStore} from './services/subscription.store';
 import {SubscriptionFormData} from "./models/form.model";
 import {ManagementComponent, ManagementConfig} from '../../../../shared/components/management/management.component';
+import {TranslationService} from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-subscription-management',
@@ -23,27 +24,30 @@ export class SubscriptionManagementComponent {
 
   protected readonly subscriptionStore = inject(SubscriptionStore);
   private readonly authService = inject(AuthService);
+  private readonly translateService = inject(TranslationService);
 
   subscriptionFormDialog = viewChild.required(SubscriptionFormDialogComponent);
 
-  managementConfig = computed<ManagementConfig>(() => (
-    {
-      title: 'Subscription Management',
-      actions: [
-        {
-          icon: IconsEnum.REFRESH,
-          variant: 'text',
-          severity: 'secondary',
-          action: () => this.subscriptionStore.loadSubscriptions(true)
-        },
-        {
-          icon: IconsEnum.PLUS,
-          label: 'New Subscription',
-          action: () => this.subscriptionFormDialog().open()
-        }
-      ]
+  managementConfig = computed<ManagementConfig>(() => {
+      this.translateService.lang();
+      return {
+        title: this.translateService.translate('app.manageSubscriptions'),
+        actions: [
+          {
+            icon: IconsEnum.REFRESH,
+            variant: 'text',
+            severity: 'secondary',
+            action: () => this.subscriptionStore.loadSubscriptions(true)
+          },
+          {
+            icon: IconsEnum.PLUS,
+            label: this.translateService.translate('app.actions.newSubscription'),
+            action: () => this.subscriptionFormDialog().open()
+          }
+        ]
+      }
     }
-  ))
+  )
 
   submit(formData: SubscriptionFormData) {
     const subscriptionId = formData.subscriptionId;
@@ -54,7 +58,7 @@ export class SubscriptionManagementComponent {
       })
     } else {
       this.subscriptionStore.createSubscription({
-          userId: this.authService.authenticatedUser.userId,
+          userId: this.authService.user().userId,
           ...formData
         }
       )

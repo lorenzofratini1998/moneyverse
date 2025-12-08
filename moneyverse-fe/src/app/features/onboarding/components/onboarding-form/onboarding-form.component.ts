@@ -10,6 +10,7 @@ import {
 import {CurrencySelectComponent} from '../../../../shared/components/forms/currency-select/currency-select.component';
 import {SelectComponent} from '../../../../shared/components/forms/select/select.component';
 import {SubmitButtonComponent} from '../../../../shared/components/forms/submit-button/submit-button.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-onboarding-form',
@@ -17,7 +18,8 @@ import {SubmitButtonComponent} from '../../../../shared/components/forms/submit-
     ReactiveFormsModule,
     CurrencySelectComponent,
     SelectComponent,
-    SubmitButtonComponent
+    SubmitButtonComponent,
+    TranslatePipe
   ],
   templateUrl: './onboarding-form.component.html'
 })

@@ -4,8 +4,8 @@ import {CategoryManagementComponent} from './pages/category-management/category-
 import {BudgetManagementComponent} from './pages/budget-management/budget-management.component';
 
 export default [
-  {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-  {path: 'dashboard', component: CategoryAnalyticsComponent},
+  {path: '', redirectTo: 'analytics', pathMatch: 'full'},
+  {path: 'analytics', component: CategoryAnalyticsComponent},
   {path: 'manage', component: CategoryManagementComponent},
   {path: 'budgeting', component: BudgetManagementComponent}
 ] as Routes;

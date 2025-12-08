@@ -1,9 +1,15 @@
-{
+const PROXY_CONFIG = {
   "/currencies": {
     "target": "http://localhost:7001",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        console.log('Skipping proxy for browser request.');
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/currencies": "/currencyManagement/api/v1/currencies"
     }
@@ -13,6 +19,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/users": "/usersManagement/api/v1/users"
     }
@@ -22,6 +33,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/preferences": "/usersManagement/api/v1/preferences"
     }
@@ -31,6 +47,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/languages": "/usersManagement/api/v1/languages"
     }
@@ -49,6 +70,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/accounts": "/accountsManagement/api/v1/accounts"
     }
@@ -67,8 +93,27 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/budgets": "/budgetsManagement/api/v1/budgets"
+    }
+  },
+  "/categories": {
+    "target": "http://localhost:7004",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
+    "pathRewrite": {
+      "^/categories": "/budgetsManagement/api/v1/categories"
     }
   },
   "/categories/**": {
@@ -76,6 +121,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/categories": "/budgetsManagement/api/v1/categories"
     }
@@ -94,6 +144,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/tags": "/transactionsManagement/api/v1/tags"
     }
@@ -103,6 +158,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/transfers": "/transactionsManagement/api/v1/transfers"
     }
@@ -112,6 +172,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/subscriptions": "/transactionsManagement/api/v1/subscriptions"
     }
@@ -121,17 +186,38 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
     "pathRewrite": {
       "^/transactions(?!/sse)": "/transactionsManagement/api/v1/transactions"
     }
   },
-  "/analytics": {
+  "/analytics/sse": {
     "target": "http://localhost:7006",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
     "pathRewrite": {
+      "^/analytics/sse": "/analytics/api/v1/sse"
+    }
+  },
+  "/analytics/**": {
+    "target": "http://localhost:7006",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "bypass": function (req, res, proxyOptions) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html';
+      }
+    },
+    "pathRewrite": {
       "^/analytics": "/analytics/api/v1"
     }
   }
-}
+};
+
+module.exports = PROXY_CONFIG;

@@ -8,7 +8,7 @@
   <div class="grid grid-cols-1">
     <app-select formControlName="language"
                 id="language-select"
-                label="Language"
+                [label]="'app.language' | translate"
                 [required]="true"
                 [options]="languages()"
                 optionLabel="country"
@@ -18,7 +18,7 @@
   <div class="grid grid-cols-1">
     <app-select formControlName="dateFormat"
                 id="dateFormat-select"
-                label="Date format"
+                [label]="'app.dateFormat' | translate"
                 [required]="true"
                 [options]="dateFormats()"
                 optionLabel="label"

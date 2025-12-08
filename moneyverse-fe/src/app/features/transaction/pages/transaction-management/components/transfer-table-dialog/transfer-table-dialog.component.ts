@@ -5,6 +5,7 @@ import {DialogComponent} from '../../../../../../shared/components/dialogs/dialo
 import {TransferTableComponent} from '../transfer-table/transfer-table.component';
 import {AccountStore} from '../../../../../account/services/account.store';
 import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-transfer-table-dialog',
@@ -35,13 +36,17 @@ export class TransferTableDialogComponent {
   protected dialog = viewChild.required<DialogComponent<Transfer>>(DialogComponent<Transfer>);
 
   private readonly accountStore = inject(AccountStore);
+  private readonly translateService = inject(TranslationService);
 
   private accountFrom = computed(() => this.accountStore.accountsMap().get(this.dialog().selectedItem()?.transactionFrom.accountId!)?.accountName);
   private accountTo = computed(() => this.accountStore.accountsMap().get(this.dialog().selectedItem()?.transactionTo.accountId!)?.accountName);
 
-  config = linkedSignal(() => ({
-    header: `Transfer from ${this.accountFrom()} to ${this.accountTo()}`,
-  }))
+  config = linkedSignal(() => {
+    this.translateService.lang();
+    return {
+      header: this.translateService.translate('app.dialog.transfer.detail', {from: this.accountFrom(), to: this.accountTo()}),
+    };
+  });
 
   open(item?: Transfer) {
     this.dialog().open(item);

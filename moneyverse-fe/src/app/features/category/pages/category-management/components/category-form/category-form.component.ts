@@ -12,6 +12,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {TextAreaComponent} from '../../../../../../shared/components/forms/text-area/text-area.component';
 import {CategoryFormData} from "../../models/form.model";
 import {FormPreviewComponent} from '../../../../../../shared/components/forms/form-preview/form-preview.component';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-category-form',
@@ -22,7 +23,8 @@ import {FormPreviewComponent} from '../../../../../../shared/components/forms/fo
     InputTextComponent,
     ReactiveFormsModule,
     TextAreaComponent,
-    FormPreviewComponent
+    FormPreviewComponent,
+    TranslatePipe
   ],
   templateUrl: './category-form.component.html'
 })

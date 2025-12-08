@@ -2,9 +2,9 @@
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-grow items-center">
     <app-input-text formControlName="name"
                     id="category-name-input"
-                    label="Category Name"/>
+                    [label]="'app.form.categoryName' | translate"/>
 
     <app-category-multi-select formControlName="parentCategories"
-                               label="Parent Category"/>
+                               [label]="'app.form.parentCategory' | translate"/>
   </div>
 </form>

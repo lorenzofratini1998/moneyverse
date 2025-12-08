@@ -1,10 +1,11 @@
-import {Component, computed, effect, output, viewChild} from '@angular/core';
+import {Component, computed, effect, inject, output, viewChild} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {Budget} from '../../../../category.model';
 import {BudgetFormComponent} from '../budget-form/budget-form.component';
 import {FormDialogComponent} from '../../../../../../shared/components/dialogs/form-dialog/form-dialog.component';
 import {DynamicDialogConfig} from 'primeng/dynamicdialog';
 import {BudgetFormData} from '../../models/form.models';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-budget-form-dialog',
@@ -24,14 +25,18 @@ import {BudgetFormData} from '../../models/form.models';
 export class BudgetFormDialogComponent {
 
   onSubmit = output<BudgetFormData>();
+  private readonly translateService = inject(TranslationService);
 
   protected form = viewChild.required(BudgetFormComponent);
   protected formDialog = viewChild.required(FormDialogComponent<Budget, BudgetFormData>);
 
-  config = computed<DynamicDialogConfig>(() => ({
-    header: this.formDialog().selectedItem() ? 'Edit Budget' : 'Add Budget',
-    styleClass: 'w-[80vw] sm:w-[70vw] md:w-[50vw] lg:w-[40vw] lg:max-w-[550px]'
-  }))
+  config = computed<DynamicDialogConfig>(() => {
+    this.translateService.lang();
+    return {
+      header: this.formDialog().selectedItem() ? this.translateService.translate('app.dialog.budget.edit') : this.translateService.translate('app.dialog.budget.add'),
+      styleClass: 'w-[80vw] sm:w-[70vw] md:w-[50vw] lg:w-[40vw] lg:max-w-[550px]'
+    }
+  })
 
   constructor() {
     effect(() => {

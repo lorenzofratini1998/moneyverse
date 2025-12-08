@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, output, signal, viewChild} from '@angular/core';
+import {Component, computed, inject, input, output, viewChild} from '@angular/core';
 import {TableModule} from 'primeng/table';
 import {AccountStore} from '../../../../../account/services/account.store';
 import {CategoryStore} from '../../../../../category/services/category.store';
@@ -17,6 +17,7 @@ import {CellTemplateDirective} from '../../../../../../shared/directives/cell-te
 import {SubscriptionTableDialogComponent} from '../subscription-table-dialog/subscription-table-dialog.component';
 import {TransactionTableService} from './transaction-table.service';
 import {PageResponse} from '../../../../../../shared/models/common.model';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-transaction-table',
@@ -52,15 +53,19 @@ export class TransactionTableComponent {
   protected readonly accountStore = inject(AccountStore);
   protected readonly categoryStore = inject(CategoryStore);
   protected readonly transactionTableService = inject(TransactionTableService);
-
-  protected readonly Icons = IconsEnum;
+  private readonly translateService = inject(TranslationService);
 
   transferTableDialog = viewChild.required(TransferTableDialogComponent);
   subscriptionTableDialog = viewChild.required<SubscriptionTableDialogComponent>(SubscriptionTableDialogComponent);
 
   tableConfig = computed<TableConfig<Transaction>>(() => {
+    this.translateService.lang();
     const baseConfig: TableConfig<Transaction> = {
-      currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
+      currentPageReportTemplate: this.translateService.translate('app.table.pageReport', {
+        first: '{first}',
+        last: '{last}',
+        totalRecords: '{totalRecords}'
+      }),
       customSort: true,
       dataKey: 'transactionId',
       lazy: true,
@@ -81,15 +86,42 @@ export class TransactionTableComponent {
     } as TableConfig<Transaction>;
   })
 
-  columns = signal<TableColumn<Transaction>[]>([
-    {field: 'date', header: 'Date', sortable: true},
-    {field: 'description', header: 'Description'},
-    {field: 'amount', header: 'Amount', sortable: true},
-    {field: 'normalizedAmount', header: 'Normalized Amount'},
-    {field: 'categoryId', header: 'Category'},
-    {field: 'accountId', header: 'Account'},
-    {field: 'tags', header: 'Tags'}
-  ])
+  columns = computed<TableColumn<Transaction>[]>(() => {
+    this.translateService.lang();
+
+    return [
+      {
+        field: 'date',
+        header: this.translateService.translate('app.date'),
+        sortable: true
+      },
+      {
+        field: 'description',
+        header: this.translateService.translate('app.description')
+      },
+      {
+        field: 'amount',
+        header: this.translateService.translate('app.amount'),
+        sortable: true
+      },
+      {
+        field: 'normalizedAmount',
+        header: this.translateService.translate('app.normalizedAmount')
+      },
+      {
+        field: 'categoryId',
+        header: this.translateService.translate('app.category')
+      },
+      {
+        field: 'accountId',
+        header: this.translateService.translate('app.account')
+      },
+      {
+        field: 'tags',
+        header: this.translateService.translate('app.tags')
+      }
+    ];
+  });
 
   actions = computed<TableAction<Transaction>[]>(() => [
     {

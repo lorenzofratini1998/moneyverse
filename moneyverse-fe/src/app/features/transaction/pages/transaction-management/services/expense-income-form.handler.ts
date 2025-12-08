@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {FormHandler} from '../../../../../shared/models/form.model';
 import {Transaction} from '../../../transaction.model';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {today} from '../../../../../shared/utils/date.utils';
+import {getUTCDate, today} from '../../../../../shared/utils/date.utils';
 import {PreferenceStore} from '../../../../../shared/stores/preference.store';
 import {AccountStore} from '../../../../account/services/account.store';
 import {TransactionFormData} from '../models/form.model';
@@ -37,7 +37,7 @@ export class ExpenseIncomeFormHandler implements FormHandler<Transaction, Transa
       account: transaction.accountId,
       category: transaction.categoryId,
       currency: transaction.currency,
-      tags: transaction.tags
+      tags: transaction.tags.map(tag => tag.tagId)
     });
   }
 
@@ -60,7 +60,7 @@ export class ExpenseIncomeFormHandler implements FormHandler<Transaction, Transa
     const value = form.value;
     return {
       transactionId: value.transactionId,
-      date: value.date,
+      date: getUTCDate(value.date.getFullYear(), value.date.getMonth(), value.date.getDate()),
       amount: value.amount,
       description: value.description,
       accountId: value.account,

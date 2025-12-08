@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, output} from '@angular/core';
 import {IconsEnum} from '../../../../../../shared/models/icons.model';
 import {SvgComponent} from '../../../../../../shared/components/svg/svg.component';
 import {Account} from '../../../../account.model';
@@ -11,6 +11,9 @@ import {CurrencyPipe} from '../../../../../../shared/pipes/currency.pipe';
 import {TableActionsComponent} from '../../../../../../shared/components/table-actions/table-actions.component';
 import {AppConfirmationService} from '../../../../../../shared/services/confirmation.service';
 import {CellTemplateDirective} from '../../../../../../shared/directives/cell-template.directive';
+import {TranslationService} from '../../../../../../shared/services/translation.service';
+import {ChipComponent} from '../../../../../../shared/components/chip/chip.component';
+import {AccountStore} from '../../../../services/account.store';
 
 @Component({
   selector: 'app-account-table',
@@ -23,6 +26,7 @@ import {CellTemplateDirective} from '../../../../../../shared/directives/cell-te
     CurrencyPipe,
     CellTemplateDirective,
     TableActionsComponent,
+    ChipComponent,
   ],
   templateUrl: './account-table.component.html',
 })
@@ -34,28 +38,40 @@ export class AccountTableComponent {
   onEdit = output<Account>();
 
   protected readonly Icons = IconsEnum;
+  protected readonly accountStore = inject(AccountStore);
   private readonly confirmationService = inject(AppConfirmationService);
+  private readonly translateService = inject(TranslationService);
 
-  config = computed<TableConfig<Account>>(() => ({
-    currentPageReportTemplate: 'Showing {first} to {last} of {totalRecords} entries',
-    dataKey: 'accountId',
-    paginator: true,
-    rows: 5,
-    rowsPerPageOptions: [5, 10, 25, 50],
-    showCurrentPageReport: true,
-    stripedRows: true,
-    styleClass: 'mt-4'
-  }));
+  config = computed<TableConfig<Account>>(() => {
+    this.translateService.lang();
+    return {
+      currentPageReportTemplate: this.translateService.translate('app.table.pageReport', {
+        first: '{first}',
+        last: '{last}',
+        totalRecords: '{totalRecords}'
+      }),
+      dataKey: 'accountId',
+      paginator: true,
+      rows: 5,
+      rowsPerPageOptions: [5, 10, 25, 50],
+      showCurrentPageReport: true,
+      stripedRows: true,
+      styleClass: 'mt-4'
+    }
+  });
 
-  columns = signal<TableColumn<Account>[]>([
-    {field: 'accountName', header: 'Name', sortable: true},
-    {field: 'accountDescription', header: 'Description'},
-    {field: 'accountCategory', header: 'Category', sortable: true},
-    {field: 'currency', header: 'Currency', sortable: true},
-    {field: 'balance', header: 'Balance', sortable: true},
-    {field: 'balanceTarget', header: 'Balance Target', sortable: true},
-    {field: 'default', header: 'Default'}
-  ])
+  columns = computed<TableColumn<Account>[]>(() => {
+    this.translateService.lang();
+    return [
+      {field: 'accountName', header: this.translateService.translate('app.name'), sortable: true},
+      {field: 'accountDescription', header: this.translateService.translate('app.description')},
+      {field: 'accountCategory', header: this.translateService.translate('app.category'), sortable: true},
+      {field: 'currency', header: this.translateService.translate('app.currency'), sortable: true},
+      {field: 'balance', header: this.translateService.translate('app.balance'), sortable: true},
+      {field: 'balanceTarget', header: this.translateService.translate('app.balanceTarget'), sortable: true},
+      {field: 'default', header: this.translateService.translate('app.default')}
+    ]
+  })
 
   actions = computed<TableAction<Account>[]>(() => [
     {
@@ -72,9 +88,11 @@ export class AccountTableComponent {
 
   private confirmDelete(account: Account) {
     this.confirmationService.confirmDelete({
-      message: `Are you sure you want to delete the account "${account.accountName}"? All associated transactions will be deleted.`,
-      header: 'Delete Account',
+      message: this.translateService.translate('app.dialog.account.confirmDelete', {field: account.accountName}),
+      header: this.translateService.translate('app.dialog.account.delete'),
       accept: () => this.onDelete.emit(account)
     });
   }
+
+  protected readonly Number = Number;
 }

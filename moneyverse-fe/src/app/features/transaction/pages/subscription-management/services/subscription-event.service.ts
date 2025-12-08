@@ -19,7 +19,7 @@ export class SubscriptionEventService {
   private getStream(): Observable<SSEEvent> {
     if (!this.subscriptionStream$) {
       this.subscriptionStream$ = this.sseService.getStream(this.URL, {
-        userId: this.authService.authenticatedUser.userId
+        userId: this.authService.user().userId
       });
     }
     return this.subscriptionStream$;

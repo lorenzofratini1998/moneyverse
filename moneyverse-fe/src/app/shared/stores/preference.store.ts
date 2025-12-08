@@ -1,8 +1,10 @@
 import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
-import {PreferenceKey, UserPreference} from '../models/preference.model';
+import {PreferenceKey, UserPreference, UserPreferenceRequest} from '../models/preference.model';
 import {AuthService} from '../../core/auth/auth.service';
 import {computed, inject} from '@angular/core';
 import {PreferenceService} from '../services/preference.service';
+import {ToastService} from '../services/toast.service';
+import {TranslationService} from '../services/translation.service';
 
 interface PreferenceState {
   preferences: Partial<Record<PreferenceKey, UserPreference>>;
@@ -18,6 +20,8 @@ export const PreferenceStore = signalStore(
   withMethods((store) => {
     const preferenceService = inject(PreferenceService);
     const authService = inject(AuthService);
+    const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     return {
       loadPreference(key: PreferenceKey) {
@@ -25,7 +29,7 @@ export const PreferenceStore = signalStore(
           return;
         }
 
-        preferenceService.getUserPreference(authService.getAuthenticatedUser().userId, key)
+        preferenceService.getUserPreference(authService.user().userId, key)
           .subscribe({
             next: (preference) => {
               const updated = {...store.preferences(), [key]: preference};
@@ -38,7 +42,7 @@ export const PreferenceStore = signalStore(
       },
 
       loadPreferences() {
-        preferenceService.getUserPreferences(authService.getAuthenticatedUser().userId)
+        preferenceService.getUserPreferences(authService.user().userId)
           .subscribe({
             next: (preferences) => {
               const preferencesMap = preferences.reduce((acc, pref) => {
@@ -61,11 +65,31 @@ export const PreferenceStore = signalStore(
         }, {...currentPreferences});
 
         patchState(store, {preferences: updatedPreferences});
+        toastService.success(translateService.translate('app.message.preferences.update.success'));
       },
 
       updatePreference(key: PreferenceKey, preference: UserPreference) {
-        const updated = {...store.preferences(), [key]: preference};
-        patchState(store, {preferences: updated});
+        const request: UserPreferenceRequest[] = [{
+          preferenceId: preference.preference.preferenceId,
+          value: preference.value
+        }];
+
+        preferenceService.updateUserPreferences(preference.userId, request)
+          .subscribe({
+            next: (data) => {
+              const updatedPreference = data[0];
+
+              const updated = {
+                ...store.preferences(),
+                [key]: updatedPreference,
+              };
+
+              patchState(store, { preferences: updated });
+            },
+            error: (err) => {
+              toastService.error(translateService.translate('app.message.preferences.update.error'));
+            }
+          })
       },
 
       removePreference(key: PreferenceKey) {

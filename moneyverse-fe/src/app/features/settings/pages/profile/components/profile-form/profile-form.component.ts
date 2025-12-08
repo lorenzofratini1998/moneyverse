@@ -5,10 +5,12 @@ import {UserModel} from '../../../../../../core/auth/models/user.model';
 import {InputTextComponent} from '../../../../../../shared/components/forms/input-text/input-text.component';
 import {SubmitButtonComponent} from '../../../../../../shared/components/forms/submit-button/submit-button.component';
 import {ProfileFormHandler} from '../services/profile-form.handler';
+import {TranslatePipe} from '@ngx-translate/core';
 
 export interface ProfileFormData {
   firstName: string;
   lastName: string;
+  email: string;
 }
 
 @Component({
@@ -16,7 +18,8 @@ export interface ProfileFormData {
   imports: [
     ReactiveFormsModule,
     InputTextComponent,
-    SubmitButtonComponent
+    SubmitButtonComponent,
+    TranslatePipe
   ],
   templateUrl: './profile-form.component.html',
   styleUrl: './profile-form.component.scss'

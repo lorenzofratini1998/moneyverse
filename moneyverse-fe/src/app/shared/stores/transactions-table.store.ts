@@ -12,6 +12,7 @@ import {AuthService} from '../../core/auth/auth.service';
 import {ToastService} from '../services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
 import {switchMap, tap} from 'rxjs';
+import {TranslationService} from '../services/translation.service';
 
 type TransactionsTableState = {
   transactions: PageResponse<Transaction>,
@@ -39,14 +40,15 @@ export const TransactionsTableStore = signalStore(
     const transactionService = inject(TransactionService);
     const authService = inject(AuthService);
     const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     return {
       load: rxMethod<TransactionCriteria>((criteria$) =>
         criteria$.pipe(
-          switchMap(criteria => transactionService.getTransactionsByUser(authService.authenticatedUser.userId, criteria)),
+          switchMap(criteria => transactionService.getTransactionsByUser(authService.user().userId, criteria)),
           tap({
             next: (response) => patchState(store, {transactions: response}),
-            error: () => toastService.error('Failed to load transactions')
+            error: () => toastService.error(translateService.translate('app.message.transaction.load.error'))
           })
         )
       ),

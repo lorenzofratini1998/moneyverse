@@ -7,7 +7,7 @@
       [max]="max()"
       [minFractionDigits]="minFractionDigits()"
       [maxFractionDigits]="maxFractionDigits()"
-      [locale]="systemService.currentLanguage.locale"
+      [locale]="systemService.currentLanguage()?.locale ?? 'en-US'"
       [disabled]="disabled()"
       (onInput)="onInput($event)"
       (onBlur)="onBlur($event)"

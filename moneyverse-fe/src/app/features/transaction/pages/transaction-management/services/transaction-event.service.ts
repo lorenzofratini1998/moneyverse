@@ -20,7 +20,7 @@ export class TransactionEventService {
   private getStream(): Observable<SSEEvent> {
     if (!this.transactionStream$) {
       this.transactionStream$ = this.sseService.getStream(this.URL, {
-        userId: this.authService.authenticatedUser.userId
+        userId: this.authService.user().userId
       });
     }
     return this.transactionStream$;

@@ -1,6 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, computed, inject} from '@angular/core';
 import {RouterLink, RouterOutlet} from '@angular/router';
 import {Tab, TabList, Tabs} from 'primeng/tabs';
+import {TranslationService} from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-settings-management',
@@ -14,7 +15,7 @@ import {Tab, TabList, Tabs} from 'primeng/tabs';
   template: `
     <p-tabs value="profile" [scrollable]="true">
       <p-tablist>
-        @for (tab of tabs; track tab.route) {
+        @for (tab of tabs(); track tab.route) {
           <p-tab [value]="tab.route" [routerLink]="tab.route" class="flex items-center !gap-2 text-inherit">
             <i [class]="tab.icon"></i>
             <span>{{ tab.label }}</span>
@@ -37,9 +38,14 @@ import {Tab, TabList, Tabs} from 'primeng/tabs';
   ]
 })
 export class SettingsManagementComponent {
-  tabs = [
-    {route: 'profile', label: 'Profile', icon: 'pi pi-user-edit'},
-    {route: 'preferences', label: 'Preferences', icon: 'pi pi-cog'}
-  ]
+  private readonly translateService = inject(TranslationService);
+
+  tabs = computed(() => {
+    this.translateService.lang();
+    return [
+      {route: 'profile', label: this.translateService.translate('app.profile'), icon: 'pi pi-user-edit'},
+      {route: 'preferences', label: this.translateService.translate('app.preferences'), icon: 'pi pi-cog'}
+    ]
+  })
 
 }

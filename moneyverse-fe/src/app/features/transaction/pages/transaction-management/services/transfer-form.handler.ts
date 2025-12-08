@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {FormHandler} from '../../../../../shared/models/form.model';
 import {Transfer} from '../../../transaction.model';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {today} from '../../../../../shared/utils/date.utils';
+import {getUTCDate, today} from '../../../../../shared/utils/date.utils';
 import {PreferenceStore} from '../../../../../shared/stores/preference.store';
 import {TransferFormData} from "../models/form.model";
 
@@ -52,7 +52,7 @@ export class TransferFormHandler implements FormHandler<Transfer, TransferFormDa
     const value = form.value;
     return {
       transferId: value.transferId,
-      date: value.date,
+      date: getUTCDate(value.date.getFullYear(), value.date.getMonth(), value.date.getDate()),
       amount: value.amount,
       currency: value.currency,
       fromAccount: value.fromAccount,

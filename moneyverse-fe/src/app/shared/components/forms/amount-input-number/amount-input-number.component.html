@@ -5,7 +5,7 @@
       [(ngModel)]="value"
       mode="currency"
       [currency]="currency()"
-      [locale]="systemService.currentLanguage.locale"
+      [locale]="systemService.currentLanguage()?.locale ?? 'en-US'"
       [disabled]="disabled()"
       (onInput)="onInput($event)"
       (onBlur)="onBlur($event)"
@@ -20,6 +20,8 @@
     />
   </p-float-label>
   @if (showError) {
-    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+    <p-message severity="error" size="small" variant="simple">
+      {{ errorMessage }}
+    </p-message>
   }
 </div>

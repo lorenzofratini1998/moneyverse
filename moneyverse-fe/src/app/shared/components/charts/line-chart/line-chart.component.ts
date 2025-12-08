@@ -34,14 +34,18 @@ export class LineChartComponent extends ChartComponent {
     smooth: true,
     tooltipFormatter: (params: any[]) => {
       const currency = this.preferenceStore.userCurrency();
-      return params
-        .map(p =>
-          `${p.seriesName}: ${this.currencyPipe.transform(
-            p.value,
-            currency
-          )}`
-        )
-        .join('<br/>');
+      const label = params[0].axisValueLabel || params[0].axisValue;
+      const lines = params.map(p => {
+        const rawValue = typeof p.value === 'object' ? p.value.value : p.value;
+        const formatted = this.currencyPipe.transform(rawValue, currency);
+
+        return `
+      ${p.marker}
+      ${p.seriesName}:&nbsp;&nbsp;<b>${formatted}</b>
+    `;
+      });
+
+      return `<strong>${label}</strong><br/>` + lines.join('<br/>');
     },
     yAxisFormatter: (value: number) => {
       return this.currencyPipe.transform(value, this.preferenceStore.userCurrency());

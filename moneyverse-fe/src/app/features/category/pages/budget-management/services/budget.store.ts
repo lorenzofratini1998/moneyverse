@@ -1,12 +1,14 @@
 import {Budget, BudgetRequest} from '../../../category.model';
 import {patchState, signalStore, withComputed, withHooks, withMethods, withState} from '@ngrx/signals';
-import {computed, inject} from '@angular/core';
+import {computed, effect, inject} from '@angular/core';
 import {CategoryService} from '../../../services/category.service';
 import {AuthService} from '../../../../../core/auth/auth.service';
 import {ToastService} from '../../../../../shared/services/toast.service';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
 import {debounceTime, filter, merge, Subscription, switchMap, tap} from 'rxjs';
 import {BudgetEventService} from './budget-event.service';
+import {TranslationService} from '../../../../../shared/services/translation.service';
+import {SystemService} from '../../../../../core/services/system.service';
 
 interface BudgetState {
   budgets: Budget[];
@@ -24,6 +26,7 @@ export const BudgetStore = signalStore(
     const categoryService = inject(CategoryService);
     const authService = inject(AuthService);
     const toastService = inject(ToastService);
+    const translateService = inject(TranslationService);
 
     const loadBudgets = rxMethod<boolean | void>((trigger) =>
       trigger.pipe(
@@ -33,11 +36,11 @@ export const BudgetStore = signalStore(
           return store.budgets().length === 0 || refresh;
         }),
         switchMap(() => {
-          const userId = authService.authenticatedUser.userId;
+          const userId = authService.user().userId;
           return categoryService.getBudgetsByUser(userId).pipe(
             tap({
               next: (budgets) => patchState(store, {budgets: budgets}),
-              error: () => toastService.error('Failed to load budgets')
+              error: () => toastService.error(translateService.translate('app.message.budget.load.error'))
             })
           );
         })
@@ -51,8 +54,8 @@ export const BudgetStore = signalStore(
         request$.pipe(
           switchMap((request) => categoryService.createBudget(request)),
           tap({
-            next: () => toastService.success('Budget created successfully'),
-            error: () => toastService.error('Failed to create budget')
+            next: () => toastService.success(translateService.translate('app.message.budget.create.success')),
+            error: () => toastService.error(translateService.translate('app.message.budget.create.error'))
           })
         )
       ),
@@ -61,8 +64,8 @@ export const BudgetStore = signalStore(
         request$.pipe(
           switchMap(({budgetId, request}) => categoryService.updateBudget(budgetId, request)),
           tap({
-            next: () => toastService.success('Budget updated successfully'),
-            error: () => toastService.error('Failed to update budget')
+            next: () => toastService.success(translateService.translate('app.message.budget.update.success')),
+            error: () => toastService.error(translateService.translate('app.message.budget.update.error'))
           })
         )
       ),
@@ -71,8 +74,8 @@ export const BudgetStore = signalStore(
         budgetId$.pipe(
           switchMap((budgetId) => categoryService.deleteBudget(budgetId)),
           tap({
-            next: () => toastService.success('Budget deleted successfully'),
-            error: () => toastService.error('Failed to delete budget')
+            next: () => toastService.success(translateService.translate('app.message.budget.delete.success')),
+            error: () => toastService.error(translateService.translate('app.message.budget.delete.error'))
           })
         )
       )
@@ -85,12 +88,19 @@ export const BudgetStore = signalStore(
   })),
 
   withHooks((store) => {
+    const systemService = inject(SystemService);
     const eventService = inject(BudgetEventService);
     const subscriptions = new Subscription();
 
     return {
       onInit() {
-        store.loadBudgets(true);
+        effect(() => {
+          const translationsReady = systemService.translationsReady();
+          if (translationsReady) {
+            store.loadBudgets(true);
+          }
+        });
+
         const reloadEvents$ = merge(
           eventService.onBudgetCreated(),
           eventService.onBudgetUpdated(),

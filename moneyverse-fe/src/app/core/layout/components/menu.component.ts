@@ -23,71 +23,71 @@ export class MenuComponent {
     {
       routerLink: '/overview',
       icon: 'home',
-      label: 'menu.overview'
+      label: 'app.overview'
     },
     {
       routerLink: '/accounts',
       icon: 'layers',
-      label: 'menu.accounts.title',
+      label: 'app.accounts',
       items: [
         {
-          routerLink: '/accounts/dashboard',
+          routerLink: '/accounts/analytics',
           icon: 'chart-pie',
-          label: 'menu.accounts.dashboard'
+          label: 'app.analytics'
         },
         {
           routerLink: '/accounts/manage',
           icon: 'table',
-          label: 'menu.accounts.manage'
+          label: 'app.manageAccounts'
         }
       ]
     },
     {
       routerLink: '/categories',
       icon: 'shapes',
-      label: 'menu.categories.title',
+      label: 'app.categories',
       items: [
         {
-          routerLink: '/categories/dashboard',
+          routerLink: '/categories/analytics',
           icon: 'chart-pie',
-          label: 'menu.categories.dashboard'
+          label: 'app.analytics'
         },
         {
           routerLink: '/categories/budgeting',
           icon: 'coins',
-          label: 'menu.categories.budgeting'
+          label: 'app.budgeting'
         },
         {
           routerLink: '/categories/manage',
           icon: 'table',
-          label: 'menu.categories.manage'
+          label: 'app.manageCategories'
         }
       ]
     },
     {
       routerLink: '/transactions',
       icon: 'credit-card',
-      label: 'menu.transactions.title',
+      label: 'app.transactions',
       items: [
         {
           routerLink: '/transactions/analytics',
           icon: 'chart-pie',
-          label: 'menu.transactions.analytics'
+          label: 'app.analytics'
         },
         {
           routerLink: '/transactions/manage',
           icon: 'table',
-          label: 'menu.transactions.manage'
+          label: 'app.manageTransactions'
         },
         {
           routerLink: '/transactions/tags',
           icon: 'tag',
-          label: 'menu.transactions.tags'
+          label: 'app.tags'
         },
         {
           routerLink: '/transactions/subscriptions',
           icon: 'calendar-sync',
-          label: 'menu.transactions.subscriptions'
+          label: 'app.subscriptions'
         }
       ]
     }

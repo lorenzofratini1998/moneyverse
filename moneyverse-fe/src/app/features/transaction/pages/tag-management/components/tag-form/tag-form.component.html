@@ -11,12 +11,12 @@
   <div class="grid grid-cols-1">
     <app-input-text formControlName="tagName"
                     id="tag-name-input"
-                    label="Tag Name"
+                    [label]="'app.form.tagName' | translate"
                     [required]="true"/>
   </div>
   <div class="grid grid-cols-1">
     <app-text-area formControlName="description"
                    id="tag-description-textarea"
-                   label="Description"/>
+                   [label]="'app.description' | translate"/>
   </div>
 </form>
