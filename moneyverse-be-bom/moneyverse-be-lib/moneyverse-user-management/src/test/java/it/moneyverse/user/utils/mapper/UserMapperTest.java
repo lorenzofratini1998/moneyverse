@@ -51,6 +51,5 @@ class UserMapperTest {
 
     assertEquals(request.firstName(), result.getFirstName());
     assertEquals(request.lastName(), result.getLastName());
-    assertEquals(request.email(), result.getEmail());
   }
 }

@@ -77,7 +77,7 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
     AccountCategory category = getRandomAccountCategory();
     return AccountTestFactory.AccountRequestDtoBuilder.builder()
         .withUserId(userId)
-        .withAccountCategory(category.getName())
+        .withAccountCategory(category.getAccountCategoryId())
         .build();
   }
 
@@ -126,7 +126,7 @@ public class AccountTestContext extends TestContext<AccountTestContext> {
   private Predicate<Account> byAccountCategory(Optional<List<String>> accountCategory) {
     return account ->
         accountCategory
-            .map(category -> category.contains(account.getAccountCategory().getName()))
+            .map(category -> category.contains(account.getAccountCategory().getAccountCategoryId().toString()))
             .orElse(true);
   }
 

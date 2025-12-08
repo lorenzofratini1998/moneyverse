@@ -39,7 +39,8 @@ public class AccountAnalyticsKpiQuery extends AbstractFilterQuery<AccountAnalyti
             argMax(t.AMOUNT, t.EVENT_TIMESTAMP) AS AMOUNT,
             argMax(t.NORMALIZED_AMOUNT, t.EVENT_TIMESTAMP) AS NORMALIZED_AMOUNT,
             argMax(t.CURRENCY, t.EVENT_TIMESTAMP) AS CURRENCY,
-            argMax(t.DATE, t.EVENT_TIMESTAMP) AS DATE
+            argMax(t.DATE, t.EVENT_TIMESTAMP) AS DATE,
+            argMax(t.EVENT_TYPE, t.EVENT_TIMESTAMP) AS LAST_EVENT_TYPE
          FROM TRANSACTION_EVENTS t
          WHERE t.USER_ID = :userId
            AND (
@@ -50,8 +51,8 @@ public class AccountAnalyticsKpiQuery extends AbstractFilterQuery<AccountAnalyti
            AND (empty([:categories]) OR t.CATEGORY_ID IN [:categories])
            AND (empty([:tags]) OR hasAny(t.TAGS, arrayMap(x -> toUUID(x), [:tags])))
            AND (empty(:currency) OR t.CURRENCY = :currency)
-           AND t.EVENT_TYPE != 2
          GROUP BY coalesce(t.ORIGINAL_TRANSACTION_ID, t.TRANSACTION_ID)
+         HAVING LAST_EVENT_TYPE != 2
         ),
         current_account_stats AS (
          SELECT

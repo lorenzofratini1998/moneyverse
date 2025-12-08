@@ -251,7 +251,7 @@ class AccountManagementControllerTest {
         RandomUtils.randomString(15),
         RandomUtils.randomBigDecimal(),
         RandomUtils.randomBigDecimal(),
-        RandomUtils.randomString(15),
+        RandomUtils.randomLong(),
         RandomUtils.randomString(15),
         null,
         null);

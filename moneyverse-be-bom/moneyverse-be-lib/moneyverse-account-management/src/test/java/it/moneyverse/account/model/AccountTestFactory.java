@@ -133,7 +133,7 @@ public class AccountTestFactory {
     private final BigDecimal balance = RandomUtils.flipCoin() ? FAKE_BALANCE.get() : null;
     private final BigDecimal balanceTarget =
         RandomUtils.flipCoin() ? FAKE_BALANCE_TARGET.get() : null;
-    private String accountCategory = FAKE_ACCOUNT_CATEGORY_NAME.get();
+    private Long accountCategory = RandomUtils.randomLong();
     private final String accountDescription =
         RandomUtils.flipCoin() ? FAKE_DESCRIPTION.get() : null;
     private String currency = FAKE_CURRENCY.get();
@@ -172,7 +172,7 @@ public class AccountTestFactory {
       return this;
     }
 
-    public AccountRequestDtoBuilder withAccountCategory(String accountCategory) {
+    public AccountRequestDtoBuilder withAccountCategory(Long accountCategory) {
       this.accountCategory = accountCategory;
       return this;
     }
@@ -202,12 +202,12 @@ public class AccountTestFactory {
     private final String accountName = FAKE_ACCOUNT_NAME.get();
     private final BigDecimal balance = FAKE_BALANCE.get();
     private final BigDecimal balanceTarget = FAKE_BALANCE_TARGET.get();
-    private String accountCategory = FAKE_ACCOUNT_CATEGORY_NAME.get();
+    private Long accountCategory = RandomUtils.randomLong();
     private final String accountDescription = FAKE_DESCRIPTION.get();
     private Boolean isDefault = FAKE_DEFAULT.get();
     private StyleRequestDto style = FAKE_STYLE_REQUEST.get();
 
-    public AccountUpdateRequestDtoBuilder withAccountCategory(String accountCategory) {
+    public AccountUpdateRequestDtoBuilder withAccountCategory(Long accountCategory) {
       this.accountCategory = accountCategory;
       return this;
     }
@@ -289,7 +289,7 @@ public class AccountTestFactory {
       return criteria -> {
         criteria.setAccountCategories(
             RandomUtils.flipCoin()
-                ? List.of(testContext.getRandomAccountCategory().getName())
+                ? List.of(testContext.getRandomAccountCategory().getAccountCategoryId().toString())
                 : null);
         return criteria;
       };

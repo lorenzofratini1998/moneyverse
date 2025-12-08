@@ -18,8 +18,9 @@ import it.moneyverse.transaction.utils.DateCalculator;
 import it.moneyverse.transaction.utils.mapper.SubscriptionMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -88,7 +89,7 @@ public class SubscriptionManagementService implements SubscriptionService {
   }
 
   private void addTransactions(Subscription subscription) {
-    LOGGER.info("Adding transactions for subscription {}", subscription.getSubscriptionId());
+    LOGGER.info("Adding transactions for subscription {} with startDate {}", subscription.getSubscriptionName(), subscription.getStartDate());
     List<Transaction> transactions = createSubscriptionTransactions(subscription);
     transactions.forEach(subscription::addTransaction);
     updateTotalAmount(subscription);
@@ -96,7 +97,7 @@ public class SubscriptionManagementService implements SubscriptionService {
 
   private List<Transaction> createSubscriptionTransactions(Subscription subscription) {
     LOGGER.info(
-        "Creating previous transactions for subscription {}", subscription.getSubscriptionId());
+        "Creating previous transactions for subscription {}", subscription.getSubscriptionName());
     DateCalculator dateCalculator = new DateCalculator(subscription.getRecurrenceRule());
     List<LocalDate> dates =
         dateCalculator.calculateDates(subscription.getStartDate(), getEndDate(subscription));
@@ -150,20 +151,20 @@ public class SubscriptionManagementService implements SubscriptionService {
       UUID subscriptionId, SubscriptionUpdateRequestDto request) {
     Subscription subscription = getSubscriptionById(subscriptionId);
     Subscription originalSubscription = subscription.copy();
+
     transactionValidator.validate(request);
     LOGGER.info("Updating subscription {}", subscriptionId);
+
     subscription = SubscriptionMapper.partialUpdate(subscription, request);
-    if (request.categoryId() != null) {
-      for (Transaction transaction : subscription.getTransactions()) {
-        transaction.setCategoryId(request.categoryId());
-        transaction.setBudgetId(
-            budgetServiceClient.getBudgetId(request.categoryId(), transaction.getDate()));
-      }
+    syncSubscriptionTransactions(subscription);
+    if (subscription.getTransactions().size() != originalSubscription.getTransactions().size()) {
+        calculateNextExecutionDate(subscription);
     }
+    updateTransactionsCategory(subscription, request.categoryId());
+
     subscription = subscriptionRepository.save(subscription);
-    if (request.categoryId() != null) {
-      transactionEventPublisher.publish(subscription, originalSubscription, EventTypeEnum.UPDATE);
-    }
+
+    transactionEventPublisher.publish(subscription, originalSubscription, EventTypeEnum.UPDATE);
     SubscriptionDto result = SubscriptionMapper.toSubscriptionDto(subscription);
     eventService.publishEvent(
         securityService.getAuthenticatedUserId(),
@@ -179,6 +180,81 @@ public class SubscriptionManagementService implements SubscriptionService {
             () ->
                 new ResourceNotFoundException(
                     "Subscription %s not found".formatted(subscriptionId)));
+  }
+
+  private void updateTransactionsCategory(Subscription subscription, UUID categoryId) {
+    if (categoryId == null) {
+      return;
+    }
+
+    subscription
+        .getTransactions()
+        .forEach(
+            transaction -> {
+              transaction.setCategoryId(categoryId);
+              transaction.setBudgetId(
+                  budgetServiceClient.getBudgetId(categoryId, transaction.getDate()));
+            });
+  }
+
+  private void syncSubscriptionTransactions(Subscription subscription) {
+    DateCalculator dateCalculator = new DateCalculator(subscription.getRecurrenceRule());
+    List<LocalDate> expectedDates =
+        dateCalculator.calculateDates(subscription.getStartDate(), getEndDate(subscription));
+
+    Map<LocalDate, Transaction> existingByDate =
+        subscription.getTransactions().stream()
+            .collect(Collectors.toMap(Transaction::getDate, Function.identity()));
+
+    createMissingTransactions(subscription, expectedDates, existingByDate);
+    removeObsoleteTransactions(subscription, expectedDates);
+    updateExistingTransactions(subscription, expectedDates, existingByDate);
+
+    updateTotalAmount(subscription);
+  }
+
+  private void createMissingTransactions(
+      Subscription subscription,
+      List<LocalDate> expectedDates,
+      Map<LocalDate, Transaction> existingByDate) {
+
+    LOGGER.info(
+        "Creating missing transactions for subscription {}", subscription.getSubscriptionId());
+    expectedDates.stream()
+        .filter(date -> !existingByDate.containsKey(date))
+        .forEach(
+            date -> {
+              Transaction transaction =
+                  transactionFactoryService.createTransaction(subscription, date);
+              subscription.addTransaction(transaction);
+            });
+  }
+
+  private void removeObsoleteTransactions(
+      Subscription subscription, List<LocalDate> expectedDates) {
+    LOGGER.info(
+        "Removing obsolete transactions for subscription {}", subscription.getSubscriptionId());
+    Set<LocalDate> expectedDatesSet = new HashSet<>(expectedDates);
+    subscription.getTransactions().removeIf(t -> !expectedDatesSet.contains(t.getDate()));
+  }
+
+  private void updateExistingTransactions(
+      Subscription subscription,
+      List<LocalDate> expectedDates,
+      Map<LocalDate, Transaction> existingByDate) {
+
+    LOGGER.info(
+        "Updating existing transactions for subscription {}", subscription.getSubscriptionId());
+    expectedDates.stream()
+        .map(existingByDate::get)
+        .filter(Objects::nonNull)
+        .forEach(
+            transaction -> {
+              Transaction managedTransaction =
+                  subscription.getTransaction(transaction.getTransactionId());
+              transactionFactoryService.updateTransaction(
+                  managedTransaction, subscription, transaction.getDate());
+            });
   }
 
   @Override

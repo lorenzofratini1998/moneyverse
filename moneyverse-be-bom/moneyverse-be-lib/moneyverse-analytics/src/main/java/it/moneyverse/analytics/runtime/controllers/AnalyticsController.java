@@ -5,11 +5,15 @@ import it.moneyverse.analytics.services.AccountAnalyticsService;
 import it.moneyverse.analytics.services.CategoryAnalyticsService;
 import it.moneyverse.analytics.services.OverviewAnalyticsService;
 import it.moneyverse.analytics.services.TransactionAnalyticsService;
+import it.moneyverse.core.model.events.SseEmitterRepository;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping(value = "${spring.security.base-path}")
@@ -20,12 +24,14 @@ public class AnalyticsController implements AccountAnalyticsOperations, Category
     private final CategoryAnalyticsService categoryAnalyticsService;
     private final TransactionAnalyticsService transactionAnalyticsService;
     private final OverviewAnalyticsService overviewAnalyticsService;
+    private final SseEmitterRepository sseEmitterRepository;
 
-    public AnalyticsController(AccountAnalyticsService accountAnalyticsService, CategoryAnalyticsService categoryAnalyticsService, TransactionAnalyticsService transactionAnalyticsService, OverviewAnalyticsService overviewAnalyticsService) {
+    public AnalyticsController(AccountAnalyticsService accountAnalyticsService, CategoryAnalyticsService categoryAnalyticsService, TransactionAnalyticsService transactionAnalyticsService, OverviewAnalyticsService overviewAnalyticsService, SseEmitterRepository sseEmitterRepository) {
         this.accountAnalyticsService = accountAnalyticsService;
         this.categoryAnalyticsService = categoryAnalyticsService;
         this.transactionAnalyticsService = transactionAnalyticsService;
         this.overviewAnalyticsService = overviewAnalyticsService;
+        this.sseEmitterRepository = sseEmitterRepository;
     }
 
     @Override
@@ -106,5 +112,18 @@ public class AnalyticsController implements AccountAnalyticsOperations, Category
     @PreAuthorize("@securityService.isAuthenticatedUserOwner(#request.userId)")
     public List<OverviewAnalyticsDto> calculateOverview(@RequestBody UserIdRequest request) {
         return overviewAnalyticsService.calculateOverview(request.userId());
+    }
+
+    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public SseEmitter subscribe(@RequestParam UUID userId) {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        sseEmitterRepository.add(userId, emitter);
+
+        emitter.onCompletion(() -> sseEmitterRepository.remove(userId, emitter));
+        emitter.onTimeout(() -> sseEmitterRepository.remove(userId, emitter));
+        emitter.onError((error) -> sseEmitterRepository.remove(userId, emitter));
+
+        return emitter;
     }
 }

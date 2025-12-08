@@ -23,7 +23,7 @@ public interface AccountService {
 
   List<AccountCategoryDto> getAccountCategories();
 
-  void incrementAccountBalance(UUID accountId, BigDecimal amount, String currency, LocalDate date);
+  void incrementAccountBalance(UUID accountId, BigDecimal amount, String currency, LocalDate date, UUID userId);
 
-  void decrementAccountBalance(UUID accountId, BigDecimal amount, String currency, LocalDate date);
+  void decrementAccountBalance(UUID accountId, BigDecimal amount, String currency, LocalDate date, UUID userId);
 }

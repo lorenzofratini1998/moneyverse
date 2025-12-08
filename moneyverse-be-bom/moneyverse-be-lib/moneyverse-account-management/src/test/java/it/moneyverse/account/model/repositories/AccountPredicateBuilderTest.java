@@ -39,8 +39,9 @@ class AccountPredicateBuilderTest {
       @Mock Path<Object> accountCategoryPath) {
     UUID userId = RandomUtils.randomUUID();
     when(root.get(Account_.ACCOUNT_CATEGORY)).thenReturn(accountCategoryPath);
+    when(accountCategoryPath.get(Account_.ACCOUNT_CATEGORY)).thenReturn(accountCategoryPath);
     when(criteria.getAccountCategories())
-        .thenReturn(Optional.of(List.of(RandomUtils.randomString(15))));
+        .thenReturn(Optional.of(List.of(RandomUtils.randomLong().toString())));
     when(criteria.getCurrencies()).thenReturn(Optional.of(List.of(RandomUtils.randomString(3))));
     when(criteria.getIsDefault()).thenReturn(Optional.of(RandomUtils.randomBoolean()));
     when(criteria.getBalance()).thenReturn(Optional.of(randomBoundCriteria()));

@@ -92,7 +92,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
         request.balance() != null ? request.balance() : BigDecimal.ZERO,
         response.getBody().getBalance());
     assertEquals(request.balanceTarget(), response.getBody().getBalanceTarget());
-    assertEquals(request.accountCategory(), response.getBody().getAccountCategory());
+    assertEquals(request.accountCategory(), Long.parseLong(response.getBody().getAccountCategory()));
     assertEquals(request.accountDescription(), response.getBody().getAccountDescription());
     assertEquals(request.currency(), response.getBody().getCurrency());
   }
@@ -136,7 +136,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(account.getBalance(), response.getBody().getBalance());
     assertEquals(account.getBalanceTarget(), response.getBody().getBalanceTarget());
     assertEquals(account.getCurrency(), response.getBody().getCurrency());
-    assertEquals(account.getAccountCategory().getName(), response.getBody().getAccountCategory());
+    assertEquals(account.getAccountCategory().getAccountCategoryId(), Long.parseLong(response.getBody().getAccountCategory()));
     assertEquals(account.getAccountDescription(), response.getBody().getAccountDescription());
     assertEquals(account.isDefault(), response.getBody().isDefault());
   }
@@ -148,7 +148,7 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     final AccountCategory category = testContext.getRandomAccountCategory();
     AccountUpdateRequestDto request =
         AccountTestFactory.AccountUpdateRequestDtoBuilder.builder()
-            .withAccountCategory(category.getName())
+            .withAccountCategory(category.getAccountCategoryId())
             .build();
 
     headers.setBearerAuth(testContext.getAuthenticationToken(user.getUserId()));
@@ -175,8 +175,8 @@ class AccountManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(
         request.accountCategory() != null
             ? request.accountCategory()
-            : account.getAccountCategory().getName(),
-        response.getBody().getAccountCategory());
+            : account.getAccountCategory().getAccountCategoryId(),
+        Long.parseLong(response.getBody().getAccountCategory()));
     assertEquals(
         request.accountDescription() != null
             ? request.accountDescription()

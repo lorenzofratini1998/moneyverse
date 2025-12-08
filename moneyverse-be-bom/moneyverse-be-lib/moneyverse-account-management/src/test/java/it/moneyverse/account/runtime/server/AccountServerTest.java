@@ -71,7 +71,7 @@ class AccountServerTest {
     when(account.getBalance()).thenReturn(RandomUtils.randomBigDecimal());
     when(account.getBalanceTarget()).thenReturn(RandomUtils.randomBigDecimal());
     when(account.getAccountCategory()).thenReturn(accountCategory);
-    when(accountCategory.getName()).thenReturn(RandomUtils.randomString(15));
+    when(accountCategory.getAccountCategoryId()).thenReturn(RandomUtils.randomLong());
     when(account.getAccountDescription()).thenReturn(RandomUtils.randomString(15));
     when(account.getCurrency()).thenReturn(RandomUtils.randomString(15));
     when(account.isDefault()).thenReturn(true);

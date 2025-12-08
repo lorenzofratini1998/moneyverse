@@ -11,7 +11,11 @@ import it.moneyverse.transaction.model.entities.Transaction;
 import it.moneyverse.transaction.model.entities.Transfer;
 import it.moneyverse.transaction.model.factories.TransactionEventFactory;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -96,14 +100,56 @@ public class TransactionEventPublisher extends AbstractEventPublisher<Transactio
 
   public void publish(
       Subscription subscription, Subscription originalSubscription, EventTypeEnum eventType) {
-    subscription
-        .getTransactions()
+    Map<UUID, Transaction> originalTransactionsMap =
+        originalSubscription.getTransactions().stream()
+            .collect(Collectors.toMap(Transaction::getTransactionId, Function.identity()));
+
+    Map<UUID, Transaction> currentTransactionsMap =
+        subscription.getTransactions().stream()
+            .collect(Collectors.toMap(Transaction::getTransactionId, Function.identity()));
+
+    handleCreatedSubscriptionTransactions(currentTransactionsMap, originalTransactionsMap);
+    handleUpdatedSubscriptionTransactions(currentTransactionsMap, originalTransactionsMap);
+    handleDeletedSubscriptionTransactions(currentTransactionsMap, originalTransactionsMap);
+  }
+
+  private void handleCreatedSubscriptionTransactions(
+      Map<UUID, Transaction> currentTransactionsMap,
+      Map<UUID, Transaction> originalTransactionsMap) {
+    currentTransactionsMap.values().stream()
+        .filter(transaction -> !originalTransactionsMap.containsKey(transaction.getTransactionId()))
+        .forEach(transaction -> publish(transaction, EventTypeEnum.CREATE));
+  }
+
+  private void handleUpdatedSubscriptionTransactions(
+      Map<UUID, Transaction> currentTransactionsMap,
+      Map<UUID, Transaction> originalTransactionsMap) {
+    currentTransactionsMap.values().stream()
+        .filter(transaction -> originalTransactionsMap.containsKey(transaction.getTransactionId()))
         .forEach(
             transaction -> {
               Transaction originalTransaction =
-                  getTransaction(originalSubscription, transaction.getTransactionId());
-              publishEvent(transaction, originalTransaction, eventType);
+                  originalTransactionsMap.get(transaction.getTransactionId());
+              if (hasChanged(transaction, originalTransaction)) {
+                publish(transaction, originalTransaction, EventTypeEnum.UPDATE);
+              }
             });
+  }
+
+  private boolean hasChanged(Transaction current, Transaction original) {
+    return !Objects.equals(current.getAmount(), original.getAmount())
+        || !Objects.equals(current.getDate(), original.getDate())
+        || !Objects.equals(current.getCategoryId(), original.getCategoryId())
+        || !Objects.equals(current.getBudgetId(), original.getBudgetId())
+        || !Objects.equals(current.getDescription(), original.getDescription());
+  }
+
+  private void handleDeletedSubscriptionTransactions(
+      Map<UUID, Transaction> currentTransactionsMap,
+      Map<UUID, Transaction> originalTransactionsMap) {
+    originalTransactionsMap.values().stream()
+        .filter(transaction -> !currentTransactionsMap.containsKey(transaction.getTransactionId()))
+        .forEach(transaction -> publish(transaction, EventTypeEnum.DELETE));
   }
 
   private Transaction getTransaction(Subscription subscription, UUID transactionId) {

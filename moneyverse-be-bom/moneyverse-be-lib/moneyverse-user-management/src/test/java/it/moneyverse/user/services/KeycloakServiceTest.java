@@ -116,7 +116,6 @@ class KeycloakServiceTest {
 
     assertNotNull(result);
     verify(userResource, times(1)).update(user);
-    verify(userResource, times(1)).sendVerifyEmail();
   }
 
   @Test

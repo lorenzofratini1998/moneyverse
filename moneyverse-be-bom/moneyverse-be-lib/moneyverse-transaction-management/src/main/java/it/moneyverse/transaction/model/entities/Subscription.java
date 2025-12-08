@@ -1,5 +1,6 @@
 package it.moneyverse.transaction.model.entities;
 
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.model.entities.Auditable;
 import it.moneyverse.core.model.entities.Copyable;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
@@ -87,7 +89,16 @@ public class Subscription extends Auditable implements Serializable, Copyable<Su
 
   @Override
   public Subscription copy() {
-    return new Subscription(this);
+    Subscription copy = new Subscription(this);
+
+    if (this.transactions != null) {
+      copy.transactions =
+          this.transactions.stream()
+              .map(Transaction::copy)
+              .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    return copy;
   }
 
   public void addTransaction(Transaction transaction) {
@@ -98,6 +109,16 @@ public class Subscription extends Auditable implements Serializable, Copyable<Su
   public void removeTransaction(Transaction transaction) {
     transactions.remove(transaction);
     transaction.setSubscription(null);
+  }
+
+  public Transaction getTransaction(UUID transactionId) {
+    return transactions.stream()
+        .filter(transaction -> transaction.getTransactionId().equals(transactionId))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Transaction with id %s not found".formatted(transactionId)));
   }
 
   public UUID getSubscriptionId() {

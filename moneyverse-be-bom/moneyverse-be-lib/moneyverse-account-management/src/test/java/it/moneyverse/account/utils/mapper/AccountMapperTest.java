@@ -48,7 +48,7 @@ class AccountMapperTest {
     category.setName(RandomUtils.randomString(15).toUpperCase());
     AccountRequestDto request =
         AccountTestFactory.AccountRequestDtoBuilder.builder()
-            .withAccountCategory(category.getName())
+            .withAccountCategory(category.getAccountCategoryId())
             .build();
 
     Account account = AccountMapper.toAccount(request, category);
@@ -58,7 +58,7 @@ class AccountMapperTest {
     assertEquals(
         request.balance() != null ? request.balance() : BigDecimal.ZERO, account.getBalance());
     assertEquals(request.balanceTarget(), account.getBalanceTarget());
-    assertEquals(request.accountCategory(), account.getAccountCategory().getName());
+    assertEquals(request.accountCategory(), account.getAccountCategory().getAccountCategoryId());
     assertEquals(request.accountDescription(), account.getAccountDescription());
     assertEquals(request.currency(), account.getCurrency());
   }
@@ -80,7 +80,7 @@ class AccountMapperTest {
     assertEquals(account.getBalance(), accountDto.getBalance());
     assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
     assertEquals(account.getCurrency(), accountDto.getCurrency());
-    assertEquals(account.getAccountCategory().getName(), accountDto.getAccountCategory());
+    assertEquals(account.getAccountCategory().getAccountCategoryId().toString(), accountDto.getAccountCategory());
     assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
     assertEquals(account.isDefault(), accountDto.isDefault());
   }
@@ -109,7 +109,7 @@ class AccountMapperTest {
       assertEquals(account.getAccountName(), accountDto.getAccountName());
       assertEquals(account.getBalance(), accountDto.getBalance());
       assertEquals(account.getBalanceTarget(), accountDto.getBalanceTarget());
-      assertEquals(account.getAccountCategory().getName(), accountDto.getAccountCategory());
+      assertEquals(account.getAccountCategory().getAccountCategoryId().toString(), accountDto.getAccountCategory());
       assertEquals(account.getAccountDescription(), accountDto.getAccountDescription());
       assertEquals(account.isDefault(), accountDto.isDefault());
     }
@@ -120,12 +120,13 @@ class AccountMapperTest {
     Account account = AccountTestFactory.fakeAccount();
     AccountCategory category = new AccountCategory();
     category.setName(RandomUtils.randomString(15).toUpperCase());
+    category.setAccountCategoryId(RandomUtils.randomLong());
     AccountUpdateRequestDto request =
         new AccountUpdateRequestDto(
             RandomUtils.randomString(25),
             RandomUtils.randomBigDecimal(),
             RandomUtils.randomBigDecimal(),
-            category.getName(),
+            category.getAccountCategoryId(),
             RandomUtils.randomString(25),
             RandomUtils.randomBoolean(),
             new StyleRequestDto(RandomUtils.randomString(15), RandomUtils.randomString(15)));
@@ -135,7 +136,7 @@ class AccountMapperTest {
     assertEquals(request.accountName(), result.getAccountName());
     assertEquals(request.balance(), result.getBalance());
     assertEquals(request.balanceTarget(), result.getBalanceTarget());
-    assertEquals(request.accountCategory(), result.getAccountCategory().getName());
+    assertEquals(request.accountCategory(), result.getAccountCategory().getAccountCategoryId());
     assertEquals(request.accountDescription(), result.getAccountDescription());
     assertEquals(request.isDefault(), result.isDefault());
   }

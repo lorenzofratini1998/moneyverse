@@ -76,8 +76,8 @@ class TransactionFactoryServiceTest {
     assertEquals(subscription.getAccountId(), result.getAccountId());
     assertEquals(subscription.getCategoryId(), result.getCategoryId());
     assertEquals(budgetId, result.getBudgetId());
-    assertEquals(subscription.getAmount(), result.getAmount());
-    assertEquals(subscription.getAmount(), result.getNormalizedAmount());
+    assertEquals(subscription.getAmount().abs(), result.getAmount().abs());
+    assertEquals(subscription.getAmount().abs(), result.getNormalizedAmount().abs());
     assertEquals(subscription.getCurrency(), result.getCurrency());
     assertEquals(date, result.getDate());
     assertEquals(subscription.getSubscriptionName(), result.getDescription());

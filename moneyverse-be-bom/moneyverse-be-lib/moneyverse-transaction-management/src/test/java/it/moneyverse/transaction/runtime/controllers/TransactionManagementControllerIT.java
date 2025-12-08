@@ -506,14 +506,14 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
     assertEquals(request.accountId(), response.getBody().getAccountId());
     assertEquals(request.categoryId(), response.getBody().getCategoryId());
     assertEquals(request.subscriptionName(), response.getBody().getSubscriptionName());
-    assertEquals(round(request.amount()), round(response.getBody().getAmount()));
+    assertEquals(round(request.amount().abs()), round(response.getBody().getAmount().abs()));
     assertEquals(request.currency(), response.getBody().getCurrency());
     assertEquals(request.recurrence().startDate(), response.getBody().getStartDate());
     assertEquals(request.recurrence().endDate(), response.getBody().getEndDate());
     assertEquals(request.recurrence().recurrenceRule(), response.getBody().getRecurrenceRule());
     assertEquals(
-        round(request.amount().multiply(BigDecimal.valueOf(expectedCreatedTransactions))),
-        round(response.getBody().getTotalAmount()));
+        round(request.amount().abs().multiply(BigDecimal.valueOf(expectedCreatedTransactions))),
+        round(response.getBody().getTotalAmount().abs()));
     assertEquals(
         testContext.getTransactions().size() + expectedCreatedTransactions,
         transactionRepository.findAll().size());
@@ -522,7 +522,7 @@ class TransactionManagementControllerIT extends AbstractIntegrationTest {
         .getTransactions()
         .forEach(
             transaction -> {
-              assertEquals(round(request.amount()), round(transaction.getAmount()));
+              assertEquals(round(request.amount().abs()), round(transaction.getAmount().abs()));
               assertEquals(request.categoryId(), transaction.getCategoryId());
               assertEquals(request.subscriptionName(), transaction.getDescription());
               assertEquals(request.currency(), transaction.getCurrency());

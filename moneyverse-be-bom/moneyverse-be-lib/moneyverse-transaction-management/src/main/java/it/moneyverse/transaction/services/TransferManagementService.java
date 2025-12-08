@@ -80,9 +80,10 @@ public class TransferManagementService implements TransferService {
         transferRepository.save(
             TransferFactory.createTransfer(
                 request,
-                TransactionFactory.createDebitTransaction(request, normalizedAmount, toAccount),
+                TransactionFactory.createDebitTransaction(
+                    request, normalizedAmount, fromAccount, toAccount),
                 TransactionFactory.createCreditTransaction(
-                    request, normalizedAmount, fromAccount)));
+                    request, normalizedAmount, fromAccount, toAccount)));
     transactionEventPublisher.publish(transfer, EventTypeEnum.CREATE);
     TransferDto result = TransferMapper.toTransferDto(transfer);
     eventService.publishEvent(

@@ -4,6 +4,9 @@ import it.moneyverse.analytics.enums.TransactionEventStateEnum;
 import it.moneyverse.analytics.model.entities.TransactionEvent;
 import it.moneyverse.analytics.model.repositories.TransactionEventBufferRepository;
 import it.moneyverse.analytics.model.repositories.TransactionEventRepository;
+import it.moneyverse.core.services.SseEventService;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -19,12 +22,15 @@ public class TransactionEventWriter implements ItemWriter<List<TransactionEvent>
   private static final Logger LOGGER = LoggerFactory.getLogger(TransactionEventWriter.class);
   private final TransactionEventRepository transactionEventRepository;
   private final TransactionEventBufferRepository transactionEventBufferRepository;
+  private final SseEventService eventService;
 
   public TransactionEventWriter(
       TransactionEventRepository transactionEventRepository,
-      TransactionEventBufferRepository transactionEventBufferRepository) {
+      TransactionEventBufferRepository transactionEventBufferRepository,
+      SseEventService eventService) {
     this.transactionEventRepository = transactionEventRepository;
     this.transactionEventBufferRepository = transactionEventBufferRepository;
+    this.eventService = eventService;
   }
 
   @Override
@@ -38,6 +44,10 @@ public class TransactionEventWriter implements ItemWriter<List<TransactionEvent>
         transactionEventRepository.saveAll(transactionEvents);
         transactionEventBufferRepository.deleteByEventIds(eventIds);
         LOGGER.info("Successfully processed {} transaction events", transactionEvents.size());
+        List<UUID> affectedUserIds =
+            transactionEvents.stream().map(TransactionEvent::getUserId).distinct().toList();
+        affectedUserIds.forEach(
+            userId -> eventService.publishEvent(userId, "TRANSACTION_EVENTS_UPDATED", Collections.emptyMap()));
       } catch (Exception e) {
         LOGGER.error("Error saving transaction events", e);
         transactionEventBufferRepository.updateStateByEventIds(

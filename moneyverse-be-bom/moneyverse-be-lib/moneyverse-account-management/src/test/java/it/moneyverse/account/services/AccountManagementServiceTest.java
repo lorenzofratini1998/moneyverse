@@ -64,17 +64,17 @@ class AccountManagementServiceTest {
   void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(
       @Mock Account account, @Mock AccountCategory category, @Mock AccountDto accountDto) {
     final UUID userId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15).toUpperCase();
+    final Long categoryId = RandomUtils.randomLong();
     AccountRequestDto request =
         AccountTestFactory.AccountRequestDtoBuilder.builder()
-            .withAccountCategory(categoryName)
+            .withAccountCategory(categoryId)
             .withUserId(userId)
             .build();
 
     Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
         .thenReturn(false);
-    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.of(category));
+    when(accountCategoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
     mapper.when(() -> AccountMapper.toAccount(request, category)).thenReturn(account);
     when(accountRepository.findDefaultAccountByUserId(request.userId()))
         .thenReturn(Optional.empty());
@@ -89,7 +89,7 @@ class AccountManagementServiceTest {
     assertNotNull(accountDto);
     verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
     verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
-    verify(accountCategoryRepository, times(1)).findByName(categoryName);
+    verify(accountCategoryRepository, times(1)).findById(categoryId);
     mapper.verify(() -> AccountMapper.toAccount(request, category), times(1));
     verify(accountRepository, times(1)).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, times(1)).save(any(Account.class));
@@ -101,10 +101,10 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenCurrencyNotFound() {
     final UUID userId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15).toUpperCase();
+    final Long categoryId = RandomUtils.randomLong();
     AccountRequestDto request =
         AccountTestFactory.AccountRequestDtoBuilder.builder()
-            .withAccountCategory(categoryName)
+            .withAccountCategory(categoryId)
             .withUserId(userId)
             .build();
 
@@ -116,7 +116,7 @@ class AccountManagementServiceTest {
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
     verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
-    verify(accountCategoryRepository, never()).findByName(categoryName);
+    verify(accountCategoryRepository, never()).findById(categoryId);
     verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, never()).existsByUserIdAndAccountName(userId, request.accountName());
@@ -125,10 +125,10 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenAccountAlreadyExists() {
     final UUID userId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15).toUpperCase();
+    final Long categoryId = RandomUtils.randomLong();
     AccountRequestDto request =
         AccountTestFactory.AccountRequestDtoBuilder.builder()
-            .withAccountCategory(categoryName)
+            .withAccountCategory(categoryId)
             .withUserId(userId)
             .build();
 
@@ -140,7 +140,7 @@ class AccountManagementServiceTest {
         ResourceAlreadyExistsException.class,
         () -> accountManagementService.createAccount(request));
 
-    verify(accountCategoryRepository, never()).findByName(categoryName);
+    verify(accountCategoryRepository, never()).findById(categoryId);
     verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
@@ -149,22 +149,22 @@ class AccountManagementServiceTest {
   @Test
   void givenAccountRequest_WhenCreateAccount_ThenCategoryNotFound() {
     final UUID userId = RandomUtils.randomUUID();
-    final String categoryName = RandomUtils.randomString(15).toUpperCase();
+    final Long categoryId = RandomUtils.randomLong();
     AccountRequestDto request =
         AccountTestFactory.AccountRequestDtoBuilder.builder()
             .withUserId(userId)
-            .withAccountCategory(categoryName)
+            .withAccountCategory(categoryId)
             .build();
 
     Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
     when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
         .thenReturn(false);
-    when(accountCategoryRepository.findByName(categoryName)).thenReturn(Optional.empty());
+    when(accountCategoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
     assertThrows(
         ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
 
-    verify(accountCategoryRepository, times(1)).findByName(categoryName);
+    verify(accountCategoryRepository, times(1)).findById(categoryId);
     verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
     verify(accountRepository, never()).save(any(Account.class));
     verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
@@ -221,7 +221,7 @@ class AccountManagementServiceTest {
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
     if (request.accountCategory() != null) {
-      when(accountCategoryRepository.findByName(any(String.class)))
+      when(accountCategoryRepository.findById(any(Long.class)))
           .thenReturn(Optional.of(category));
     }
     mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
@@ -237,7 +237,7 @@ class AccountManagementServiceTest {
     assertNotNull(result);
     verify(accountRepository, times(1)).findById(accountId);
     if (request.accountCategory() != null) {
-      verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+      verify(accountCategoryRepository, times(1)).findById(any(Long.class));
     }
     mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
     verify(accountRepository, times(1)).save(account);
@@ -277,14 +277,14 @@ class AccountManagementServiceTest {
         AccountTestFactory.AccountUpdateRequestDtoBuilder.defaultInstance();
 
     when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-    when(accountCategoryRepository.findByName(any(String.class))).thenReturn(Optional.empty());
+    when(accountCategoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
     assertThrows(
         ResourceNotFoundException.class,
         () -> accountManagementService.updateAccount(accountId, request));
 
     verify(accountRepository, times(1)).findById(accountId);
-    verify(accountCategoryRepository, times(1)).findByName(any(String.class));
+    verify(accountCategoryRepository, times(1)).findById(any(Long.class));
     mapper.verify(
         () ->
             AccountMapper.partialUpdate(
@@ -303,14 +303,14 @@ class AccountManagementServiceTest {
     when(securityService.getAuthenticatedUserId()).thenReturn(userId);
     doNothing()
         .when(sseEventService)
-        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_DELETED.name(), account);
+        .publishEvent(eq(userId), eq(AccountSseEventEnum.ACCOUNT_DELETED.name()), any());
 
     accountManagementService.deleteAccount(accountId);
 
     verify(accountRepository, times(1)).findById(accountId);
     verify(securityService, times(1)).getAuthenticatedUserId();
     verify(sseEventService, times(1))
-        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_DELETED.name(), account);
+        .publishEvent(eq(userId), eq(AccountSseEventEnum.ACCOUNT_DELETED.name()), any());
   }
 
   @Test

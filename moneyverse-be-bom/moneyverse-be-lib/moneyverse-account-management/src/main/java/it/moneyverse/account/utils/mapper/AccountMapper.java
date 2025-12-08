@@ -58,7 +58,7 @@ public class AccountMapper {
         .withAccountName(account.getAccountName())
         .withBalance(account.getBalance())
         .withBalanceTarget(account.getBalanceTarget())
-        .withAccountCategory(account.getAccountCategory().getName().toUpperCase())
+        .withAccountCategory(account.getAccountCategory().getAccountCategoryId().toString())
         .withAccountDescription(account.getAccountDescription())
         .withCurrency(account.getCurrency())
         .withDefault(account.isDefault())

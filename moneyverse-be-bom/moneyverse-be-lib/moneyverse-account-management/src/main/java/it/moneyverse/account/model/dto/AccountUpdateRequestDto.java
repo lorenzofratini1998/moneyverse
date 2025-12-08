@@ -11,7 +11,7 @@ public record AccountUpdateRequestDto(
     String accountName,
     BigDecimal balance,
     BigDecimal balanceTarget,
-    String accountCategory,
+    Long accountCategory,
     String accountDescription,
     Boolean isDefault,
     StyleRequestDto style)

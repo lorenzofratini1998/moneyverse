@@ -77,6 +77,7 @@ public class TransactionCustomRepositoryImplTest {
     List<Transaction> expected = testContext.filterTransactions(userId, criteria);
 
     List<Transaction> actual = customRepository.findTransactions(userId, criteria);
+
     assertEquals(expected.size(), actual.size());
   }
 }

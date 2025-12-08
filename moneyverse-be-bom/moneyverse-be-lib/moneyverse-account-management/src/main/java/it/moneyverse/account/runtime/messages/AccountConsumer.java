@@ -60,7 +60,7 @@ public class AccountConsumer extends AbstractConsumer {
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
     if (eventNotProcessed(record.key())) {
       accountService.incrementAccountBalance(
-          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate(), event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }
@@ -77,7 +77,7 @@ public class AccountConsumer extends AbstractConsumer {
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
     if (eventNotProcessed(record.key())) {
       accountService.decrementAccountBalance(
-          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate(), event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }
@@ -102,21 +102,22 @@ public class AccountConsumer extends AbstractConsumer {
           event.getPreviousTransaction().getAccountId(),
           event.getPreviousTransaction().getAmount().negate(),
           event.getPreviousTransaction().getCurrency(),
-          event.getPreviousTransaction().getDate());
+          event.getPreviousTransaction().getDate(),
+          event.getPreviousTransaction().getUserId());
       LOGGER.info(
           "Applying transaction {} on account {}", event.getTransactionId(), event.getAccountId());
       applyTransaction(
-          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate());
+          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate(), event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }
 
   private void applyTransaction(
-      UUID accountId, BigDecimal amount, String currency, LocalDate date) {
+      UUID accountId, BigDecimal amount, String currency, LocalDate date, UUID userId) {
     if (amount.compareTo(BigDecimal.ZERO) > 0) {
-      accountService.incrementAccountBalance(accountId, amount, currency, date);
+      accountService.incrementAccountBalance(accountId, amount, currency, date, userId);
     } else if (amount.compareTo(BigDecimal.ZERO) < 0) {
-      accountService.decrementAccountBalance(accountId, amount.abs(), currency, date);
+      accountService.decrementAccountBalance(accountId, amount.abs(), currency, date, userId);
     }
   }
 }

@@ -135,9 +135,9 @@ public class AccountManagementService implements AccountService {
     return result;
   }
 
-  private AccountCategory findAccountCategory(String name) {
+  private AccountCategory findAccountCategory(Long accountCategoryId) {
     return accountCategoryRepository
-        .findByName(name)
+        .findById(accountCategoryId)
         .orElseThrow(() -> new ResourceNotFoundException("Invalid account category"));
   }
 
@@ -151,7 +151,7 @@ public class AccountManagementService implements AccountService {
     eventService.publishEvent(
         securityService.getAuthenticatedUserId(),
         AccountSseEventEnum.ACCOUNT_DELETED.name(),
-        account);
+        AccountMapper.toAccountDto(account));
   }
 
   @Transactional
@@ -173,15 +173,15 @@ public class AccountManagementService implements AccountService {
   @Override
   @Transactional
   public void incrementAccountBalance(
-      UUID accountId, BigDecimal amount, String currency, LocalDate date) {
-    updateAccountBalance(accountId, amount, currency, date, BigDecimal::add);
+      UUID accountId, BigDecimal amount, String currency, LocalDate date, UUID userId) {
+    updateAccountBalance(accountId, amount, currency, date, BigDecimal::add, userId);
   }
 
   @Override
   @Transactional
   public void decrementAccountBalance(
-      UUID accountId, BigDecimal amount, String currency, LocalDate date) {
-    updateAccountBalance(accountId, amount, currency, date, BigDecimal::subtract);
+      UUID accountId, BigDecimal amount, String currency, LocalDate date, UUID userId) {
+    updateAccountBalance(accountId, amount, currency, date, BigDecimal::subtract, userId);
     LOGGER.info("Account balance for account {} decreased by {}", accountId, amount);
   }
 
@@ -190,7 +190,8 @@ public class AccountManagementService implements AccountService {
       BigDecimal amount,
       String currency,
       LocalDate date,
-      BinaryOperator<BigDecimal> operation) {
+      BinaryOperator<BigDecimal> operation,
+      UUID userId) {
     Account account = findAccountById(accountId);
     BigDecimal effectiveAmount =
         account.getCurrency().equals(currency)
@@ -200,9 +201,9 @@ public class AccountManagementService implements AccountService {
     accountRepository.save(account);
     LOGGER.info("Account balance for account {} increased by {}", accountId, amount);
     eventService.publishEvent(
-        securityService.getAuthenticatedUserId(),
+        userId,
         AccountSseEventEnum.ACCOUNT_UPDATED.name(),
-        account);
+        AccountMapper.toAccountDto(account));
   }
 
   private Account findAccountById(UUID accountId) {

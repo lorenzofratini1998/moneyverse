@@ -134,16 +134,16 @@ public class BudgetManagementService implements BudgetService {
   @Override
   @Transactional
   public void incrementBudgetAmount(
-      UUID budgetId, BigDecimal amount, String currency, LocalDate date) {
-    updateBudgetAmount(budgetId, amount, currency, date, BigDecimal::add);
+      UUID budgetId, BigDecimal amount, String currency, LocalDate date, UUID userId) {
+    updateBudgetAmount(budgetId, amount, currency, date, BigDecimal::add, userId);
     LOGGER.info("Incremented budget {} by {}", budgetId, amount);
   }
 
   @Override
   @Transactional
   public void decrementBudgetAmount(
-      UUID budgetId, BigDecimal amount, String currency, LocalDate date) {
-    updateBudgetAmount(budgetId, amount.abs(), currency, date, BigDecimal::subtract);
+      UUID budgetId, BigDecimal amount, String currency, LocalDate date, UUID userId) {
+    updateBudgetAmount(budgetId, amount.abs(), currency, date, BigDecimal::subtract, userId);
     LOGGER.info("Decremented budget {} by {}", budgetId, amount);
   }
 
@@ -152,7 +152,8 @@ public class BudgetManagementService implements BudgetService {
       BigDecimal amount,
       String currency,
       LocalDate date,
-      BinaryOperator<BigDecimal> operation) {
+      BinaryOperator<BigDecimal> operation,
+      UUID userId) {
     Budget budget = findBudgetById(budgetId);
     BigDecimal effectiveAmount =
         budget.getCurrency().equals(currency)
@@ -161,7 +162,7 @@ public class BudgetManagementService implements BudgetService {
     budget.setAmount(operation.apply(budget.getAmount(), effectiveAmount));
     budgetRepository.save(budget);
     eventService.publishEvent(
-        securityService.getAuthenticatedUserId(), BudgetSseEventEnum.BUDGET_DELETED.name(), budget);
+        userId, BudgetSseEventEnum.BUDGET_UPDATED.name(), BudgetMapper.toBudgetDto(budget));
   }
 
   private Budget findBudgetById(UUID budgetId) {

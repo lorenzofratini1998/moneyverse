@@ -17,7 +17,7 @@ public record AccountRequestDto(
     @NotEmpty(message = "'Account name' must not be empty or null") String accountName,
     BigDecimal balance,
     BigDecimal balanceTarget,
-    @NotEmpty(message = "'Account Category' must not be empty or null") String accountCategory,
+    @NotNull(message = "'Account Category' must not be null") Long accountCategory,
     String accountDescription,
     @NotEmpty(message = "'Currency' must not be null") String currency,
     StyleRequestDto style)

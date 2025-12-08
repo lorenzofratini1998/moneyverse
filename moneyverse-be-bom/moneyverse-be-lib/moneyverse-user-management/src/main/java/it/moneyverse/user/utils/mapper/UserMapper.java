@@ -33,10 +33,6 @@ public class UserMapper {
     if (request.lastName() != null) {
       user.setLastName(request.lastName());
     }
-    if (request.email() != null) {
-      user.setEmail(request.email());
-      user.setEmailVerified(false);
-    }
     return user;
   }
 

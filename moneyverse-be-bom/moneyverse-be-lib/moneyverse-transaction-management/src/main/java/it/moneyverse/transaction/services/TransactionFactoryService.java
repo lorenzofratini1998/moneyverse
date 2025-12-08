@@ -57,4 +57,12 @@ public class TransactionFactoryService {
             subscription.getUserId(), subscription.getAmount(), subscription.getCurrency(), date);
     return TransactionFactory.createTransaction(subscription, date, budgetId, normalizedAmount);
   }
+
+  public void updateTransaction(Transaction transaction, Subscription subscription, LocalDate date) {
+      UUID budgetId = budgetServiceClient.getBudgetId(subscription.getCategoryId(), date);
+      BigDecimal normalizedAmount =
+        currencyServiceClient.convertCurrencyAmountByUserPreference(
+            subscription.getUserId(), subscription.getAmount(), subscription.getCurrency(), date);
+      TransactionFactory.updateTransaction(transaction, subscription, date, budgetId, normalizedAmount);
+  }
 }

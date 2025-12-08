@@ -20,7 +20,7 @@ public interface BudgetService {
 
   void deleteBudget(UUID budgetId);
 
-  void incrementBudgetAmount(UUID budgetId, BigDecimal amount, String currency, LocalDate date);
+  void incrementBudgetAmount(UUID budgetId, BigDecimal amount, String currency, LocalDate date, UUID userId);
 
-  void decrementBudgetAmount(UUID budgetId, BigDecimal amount, String currency, LocalDate date);
+  void decrementBudgetAmount(UUID budgetId, BigDecimal amount, String currency, LocalDate date, UUID userId);
 }

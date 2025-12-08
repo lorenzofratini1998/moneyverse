@@ -81,7 +81,7 @@ public class AccountPredicateBuilder {
               .map(
                   category ->
                       cb.equal(
-                          root.get(Account_.ACCOUNT_CATEGORY).get(AccountCategory_.NAME), category))
+                          root.get(Account_.ACCOUNT_CATEGORY).get(AccountCategory_.ACCOUNT_CATEGORY_ID), category))
               .toArray(Predicate[]::new);
 
       predicates.add(cb.or(categoryPredicates));

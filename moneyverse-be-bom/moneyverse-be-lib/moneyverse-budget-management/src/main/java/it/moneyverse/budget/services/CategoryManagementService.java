@@ -185,7 +185,7 @@ public class CategoryManagementService implements CategoryService {
     eventService.publishEvent(
         securityService.getAuthenticatedUserId(),
         CategorySseEventEnum.CATEGORY_DELETED.name(),
-        category);
+        CategoryMapper.toCategoryDto(category));
   }
 
   @Override

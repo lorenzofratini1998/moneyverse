@@ -41,9 +41,6 @@ public class KeycloakService implements AuthenticationService {
 
     userRepresentation = UserMapper.partialUpdate(userRepresentation, request);
     getUsersResource().get(userId.toString()).update(userRepresentation);
-    if (request.email() != null) {
-      sendVerificationEmail(userId.toString());
-    }
     return UserMapper.toUserDto(userRepresentation);
   }
 
@@ -84,14 +81,5 @@ public class KeycloakService implements AuthenticationService {
 
   private UsersResource getUsersResource() {
     return keycloakClient.realm(properties.getRealmName()).users();
-  }
-
-  private void sendVerificationEmail(String userId) {
-    try {
-      getUsersResource().get(userId).sendVerifyEmail();
-    } catch (Exception e) {
-      throw new UserServiceException(
-          "Failed to send verification email for user with ID " + userId, e);
-    }
   }
 }

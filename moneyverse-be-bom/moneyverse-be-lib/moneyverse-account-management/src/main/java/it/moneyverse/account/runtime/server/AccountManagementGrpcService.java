@@ -47,7 +47,7 @@ class AccountManagementGrpcService extends AccountServiceGrpc.AccountServiceImpl
                                     Optional.ofNullable(account.getBalanceTarget())
                                         .orElse(BigDecimal.ZERO)
                                         .doubleValue())
-                                .setAccountCategory(account.getAccountCategory().getName())
+                                .setAccountCategory(account.getAccountCategory().getAccountCategoryId().toString())
                                 .setAccountDescription(
                                     Optional.ofNullable(account.getAccountDescription()).orElse(""))
                                 .setCurrency(account.getCurrency())

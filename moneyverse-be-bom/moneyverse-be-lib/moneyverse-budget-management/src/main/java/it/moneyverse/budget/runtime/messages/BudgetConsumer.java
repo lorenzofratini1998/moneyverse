@@ -45,7 +45,11 @@ public class BudgetConsumer extends AbstractConsumer {
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
     if (eventNotProcessed(record.key()) && event.getBudgetId() != null) {
       budgetService.incrementBudgetAmount(
-          event.getBudgetId(), event.getAmount().abs(), event.getCurrency(), event.getDate());
+          event.getBudgetId(),
+          event.getAmount().abs(),
+          event.getCurrency(),
+          event.getDate(),
+          event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }
@@ -65,7 +69,8 @@ public class BudgetConsumer extends AbstractConsumer {
           event.getBudgetId(),
           event.getAmount().abs().negate(),
           event.getCurrency(),
-          event.getDate());
+          event.getDate(),
+          event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }
@@ -81,29 +86,59 @@ public class BudgetConsumer extends AbstractConsumer {
       ConsumerRecord<UUID, String> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     logMessage(record, topic);
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
-    if (eventNotProcessed(record.key()) && event.getBudgetId() != null) {
+
+    if (!eventNotProcessed(record.key())) {
+      return;
+    }
+
+    UUID previousBudgetId =
+        event.getPreviousTransaction() != null
+            ? event.getPreviousTransaction().getBudgetId()
+            : null;
+    UUID newBudgetId = event.getBudgetId();
+
+    if (newBudgetId != null) {
+      if (previousBudgetId != null) {
+        LOGGER.info(
+            "Undoing previous transaction {} on budget {}",
+            event.getPreviousTransaction().getTransactionId(),
+            previousBudgetId);
+        applyTransaction(
+            event.getPreviousTransaction().getBudgetId(),
+            event.getPreviousTransaction().getAmount().abs().negate(),
+            event.getPreviousTransaction().getCurrency(),
+            event.getPreviousTransaction().getDate(),
+            event.getPreviousTransaction().getUserId());
+      }
       LOGGER.info(
-          "Undoing transaction {} on budget {}",
+          "Applying transaction {} on budget {}", event.getTransactionId(), event.getBudgetId());
+      applyTransaction(
+          event.getBudgetId(),
+          event.getAmount().abs(),
+          event.getCurrency(),
+          event.getDate(),
+          event.getUserId());
+    } else if (previousBudgetId != null) {
+      LOGGER.info(
+          "Undoing transaction {} on previous budget {} because new budget does not exist",
           event.getPreviousTransaction().getTransactionId(),
-          event.getPreviousTransaction().getBudgetId());
+          previousBudgetId);
       applyTransaction(
           event.getPreviousTransaction().getBudgetId(),
           event.getPreviousTransaction().getAmount().abs().negate(),
           event.getPreviousTransaction().getCurrency(),
-          event.getPreviousTransaction().getDate());
-      LOGGER.info(
-          "Applying transaction {} on budget {}", event.getTransactionId(), event.getBudgetId());
-      applyTransaction(
-          event.getBudgetId(), event.getAmount().abs(), event.getCurrency(), event.getDate());
-      persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
+          event.getPreviousTransaction().getDate(),
+          event.getPreviousTransaction().getUserId());
     }
+    persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
   }
 
-  private void applyTransaction(UUID budgetId, BigDecimal amount, String currency, LocalDate date) {
+  private void applyTransaction(
+      UUID budgetId, BigDecimal amount, String currency, LocalDate date, UUID userId) {
     if (amount.compareTo(BigDecimal.ZERO) > 0) {
-      budgetService.incrementBudgetAmount(budgetId, amount, currency, date);
+      budgetService.incrementBudgetAmount(budgetId, amount, currency, date, userId);
     } else if (amount.compareTo(BigDecimal.ZERO) < 0) {
-      budgetService.decrementBudgetAmount(budgetId, amount.abs(), currency, date);
+      budgetService.decrementBudgetAmount(budgetId, amount.abs(), currency, date, userId);
     }
   }
 }

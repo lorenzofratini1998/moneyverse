@@ -69,11 +69,11 @@ class TransferManagementServiceTest {
             request.userId(), request.amount(), request.currency(), request.date()))
         .thenReturn(request.amount());
     transactionFactory
-        .when(() -> TransactionFactory.createDebitTransaction(eq(request), any(), any()))
+        .when(() -> TransactionFactory.createDebitTransaction(eq(request), any(), any(), any()))
         .thenReturn(debitTx);
 
     transactionFactory
-        .when(() -> TransactionFactory.createCreditTransaction(eq(request), any(), any()))
+        .when(() -> TransactionFactory.createCreditTransaction(eq(request), any(), any(), any()))
         .thenReturn(creditTx);
     transferFactory
         .when(
