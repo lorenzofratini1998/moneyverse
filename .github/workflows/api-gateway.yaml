@@ -36,11 +36,3 @@ jobs:
           file: moneyverse-api-gateway/krakend/Dockerfile
           push: true
           tags: docker.io/${{ secrets.DOCKER_USERNAME }}/moneyverse-krakend:latest
-
-      - name: Build and push Nginx image
-        uses: docker/build-push-action@v6
-        with:
-          context: moneyverse-api-gateway/nginx
-          file: moneyverse-api-gateway/nginx/Dockerfile
-          push: true
-          tags: docker.io/${{ secrets.DOCKER_USERNAME }}/moneyverse-nginx:latest
