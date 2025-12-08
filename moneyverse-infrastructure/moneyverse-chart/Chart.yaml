@@ -26,56 +26,56 @@ appVersion: "1.0.0"
 dependencies:
   - name: helm-library
     version: "0.1.0"
-    repository: file://charts/helm-library
+    repository: file://apps/helm-library
 
   - name: postgres
     version: "0.1.0"
-    repository: file://charts/postgres
+    repository: file://apps/postgres
 
   - name: clickhouse
     version: "0.1.0"
-    repository: file://charts/clickhouse
+    repository: file://apps/clickhouse
 
   - name: redis
     version: "0.1.0"
-    repository: file://charts/redis
+    repository: file://apps/redis
 
   - name: keycloak
     version: "0.1.0"
-    repository: file://charts/keycloak
+    repository: file://apps/keycloak
 
   - name: kafka
     version: "0.1.0"
-    repository: file://charts/kafka
+    repository: file://apps/kafka
 
   - name: currency-management
     version: "0.1.0"
-    repository: file://charts/currency-management
+    repository: file://apps/currency-management
 
   - name: user-management
     version: "0.1.0"
-    repository: file://charts/user-management
+    repository: file://apps/user-management
 
   - name: account-management
     version: "0.1.0"
-    repository: file://charts/account-management
+    repository: file://apps/account-management
 
   - name: budget-management
     version: "0.1.0"
-    repository: file://charts/budget-management
+    repository: file://apps/budget-management
 
   - name: transaction-management
     version: "0.1.0"
-    repository: file://charts/transaction-management
+    repository: file://apps/transaction-management
 
   - name: analytics
     version: "0.1.0"
-    repository: file://charts/analytics
+    repository: file://apps/analytics
 
   - name: krakend
     version: "0.1.0"
-    repository: file://charts/krakend
+    repository: file://apps/krakend
 
   - name: frontend
     version: "0.1.0"
-    repository: file://charts/frontend
+    repository: file://apps/frontend

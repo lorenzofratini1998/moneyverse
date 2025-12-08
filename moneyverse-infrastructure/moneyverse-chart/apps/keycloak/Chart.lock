@@ -1,0 +1,9 @@
+dependencies:
+- name: keycloak
+  repository: https://charts.bitnami.com/bitnami
+  version: 25.2.0
+- name: helm-library
+  repository: file://../helm-library
+  version: 0.1.0
+digest: sha256:20e32b61b4428fe62ce7364c6a437344a7ec70ad31345df3de0f6e7a5815d9bd
+generated: "2025-12-08T15:41:21.1556158+01:00"

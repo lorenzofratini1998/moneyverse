@@ -1,0 +1,41 @@
+name: Infrastructure CI
+
+on:
+  push:
+    branches:
+      - master
+      - feat/frontend
+    paths:
+      - 'moneyverse-infrastructure/moneyverse-chart'
+      - '.github/workflows/infrastructure-ci.yaml'
+  pull_request:
+    paths:
+      - 'moneyverse-infrastructure/moneyverse-chart'
+      - '.github/workflows/infrastructure-ci.yaml'
+
+jobs:
+  infrastructure-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.0
+
+      - name: Enable OCI support
+        run: |
+          helm registry login registry-1.docker.io \
+            --username ${{ secrets.DOCKER_USERNAME }} \
+            --password ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Package Helm chart
+        run: |
+          helm package moneyverse-infrastructure/moneyverse-chart -d moneyverse-infrastructure
+
+      - name: Push Helm chart to Docker Hub
+        run: |
+          helm push moneyverse-infrastructure/moneyverse-chart-0.1.0.tgz oci://registry-1.docker.io/lfrat
