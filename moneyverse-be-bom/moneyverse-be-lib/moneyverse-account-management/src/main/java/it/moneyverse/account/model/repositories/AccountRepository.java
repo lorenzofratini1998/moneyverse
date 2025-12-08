@@ -14,8 +14,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID>, Account
 
   @Modifying
   @Query(
-      "UPDATE Account a SET a.isDefault = FALSE WHERE a.isDefault = TRUE AND a.accountId <> :accountId")
-  void unsetDefaultAccountExcept(UUID accountId);
+      "UPDATE Account a SET a.isDefault = FALSE WHERE a.isDefault = TRUE AND a.accountId <> :accountId AND a.userId = :userId")
+  void unsetDefaultAccountExcept(UUID accountId, UUID userId);
 
   @Query("SELECT a FROM Account a WHERE a.isDefault = TRUE AND a.userId = :userId")
   Optional<Account> findDefaultAccountByUserId(UUID userId);

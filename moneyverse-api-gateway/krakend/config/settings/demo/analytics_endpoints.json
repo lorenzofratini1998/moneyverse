@@ -76,6 +76,15 @@
         "url_pattern": "/analytics/api/v1/transactions/trend",
         "method": "POST"
       }
+    },
+    {
+      "endpoint": "/analytics/overview",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/overview",
+        "method": "POST",
+        "is_collection": true
+      }
     }
   ]
 }

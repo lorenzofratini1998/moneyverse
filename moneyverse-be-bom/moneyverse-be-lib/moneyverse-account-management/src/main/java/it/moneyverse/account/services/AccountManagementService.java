@@ -124,7 +124,7 @@ public class AccountManagementService implements AccountService {
     account = accountRepository.save(AccountMapper.partialUpdate(account, request, category));
 
     if (Boolean.TRUE.equals(request.isDefault())) {
-      accountRepository.unsetDefaultAccountExcept(accountId);
+      accountRepository.unsetDefaultAccountExcept(accountId, account.getUserId());
     }
     AccountDto result = AccountMapper.toAccountDto(account);
     LOGGER.info("Updated account {} for user {}", result.getAccountId(), account.getUserId());
