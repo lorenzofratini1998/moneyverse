@@ -32,9 +32,39 @@ jobs:
             --username ${{ secrets.DOCKER_USERNAME }} \
             --password ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Update Helm dependencies
+      - name: Add Bitnami repository
         run: |
-          helm dependencies update moneyverse-infrastructure/moneyverse-chart
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+
+      - name: Build Helm dependencies
+        run: |
+          cd moneyverse-infrastructure/moneyverse-chart
+          
+          # Function to build chart dependencies
+          build_chart_deps() {
+            local chart_path=$1
+            if [ -f "$chart_path/Chart.yaml" ]; then
+              echo "Building dependencies for $chart_path"
+              (cd "$chart_path" && helm dependency build) || {
+                echo "Warning: Failed to build dependencies for $chart_path"
+                return 1
+              }
+            fi
+          }
+          
+          # Build helm-library first
+          build_chart_deps "apps/helm-library"
+          
+          # Build all other apps
+          for app in apps/*/; do
+            if [ "$(basename $app)" != "helm-library" ]; then
+              build_chart_deps "$app"
+            fi
+          done
+          
+          # Finally build the main chart
+          helm dependency build
 
       - name: Package Helm chart
         run: |
