@@ -158,6 +158,74 @@ You can log in using:
 
 This account includes sample data, so you can explore the application's features immediately.
 
+## 🖼️ Screenshots
+<!-- Overview -->
+<p align="center">
+  <img 
+    width="1000"
+    src="https://github.com/user-attachments/assets/6ca5a9d0-81e1-444a-bd84-de807d11f361"
+    alt="overview"
+  />
+</p>
+<p align="center"><em>Overview</em></p>
+
+<!-- Accounts -->
+<p align="center">
+  <img 
+    width="1000"
+    src="https://github.com/user-attachments/assets/ab14079c-61c1-4148-81bb-1249cee60dac"
+    alt="accounts-analytics"
+  />
+</p>
+<p align="center"><em>Accounts - Analytics</em></p>
+
+<p align="center">
+  <img 
+    width="1000"
+    src="https://github.com/user-attachments/assets/a5948fdd-2047-45cd-96ec-a22728b11eb0"
+    alt="accounts-manage"
+  />
+</p>
+<p align="center"><em>Accounts - Manage</em></p>
+
+<!-- Categories -->
+<p align="center">
+  <img 
+    width="1000"
+    src="https://github.com/user-attachments/assets/6ceca737-3660-411a-ad35-5260a438a6bd"
+    alt="category-analytics"
+  />
+</p>
+<p align="center"><em>Categories - Analytics</em></p>
+
+<p align="center">
+  <img 
+    width="1000"
+    src="https://github.com/user-attachments/assets/5c34ba58-7479-4029-97a4-1b09eeca6d19"
+    alt="category-manage"
+  />
+</p>
+<p align="center"><em>Categories - Manage</em></p>
+
+<!-- Transactions -->
+<p align="center">
+  <img 
+    width="1000"
+    src="https://github.com/user-attachments/assets/ad28ac0e-c007-4276-8914-bcb0a01410df"
+    alt="transactions-analytics"
+  />
+</p>
+<p align="center"><em>Transactions - Analytics</em></p>
+
+<p align="center">
+  <img 
+    width="1000"
+    src="https://github.com/user-attachments/assets/91ab3b9f-fdaa-49c0-90f1-ce2fdc46f5f7"
+    alt="transactions-analytics"
+  />
+</p>
+<p align="center"><em>Transactions - Manage</em></p>
+
 ## 📘 What I Learned
 
 This project allowed me to gain hands-on experience with:
