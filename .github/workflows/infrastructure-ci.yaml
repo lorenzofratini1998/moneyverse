@@ -6,11 +6,11 @@ on:
       - master
       - feat/frontend
     paths:
-      - 'moneyverse-infrastructure/moneyverse-chart'
+      - 'moneyverse-infrastructure/moneyverse-chart/**'
       - '.github/workflows/infrastructure-ci.yaml'
   pull_request:
     paths:
-      - 'moneyverse-infrastructure/moneyverse-chart'
+      - 'moneyverse-infrastructure/moneyverse-chart/**'
       - '.github/workflows/infrastructure-ci.yaml'
 
 jobs:
