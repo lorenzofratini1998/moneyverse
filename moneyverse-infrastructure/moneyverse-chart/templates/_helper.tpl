@@ -11,7 +11,7 @@
 {{- end }}
 
 {{- define "moneyverse.kafka-host" -}}
-{{ printf "%s-%s" .Release.Name "kafka-controller-headless" }}
+{{ printf "%s-kafka-controller-headless.%s.svc.cluster.local" .Release.Name .Release.Namespace }}
 {{- end }}
 
 {{- define "moneyverse.redis-host" -}}

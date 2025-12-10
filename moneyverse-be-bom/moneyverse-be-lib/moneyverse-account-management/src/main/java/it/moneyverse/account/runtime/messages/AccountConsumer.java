@@ -16,10 +16,12 @@ import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +37,15 @@ public class AccountConsumer extends AbstractConsumer {
     this.accountService = accountService;
   }
 
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = UserDeletionTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onUserDeletion(
@@ -48,7 +55,11 @@ public class AccountConsumer extends AbstractConsumer {
     accountService.deleteAccountsByUserId(event.key());
   }
 
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = TransactionCreationTopic.TOPIC,
       autoStartup = "true",
@@ -60,15 +71,24 @@ public class AccountConsumer extends AbstractConsumer {
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
     if (eventNotProcessed(record.key())) {
       accountService.incrementAccountBalance(
-          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate(), event.getUserId());
+          event.getAccountId(),
+          event.getAmount(),
+          event.getCurrency(),
+          event.getDate(),
+          event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }
 
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = TransactionDeletionTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onTransactionDeletion(
@@ -77,16 +97,25 @@ public class AccountConsumer extends AbstractConsumer {
     TransactionEvent event = JsonUtils.fromJson(record.value(), TransactionEvent.class);
     if (eventNotProcessed(record.key())) {
       accountService.decrementAccountBalance(
-          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate(), event.getUserId());
+          event.getAccountId(),
+          event.getAmount(),
+          event.getCurrency(),
+          event.getDate(),
+          event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }
 
   @Transactional
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = TransactionUpdateTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onTransactionUpdate(
@@ -107,7 +136,11 @@ public class AccountConsumer extends AbstractConsumer {
       LOGGER.info(
           "Applying transaction {} on account {}", event.getTransactionId(), event.getAccountId());
       applyTransaction(
-          event.getAccountId(), event.getAmount(), event.getCurrency(), event.getDate(), event.getUserId());
+          event.getAccountId(),
+          event.getAmount(),
+          event.getCurrency(),
+          event.getDate(),
+          event.getUserId());
       persistProcessedEvent(record.key(), topic, event.getEventType(), record.value());
     }
   }

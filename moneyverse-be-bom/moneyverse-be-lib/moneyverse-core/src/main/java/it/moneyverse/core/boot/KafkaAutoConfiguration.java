@@ -4,6 +4,8 @@ import it.moneyverse.core.exceptions.ResourceNotFoundException;
 import it.moneyverse.core.services.MessageProducer;
 import it.moneyverse.core.utils.properties.KafkaProperties;
 import jakarta.json.stream.JsonParsingException;
+
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,6 +41,9 @@ public class KafkaAutoConfiguration {
   public KafkaAutoConfiguration(KafkaProperties kafkaProperties) {
     this.kafkaProperties = kafkaProperties;
     LOGGER.info("Starting to load beans from {}", KafkaAutoConfiguration.class);
+    LOGGER.info(
+        "Kafka bootstrap servers configured as: {}",
+        kafkaProperties.getAdmin().getBootstrapServers());
   }
 
   @Bean
@@ -46,6 +51,9 @@ public class KafkaAutoConfiguration {
     Map<String, Object> configs = new HashMap<>();
     configs.put(
         AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+        kafkaProperties.getAdmin().getBootstrapServers());
+    LOGGER.info(
+        "Creating KafkaAdmin with bootstrap servers: {}",
         kafkaProperties.getAdmin().getBootstrapServers());
     return new KafkaAdmin(configs);
   }
@@ -61,6 +69,10 @@ public class KafkaAutoConfiguration {
     configs.put(
         ProducerConfig.RETRY_BACKOFF_MS_CONFIG, kafkaProperties.getProducer().getRetryBackoffMs());
     configs.put(ProducerConfig.ACKS_CONFIG, kafkaProperties.getProducer().getAcks());
+    LOGGER.info(
+        "Creating ProducerFactory with bootstrap servers: {}",
+        kafkaProperties.getAdmin().getBootstrapServers());
+
     return new DefaultKafkaProducerFactory<>(configs);
   }
 
@@ -79,6 +91,17 @@ public class KafkaAutoConfiguration {
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OffsetResetStrategy.LATEST.name().toLowerCase());
     configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, UUIDDeserializer.class);
     configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    configs.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 60000); // 60 seconds
+    configs.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 45000); // 45 seconds
+    configs.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 3000); // 3 seconds
+    configs.put("socket.connection.setup.timeout.ms", 60000); // 60 seconds for initial connection
+    configs.put("socket.connection.setup.timeout.max.ms", 120000); // 120 seconds max
+
+    LOGGER.info(
+        "Creating ConsumerFactory with bootstrap servers: {}",
+        kafkaProperties.getAdmin().getBootstrapServers());
+    LOGGER.info("Consumer group ID: {}", kafkaProperties.getConsumer().getGroupId());
+    LOGGER.info("Consumer configs: {}", configs);
     return new DefaultKafkaConsumerFactory<>(configs);
   }
 
@@ -108,6 +131,10 @@ public class KafkaAutoConfiguration {
         new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory());
     factory.setCommonErrorHandler(errorHandler);
+    factory.setConcurrency(1);
+    factory.getContainerProperties().setConsumerStartTimeout(Duration.ofSeconds(60));
+
+    LOGGER.info("Created KafkaListenerContainerFactory with concurrency=1");
     return factory;
   }
 
