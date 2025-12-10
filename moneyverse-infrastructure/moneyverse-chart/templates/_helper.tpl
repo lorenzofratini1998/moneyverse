@@ -15,7 +15,7 @@
 {{- end }}
 
 {{- define "moneyverse.redis-host" -}}
-{{ printf "%s-%s" .Release.Name "redis" }}
+{{ printf "%s-%s" .Release.Name "redis-master" }}
 {{- end }}
 
 {{- define "moneyverse.currency-management-host" -}}
