@@ -49,8 +49,7 @@
       "method": "GET",
       "backend": {
         "url_pattern": "/usersManagement/api/v1/users/{userId}/preferences/{key}",
-        "method": "GET",
-        "is_collection": true
+        "method": "GET"
       }
     },
     {
@@ -58,7 +57,8 @@
       "method": "GET",
       "backend": {
         "url_pattern": "/usersManagement/api/v1/languages",
-        "method": "GET"
+        "method": "GET",
+        "is_collection": true
       }
     },
     {
