@@ -13,7 +13,7 @@ global:
     clickhouse:
       port: 8123
     kafka:
-      port: 9093
+      port: 9092
     redis:
       port: 6379
     currency_management:
