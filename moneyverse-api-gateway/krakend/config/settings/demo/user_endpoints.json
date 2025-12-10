@@ -58,8 +58,7 @@
       "method": "GET",
       "backend": {
         "url_pattern": "/usersManagement/api/v1/languages",
-        "method": "GET",
-        "is_collection": true
+        "method": "GET"
       }
     },
     {

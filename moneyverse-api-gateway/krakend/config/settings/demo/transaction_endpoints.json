@@ -14,7 +14,8 @@
       "method": "POST",
       "backend": {
         "url_pattern": "/transactionsManagement/api/v1/transactions",
-        "method": "POST"
+        "method": "POST",
+        "is_collection": true
       }
     },
     {

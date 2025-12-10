@@ -24,8 +24,7 @@
       "method": "POST",
       "backend": {
         "url_pattern": "/budgetsManagement/api/v1/categories/users/{userId}/default",
-        "method": "POST",
-        "is_collection": true
+        "method": "POST"
       }
     },
     {
