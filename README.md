@@ -101,7 +101,7 @@ After installing these tools, follow the setup steps below.
 1. Create a folder (optional)
 
 ```bash
-   mkdir moneyverse && cd moneyverse
+mkdir moneyverse && cd moneyverse
 ```
 
 2. Download the Kind cluster configuration file `moneyverse-infrastructure/cluster/config.yaml`
@@ -109,22 +109,22 @@ After installing these tools, follow the setup steps below.
 3. Create the Kubernetes cluster using the configuration file:
 
 ```bash
-   kind create cluster --config config.yaml
+kind create cluster --config config.yaml
 ```
 
 4. Create the namespace (you may choose another name):
 
 ```bash
-   kubectl create namespace moneyverse
+kubectl create namespace moneyverse
 ```
 
 5. Install the [Infisical Secret Operator](https://infisical.com/docs/integrations/platforms/kubernetes/overview):
 
 ```bash
-    helm repo add infisical-helm-charts 'https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/'
-    helm repo update
+helm repo add infisical-helm-charts 'https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/'
+helm repo update
     
-    helm install --generate-name infisical-helm-charts/secrets-operator -n moneyverse
+helm install --generate-name infisical-helm-charts/secrets-operator -n moneyverse
 ```
 
 ### ▶️ Running Moneyverse Locally
@@ -134,13 +134,13 @@ From the same directory:
 1. Pull and extract the Helm chart:
 
 ``` bash
-    helm pull oci://registry-1.docker.io/lfrat/moneyverse-chart --version 0.1.0 --untar
+helm pull oci://registry-1.docker.io/lfrat/moneyverse-chart --version 0.1.0 --untar
 ```
 
 2. Deploy Moneyverse
 
 ``` bash
-    helm install moneyverse ./moneyverse-chart -f ./moneyverse-chart/environments/demo/values.yaml -n moneyverse
+helm install moneyverse ./moneyverse-chart -f ./moneyverse-chart/environments/demo/values.yaml -n moneyverse
 ```
 
 Deployment usually completes within 3–5 minutes. You can monitor the deployment in real-time using *k9s*.
@@ -225,6 +225,12 @@ This account includes sample data, so you can explore the application's features
   />
 </p>
 <p align="center"><em>Transactions - Manage</em></p>
+
+## 📽️ Demo 
+
+https://github.com/user-attachments/assets/b819e954-bb7e-4633-9d2d-936eb13846fe
+
+
 
 ## 📘 What I Learned
 
