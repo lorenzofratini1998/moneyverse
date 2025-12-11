@@ -42,4 +42,4 @@ dependencies:
   repository: file://apps/frontend
   version: 0.1.0
 digest: sha256:e348ef81c0fc582c0c65529f4cf6e75c6a1f4cb264da2378f12d5dba2332df20
-generated: "2025-12-08T15:42:53.3710681+01:00"
+generated: "2025-12-11T11:17:18.6482636+01:00"

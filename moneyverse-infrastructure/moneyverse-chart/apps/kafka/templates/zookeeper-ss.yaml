@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    service: moneyverse-zookeeper
+  name: moneyverse-zookeeper
+spec:
+  serviceName: moneyverse-zookeeper
+  replicas: 1
+  selector:
+    matchLabels:
+      service: moneyverse-zookeeper
+  template:
+    metadata:
+      labels:
+        service: moneyverse-zookeeper
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: moneyverse-zookeeper
+          imagePullPolicy: IfNotPresent
+          image: {{ .Values.confluent.zookeeper }}:{{ .Values.confluent.version }}
+          ports:
+            - containerPort: 2181
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_DATA_DIR
+              value: "/var/lib/zookeeper/data"
+            - name: ZOOKEEPER_LOG_DIR
+              value: "/var/lib/zookeeper/log"
+            - name: ZOOKEEPER_SERVER_ID
+              value: "1"
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/zookeeper/data
+              name: zookeeper-data
+            - mountPath: /var/lib/zookeeper/log
+              name: zookeeper-log
+      hostname: moneyverse-zookeeper
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: zookeeper-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 250Mi
+    - metadata:
+        name: zookeeper-log
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 250Mi

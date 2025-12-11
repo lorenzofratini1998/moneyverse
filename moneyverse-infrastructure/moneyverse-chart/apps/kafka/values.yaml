@@ -1,14 +1,4 @@
-kafka:
-  image:
-    repository: bitnamilegacy/kafka
-  controller:
-    replicaCount: 1
-  listeners:
-    client:
-      protocol: PLAINTEXT
-    controller:
-      protocol: PLAINTEXT
-    interbroker:
-      protocol: PLAINTEXT
-    external:
-      protocol: PLAINTEXT
+confluent:
+  version: 7.8.0
+  kafka: confluentinc/cp-kafka
+  zookeeper: confluentinc/cp-zookeeper
