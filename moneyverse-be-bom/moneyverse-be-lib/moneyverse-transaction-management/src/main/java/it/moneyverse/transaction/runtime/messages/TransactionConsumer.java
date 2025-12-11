@@ -14,10 +14,12 @@ import it.moneyverse.core.utils.JsonUtils;
 import it.moneyverse.transaction.services.TransactionService;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,10 +33,15 @@ public class TransactionConsumer extends AbstractConsumer {
     this.transactionService = transactionService;
   }
 
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = UserDeletionTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onUserDeletionEvent(
@@ -44,10 +51,15 @@ public class TransactionConsumer extends AbstractConsumer {
     transactionService.deleteAllTransactionsByUserId(event.getUserId());
   }
 
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = AccountDeletionTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onAccountDeletionEvent(
@@ -60,10 +72,15 @@ public class TransactionConsumer extends AbstractConsumer {
     }
   }
 
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = CategoryDeletionTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onCategoryDeletionEvent(
@@ -76,10 +93,15 @@ public class TransactionConsumer extends AbstractConsumer {
     }
   }
 
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = BudgetDeletionTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onCategoryBudgetEvent(

@@ -13,10 +13,12 @@ import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +37,15 @@ public class DashboardConsumer extends AbstractConsumer {
   }
 
   @Transactional
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = TransactionCreationTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onTransactionCreation(
@@ -48,10 +55,15 @@ public class DashboardConsumer extends AbstractConsumer {
   }
 
   @Transactional
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = TransactionDeletionTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onTransactionDeletion(
@@ -61,10 +73,15 @@ public class DashboardConsumer extends AbstractConsumer {
   }
 
   @Transactional
-  @RetryableTopic
+  @RetryableTopic(
+      backoff = @Backoff(delay = 1500, multiplier = 1.5, maxDelay = 15000),
+      autoCreateTopics = "false",
+      include = {RecoverableDataAccessException.class},
+      concurrency = "1")
   @KafkaListener(
       topics = TransactionUpdateTopic.TOPIC,
       autoStartup = "true",
+      concurrency = "1",
       groupId =
           "#{environment.getProperty(T(it.moneyverse.core.utils.properties.KafkaProperties.KafkaConsumerProperties).GROUP_ID)}")
   public void onTransactionUpdate(
