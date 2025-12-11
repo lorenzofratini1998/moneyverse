@@ -1,0 +1,32 @@
+{{/*
+Base service template
+*/}}
+{{- define "helm-library.service.tpl" -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%s" .Release.Name .Chart.Name }}
+  labels:
+    {{- include "helm-library.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  ports:
+    {{- range .Values.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      name: {{ .name }}
+      {{- if .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+    {{- end }}
+  selector:
+    {{- include "helm-library.selectorLabels" . | nindent 4 }}
+{{- end }}
+
+{{/*
+Main service template with override support
+*/}}
+{{- define "helm-library.service" -}}
+{{- include "helm-library.util.merge" (append . "helm-library.service.tpl") -}}
+{{- end -}}

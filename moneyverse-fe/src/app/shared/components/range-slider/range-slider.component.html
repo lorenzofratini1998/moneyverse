@@ -1,0 +1,37 @@
+<div class="flex items-center">
+  <span class="text-sm font-medium w-1/4">{{ title() }}</span>
+  <div class="flex items-center gap-4 w-3/4">
+    <p-input-number
+      [(ngModel)]="currentValues()[0]"
+      (ngModelChange)="onInputNumberChange($event, 0)"
+      [min]="min()"
+      [max]="max()"
+      [step]="step()"
+      [minFractionDigits]="minFractionDigits()"
+      [maxFractionDigits]="maxFractionDigits()"
+      class="flex-shrink-0"
+      [inputStyle]="{ width: '8rem' }"
+    />
+
+    <p-slider
+      [(ngModel)]="currentValues"
+      [range]="true"
+      [min]="min()"
+      [max]="max()"
+      [step]="step()"
+      class="flex-grow"
+    />
+
+    <p-input-number
+      [(ngModel)]="currentValues()[1]"
+      (ngModelChange)="onInputNumberChange($event, 1)"
+      [min]="min()"
+      [max]="max()"
+      [step]="step()"
+      [minFractionDigits]="minFractionDigits()"
+      [maxFractionDigits]="maxFractionDigits()"
+      class="flex-shrink-0"
+      [inputStyle]="{ width: '8rem' }"
+    />
+  </div>
+</div>

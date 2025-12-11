@@ -1,0 +1,11 @@
+<app-management [config]="managementConfig()">
+  <app-category-filter-panel/>
+
+  <app-category-table
+    [categories]="categoryFilterStore.categories()"
+    (onDelete)="deleteCategory($event)"
+    (onEdit)="categoryFormDialog().open($event)"/>
+
+  <app-category-default-dialog (onSubmit)="createDefaultCategories()"/>
+  <app-category-form-dialog (onSubmit)="submit($event)"/>
+</app-management>

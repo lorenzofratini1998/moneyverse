@@ -1,0 +1,13 @@
+{{- include "helm-library.configmap" (list . "clickhouse.init") -}}
+{{- define "clickhouse.init" -}}
+metadata:
+  name: "clickhouse-init"
+data:
+  init-db.sh: |
+    #!/bin/bash
+    set -e
+
+    clickhouse client -u admin --password="$CLICKHOUSE_ADMIN_PASSWORD" -n <<-EOSQL
+    CREATE DATABASE analytics;
+    EOSQL
+{{- end -}}

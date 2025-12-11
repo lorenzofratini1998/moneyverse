@@ -1,0 +1,9 @@
+.card {
+  background: var(--p-content-background);
+  padding: 2rem;
+  border-radius: var(--p-content-border-radius);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}

@@ -1,0 +1,21 @@
+package it.moneyverse.account;
+
+import it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration;
+import it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration;
+import it.moneyverse.core.exceptions.MoneyverseExceptionHandler;
+import it.moneyverse.core.runtime.interceptor.LocaleInterceptor;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
+
+@SpringBootApplication(
+    exclude = {
+      AccountServiceGrpcClientAutoConfiguration.class,
+      BudgetServiceGrpcClientAutoConfiguration.class
+    })
+public class AccountManagementApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(AccountManagementApplication.class, args);
+  }
+}

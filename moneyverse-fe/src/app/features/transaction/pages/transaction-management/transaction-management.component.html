@@ -1,0 +1,12 @@
+<app-management [config]="managementConfig()">
+  <app-transaction-filter-panel/>
+  <app-transaction-table
+    [transactions]="transactionStore.transactionPage()"
+    (onEdit)="transactionFormDialog().open($event.data, $event.option)"
+    (onDeleteTransaction)="deleteTransaction($event)"
+    (onDeleteTransfer)="deleteTransfer($event)"
+    (onPage)="transactionTableService.onPage($event)"
+    (onSort)="transactionTableService.onSort($event)"/>
+
+  <app-transaction-form-dialog (onSubmit)="submit($event)"/>
+</app-management>

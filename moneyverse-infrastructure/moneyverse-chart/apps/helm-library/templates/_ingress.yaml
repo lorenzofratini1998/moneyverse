@@ -1,0 +1,45 @@
+{{/*
+Base ingress template
+*/}}
+{{- define "helm-library.ingress.tpl" -}}
+{{- $values := .Values.ingress | default dict -}}
+{{- if $values.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-%s" .Release.Name .Chart.Name }}
+  labels:
+    {{- include "helm-library.labels" . | nindent 4 }}
+spec:
+  rules:
+    {{- range $values.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path | default "/" }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- else }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              service:
+                name: {{ .service.name | default (include "helm-library.fullname" $) }}
+                port:
+                  {{- if .service.port.name }}
+                  name: {{ .service.port.name }}
+                  {{- else }}
+                  number: {{ .service.port.number | default 80 }}
+                  {{- end }}
+              {{- end }}
+        {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Main ingress template with override support
+*/}}
+{{- define "helm-library.ingress" -}}
+{{- include "helm-library.util.merge" (append . "helm-library.ingress.tpl") -}}
+{{- end -}}

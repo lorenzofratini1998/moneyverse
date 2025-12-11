@@ -1,0 +1,5 @@
+export enum TagSseEventEnum {
+  TAG_CREATED = 'TAG_CREATED',
+  TAG_UPDATED = 'TAG_UPDATED',
+  TAG_DELETED = 'TAG_DELETED',
+}

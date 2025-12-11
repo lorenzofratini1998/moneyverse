@@ -1,0 +1,22 @@
+<form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid grid-cols-1 flex items-center justify-center gap-2">
+    <app-form-preview [color]="getControlValue('color')"
+                      [icon]="getControlValue('icon')"
+                      [message]="getControlValue('tagName')"/>
+    <div class="col-span-1 flex items-center justify-center gap-2">
+      <app-color-picker formControlName="color"/>
+      <app-icon-picker formControlName="icon"/>
+    </div>
+  </div>
+  <div class="grid grid-cols-1">
+    <app-input-text formControlName="tagName"
+                    id="tag-name-input"
+                    [label]="'app.form.tagName' | translate"
+                    [required]="true"/>
+  </div>
+  <div class="grid grid-cols-1">
+    <app-text-area formControlName="description"
+                   id="tag-description-textarea"
+                   [label]="'app.description' | translate"/>
+  </div>
+</form>

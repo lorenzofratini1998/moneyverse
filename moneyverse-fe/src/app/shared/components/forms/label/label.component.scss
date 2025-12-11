@@ -1,0 +1,34 @@
+.label-container {
+  display: flex;
+  gap: 0.25rem;
+
+  .label-text-required {
+    color: var(--message-error-color);
+  }
+
+  &.disabled {
+    .label-text-required {
+      opacity: 1;
+    }
+
+    &[data-component-type="select"] {
+      background: var(--p-select-disabled-background);
+    }
+
+    &[data-component-type="input"] {
+      background: var(--p-inputtext-disabled-background);
+    }
+
+    &[data-component-type="textarea"] {
+      background: var(--p-textarea-disabled-background);
+    }
+
+    &[data-component-type="calendar"] {
+      background: var(--p-inputtext-disabled-background);
+    }
+
+    &[data-component-type="multiselect"] {
+      background: var(--p-multiselect-disabled-background);
+    }
+  }
+}

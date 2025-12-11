@@ -1,0 +1,6 @@
+spring:
+  flyway:
+    postgres:
+      locations: classpath:db/migration/postgres/common,classpath:db/migration/postgres/demo
+      placeholders: "{DEMO_USER_ID:'${DEMO_USER_ID:84830153-f653-4e57-9057-36fce83476c5}', DEMO_EMAIL:'${DEMO_EMAIL:demo@demo.it}'}"
+

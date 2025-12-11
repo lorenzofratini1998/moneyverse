@@ -1,0 +1,24 @@
+<form [formGroup]="formGroup">
+  <div class="grid grid-cols-1 w-1/2 gap-4">
+    <app-input-text formControlName="currency"
+                    id="currency-input"
+                    [label]="'app.currency' | translate"
+                    [required]="true"
+                    [readonly]="true"/>
+    <app-select formControlName="language"
+                id="language-select"
+                [label]="'app.language' | translate"
+                [required]="true"
+                [options]="systemService.languages()"
+                optionLabel="country"
+                optionValue="isoCode"/>
+    <app-select formControlName="dateFormat"
+                id="dateFormat-select"
+                [label]="'app.dateFormat' | translate"
+                [required]="true"
+                [options]="dateFormats()"
+                optionLabel="label"
+                optionValue="value"/>
+    <app-submit-button (onSubmit)="submit()"/>
+  </div>
+</form>

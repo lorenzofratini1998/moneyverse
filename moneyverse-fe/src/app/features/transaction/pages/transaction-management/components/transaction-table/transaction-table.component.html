@@ -1,0 +1,60 @@
+<app-table [data]="transactions().content"
+           [columns]="columns()"
+           [config]="tableConfig()"
+           [actions]="!readonly()? actions : null"
+           (onPage)="onPage.emit($event)"
+           (onSort)="onSort.emit($event)">
+
+  <ng-template cellTemplate field="date" let-transaction>
+    {{ transaction.date | date: preferenceStore.userDateFormat() }}
+  </ng-template>
+
+  <ng-template cellTemplate field="amount" let-transaction>
+    {{ transaction.amount | currency: transaction.currency }}
+  </ng-template>
+
+  <ng-template cellTemplate field="normalizedAmount" let-transaction>
+    {{ transaction.normalizedAmount | currency: preferenceStore.userCurrency() }}
+  </ng-template>
+
+  <ng-template cellTemplate field="categoryId" let-transaction>
+    @if (categoryStore.categoriesMap().get(transaction.categoryId); as category) {
+      <app-chip [color]="category.style.color"
+                [icon]="category.style.icon"
+                [message]="category.categoryName"/>
+    }
+  </ng-template>
+
+  <ng-template cellTemplate field="accountId" let-transaction>
+    @if (this.accountStore.accountsMap().get(transaction.accountId); as account) {
+      <app-chip [color]="account.style.color"
+                [icon]="account.style.icon"
+                [message]="account.accountName"/>
+    }
+  </ng-template>
+
+  <ng-template cellTemplate field="tags" let-transaction>
+    @if (transaction.tags && transaction.tags.length > 0) {
+      @for (tag of transaction.tags; track tag.tagId) {
+        <div class="flex flex-wrap gap-2">
+          <app-chip [color]="tag.style.color"
+                    [icon]="tag.style.icon"
+                    [message]="tag.tagName"/>
+        </div>
+      }
+    } @else {
+      <span>-</span>
+    }
+  </ng-template>
+
+  <ng-template #actions let-transaction>
+    <app-table-actions
+      [row]="transaction"
+      [actions]="this.actions()">
+    </app-table-actions>
+  </ng-template>
+
+</app-table>
+
+<app-transfer-table-dialog/>
+<app-subscription-table-dialog/>

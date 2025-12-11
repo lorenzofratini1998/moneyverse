@@ -1,0 +1,10 @@
+{{- include "helm-library.deployment" (list . "user-management.deployment") -}}
+
+{{- define "user-management.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "wait-for-service" (dict "name" "postgres" "host" "moneyverse-postgresql" "port" .Values.global.dependencies.postgresql.port) | nindent 8 }}
+        {{- include "wait-for-service" (dict "name" "keycloak" "host" "moneyverse-keycloak" "port" .Values.global.dependencies.keycloak.port) | nindent 8 }}
+{{- end -}}

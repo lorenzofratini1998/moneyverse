@@ -1,0 +1,26 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <textarea pTextarea
+              [id]="id()"
+              [rows]="rows()"
+              [cols]="cols()"
+              [required]="required()"
+              [disabled]="disabled()"
+              [(ngModel)]="value"
+              (input)="onInput($event)"
+              (blur)="onBlur($event)"
+              [fluid]="true"
+              [class]="showError ? 'ng-dirty ng-invalid' : ''"></textarea>
+    <app-label [for]="id()"
+               [required]="required()"
+               [name]="label()"
+               [disabled]="disabled()"
+               componentType="textarea"
+    />
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">
+      {{ errorMessage }}
+    </p-message>
+  }
+</div>

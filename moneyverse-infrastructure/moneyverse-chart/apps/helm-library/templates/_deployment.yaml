@@ -1,0 +1,38 @@
+{{/*
+Base deployment template
+*/}}
+{{- define "helm-library.deployment.tpl" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" .Release.Name .Chart.Name }}
+  labels:
+    {{- include "helm-library.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "helm-library.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "helm-library.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        {{- if .Values.container }}
+        - {{ include "helm-library.container" (list . (printf "%s.container" .Chart.Name )) | nindent 10 }}
+        {{- else }}
+        - {{- include "helm-library.container.tpl" . | nindent 10 }}
+        {{- end }}
+{{- end }}
+
+{{/*
+Main deployment template with override support
+*/}}
+{{- define "helm-library.deployment" -}}
+{{- include "helm-library.util.merge" (append . "helm-library.deployment.tpl") -}}
+{{- end -}}

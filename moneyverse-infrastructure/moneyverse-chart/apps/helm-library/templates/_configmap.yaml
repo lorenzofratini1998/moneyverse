@@ -1,0 +1,19 @@
+{{/*
+Base configmap template
+*/}}
+{{- define "helm-library.configmap.tpl" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" .Release.Name .Chart.Name | quote }}
+  labels:
+    {{- include "helm-library.labels" . | nindent 4 }}
+data: { }
+{{- end }}
+
+{{/*
+Main configmap template with override support
+*/}}
+{{- define "helm-library.configmap" -}}
+{{- include "helm-library.util.merge" (append . "helm-library.configmap.tpl") -}}
+{{- end -}}

@@ -1,0 +1,2 @@
+{{- define "currency-management.container" -}}
+{{- end -}}

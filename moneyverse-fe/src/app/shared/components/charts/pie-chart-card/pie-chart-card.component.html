@@ -1,0 +1,13 @@
+<p-card>
+  <ng-template #header>
+    <div class="account-pie-chart-header">
+      <p-select-button [options]="chartFilterOptions()"
+                       [ngModel]="_pieChartFilter()"
+                       (ngModelChange)="_pieChartFilter.set($event)"
+                       optionLabel="label"
+                       optionValue="value"
+                       [unselectable]="true"/>
+    </div>
+  </ng-template>
+  <ng-content select="[chart-content]"/>
+</p-card>

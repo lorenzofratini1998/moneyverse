@@ -1,0 +1,14 @@
+{
+  "host": "http://moneyverse-currency-management:7001",
+  "endpoints": [
+    {
+      "endpoint": "/currencies",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/currencyManagement/api/v1/currencies",
+        "method": "GET",
+        "is_collection": true
+      }
+    }
+  ]
+}

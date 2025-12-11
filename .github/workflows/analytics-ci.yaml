@@ -1,0 +1,23 @@
+name: Analytics CI
+
+on:
+  push:
+    branches:
+      - master
+      - feat/frontend
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-analytics/**'
+      - '.github/workflows/analytics-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+  pull_request:
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-analytics/**'
+      - '.github/workflows/analytics-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+
+jobs:
+  analytics-be-job:
+    uses: ./.github/workflows/backend-ci.yaml
+    with:
+      service: moneyverse-analytics
+    secrets: inherit

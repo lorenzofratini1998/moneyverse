@@ -1,0 +1,100 @@
+package it.moneyverse.transaction.utils.mapper;
+
+import it.moneyverse.transaction.model.dto.TransactionDto;
+import it.moneyverse.transaction.model.dto.TransactionRequestItemDto;
+import it.moneyverse.transaction.model.dto.TransactionUpdateRequestDto;
+import it.moneyverse.transaction.model.entities.Tag;
+import it.moneyverse.transaction.model.entities.Transaction;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+public class TransactionMapper {
+
+  public static Transaction toTransaction(
+      UUID userId, TransactionRequestItemDto request, Set<Tag> tags) {
+    if (request == null) {
+      return null;
+    }
+    Transaction transaction = new Transaction();
+    transaction.setUserId(userId);
+    transaction.setAccountId(request.accountId());
+    transaction.setCategoryId(request.categoryId());
+    transaction.setDate(request.date());
+    transaction.setDescription(request.description());
+    transaction.setAmount(request.amount());
+    transaction.setCurrency(request.currency());
+    transaction.setTags(tags);
+    return transaction;
+  }
+
+  public static TransactionDto toTransactionDto(Transaction transaction) {
+    if (transaction == null) {
+      return null;
+    }
+    return TransactionDto.builder()
+        .withTransactionId(transaction.getTransactionId())
+        .withUserId(transaction.getUserId())
+        .withAccountId(transaction.getAccountId())
+        .withCategoryId(transaction.getCategoryId())
+        .withBudgetId(transaction.getBudgetId())
+        .withDate(transaction.getDate())
+        .withDescription(transaction.getDescription())
+        .withAmount(transaction.getAmount())
+        .withNormalizedAmount(transaction.getNormalizedAmount())
+        .withCurrency(transaction.getCurrency())
+        .withTags(TagMapper.toTagDto(transaction.getTags()))
+        .withTransferId(
+            transaction.getTransfer() != null ? transaction.getTransfer().getTransferId() : null)
+        .withSubscriptionId(
+            transaction.getSubscription() != null
+                ? transaction.getSubscription().getSubscriptionId()
+                : null)
+        .build();
+  }
+
+  public static List<TransactionDto> toTransactionDto(List<Transaction> entities) {
+    if (entities.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return entities.stream().map(TransactionMapper::toTransactionDto).toList();
+  }
+
+  public static Transaction partialUpdate(
+      Transaction transaction, TransactionUpdateRequestDto request, Set<Tag> tags) {
+    partialUpdate(transaction, request);
+    if (tags != null) {
+      transaction.setTags(tags);
+    }
+    return transaction;
+  }
+
+  public static Transaction partialUpdate(
+      Transaction transaction, TransactionUpdateRequestDto request) {
+    if (request == null) {
+      return transaction;
+    }
+    if (request.accountId() != null) {
+      transaction.setAccountId(request.accountId());
+    }
+    if (request.categoryId() != null) {
+      transaction.setCategoryId(request.categoryId());
+    }
+    if (request.date() != null) {
+      transaction.setDate(request.date());
+    }
+    if (request.description() != null) {
+      transaction.setDescription(request.description());
+    }
+    if (request.currency() != null) {
+      transaction.setCurrency(request.currency());
+    }
+    if (request.amount() != null) {
+      transaction.setAmount(request.amount());
+    }
+    return transaction;
+  }
+
+  private TransactionMapper() {}
+}

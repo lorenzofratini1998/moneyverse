@@ -1,0 +1,59 @@
+global:
+  namespace: moneyverse
+  environment: demo
+  infisical:
+    projectSlug: moneyverse-luo-3
+    envSlug: dev
+  dependencies:
+    keycloak:
+      port: 7080
+      realm: "moneyverse-fe"
+    postgresql:
+      port: 5432
+    clickhouse:
+      port: 8123
+    kafka:
+      port: 29092
+    redis:
+      port: 6379
+    currency_management:
+      ports:
+        http: 7001
+      port: 50051
+    user_management:
+      ports:
+        http: 7002
+      port: 50052
+    account_management:
+      ports:
+        http: 7003
+      port: 50053
+    budget_management:
+      ports:
+        http: 7004
+      port: 50054
+    transaction_management:
+      ports:
+        http: 7005
+    analytics:
+      ports:
+        http: 7006
+    krakend:
+      ports:
+        http: 8080
+    nginx:
+      ports:
+        http: 80
+  demo:
+    currency: "EUR"
+    user:
+      userId: "84830153-f653-4e57-9057-36fce83476c5"
+      email: "demo@demo.it"
+      firstName: "Demo"
+      lastName: "User"
+      password: "demo"
+
+infisical:
+  authentification:
+    clientId: "Njg4NjA2YjUtMDliOC00MmJjLWI1ZGYtOWEyMzNmNzRkZDRl"
+    clientSecret: "NzEzNWUyNWQ0MWJlNGZiYzEzNzY3MWNiMjBjNjY5YWFjOWUzYWZhNDdkZTRmNDg5MTAzYWZiNWI4Yzc4YTdjMA=="

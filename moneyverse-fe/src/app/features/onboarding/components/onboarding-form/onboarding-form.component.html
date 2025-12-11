@@ -1,0 +1,31 @@
+<form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid grid-cols-1">
+    <app-currency-select formControlName="currency"
+                         [required]="true"
+                         [disabled]="userCurrency() !== undefined"
+                         [filter]="true"/>
+  </div>
+  <div class="grid grid-cols-1">
+    <app-select formControlName="language"
+                id="language-select"
+                [label]="'app.language' | translate"
+                [required]="true"
+                [options]="languages()"
+                optionLabel="country"
+                optionValue="isoCode"
+                [disabled]="userLanguage() !== undefined"/>
+  </div>
+  <div class="grid grid-cols-1">
+    <app-select formControlName="dateFormat"
+                id="dateFormat-select"
+                [label]="'app.dateFormat' | translate"
+                [required]="true"
+                [options]="dateFormats()"
+                optionLabel="label"
+                optionValue="value"
+                [disabled]="userDateFormat() !== undefined"/>
+  </div>
+  <div class="form-dialog-footer">
+    <app-submit-button (onSubmit)="submit()"/>
+  </div>
+</form>

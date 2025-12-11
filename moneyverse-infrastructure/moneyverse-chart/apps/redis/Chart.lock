@@ -1,0 +1,9 @@
+dependencies:
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 23.2.2
+- name: helm-library
+  repository: file://../helm-library
+  version: 0.1.0
+digest: sha256:da7f2755203a6dabcd507f73b8921f91898b93ea41c9cfed55b4328870338921
+generated: "2025-12-08T15:41:58.3928048+01:00"

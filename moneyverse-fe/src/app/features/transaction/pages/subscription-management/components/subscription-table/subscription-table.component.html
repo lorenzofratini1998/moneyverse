@@ -1,0 +1,105 @@
+<app-table [data]="subscriptions()"
+           [columns]="columns()"
+           [config]="tableConfig()"
+           [actions]="!readonly()? actions : null"
+           [rowExpandTemplate]="expanded() ? expandedRow : null"
+           (onRowExpand)="subscriptionTableService.onRowExpand($event)"
+           (onRowCollapse)="subscriptionTableService.onRowCollapse($event)">
+
+  <ng-template cellTemplate field="amount" let-subscription>
+    {{ math.abs(subscription.amount) | currency: subscription.currency }}
+  </ng-template>
+
+  <ng-template cellTemplate field="totalAmount" let-subscription>
+    {{ math.abs(subscription.totalAmount) | currency: subscription.currency }}
+  </ng-template>
+
+  <ng-template cellTemplate field="accountId" let-transaction>
+    @if (accountStore.accountsMap().get(transaction.accountId); as account) {
+      <app-chip [color]="account.style.color"
+                [icon]="account.style.icon"
+                [message]="account.accountName"/>
+    }
+  </ng-template>
+
+  <ng-template cellTemplate field="categoryId" let-transaction>
+    @if (categoryStore.categoriesMap().get(transaction.categoryId); as category) {
+      <app-chip [color]="category.style.color"
+                [icon]="category.style.icon"
+                [message]="category.categoryName"/>
+    }
+  </ng-template>
+
+  <ng-template cellTemplate field="startDate" let-subscription>
+    {{ subscription.startDate | date: preferenceStore.userDateFormat() }}
+  </ng-template>
+
+  <ng-template cellTemplate field="endDate" let-subscription>
+    {{ subscription.endDate | date: preferenceStore.userDateFormat() }}
+  </ng-template>
+
+  <ng-template cellTemplate field="nextExecutionDate" let-subscription>
+    {{ subscription.nextExecutionDate | date: preferenceStore.userDateFormat() }}
+  </ng-template>
+
+  <ng-template cellTemplate field="recurrenceRule" let-subscription>
+    @if (formatRecurrence(subscription.recurrenceRule); as recurrence) {
+      <p-tag [value]="recurrence" [severity]="getSeverity(recurrence)"></p-tag>
+    }
+  </ng-template>
+
+  <ng-template cellTemplate field="active" let-subscription>
+    <p-tag [severity]="subscription.active ? 'success' : 'error'" [rounded]="true">
+      @if (subscription.active) {
+        <app-svg [name]="Icons.CHECK"/>
+      } @else {
+        <app-svg [name]="Icons.X"/>
+      }
+    </p-tag>
+  </ng-template>
+
+  <ng-template #actions let-subscription>
+    <app-table-actions
+      [row]="subscription"
+      [actions]="this.actions()">
+    </app-table-actions>
+  </ng-template>
+
+  <ng-template #expandedRow let-subscription>
+    <div class="p-4">
+      <h5>Transactions for {{ subscription.subscriptionName }}</h5>
+      <app-table [data]="subscriptionTableService.subscriptionTransactionsMap().get(subscription.subscriptionId) ?? []"
+                 [config]="expandedConfig()"
+                 [columns]="expandedColumns()">
+
+        <ng-template cellTemplate field="date" let-transaction>
+          {{ transaction.date | date: preferenceStore.userDateFormat() }}
+        </ng-template>
+
+        <ng-template cellTemplate field="amount" let-transaction>
+          {{ transaction.amount | currency: transaction.currency }}
+        </ng-template>
+
+        <ng-template cellTemplate field="normalizedAmount" let-transaction>
+          {{ transaction.normalizedAmount | currency: preferenceStore.userCurrency() }}
+        </ng-template>
+
+        <ng-template cellTemplate field="accountId" let-transaction>
+          @if (accountStore.accountsMap().get(transaction.accountId); as account) {
+            <app-chip [color]="account.style.color"
+                      [icon]="account.style.icon"
+                      [message]="account.accountName"/>
+          }
+        </ng-template>
+
+        <ng-template cellTemplate field="categoryId" let-transaction>
+          @if (categoryStore.categoriesMap().get(transaction.categoryId); as category) {
+            <app-chip [color]="category.style.color"
+                      [icon]="category.style.icon"
+                      [message]="category.categoryName"/>
+          }
+        </ng-template>
+      </app-table>
+    </div>
+  </ng-template>
+</app-table>

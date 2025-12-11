@@ -1,0 +1,72 @@
+server:
+  port:
+    ${PORT:8080}
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/transaction_management
+    username: ${SPRING_DATASOURCE_USERNAME:undefined}
+    password: ${SPRING_DATASOURCE_PASSWORD:undefined}
+  security:
+    base-path: /transactionsManagement/api/v1
+    oauth2:
+      keycloak:
+        host: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST:undefined}
+        port: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_PORT:undefined}
+        realm-name: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_REALM_NAME:undefined}
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+  cache:
+    redis:
+      host: ${SPRING_CACHE_REDIS_HOST:localhost}
+      port: ${SPRING_CACHE_REDIS_PORT:6379}
+      password: ${SPRING_CACHE_REDIS_PASSWORD:undefined}
+  kafka:
+    admin:
+      bootstrap-servers: ${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST}:${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_PORT}
+    consumer:
+      group-id: transaction-management
+  flyway:
+    locations: classpath:db/migration/common
+
+grpc:
+  client:
+    currency-service:
+      host: ${SPRING_GRPC_CLIENT_CURRENCY_SERVICE_HOST:localhost}
+      port: ${SPRING_GRPC_CLIENT_CURRENCY_SERVICE_PORT:50051}
+    user-service:
+      host: ${SPRING_GRPC_CLIENT_USER_SERVICE_HOST:localhost}
+      port: ${SPRING_GRPC_CLIENT_USER_SERVICE_PORT:50052}
+    account-service:
+      host: ${SPRING_GRPC_CLIENT_ACCOUNT_SERVICE_HOST:localhost}
+      port: ${SPRING_GRPC_CLIENT_ACCOUNT_SERVICE_PORT:50053}
+    budget-service:
+      host: ${SPRING_GRPC_CLIENT_BUDGET_SERVICE_HOST:localhost}
+      port: ${SPRING_GRPC_CLIENT_BUDGET_SERVICE_PORT:50054}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /public/api/docs
+  swagger-ui:
+    path: /public/api/docs/swagger-ui.html
+    operations-sorter: alpha

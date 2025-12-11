@@ -1,0 +1,8 @@
+<app-management [config]="managementConfig()">
+  <app-tag-table
+    class="p-4"
+    (onDelete)="deleteTag($event)"
+    (onEdit)="tagFormDialog().open($event)"/>
+
+  <app-tag-form-dialog (onSubmit)="submit($event)"/>
+</app-management>

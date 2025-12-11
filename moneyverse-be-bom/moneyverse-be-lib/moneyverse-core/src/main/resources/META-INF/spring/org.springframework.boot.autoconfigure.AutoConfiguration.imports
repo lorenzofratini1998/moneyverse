@@ -1,0 +1,10 @@
+it.moneyverse.core.boot.DatasourceAutoConfiguration
+it.moneyverse.core.boot.KafkaAutoConfiguration
+it.moneyverse.core.boot.SecurityAutoConfiguration
+it.moneyverse.core.boot.UserServiceGrpcClientAutoConfiguration
+it.moneyverse.core.boot.AccountServiceGrpcClientAutoConfiguration
+it.moneyverse.core.boot.BudgetServiceGrpcClientAutoConfiguration
+it.moneyverse.core.boot.CurrencyServiceGrpcClientAutoConfiguration
+it.moneyverse.core.boot.RedisAutoConfiguration
+it.moneyverse.core.boot.OutboxAutoConfiguration
+it.moneyverse.core.boot.SseAutoConfiguration

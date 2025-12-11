@@ -1,0 +1,35 @@
+<p-confirmDialog
+  [visible]="isVisible()"
+  [closable]="true"
+  [closeOnEscape]="true"
+  [dismissableMask]="false"
+  [focusTrap]="true"
+  [draggable]="false"
+  (onHide)="onHide()">
+
+  <ng-template #header>
+    <h4 class="text-center">{{ title() }}</h4>
+  </ng-template>
+
+  <ng-template #message>
+    <p>{{ this.message() }}</p>
+  </ng-template>
+
+  <ng-template #footer>
+    <div class="flex justify-center gap-4 p-2 w-full">
+      <p-button
+        [label]="'app.dialog.cancel' | translate"
+        [outlined]="true"
+        [rounded]="true"
+        severity="secondary"
+        (onClick)="onCancel()"/>
+
+      <p-button
+        [label]="acceptLabel() | translate"
+        [rounded]="true"
+        [severity]="acceptSeverity()"
+        (onClick)="onAcceptClick()"/>
+    </div>
+  </ng-template>
+</p-confirmDialog>
+

@@ -1,0 +1,9 @@
+{{- include "helm-library.deployment" (list . "frontend.deployment") -}}
+
+{{- define "frontend.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "wait-for-service" (dict "name" "kranend" "host" (include "moneyverse.krakend-host" .) "port" .Values.global.dependencies.krakend.ports.http) | nindent 8 }}
+{{- end -}}

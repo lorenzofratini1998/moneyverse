@@ -1,0 +1,61 @@
+infisical:
+  secretName: "budget-management-secret"
+  secretsPath: "/budget_management"
+
+ports:
+  http: &http 7004
+  grpc: &grpc 50054
+
+#Deployment settings
+replicas: 1
+serviceAccountName: "moneyverse-budget-management"
+
+#Container configuration
+container:
+  image:
+    repository: "lfrat/moneyverse-budget-management"
+    tag: "latest"
+    pullPolicy: "Always"
+  ports:
+    - name: "http"
+      containerPort: *http
+    - name: "grpc"
+      containerPort: *grpc
+  resourceTier: "small"
+  envFrom:
+    - secretRef:
+        name: "budget-management-secret"
+    - configMapRef:
+        name: "budget-management-config"
+  livenessProbe:
+    httpGet:
+      path: "/actuator/health/liveness"
+      port: *http
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    failureThreshold: 5
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: "/actuator/health/readiness"
+      port: *http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 5
+    timeoutSeconds: 5
+
+#Service configuration
+service:
+  type: ClusterIP
+  ports:
+    - name: "http"
+      port: *http
+      targetPort: *http
+    - name: "grpc"
+      port: *grpc
+      targetPort: *grpc
+
+#ConfigMap data
+config:
+  serverPort: *http
+  grpcPort: *grpc

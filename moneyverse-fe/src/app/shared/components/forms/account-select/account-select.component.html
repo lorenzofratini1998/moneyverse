@@ -1,0 +1,29 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <p-select [id]="id()"
+              [options]="accountStore.accounts()"
+              optionLabel="accountName"
+              optionValue="accountId"
+              [appendTo]="'body'"
+              [disabled]="disabled()"
+              [required]="required()"
+              [(ngModel)]="value"
+              (onChange)="onSelect($event)"
+              (onBlur)="onBlur($event)"
+              [showClear]="!required()"
+              class="w-full"
+              [class]="showError ? 'ng-dirty ng-invalid' : ''"
+    />
+    <app-label [for]="id()"
+               [required]="required()"
+               [name]="label() | translate"
+               [disabled]="disabled()"
+               componentType="select"
+    />
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">
+      {{ errorMessage }}
+    </p-message>
+  }
+</div>

@@ -1,0 +1,90 @@
+{
+  "host": "http://moneyverse-analytics:7006",
+  "endpoints": [
+    {
+      "endpoint": "/analytics/accounts/kpi",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/accounts/kpi",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/analytics/accounts/distribution",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/accounts/distribution",
+        "method": "POST",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/analytics/accounts/trend",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/accounts/trend",
+        "method": "POST",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/analytics/categories/kpi",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/categories/kpi",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/analytics/categories/distribution",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/categories/distribution",
+        "method": "POST",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/analytics/categories/trend",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/categories/trend",
+        "method": "POST",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/analytics/transactions/kpi",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/transactions/kpi",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/analytics/transactions/distribution",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/transactions/distribution",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/analytics/transactions/trend",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/transactions/trend",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/analytics/overview",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/analytics/api/v1/overview",
+        "method": "POST",
+        "is_collection": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+<form [formGroup]="formGroup" class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-grow items-center">
+    <app-input-text formControlName="name"
+                    id="category-name-input"
+                    [label]="'app.form.categoryName' | translate"/>
+
+    <app-category-multi-select formControlName="parentCategories"
+                               [label]="'app.form.parentCategory' | translate"/>
+  </div>
+</form>

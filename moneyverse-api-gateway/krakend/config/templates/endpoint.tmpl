@@ -1,0 +1,54 @@
+{{$service := . }}
+
+{{ range $idx, $endpoint := $service.endpoints }}
+{{if $idx}},{{end}}
+{
+    "endpoint": "{{ $endpoint.endpoint }}",
+    "method": "{{ $endpoint.method }}",
+    "input_headers": ["*"],
+    "input_query_strings": ["*"],
+    {{if $endpoint.backend.is_collection}}
+        "output_encoding": "json-collection",
+    {{end}}
+    "extra_config": {
+        {{ include "keycloak_auth.tmpl" }}
+    },
+    "backend": [
+        {
+            "url_pattern": "{{ $endpoint.backend.url_pattern }}",
+            "method": "{{ $endpoint.backend.method }}",
+            "host": [
+                "{{ $service.host }}"
+            ],
+            {{if $endpoint.backend.is_collection}}
+                "is_collection": true,
+            {{end}}
+            "extra_config": {
+                "backend/http": {
+                  "return_error_code": true
+                },
+                "modifier/martian": {
+                    "fifo.Group": {
+                      "scope": ["request", "response"],
+                      "aggregateErrors": true,
+                      "modifiers": [
+                          {
+                            "header.Blacklist": {
+                              "scope": ["request"],
+                              "names": [
+                                "Access-Control-Request-Method",
+                                "Sec-Fetch-Dest",
+                                "Sec-Fetch-Mode",
+                                "Sec-Fetch-Site",
+                                "Origin"
+                              ]
+                            }
+                          }
+                      ]
+                    }
+                }
+            }
+        }
+    ]
+}
+{{ end }}

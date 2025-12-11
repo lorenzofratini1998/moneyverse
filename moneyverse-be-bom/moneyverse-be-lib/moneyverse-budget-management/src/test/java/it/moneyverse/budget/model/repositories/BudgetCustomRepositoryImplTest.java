@@ -1,0 +1,78 @@
+package it.moneyverse.budget.model.repositories;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import it.moneyverse.budget.model.BudgetTestContext;
+import it.moneyverse.budget.model.BudgetTestFactory;
+import it.moneyverse.budget.model.dto.BudgetCriteria;
+import it.moneyverse.budget.model.entities.Budget;
+import it.moneyverse.budget.model.entities.Category;
+import it.moneyverse.core.boot.*;
+import jakarta.persistence.EntityManager;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+@DataJpaTest(
+    properties = {
+      "spring.datasource.url=jdbc:h2:mem:testdb",
+      "spring.datasource.driverClassName=org.h2.Driver",
+      "spring.datasource.username=sa",
+      "spring.datasource.password=password",
+      "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+      "spring.jpa.hibernate.ddl-auto=create",
+      "spring.jpa.properties.hibernate.show_sql=false",
+      "flyway.enabled=false"
+    },
+    excludeAutoConfiguration = {
+      FlywayAutoConfiguration.class,
+      SecurityAutoConfiguration.class,
+      UserServiceGrpcClientAutoConfiguration.class,
+      CurrencyServiceGrpcClientAutoConfiguration.class,
+      DatasourceAutoConfiguration.class,
+      KafkaAutoConfiguration.class
+    })
+class BudgetCustomRepositoryImplTest {
+
+  @Autowired EntityManager entityManager;
+  @Autowired BudgetCustomRepositoryImpl customRepository;
+
+  static BudgetTestContext testContext;
+
+  @BeforeAll
+  public static void beforeAll() {
+    testContext = new BudgetTestContext();
+    testContext.getCategories().forEach(budget -> budget.setCategoryId(null));
+    testContext.getBudgets().forEach(budget -> budget.setBudgetId(null));
+  }
+
+  @BeforeEach
+  public void setup() {
+    for (Category category : testContext.getCategories()) {
+      entityManager.persist(category);
+    }
+    entityManager.flush();
+
+    for (Budget budget : testContext.getBudgets()) {
+      entityManager.persist(budget);
+    }
+    entityManager.flush();
+  }
+
+  @Test
+  void givenCriteria_thenReturnFilteredBudgets() {
+    BudgetCriteria criteria =
+        BudgetTestFactory.BudgetCriteriaBuilder.generator(testContext).generate();
+    UUID userId = testContext.getRandomUser().getUserId();
+    List<Budget> expected = testContext.filterBudgets(userId, criteria);
+
+    List<Budget> actual = customRepository.filterBudgets(userId, criteria);
+
+    assertEquals(expected.size(), actual.size());
+  }
+}

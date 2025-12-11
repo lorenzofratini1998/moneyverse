@@ -1,0 +1,144 @@
+{
+  "host": "http://moneyverse-transaction-management:7005",
+  "endpoints": [
+    {
+      "endpoint": "/transactions/users/{userId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transactions/users/{userId}",
+        "method": "GET"
+      }
+    },
+    {
+      "endpoint": "/transactions",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transactions",
+        "method": "POST",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/transactions/{transactionId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transactions/{transactionId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/transactions/{transactionId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transactions/{transactionId}",
+        "method": "DELETE"
+      }
+    },
+    {
+      "endpoint": "/tags/users/{userId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/tags/users/{userId}",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/tags",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/tags/{tagId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/tags/{tagId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/tags/{tagId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/tags/{tagId}",
+        "method": "DELETE"
+      }
+    },
+    {
+      "endpoint": "/transfers",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transfers",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/transfers/{transferId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transfers/{transferId}",
+        "method": "GET"
+      }
+    },
+    {
+      "endpoint": "/transfers/{transferId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transfers/{transferId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/transfers/{transferId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/transfers/{transferId}",
+        "method": "DELETE"
+      }
+    },
+    {
+      "endpoint": "/subscriptions/users/{userId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/subscriptions/users/{userId}",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/subscriptions",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/subscriptions",
+        "method": "POST"
+      }
+    },
+    {
+      "endpoint": "/subscriptions/{subscriptionId}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/subscriptions/{subscriptionId}",
+        "method": "GET"
+      }
+    },
+    {
+      "endpoint": "/subscriptions/{subscriptionId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/subscriptions/{subscriptionId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/subscriptions/{subscriptionId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/transactionsManagement/api/v1/subscriptions/{subscriptionId}",
+        "method": "DELETE"
+      }
+    }
+  ]
+}

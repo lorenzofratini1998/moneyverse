@@ -1,0 +1,40 @@
+<form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <app-date-picker formControlName="date"
+                     id="date-date-picker"
+                     [label]="'app.date' | translate"
+                     [required]="true"/>
+
+    <div class="col-span-2 grid grid-cols-2 gap-4">
+      <app-amount-input-number
+        formControlName="amount"
+        id="amount-input"
+        [label]="'app.amount' | translate"
+        [currency]="formGroup.get('currency')?.value"
+        [required]="true"/>
+
+      <app-currency-select
+        formControlName="currency"
+        id="currency-select"
+        [required]="true"/>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1">
+    <app-text-area formControlName="description"
+                   id="description-input"
+                   [label]="'app.description' | translate"
+                   [required]="true"/>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4" [class]="tagStore.tags().length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'">
+    <app-account-select formControlName="account"
+                        [required]="true"/>
+
+    <app-category-select formControlName="category"/>
+
+    @if (tagStore.tags().length > 0) {
+      <app-tag-multi-select formControlName="tags"/>
+    }
+  </div>
+</form>

@@ -1,0 +1,32 @@
+<app-table [data]="categories()"
+           [columns]="columns()"
+           [config]="config()"
+           [actions]="actions">
+
+  <ng-template cellTemplate field="categoryName" let-category>
+    <app-chip [color]="category.style.color"
+              [icon]="category.style.icon"
+              [message]="category.categoryName"/>
+  </ng-template>
+
+  <ng-template cellTemplate field="parentCategory" let-category>
+    @if (category.parentCategory) {
+      @if (getParentCategory(category.parentCategory); as parent) {
+        <app-chip [color]="parent.style.color"
+                  [icon]="parent.style.icon"
+                  [message]="parent.categoryName"/>
+      }
+    } @else {
+      -
+    }
+  </ng-template>
+
+  <ng-template #actions let-category>
+    <app-table-actions
+      [row]="category"
+      [actions]="this.actions()">
+    </app-table-actions>
+  </ng-template>
+</app-table>
+
+<app-category-tree-dialog #categoryTreeDialog/>

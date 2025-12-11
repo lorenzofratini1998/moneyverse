@@ -1,0 +1,18 @@
+<app-table [data]="transferTransactions()"
+           [config]="config()"
+           [columns]="columns()">
+
+  <ng-template cellTemplate field="amount" let-transaction>
+    {{ transaction.amount | currency: transaction.currency }}
+  </ng-template>
+
+  <ng-template cellTemplate field="normalizedAmount" let-transaction>
+    {{ transaction.normalizedAmount | currency: preferenceStore.userCurrency() }}
+  </ng-template>
+
+  <ng-template cellTemplate field="accountId" let-transaction>
+    @if (accountStore.accountsMap().get(transaction.accountId); as account) {
+      <span>{{ account.accountName }}</span>
+    }
+  </ng-template>
+</app-table>

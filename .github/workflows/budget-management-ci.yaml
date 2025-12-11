@@ -1,0 +1,23 @@
+name: Budget Management CI
+
+on:
+  push:
+    branches:
+      - master
+      - feat/frontend
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-budget-management/**'
+      - '.github/workflows/budget-management-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+  pull_request:
+    paths:
+      - 'moneyverse-be-bom/moneyverse-be-lib/moneyverse-budget-management/**'
+      - '.github/workflows/budget-management-ci.yaml'
+      - '.github/workflows/backend-ci.yaml'
+
+jobs:
+  budget-management-be-job:
+    uses: ./.github/workflows/backend-ci.yaml
+    with:
+      service: moneyverse-budget-management
+    secrets: inherit

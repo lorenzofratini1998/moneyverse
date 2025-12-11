@@ -1,0 +1,30 @@
+<p-card>
+  <ng-template #header>
+    <div class="border-b border-b-[1px] mx-4" style="border-color: var(--surface-border)">
+      <div class="w-full flex flex-col md:flex-row items-center justify-between py-4 box-border gap-4">
+        <div class="w-full md:w-auto order-1">
+          <p-select
+            [options]="accountStore.accounts()"
+            [(ngModel)]="selectedAccount"
+            optionLabel="accountName"
+            class="w-full md:w-56"
+          />
+        </div>
+
+        <div class="w-full md:w-auto flex justify-center order-2 md:order-1">
+          <p-select-button [options]="analyticsService.chartFilterOptions()"
+                           [ngModel]="chartFilter()"
+                           (ngModelChange)="chartFilter.set($event)"
+                           optionLabel="label"
+                           optionValue="value"
+                           [unselectable]="true"/>
+        </div>
+      </div>
+    </div>
+
+  </ng-template>
+  <app-line-chart
+    [options]="options()"
+    (onChartClick)="clickChart($event)"
+  ></app-line-chart>
+</p-card>

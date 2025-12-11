@@ -1,0 +1,9 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 18.1.3
+- name: helm-library
+  repository: file://../helm-library
+  version: 0.1.0
+digest: sha256:f32556e42da7bd2b2ffef27bab079508535ee229f6cbf117f2c2da9076c3c4cd
+generated: "2025-12-08T15:41:45.848004+01:00"

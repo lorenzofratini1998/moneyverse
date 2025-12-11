@@ -1,0 +1,60 @@
+server:
+  port:
+    ${PORT:8085}
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/analytics
+    username: ${SPRING_DATASOURCE_USERNAME:undefined}
+    password: ${SPRING_DATASOURCE_PASSWORD:undefined}
+    clickhouse:
+      driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+      url: jdbc:clickhouse://${SPRING_DATASOURCE_CLICKHOUSE_HOST}:${SPRING_DATASOURCE_CLICKHOUSE_PORT}/analytics
+      username: ${SPRING_DATASOURCE_CLICKHOUSE_USERNAME:undefined}
+      password: ${SPRING_DATASOURCE_CLICKHOUSE_PASSWORD:undefined}
+  security:
+    base-path: /analytics/api/v1
+    oauth2:
+      keycloak:
+        host: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_HOST:undefined}
+        port: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_PORT:undefined}
+        realm-name: ${SPRING_SECURITY_OAUTH2_KEYCLOAK_REALM_NAME:undefined}
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+  flyway:
+    postgres:
+      locations: classpath:db/migration/postgres/common
+    clickhouse:
+      locations: classpath:db/migration/clickhouse/common
+  kafka:
+    admin:
+      bootstrap-servers: ${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_HOST}:${SPRING_KAFKA_ADMIN_BOOTSTRAP_SERVERS_PORT}
+    consumer:
+      group-id: dashboard
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /public/api/docs
+  swagger-ui:
+    path: /public/api/docs/swagger-ui.html
+    operations-sorter: alpha

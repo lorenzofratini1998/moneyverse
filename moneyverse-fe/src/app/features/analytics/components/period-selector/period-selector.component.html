@@ -1,0 +1,48 @@
+<div [formGroup]="formGroup()">
+  <p-fieldset>
+    <ng-template #header>
+      <span class="font-semibold">{{ label() }}</span>
+    </ng-template>
+
+    <div class="grid grid-cols-1 flex items-center justify-center gap-4">
+      <div class="grid grid-cols-1 gap-4" [class]="nullable() ? 'grid-cols-4' : 'grid-cols-3'">
+        @for (option of options(); track option.id) {
+          <div class="flex items-center">
+            <p-radio-button
+              [value]="option.value"
+              [inputId]="getUniqueInputId(option.id)"
+              [formControlName]="formatControlName()"/>
+            <label [for]="getUniqueInputId(option.id)" class="ml-2">{{ option.label }}</label>
+          </div>
+        }
+      </div>
+
+      @if (selectedFormat() && selectedFormat() !== 'none') {
+        <div class="flex items-center justify-center">
+          @if (selectedFormat() === 'custom') {
+            <p-date-picker
+              [formControlName]="periodControlName()"
+              [showIcon]="true"
+              [readonlyInput]="true"
+              dateFormat="dd/mm/yy"
+              selectionMode="range"
+              [placeholder]="placeholder()"
+            />
+          } @else {
+            <p-date-picker
+              [formControlName]="periodControlName()"
+              [iconDisplay]="'input'"
+              [showIcon]="true"
+              [readonlyInput]="true"
+              dateFormat="dd/mm/yy"
+              [view]="selectedView()"
+              selectionMode="range"
+              [placeholder]="placeholder()"
+              (onSelect)="onSelect.emit($event)"
+            />
+          }
+        </div>
+      }
+    </div>
+  </p-fieldset>
+</div>

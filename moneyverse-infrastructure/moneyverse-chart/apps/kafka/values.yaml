@@ -1,0 +1,4 @@
+confluent:
+  version: 7.8.0
+  kafka: confluentinc/cp-kafka
+  zookeeper: confluentinc/cp-zookeeper

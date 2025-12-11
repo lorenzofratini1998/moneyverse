@@ -1,0 +1,87 @@
+<div class="layout-topbar">
+  <div class="layout-topbar-logo-container">
+    @if (!layoutService.isOnboarding()) {
+      <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
+        <i class="pi pi-bars"></i>
+      </button>
+    }
+    <a class="layout-topbar-logo" routerLink="/">
+      <app-svg src="/assets/images/moneyverse-logo.svg"/>
+    </a>
+  </div>
+
+  <div class="layout-topbar-actions">
+    <div class="layout-config-menu">
+      <app-dark-mode-button class="layout-topbar-action"/>
+    </div>
+
+    <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden"
+            enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout"
+            [hideOnOutsideClick]="true">
+      <i class="pi pi-ellipsis-v"></i>
+    </button>
+
+    <div class="layout-topbar-menu hidden lg:block">
+      <div class="layout-topbar-menu-content">
+        @if (!layoutService.isOnboarding()) {
+          @if (layoutService.isAnalyticsPage()) {
+            <button type="button" class="layout-topbar-action" (click)="dashboardFilterDrawer.open()">
+              <p-overlay-badge [value]="dashboardStore.activeFiltersCount()" badgeSize="small">
+                <i class="pi pi-filter"></i>
+              </p-overlay-badge>
+            </button>
+          }
+          <app-language-popover/>
+        }
+        @if (layoutService.isOnboarding()) {
+          <button type="button" class="layout-topbar-action" (click)="authService.logout()">
+            <app-svg [name]="icons.LOG_OUT"/>
+          </button>
+        } @else {
+          <button type="button" class="layout-topbar-action" (click)="userOp.toggle($event)">
+            <span>{{ authService.user().firstName.toUpperCase()[0] + authService.user().lastName.toUpperCase()[0] }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-dashboard-filter-drawer #dashboardFilterDrawer/>
+
+<p-popover #userOp>
+  <!-- Header Section -->
+  <div class="flex items-center gap-3 p-2">
+    <div class="avatar bg-base-200">
+      <div class="placeholder rounded-full">
+        <span>{{ authService.user().firstName.toUpperCase()[0] + authService.user().lastName.toUpperCase()[0] }}</span>
+      </div>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-bold">{{ authService.user().fullName }}</span>
+      <span class="text-sm opacity-70">{{ authService.user().email }}</span>
+    </div>
+  </div>
+
+  <!-- Menu Items -->
+  <ul class="list-none p-0 m-0 flex flex-col">
+    <li class="gap-2 p-2 hover:bg-emphasis cursor-pointer rounded-border">
+      <a
+        routerLink="/settings"
+        class="flex items-center gap-2"
+      >
+        <i class="pi pi-cog"></i>
+        <span>{{ 'app.settings' | translate }}</span>
+      </a>
+    </li>
+    <li class="gap-2 p-2 hover:bg-emphasis cursor-pointer rounded-border">
+      <a
+        (click)="authService.logout()"
+        class="flex items-center gap-2"
+      >
+        <i class="pi pi-sign-out"></i>
+        <span>{{ 'app.logout' | translate }}</span>
+      </a>
+    </li>
+  </ul>
+</p-popover>

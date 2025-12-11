@@ -1,0 +1,9 @@
+infisical:
+  secretName: "redis-secret"
+  secretsPath: "/redis"
+
+redis:
+  architecture: "standalone"
+  auth:
+    existingSecret: "redis-secret"
+    existingSecretPasswordKey: "REDIS_PASSWORD"

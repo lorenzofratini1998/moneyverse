@@ -1,0 +1,7 @@
+<app-management [config]="managementConfig()">
+  <app-subscription-table [subscriptions]="subscriptionStore.subscriptions()"
+                          (onEdit)="subscriptionFormDialog().open($event)"
+                          (onDelete)="deleteSubscription($event)"/>
+
+  <app-subscription-form-dialog (onSubmit)="submit($event)"/>
+</app-management>

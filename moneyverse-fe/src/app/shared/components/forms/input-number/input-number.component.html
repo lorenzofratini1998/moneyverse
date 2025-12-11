@@ -1,0 +1,27 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <p-input-number
+      [id]="id()"
+      [(ngModel)]="value"
+      [min]="min()"
+      [max]="max()"
+      [minFractionDigits]="minFractionDigits()"
+      [maxFractionDigits]="maxFractionDigits()"
+      [locale]="systemService.currentLanguage()?.locale ?? 'en-US'"
+      [disabled]="disabled()"
+      (onInput)="onInput($event)"
+      (onBlur)="onBlur($event)"
+      [class]="showError ? 'ng-dirty ng-invalid' : ''"
+      [fluid]="true"
+    />
+    <app-label [for]="id()"
+               [name]="label()"
+               [required]="required()"
+               [disabled]="disabled()"
+               componentType="input"
+    />
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+  }
+</div>

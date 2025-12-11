@@ -1,0 +1,2 @@
+{{- define "analytics.container" -}}
+{{- end -}}

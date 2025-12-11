@@ -1,0 +1,41 @@
+<button
+  [id]="id()"
+  type="button"
+  class="w-5 h-5 rounded cursor-pointer transition-all duration-200 hover:scale-110"
+  [class.ring-red-500]="showError"
+  [class.opacity-50]="disabled()"
+  [style.background-color]="`var(--style-${value ?? 'red'}-text-light)`"
+  [disabled]="disabled()"
+  (click)="toggle($event)"
+  (blur)="onBlur($event)"
+>
+</button>
+
+@if (showError) {
+  <p-message severity="error" size="small" variant="simple">{{ label() }} is required.</p-message>
+}
+
+<p-popover (onShow)="onShow()"
+           [appendTo]="'body'">
+  <div tabindex="0" class="grid grid-cols-5 gap-2">
+    @for (color of colors; track color.name) {
+      <label class="relative group">
+        <input
+          type="radio"
+          [value]="color.name"
+          [checked]="color.selected"
+          [name]="'color-picker-' + id()"
+          [id]="'color_' + color.name + '_' + id()"
+          class="sr-only peer"
+          [disabled]="disabled()"
+          (change)="onColorSelect(color.name)"
+        >
+        <div
+          class="w-5 h-5 rounded cursor-pointer transition-all duration-200 hover:scale-110 peer-checked:ring-1 peer-checked:ring-offset-1 peer-checked:ring-blue-500 group-hover:ring-1 group-hover:ring-gray-300"
+          [style.background-color]="`var(--style-${color.name}-text-light)`"
+          [class.opacity-50]="disabled()"
+        ></div>
+      </label>
+    }
+  </div>
+</p-popover>

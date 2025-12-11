@@ -1,0 +1,33 @@
+<div class="flex flex-col justify-between gap-4">
+  <p-card>
+    <ng-template #title>
+      <h3>{{ 'app.profile' | translate }}</h3>
+    </ng-template>
+    <ng-template #subtitle>
+      <p>{{ 'app.features.profile.subtitle' | translate }}</p>
+    </ng-template>
+    <div class="form-dialog-content-container">
+      <app-profile-form [user]="authService.user()" (onSubmit)="updateProfile($event)"/>
+    </div>
+  </p-card>
+
+  <p-card>
+    <ng-template #title>
+      <h3>{{ 'app.features.profile.danger.title' | translate }}</h3>
+    </ng-template>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-2">
+      <div>
+        <h4>{{ 'app.features.profile.danger.subtitle' | translate }}</h4>
+        <p>{{ 'app.features.profile.danger.subsubtitle' | translate }}</p>
+      </div>
+      <p-button [rounded]="true"
+                severity="danger"
+                [outlined]="true"
+                (click)="confirmDelete()"
+      >
+        <app-svg [name]="icons.CIRCLE_USER_ROUND"/>
+        <span>{{ 'app.features.profile.danger.button' | translate }}</span>
+      </p-button>
+    </div>
+  </p-card>
+</div>

@@ -1,0 +1,44 @@
+:root {
+  --chart-color-1: #2ec7c9;
+  --chart-color-2: #b6a2de;
+  --chart-color-3: #5ab1ef;
+  --chart-color-4: #ffb980;
+  --chart-color-5: #d87a80;
+  --chart-color-6: #8d98b3;
+  --chart-color-7: #e5cf0d;
+  --chart-color-8: #97b552;
+  --chart-color-9: #95706d;
+  --chart-color-10: #dc69aa;
+  --chart-color-11: #07a2a4;
+  /*--chart-color-12:#E9DAC2;
+  --chart-color-13:#C1E1C1;
+  --chart-color-14:#C6E4E9;
+  --chart-color-15:#F9CB9C;
+  --chart-color-16:#D8D2CF;
+  --chart-color-17:#DECAD5;
+  --chart-color-18:#EEC2A7;
+  --chart-color-19:#F7C6C7;*/
+
+}
+
+:root[class*='app-dark'] {
+  --chart-color-1: #dd6b66;
+  --chart-color-2: #759aa0;
+  --chart-color-3: #e69d87;
+  --chart-color-4: #8dc1a9;
+  --chart-color-5: #ea7e53;
+  --chart-color-6: #eedd78;
+  --chart-color-7: #73a373;
+  --chart-color-8: #73b9bc;
+  --chart-color-9: #7289ab;
+  --chart-color-10: #91ca8c;
+  --chart-color-11: #f49f42;
+  /*--chart-color-12:#DDCFB8;
+  --chart-color-13:#B6D4B6;
+  --chart-color-14:#AED9E0;
+  --chart-color-15:#EBC093;
+  --chart-color-16:#C9C0BB;
+  --chart-color-17:#D1B3C4;
+  --chart-color-18:#E8A87C;
+  --chart-color-19:#E9BBBC;*/
+}

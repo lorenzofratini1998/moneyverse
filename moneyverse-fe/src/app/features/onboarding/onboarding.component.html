@@ -1,0 +1,16 @@
+<div class="flex justify-center">
+  <p-card styleClass="w-md element md:w-lg">
+    <ng-template #title>
+      <h2>{{ 'app.onboarding.title' | translate }}</h2>
+    </ng-template>
+    <ng-template #subtitle>
+      <p>{{ 'app.onboarding.subtitle' | translate }}</p>
+    </ng-template>
+    <app-onboarding-form
+      [languages]="systemService.languages()"
+      [dateFormats]="dateFormats"
+      [userPreferences]="userPreferences()"
+      (onSubmit)="submit($event)"
+    ></app-onboarding-form>
+  </p-card>
+</div>

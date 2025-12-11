@@ -1,0 +1,26 @@
+ports:
+  http: &http 80
+
+#Deployment settings
+replicas: 1
+serviceAccountName: "frontend"
+
+#Container configuration
+container:
+  image:
+    repository: "lfrat/moneyverse-fe"
+    tag: "latest"
+    pullPolicy: "Always"
+  ports:
+    - name: "http"
+      containerPort: *http
+  resourceTier: "micro"
+
+#Service configuration
+service:
+  type: NodePort
+  ports:
+    - name: "http"
+      port: *http
+      targetPort: *http
+      nodePort: 30000

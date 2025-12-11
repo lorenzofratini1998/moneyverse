@@ -1,0 +1,22 @@
+<app-dialog [config]="config()">
+  <ng-content header>
+    <h3>{{ config().header }}</h3>
+  </ng-content>
+  <div content class="py-2">
+    <app-category-default-grid [defaultCategories]="categoryStore.defaultCategories()"/>
+  </div>
+  <div footer class="flex justify-center items-center gap-4">
+    <p-button
+      (onClick)="dialog().close()"
+      [rounded]="true"
+      [outlined]="true"
+      severity="secondary">
+      <span>{{ "app.dialog.cancel" | translate }}</span>
+    </p-button>
+    <p-button
+      (onClick)="confirm()"
+      [rounded]="true">
+      <span>{{ "app.dialog.confirm" | translate }}</span>
+    </p-button>
+  </div>
+</app-dialog>

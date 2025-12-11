@@ -1,0 +1,74 @@
+{
+  "host": "http://moneyverse-user-management:7002",
+  "endpoints": [
+    {
+      "endpoint": "/users/{userId}",
+      "method": "DELETE",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/users/{userId}",
+        "method": "DELETE"
+      }
+    },
+    {
+      "endpoint": "/users/{userId}",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/users/{userId}",
+        "method": "PUT"
+      }
+    },
+    {
+      "endpoint": "/users/{userId}/preferences",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/users/{userId}/preferences",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/users/{userId}/preferences",
+      "method": "POST",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/users/{userId}/preferences",
+        "method": "POST",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/users/{userId}/preferences",
+      "method": "PUT",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/users/{userId}/preferences",
+        "method": "PUT",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/users/{userId}/preferences/{key}",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/users/{userId}/preferences/{key}",
+        "method": "GET"
+      }
+    },
+    {
+      "endpoint": "/languages",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/languages",
+        "method": "GET",
+        "is_collection": true
+      }
+    },
+    {
+      "endpoint": "/preferences",
+      "method": "GET",
+      "backend": {
+        "url_pattern": "/usersManagement/api/v1/preferences",
+        "method": "GET",
+        "is_collection": true
+      }
+    }
+  ]
+}

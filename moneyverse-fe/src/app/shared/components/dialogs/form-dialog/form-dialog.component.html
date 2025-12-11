@@ -1,0 +1,14 @@
+<app-dialog [config]="config()">
+  <div header>
+    <h3>{{ config().header ?? ((selectedItem() ? 'Edit' : 'Add') + ' Item') }}</h3>
+  </div>
+
+  <div content class="form-dialog-content-container">
+    <ng-content></ng-content>
+  </div>
+
+  <div footer class="form-dialog-footer">
+    <app-cancel-button (onCancel)="close()"></app-cancel-button>
+    <app-submit-button (onSubmit)="form().submit()"></app-submit-button>
+  </div>
+</app-dialog>

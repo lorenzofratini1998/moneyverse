@@ -1,0 +1,22 @@
+<form [formGroup]="formGroup" class="space-y-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <app-input-text formControlName="firstName"
+                    id="first-name-input"
+                    [label]="'app.form.firstName' | translate"
+                    [required]="true"
+                    class="w-full"/>
+    <app-input-text formControlName="lastName"
+                    id="last-name-input"
+                    [label]="'app.form.lastName' | translate"
+                    [required]="true"
+                    class="w-full"/>
+    <app-input-text formControlName="email"
+                    id="email-input"
+                    [label]="'app.form.email' | translate"
+                    [required]="true"
+                    class="w-full"/>
+  </div>
+  <div class="form-dialog-footer">
+    <app-submit-button (onSubmit)="submit()"/>
+  </div>
+</form>

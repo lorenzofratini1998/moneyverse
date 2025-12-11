@@ -1,0 +1,16 @@
+<div
+  class="group block rounded relative p-4 shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-base-100 border border-base-300 relative">
+  <!-- Title -->
+  <p class="text-sm font-semibold uppercase tracking-wider text-base-content/70 mb-1">{{ title() }}</p>
+
+  <!-- Previous value (optional) -->
+  @if (previousValue() !== undefined) {
+    <p class="absolute text-sm right-3 top-3">{{ previousValue() }}</p>
+  }
+
+  <!-- Main value -->
+  <p class="text-xl font-bold text-base-content">{{ currentValue() }}</p>
+
+</div>
+
+

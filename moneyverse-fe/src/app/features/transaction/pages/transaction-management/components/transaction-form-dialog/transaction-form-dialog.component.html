@@ -1,0 +1,30 @@
+<app-form-dialog [form]="currentForm()" [config]="config()">
+  <div class="grid grid-cols-1 flex items-center justify-center gap-4">
+    <div class="col-span-1 flex items-center justify-center mb-2">
+      <p-select-button [ngModel]="dialogOption()"
+                       (ngModelChange)="dialogOption.set($event)"
+                       [options]="options()"
+                       optionLabel="label"
+                       optionValue="value"
+                       [unselectable]="true"
+      >
+        <ng-template #item let-item>
+          <app-svg [name]="item.icon"></app-svg>
+          <span>{{ item.label }}</span>
+        </ng-template>
+      </p-select-button>
+    </div>
+  </div>
+  <div class="form-dialog-content-container">
+    @if (isExpenseOrIncome() || isSubscription()) {
+      <app-expense-income-form [transactionFormOption]="dialogOption()"
+                               [selectedItem]="this.formDialog().selectedItem()"
+                               [transactionToEdit]="transactionToEdit()"
+      />
+    } @else {
+      <app-transfer-form [selectedItem]="this.formDialog().selectedItem()"
+                         [transferToEdit]="transferToEdit()"
+      />
+    }
+  </div>
+</app-form-dialog>

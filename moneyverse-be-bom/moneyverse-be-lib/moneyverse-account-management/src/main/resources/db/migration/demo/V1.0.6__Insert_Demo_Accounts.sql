@@ -1,0 +1,10 @@
+INSERT INTO accounts (account_id, user_id, account_name, balance, balance_target, account_description, is_default,
+                      currency, account_category, color, icon, created_by, created_at, updated_by, updated_at)
+VALUES ('a1000000-0000-0000-0000-000000000001'::uuid, '${DEMO_USER_ID}'::uuid, 'United Credit Union', 22262.66, null,
+        'Primary account for daily expenses and transactions', true, 'EUR',
+        (SELECT account_category_id FROM account_categories WHERE name = 'DEBIT'), 'yellow', 'credit-card',
+        '${DEMO_EMAIL}', CURRENT_TIMESTAMP, '${DEMO_EMAIL}', CURRENT_TIMESTAMP),
+       ('a1000000-0000-0000-0000-000000000002'::uuid, '${DEMO_USER_ID}'::uuid, 'Joint Bank Corp.', 1450, null,
+        'Long-term savings account for future goals and emergency fund', false, 'EUR',
+        (SELECT account_category_id FROM account_categories WHERE name = 'SAVINGS'), 'green', 'piggy-bank',
+        '${DEMO_EMAIL}', CURRENT_TIMESTAMP, '${DEMO_EMAIL}', CURRENT_TIMESTAMP);

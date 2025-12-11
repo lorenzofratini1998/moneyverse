@@ -1,0 +1,45 @@
+dependencies:
+- name: helm-library
+  repository: file://apps/helm-library
+  version: 0.1.0
+- name: postgres
+  repository: file://apps/postgres
+  version: 0.1.0
+- name: clickhouse
+  repository: file://apps/clickhouse
+  version: 0.1.0
+- name: redis
+  repository: file://apps/redis
+  version: 0.1.0
+- name: keycloak
+  repository: file://apps/keycloak
+  version: 0.1.0
+- name: kafka
+  repository: file://apps/kafka
+  version: 0.1.0
+- name: currency-management
+  repository: file://apps/currency-management
+  version: 0.1.0
+- name: user-management
+  repository: file://apps/user-management
+  version: 0.1.0
+- name: account-management
+  repository: file://apps/account-management
+  version: 0.1.0
+- name: budget-management
+  repository: file://apps/budget-management
+  version: 0.1.0
+- name: transaction-management
+  repository: file://apps/transaction-management
+  version: 0.1.0
+- name: analytics
+  repository: file://apps/analytics
+  version: 0.1.0
+- name: krakend
+  repository: file://apps/krakend
+  version: 0.1.0
+- name: frontend
+  repository: file://apps/frontend
+  version: 0.1.0
+digest: sha256:e348ef81c0fc582c0c65529f4cf6e75c6a1f4cb264da2378f12d5dba2332df20
+generated: "2025-12-11T11:17:18.6482636+01:00"

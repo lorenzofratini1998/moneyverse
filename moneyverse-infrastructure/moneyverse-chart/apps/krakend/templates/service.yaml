@@ -1,0 +1,4 @@
+{{- include "helm-library.service" (list . "krakend.service") -}}
+
+{{- define "krakend.service" -}}
+{{- end -}}

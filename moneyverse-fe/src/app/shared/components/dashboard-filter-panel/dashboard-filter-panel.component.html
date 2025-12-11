@@ -1,0 +1,31 @@
+<!--<div class="flex flex-start flex-wrap gap-2 items-center">
+
+  @for (acc of dashboardStore.selectedAccounts(); track acc.accountId) {
+    <app-badge-filter
+      [name]="acc.accountName.toUpperCase()"
+      (remove)="onRemoveFilter('accounts', acc.accountName)"
+    ></app-badge-filter>
+  }
+
+  @for (cat of dashboardStore.selectedCategories(); track cat.categoryId) {
+    <app-badge-filter
+      [name]="cat.categoryName.toUpperCase()"
+      (remove)="onRemoveFilter('categories', cat.categoryName)"
+    ></app-badge-filter>
+  }
+
+  @if (dashboardStore.filter().amount; as amount) {
+    @if (amount.lower != null; as l) {
+      <app-badge-filter
+        [name]="'MIN ' + l"
+        (remove)="onRemoveFilter('amount', 'lower')"
+      ></app-badge-filter>
+    }
+    @if (amount.upper != null; as u) {
+      <app-badge-filter
+        [name]="'MAX ' + u"
+        (remove)="onRemoveFilter('amount', 'upper')"
+      ></app-badge-filter>
+    }
+  }
+</div>-->

@@ -1,0 +1,77 @@
+<form [formGroup]="formGroup" class="space-y-4">
+
+  @if (selectedItem()) {
+    <div class="grid grid-cols-1">
+      <div class="flex justify-center items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label for="active-toggle" class="text-sm font-medium">{{ 'app.form.active' | translate}}</label>
+          <p-toggle-switch id="active-toggle" formControlName="active"/>
+        </div>
+        <app-date-picker
+          formControlName="nextExecutionDate"
+          id="nextExecutionDate-date-picker"
+          [label]="'app.form.nextPayment' | translate"
+          [disabled]="!formGroup.get('active')?.value"/>
+      </div>
+    </div>
+  }
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-input-text
+      formControlName="subscriptionName"
+      id="subscriptionName-input"
+      [label]="'app.form.subscriptionName' | translate"
+      [required]="true"/>
+
+    <div class="grid grid-cols-2 gap-4">
+      <app-amount-input-number
+        formControlName="amount"
+        id="amount-input"
+        [label]="'app.amount' | translate"
+        [currency]="formGroup.get('currency')?.value"
+        [required]="true"/>
+
+      <app-currency-select
+        formControlName="currency"
+        id="currency-select"
+        [required]="true"/>
+    </div>
+  </div>
+
+  <!-- Recurrence Section -->
+  <div formGroupName="recurrence" class="space-y-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-1">
+        <app-select
+          formControlName="recurrenceRule"
+          id="recurrenceRule-select"
+          [label]="'app.form.recurrence' | translate"
+          [options]="recurrenceRuleOptions()"
+          [required]="true"/>
+      </div>
+
+      <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+        <app-date-picker
+          formControlName="startDate"
+          id="startDate-date-picker"
+          [label]="'app.form.dateStart' | translate"
+          [required]="true"/>
+
+        <app-date-picker
+          formControlName="endDate"
+          id="endDate-date-picker"
+          [label]="'app.form.dateEnd' | translate"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <app-account-select
+      formControlName="account"
+      [required]="true"/>
+
+    <app-category-select
+      formControlName="category"/>
+  </div>
+
+</form>

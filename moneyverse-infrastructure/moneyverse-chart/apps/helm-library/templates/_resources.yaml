@@ -1,0 +1,62 @@
+{{/*
+Resource tiers
+*/}}
+{{- define "helm-library.resources.tier" -}}
+{{- if eq .Values.container.resourceTier "nano" }}
+requests:
+  memory: "128Mi"
+  cpu: "100m"
+limits:
+  memory: "192Mi"
+  cpu: "150m"
+{{- else if eq .Values.container.resourceTier "micro" }}
+requests:
+  memory: "256Mi"
+  cpu: "250m"
+limits:
+  memory: "384Mi"
+  cpu: "375m"
+{{- else if eq .Values.container.resourceTier "small" }}
+requests:
+  memory: "512Mi"
+  cpu: "500m"
+limits:
+  memory: "768Mi"
+  cpu: "750m"
+{{- else if eq .Values.container.resourceTier "medium" }}
+requests:
+  memory: "1024Mi"
+  cpu: "500m"
+limits:
+  memory: "1536Mi"
+  cpu: "750m"
+{{- else if eq .Values.container.resourceTier "large" }}
+requests:
+  memory: "2048Mi"
+  cpu: "1.0"
+limits:
+  memory: "3072Mi"
+  cpu: "1.5"
+{{- else if eq .Values.container.resourceTier "xlarge" }}
+requests:
+  memory: "3072Mi"
+  cpu: "1.0"
+limits:
+  memory: "6144Mi"
+  cpu: "3.0"
+{{- else if eq .Values.container.resourceTier "2xlarge" }}
+requests:
+  memory: "3072Mi"
+  cpu: "1.0"
+limits:
+  memory: "12288Mi"
+  cpu: "6.0"
+{{- else }}
+requests:
+  memory: "250Mi"
+  cpu: "250m"
+limits:
+  memory: "500Mi"
+  cpu: "500m"
+{{- end }}
+{{- end }}

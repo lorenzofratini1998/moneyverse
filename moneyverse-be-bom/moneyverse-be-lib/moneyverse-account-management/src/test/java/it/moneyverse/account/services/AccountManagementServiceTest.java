@@ -1,0 +1,342 @@
+package it.moneyverse.account.services;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import it.moneyverse.account.enums.AccountSseEventEnum;
+import it.moneyverse.account.model.AccountTestFactory;
+import it.moneyverse.account.model.dto.*;
+import it.moneyverse.account.model.entities.Account;
+import it.moneyverse.account.model.entities.AccountCategory;
+import it.moneyverse.account.model.repositories.AccountCategoryRepository;
+import it.moneyverse.account.model.repositories.AccountRepository;
+import it.moneyverse.account.runtime.messages.AccountEventPublisher;
+import it.moneyverse.account.utils.mapper.AccountMapper;
+import it.moneyverse.core.exceptions.ResourceAlreadyExistsException;
+import it.moneyverse.core.exceptions.ResourceNotFoundException;
+import it.moneyverse.core.model.beans.AccountDeletionTopic;
+import it.moneyverse.core.model.dto.AccountDto;
+import it.moneyverse.core.model.dto.PageCriteria;
+import it.moneyverse.core.model.dto.SortCriteria;
+import it.moneyverse.core.services.CurrencyServiceGrpcClient;
+import it.moneyverse.core.services.SecurityService;
+import it.moneyverse.core.services.SseEventService;
+import it.moneyverse.test.utils.RandomUtils;
+import java.util.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+/** Unit test for {@link AccountManagementService} */
+@ExtendWith(MockitoExtension.class)
+class AccountManagementServiceTest {
+
+  @InjectMocks private AccountManagementService accountManagementService;
+
+  @Mock private AccountCategoryRepository accountCategoryRepository;
+  @Mock private AccountRepository accountRepository;
+  @Mock private CurrencyServiceGrpcClient currencyServiceClient;
+  @Mock private AccountEventPublisher eventPublisher;
+  @Mock private AccountDeletionTopic accountDeletionTopic;
+  @Mock private SecurityService securityService;
+  @Mock private SseEventService sseEventService;
+  private MockedStatic<AccountMapper> mapper;
+
+  @BeforeEach
+  public void setup() {
+    mapper = mockStatic(AccountMapper.class);
+  }
+
+  @AfterEach
+  public void tearDown() {
+    mapper.close();
+  }
+
+  @Test
+  void givenAccountRequest_WhenCreateAccount_ThenReturnCreatedAccount(
+      @Mock Account account, @Mock AccountCategory category, @Mock AccountDto accountDto) {
+    final UUID userId = RandomUtils.randomUUID();
+    final Long categoryId = RandomUtils.randomLong();
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withAccountCategory(categoryId)
+            .withUserId(userId)
+            .build();
+
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
+    when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
+        .thenReturn(false);
+    when(accountCategoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+    mapper.when(() -> AccountMapper.toAccount(request, category)).thenReturn(account);
+    when(accountRepository.findDefaultAccountByUserId(request.userId()))
+        .thenReturn(Optional.empty());
+    when(accountRepository.save(any(Account.class))).thenReturn(account);
+    mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(accountDto);
+    doNothing()
+        .when(sseEventService)
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_CREATED.name(), accountDto);
+
+    accountDto = accountManagementService.createAccount(request);
+
+    assertNotNull(accountDto);
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+    verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
+    verify(accountCategoryRepository, times(1)).findById(categoryId);
+    mapper.verify(() -> AccountMapper.toAccount(request, category), times(1));
+    verify(accountRepository, times(1)).findDefaultAccountByUserId(request.userId());
+    verify(accountRepository, times(1)).save(any(Account.class));
+    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+    verify(sseEventService, times(1))
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_CREATED.name(), accountDto);
+  }
+
+  @Test
+  void givenAccountRequest_WhenCreateAccount_ThenCurrencyNotFound() {
+    final UUID userId = RandomUtils.randomUUID();
+    final Long categoryId = RandomUtils.randomLong();
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withAccountCategory(categoryId)
+            .withUserId(userId)
+            .build();
+
+    Mockito.doThrow(ResourceNotFoundException.class)
+        .when(currencyServiceClient)
+        .checkIfCurrencyExists(request.currency());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
+
+    verify(currencyServiceClient, times(1)).checkIfCurrencyExists(request.currency());
+    verify(accountCategoryRepository, never()).findById(categoryId);
+    verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
+    verify(accountRepository, never()).save(any(Account.class));
+    verify(accountRepository, never()).existsByUserIdAndAccountName(userId, request.accountName());
+  }
+
+  @Test
+  void givenAccountRequest_WhenCreateAccount_ThenAccountAlreadyExists() {
+    final UUID userId = RandomUtils.randomUUID();
+    final Long categoryId = RandomUtils.randomLong();
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withAccountCategory(categoryId)
+            .withUserId(userId)
+            .build();
+
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
+    when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
+        .thenReturn(true);
+
+    assertThrows(
+        ResourceAlreadyExistsException.class,
+        () -> accountManagementService.createAccount(request));
+
+    verify(accountCategoryRepository, never()).findById(categoryId);
+    verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
+    verify(accountRepository, never()).save(any(Account.class));
+    verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
+  }
+
+  @Test
+  void givenAccountRequest_WhenCreateAccount_ThenCategoryNotFound() {
+    final UUID userId = RandomUtils.randomUUID();
+    final Long categoryId = RandomUtils.randomLong();
+    AccountRequestDto request =
+        AccountTestFactory.AccountRequestDtoBuilder.builder()
+            .withUserId(userId)
+            .withAccountCategory(categoryId)
+            .build();
+
+    Mockito.doNothing().when(currencyServiceClient).checkIfCurrencyExists(request.currency());
+    when(accountRepository.existsByUserIdAndAccountName(userId, request.accountName()))
+        .thenReturn(false);
+    when(accountCategoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> accountManagementService.createAccount(request));
+
+    verify(accountCategoryRepository, times(1)).findById(categoryId);
+    verify(accountRepository, never()).findDefaultAccountByUserId(request.userId());
+    verify(accountRepository, never()).save(any(Account.class));
+    verify(accountRepository, times(1)).existsByUserIdAndAccountName(userId, request.accountName());
+  }
+
+  @Test
+  void givenAccountCriteria_WhenGetAccounts_ThenReturnAccountList(
+      @Mock AccountCriteria criteria, @Mock List<Account> accounts) {
+    UUID userId = RandomUtils.randomUUID();
+    when(accountRepository.findAccounts(userId, criteria)).thenReturn(accounts);
+
+    accountManagementService.findAccounts(userId, criteria);
+
+    assertNotNull(accounts);
+    verify(criteria, times(1)).setPage(any(PageCriteria.class));
+    verify(criteria, times(1)).setSort(any(SortCriteria.class));
+    verify(accountRepository, times(1)).findAccounts(userId, criteria);
+  }
+
+  @Test
+  void givenAccountId_WhenGetAccount_ThenReturnAccountDto(
+      @Mock Account account, @Mock AccountDto result) {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(AccountMapper.toAccountDto(account)).thenReturn(result);
+
+    result = accountManagementService.findAccountByAccountId(accountId);
+    assertNotNull(result);
+    verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+  }
+
+  @Test
+  void givenAccountId_WhenGetAccount_ThenResourceNotFoundException() {
+    UUID accountId = RandomUtils.randomUUID();
+    when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> accountManagementService.findAccountByAccountId(accountId));
+    verify(accountRepository, times(1)).findById(accountId);
+    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
+  }
+
+  @Test
+  void givenAccountId_WhenUpdateAccount_ThenReturnAccountDto(
+      @Mock Account account, @Mock AccountCategory category, @Mock AccountDto result) {
+    UUID accountId = RandomUtils.randomUUID();
+    UUID userId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.builder()
+            .withDefault(Boolean.FALSE)
+            .build();
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    if (request.accountCategory() != null) {
+      when(accountCategoryRepository.findById(any(Long.class)))
+          .thenReturn(Optional.of(category));
+    }
+    mapper.when(() -> AccountMapper.partialUpdate(account, request, category)).thenReturn(account);
+    when(accountRepository.save(account)).thenReturn(account);
+    mapper.when(() -> AccountMapper.toAccountDto(account)).thenReturn(result);
+    when(securityService.getAuthenticatedUserId()).thenReturn(userId);
+    doNothing()
+        .when(sseEventService)
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_UPDATED.name(), result);
+
+    result = accountManagementService.updateAccount(accountId, request);
+
+    assertNotNull(result);
+    verify(accountRepository, times(1)).findById(accountId);
+    if (request.accountCategory() != null) {
+      verify(accountCategoryRepository, times(1)).findById(any(Long.class));
+    }
+    mapper.verify(() -> AccountMapper.partialUpdate(account, request, category), times(1));
+    verify(accountRepository, times(1)).save(account);
+    mapper.verify(() -> AccountMapper.toAccountDto(account), times(1));
+    verify(securityService, times(1)).getAuthenticatedUserId();
+    verify(sseEventService, times(1))
+        .publishEvent(userId, AccountSseEventEnum.ACCOUNT_UPDATED.name(), result);
+  }
+
+  @Test
+  void givenAccountId_WhenUpdateAccount_ThenReturnAccountNotFound() {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.builder().build();
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> accountManagementService.updateAccount(accountId, request));
+
+    verify(accountRepository, times(1)).findById(accountId);
+    verify(accountCategoryRepository, never()).findByName(any(String.class));
+    mapper.verify(
+        () ->
+            AccountMapper.partialUpdate(
+                any(Account.class), any(AccountUpdateRequestDto.class), any(AccountCategory.class)),
+        never());
+    verify(accountRepository, never()).save(any(Account.class));
+    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
+  }
+
+  @Test
+  void givenAccountId_WhenUpdateAccount_ThenReturnCategoryNotFound(@Mock Account account) {
+    UUID accountId = RandomUtils.randomUUID();
+    AccountUpdateRequestDto request =
+        AccountTestFactory.AccountUpdateRequestDtoBuilder.defaultInstance();
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(accountCategoryRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> accountManagementService.updateAccount(accountId, request));
+
+    verify(accountRepository, times(1)).findById(accountId);
+    verify(accountCategoryRepository, times(1)).findById(any(Long.class));
+    mapper.verify(
+        () ->
+            AccountMapper.partialUpdate(
+                any(Account.class), any(AccountUpdateRequestDto.class), any(AccountCategory.class)),
+        never());
+    verify(accountRepository, never()).save(any(Account.class));
+    mapper.verify(() -> AccountMapper.toAccountDto(any(Account.class)), never());
+  }
+
+  @Test
+  void givenAccountId_WhenDeleteAccount_ThenDeleteAccount(@Mock Account account) {
+    UUID accountId = RandomUtils.randomUUID();
+    UUID userId = RandomUtils.randomUUID();
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+    when(securityService.getAuthenticatedUserId()).thenReturn(userId);
+    doNothing()
+        .when(sseEventService)
+        .publishEvent(eq(userId), eq(AccountSseEventEnum.ACCOUNT_DELETED.name()), any());
+
+    accountManagementService.deleteAccount(accountId);
+
+    verify(accountRepository, times(1)).findById(accountId);
+    verify(securityService, times(1)).getAuthenticatedUserId();
+    verify(sseEventService, times(1))
+        .publishEvent(eq(userId), eq(AccountSseEventEnum.ACCOUNT_DELETED.name()), any());
+  }
+
+  @Test
+  void givenAccountId_WhenDeleteAccount_ThenResourceNotFoundException() {
+    UUID accountId = RandomUtils.randomUUID();
+
+    when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class, () -> accountManagementService.deleteAccount(accountId));
+
+    verify(accountRepository, times(1)).findById(accountId);
+    verify(accountDeletionTopic, never()).name();
+  }
+
+  @Test
+  void whenGetAccountCategories_ThenReturnAccountCategories(
+      @Mock AccountCategory accountCategory, @Mock AccountCategoryDto accountCategoryDto) {
+    when(accountCategoryRepository.findAll()).thenReturn(List.of(accountCategory));
+    mapper
+        .when(() -> AccountMapper.toAccountCategoryDto(any(AccountCategory.class)))
+        .thenReturn(accountCategoryDto);
+
+    accountManagementService.getAccountCategories();
+
+    verify(accountCategoryRepository, times(1)).findAll();
+    mapper.verify(() -> AccountMapper.toAccountCategoryDto(any(AccountCategory.class)), times(1));
+  }
+}

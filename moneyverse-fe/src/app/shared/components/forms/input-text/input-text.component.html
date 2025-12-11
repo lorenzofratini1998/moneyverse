@@ -1,0 +1,26 @@
+<div class="form-control-container">
+  <p-float-label variant="on">
+    <input pInputText
+           type="text"
+           [id]="id()"
+           [required]="required()"
+           [disabled]="disabled()"
+           [(ngModel)]="value"
+           (input)="onInput($event)"
+           (blur)="onBlur($event)"
+           [fluid]="true"
+           [class]="showError ? 'ng-dirty ng-invalid' : ''"
+           [readonly]="readonly()"/>
+    <app-label [for]="id()"
+               [required]="required()"
+               [name]="label()"
+               [disabled]="disabled()"
+               componentType="input"
+    />
+  </p-float-label>
+  @if (showError) {
+    <p-message severity="error" size="small" variant="simple">
+      {{ errorMessage }}
+    </p-message>
+  }
+</div>

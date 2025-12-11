@@ -1,0 +1,26 @@
+<form [formGroup]="formGroup" class="flex flex-col gap-y-3">
+
+  <app-period-selector
+    [formGroup]="formGroup"
+    id="period-selector"
+    label="Period"
+    formatControlName="periodFormat"
+    periodControlName="period"
+    (onSelect)="formHandler.onSelectPeriod(formGroup, $event)"
+  />
+
+  <app-period-selector
+    [formGroup]="formGroup"
+    id="compare-period-selector"
+    label="Compare Period"
+    formatControlName="comparePeriodFormat"
+    periodControlName="comparePeriod"
+    [nullable]="true"
+    (onSelect)="formHandler.onSelectComparePeriod(formGroup, ($event))"
+  />
+
+  <app-account-multi-select formControlName="accounts"/>
+  <app-category-multi-select formControlName="categories"/>
+  <app-currency-select formControlName="currency" [filter]="true" [showClear]="true"/>
+  <app-tag-multi-select formControlName="tags"/>
+</form>

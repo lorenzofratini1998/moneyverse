@@ -1,0 +1,27 @@
+<button
+  type="button"
+  class="w-5 h-5 rounded cursor-pointer peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-blue-500"
+  (click)="toggle($event)">
+  <app-svg [name]="selectedIcon"/>
+</button>
+<p-popover #op>
+  <div
+    tabindex="0"
+    class="shadow-md grid grid-cols-5 gap-2">
+    @for (icon of icons; track icon) {
+      <label class="relative">
+        <input type="radio"
+               [value]="icon"
+               [checked]="icon === selectedIcon"
+               [name]="icon"
+               class="sr-only peer"
+               (change)="onSelect(icon)"
+        >
+        <div
+          class="w-5 h-5 rounded-full cursor-pointer peer-checked:ring-1 peer-checked:ring-offset-1 peer-checked:ring-blue-500">
+          <app-svg [name]="icon"/>
+        </div>
+      </label>
+    }
+  </div>
+</p-popover>

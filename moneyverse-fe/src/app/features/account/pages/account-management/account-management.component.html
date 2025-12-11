@@ -1,0 +1,11 @@
+<app-management [config]="managementConfig()">
+  <app-account-filter-panel [accounts]="accountFilterStore.accounts()"/>
+
+  <app-account-table
+    [accounts]="accountFilterStore.accounts()"
+    (onDelete)="deleteAccount($event)"
+    (onEdit)="accountFormDialog().open($event)"
+  />
+
+  <app-account-form-dialog (onSubmit)="submit($event)"/>
+</app-management>

@@ -1,0 +1,43 @@
+<div class="flex justify-between items-center p-4">
+  <div class="card w-full flex justify-center">
+    <app-budget-gauge [budget]="budget()"/>
+  </div>
+
+  <p-card class="w-full">
+    <ng-template #title>
+      <div class="flex justify-between items-center">
+        <span>Budget: {{ budget().budgetLimit | currency: budget().currency }}</span>
+        <div class="flex items-center gap-2">
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="secondary"
+            (click)="onEdit.emit(budget())"
+          >
+            <app-svg [name]="icons.PENCIL"/>
+          </button>
+          <button
+            pButton
+            type="button"
+            text
+            rounded
+            severity="danger"
+            (click)="confirmDelete(budget())"
+          >
+            <app-svg [name]="icons.TRASH"/>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template #content>
+      <p-progress-bar [value]="budget().amount / budget().budgetLimit * 100" [showValue]="false"></p-progress-bar>
+      <div class="flex justify-between py-1">
+        <span class="text-sm">{{ budget().amount | currency: budget().currency }} {{ ('app.spent' | translate).toLowerCase() }}</span>
+        <span class="text-sm">{{ (budget().budgetLimit - budget().amount) | currency: budget().currency }} {{ ('app.left' | translate).toLowerCase() }}</span>
+      </div>
+
+    </ng-template>
+  </p-card>
+</div>

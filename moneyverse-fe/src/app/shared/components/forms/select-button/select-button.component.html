@@ -1,0 +1,10 @@
+<p-selectButton
+  [options]="options()"
+  [multiple]="multiple()"
+  [optionLabel]="optionLabel()"
+  [optionValue]="optionValue()"
+  [disabled]="disabled()"
+  [unselectable]="unselectable()"
+  [ngModel]="value"
+  (ngModelChange)="onSelectChange($event)">
+</p-selectButton>

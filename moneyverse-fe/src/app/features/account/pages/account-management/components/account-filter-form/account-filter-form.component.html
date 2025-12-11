@@ -1,0 +1,37 @@
+<form [formGroup]="formGroup">
+  <div class="grid grid-cols-1 gap-4 flex-grow items-center"
+       [class]="showTargetBalanceSlider() ? 'xl:grid-cols-5' : 'xl:grid-cols-4'">
+    <app-multi-select formControlName="accountCategories"
+                      id="account-categories-multiselect"
+                      [options]="accountStore.categories()"
+                      optionLabel="name"
+                      optionValue="accountCategoryId"
+                      [label]="'app.categories' | translate"/>
+
+    <app-currency-multi-select formControlName="currencies"/>
+
+    <div class="col-span-1">
+      <div formGroupName="balance" class="grid grid-cols-2 gap-2">
+        <app-input-number formControlName="lower" [label]="'app.form.balanceMin' | translate"/>
+        <app-input-number formControlName="upper" [label]="'app.form.balanceMax' | translate"/>
+      </div>
+    </div>
+
+    @if (showTargetBalanceSlider()) {
+      <div class="col-span-1">
+        <div formGroupName="balanceTarget" class="grid grid-cols-2 gap-2">
+          <app-input-number formControlName="lower" label="Target min."/>
+          <app-input-number formControlName="upper" label="Target max."/>
+        </div>
+      </div>
+    }
+
+    <div class="flex justify-center items-center">
+      <label for="isDefault" class="mr-2">Default</label>
+      <p-checkbox formControlName="isDefault"
+                  [binary]="true"
+                  [indeterminate]="getControlValue('isDefault') === null"
+                  id="isDefault"/>
+    </div>
+  </div>
+</form>

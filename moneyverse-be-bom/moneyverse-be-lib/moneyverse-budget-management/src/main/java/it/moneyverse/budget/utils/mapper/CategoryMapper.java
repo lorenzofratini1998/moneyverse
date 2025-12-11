@@ -1,0 +1,131 @@
+package it.moneyverse.budget.utils.mapper;
+
+import it.moneyverse.budget.model.dto.CategoryRequestDto;
+import it.moneyverse.budget.model.dto.CategoryUpdateRequestDto;
+import it.moneyverse.budget.model.entities.Category;
+import it.moneyverse.budget.model.entities.DefaultCategory;
+import it.moneyverse.core.model.dto.CategoryDto;
+import it.moneyverse.core.model.dto.StyleDto;
+import it.moneyverse.core.utils.mappers.StyleMapper;
+import java.util.*;
+
+public class CategoryMapper {
+
+  public static Category toCategory(UUID userId, DefaultCategory defaultCategory) {
+    if (defaultCategory == null) {
+      return null;
+    }
+    Category category = new Category();
+    category.setUserId(userId);
+    category.setCategoryName(defaultCategory.getName());
+    category.setDescription(defaultCategory.getDescription());
+    category.setStyle(defaultCategory.getStyle());
+    return category;
+  }
+
+  public static Category toCategory(CategoryRequestDto request) {
+    return toCategory(request, null);
+  }
+
+  public static Category toCategory(CategoryRequestDto request, Category parentCategory) {
+    if (request == null) {
+      return null;
+    }
+    Category category = new Category();
+    category.setUserId(request.userId());
+    category.setCategoryName(request.categoryName());
+    category.setDescription(request.description());
+    category.setParentCategory(parentCategory);
+    category.setStyle(StyleMapper.toStyle(request.style()));
+    return category;
+  }
+
+  public static CategoryDto toCategoryDto(Category category) {
+    return toCategoryDto(category, new HashSet<>());
+  }
+
+  public static CategoryDto toCategoryDto(Category category, Set<UUID> visitedIds) {
+    if (category == null || visitedIds.contains(category.getCategoryId())) {
+      return null;
+    }
+    visitedIds.add(category.getCategoryId());
+    return CategoryDto.builder()
+        .withCategoryId(category.getCategoryId())
+        .withUserId(category.getUserId())
+        .withCategoryName(category.getCategoryName())
+        .withDescription(category.getDescription())
+        .withParentCategory(
+            category.getParentCategory() != null
+                ? category.getParentCategory().getCategoryId()
+                : null)
+        .withChildren(
+            category.getSubCategories().stream()
+                .map(subCategory -> toCategoryDto(subCategory, visitedIds))
+                .filter(Objects::nonNull)
+                .toList())
+        .withStyle(
+            StyleDto.builder()
+                .withColor(category.getStyle().getColor())
+                .withIcon(category.getStyle().getIcon())
+                .build())
+        .build();
+  }
+
+  public static List<CategoryDto> toCategoryDto(List<Category> entities) {
+    if (entities.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return entities.stream().map(CategoryMapper::toCategoryDto).toList();
+  }
+
+  public static CategoryDto toCategoryDto(DefaultCategory category) {
+    if (category == null) {
+      return null;
+    }
+    return CategoryDto.builder()
+        .withCategoryId(category.getId())
+        .withCategoryName(category.getName())
+        .withDescription(category.getDescription())
+        .withStyle(
+            StyleDto.builder()
+                .withColor(category.getStyle().getColor())
+                .withIcon(category.getStyle().getIcon())
+                .build())
+        .build();
+  }
+
+  public static List<CategoryDto> mapDefaultCategories(List<DefaultCategory> entities) {
+    if (entities.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return entities.stream().map(CategoryMapper::toCategoryDto).toList();
+  }
+
+  public static Category partialUpdate(Category category, CategoryUpdateRequestDto request) {
+    if (request == null) {
+      return category;
+    }
+    if (request.categoryName() != null) {
+      category.setCategoryName(request.categoryName());
+    }
+    if (request.description() != null) {
+      category.setDescription(request.description());
+    }
+    if (request.style() != null) {
+      category.setStyle(StyleMapper.toStyle(request.style()));
+    }
+    category.setParentCategory(null);
+    return category;
+  }
+
+  public static Category partialUpdate(
+      Category category, CategoryUpdateRequestDto request, Category parentCategory) {
+    category = partialUpdate(category, request);
+    if (request.parentId() != null) {
+      category.setParentCategory(parentCategory);
+    }
+    return category;
+  }
+
+  private CategoryMapper() {}
+}

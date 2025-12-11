@@ -1,0 +1,20 @@
+<p-card>
+  <ng-template #title>
+    <div class="border-b border-b-[1px] mx-4" style="border-color: var(--surface-border)">
+      <div class="flex justify-between items-center w-full md:w-auto order-1 md:order-2 pb-4 box-border gap-4">
+        <h3>{{ 'app.patrimony' | translate }}</h3>
+        <p-select-button [options]="overviewChartService.chartViewOptions()"
+                         [ngModel]="viewOptions()"
+                         (ngModelChange)="viewOptions.set($event)"
+                         optionLabel="label"
+                         optionValue="value"
+                         [unselectable]="true"/>
+      </div>
+    </div>
+  </ng-template>
+  <app-bar-chart
+    [options]="options()"
+    [disableAutoCurrencyFormat]="false"
+    [disableAutoTooltipFormat]="false"
+  />
+</p-card>

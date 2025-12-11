@@ -1,0 +1,15 @@
+{{- include "helm-library.configmap" (list . "postgres.init") -}}
+{{- define "postgres.init" -}}
+metadata:
+  name: "postgres-init"
+data:
+  init.sql: |
+    -- Create databases
+    CREATE DATABASE keycloak;
+    CREATE DATABASE currency_management;
+    CREATE DATABASE user_management;
+    CREATE DATABASE account_management;
+    CREATE DATABASE budget_management;
+    CREATE DATABASE transaction_management;
+    CREATE DATABASE analytics;
+{{- end -}}
